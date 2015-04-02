@@ -1,0 +1,301 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.2//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+
+    <property name="charset" value="UTF-8"/>
+
+    <!-- Duplicate code -->
+    <!--
+        <module name="StrictDuplicateCode">
+            <property name="min" value="20"/>
+        </module>
+    -->
+
+    <!-- Headers -->
+    <module name="Header">
+        <property name="headerFile" value="config/checkstyle/java.header"/>
+        <property name="ignoreLines" value="4"/>
+    </module>
+
+    <!-- Javadoc -->
+    <!--
+        <module name="JavadocPackage"/>
+    -->
+
+    <!-- Misc -->
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf"/>
+    </module>
+    <!--
+    <module name="Translation"/>
+    -->
+
+    <!-- Size Violations -->
+    <module name="FileLength"/>
+
+    <!-- Whitespace -->
+    <module name="FileTabCharacter"/>
+
+    <module name="TreeWalker">
+
+        <property name="tabWidth" value="4"/>
+        <property name="cacheFile" value="target/checkstyle-cachefile"/>
+
+        <module name="FileContentsHolder"/>
+
+        <!-- Annotations -->
+        <module name="AnnotationUseStyle"/>
+        <module name="MissingDeprecated"/>
+        <module name="MissingOverride"/>
+        <module name="PackageAnnotation"/>
+        <module name="SuppressWarnings"/>
+
+        <!-- Block checks -->
+        <module name="EmptyBlock"/>
+        <module name="LeftCurly"/>
+        <module name="NeedBraces"/>
+        <module name="RightCurly"/>
+        <module name="AvoidNestedBlocks"/>
+
+        <!-- Class design -->
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
+        <module name="FinalClass"/>
+        <module name="InterfaceIsType"/>
+        <module name="HideUtilityClassConstructor"/>
+        <!--
+        <module name="DesignForExtension"/>
+        -->
+        <module name="MutableException"/>
+        <module name="ThrowsCount">
+            <property name="max" value="2"/>
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- Coding -->
+        <!--
+        <module name="ArrayTrailingComma"/>
+        <module name="AvoidInlineConditionals"/>
+        -->
+        <module name="CovariantEquals"/>
+        <module name="EmptyStatement"/>
+        <module name="EqualsAvoidNull"/>
+        <module name="EqualsHashCode"/>
+        <module name="FinalLocalVariable"/>
+        <module name="HiddenField">
+            <property name="ignoreConstructorParameter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+        </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+        </module>
+        <module name="IllegalToken">
+            <property name="tokens" value="LITERAL_NATIVE,LITERAL_ASSERT"/>
+        </module>
+        <!--
+        <module name="IllegalTokenText"/>
+        -->
+        <module name="InnerAssignment"/>
+        <module name="MagicNumber"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="ModifiedControlVariable"/>
+        <module name="RedundantThrows"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+        <module name="NestedIfDepth"/>
+        <module name="NestedTryDepth"/>
+        <module name="NoClone"/>
+        <module name="NoFinalizer"/>
+        <!--
+        <module name="SuperClone"/>
+        <module name="SuperFinalize"/>
+        -->
+        <module name="IllegalCatch"/>
+        <module name="IllegalThrows"/>
+        <module name="PackageDeclaration"/>
+        <module name="ReturnCount">
+            <property name="max" value="4"/>
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="IllegalType"/>
+        <module name="DeclarationOrder"/>
+        <module name="ParameterAssignment"/>
+        <module name="ExplicitInitialization"/>
+        <module name="DefaultComesLast"/>
+        <!--
+        <module name="MissingCtor"/>
+        -->
+        <module name="FallThrough">
+            <property name="severity" value="warning"/>
+        </module>
+        <!--
+        <module name="MultipleStringLiterals">
+            <property name="severity" value="warning"/>
+            <property name="ignoreStringsRegexp" value='^(("")|(", "))$'/>
+        </module>
+        -->
+        <module name="MultipleVariableDeclarations">
+            <property name="severity" value="warning"/>
+        </module>
+        <!--
+        <module name="RequireThis"/>
+        -->
+        <module name="UnnecessaryParentheses"/>
+
+        <!-- Imports -->
+        <module name="AvoidStarImport"/>
+        <!--
+                <module name="AvoidStaticImport"/>
+        -->
+        <module name="IllegalImport"/>
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+        <!--
+                <module name="ImportOrder">
+                    <property name="groups" value="/^javax?\./,org,com"/>
+                    <property name="ordered" value="true"/>
+                    <property name="separated" value="true"/>
+                    <property name="option" value="top"/>
+                </module>
+        -->
+        <!--
+        <module name="ImportControl"/>
+        -->
+
+        <!-- Javadoc -->
+        <!--
+                <module name="JavadocType"/>
+                <module name="JavadocMethod">
+                    <property name="allowUndeclaredRTE" value="true"/>
+                </module>
+                <module name="JavadocVariable"/>
+                <module name="JavadocStyle"/>
+                <module name="WriteTag"/>
+        -->
+
+        <!-- Metrics -->
+        <module name="BooleanExpressionComplexity">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="ClassDataAbstractionCoupling">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="ClassFanOutComplexity">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="NPathComplexity">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="JavaNCSS">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- Misc -->
+        <module name="TodoComment">
+            <property name="format" value="TODO|FIXME"/>
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="UncommentedMain"/>
+        <module name="UpperEll"/>
+        <module name="ArrayTypeStyle"/>
+        <module name="FinalParameters"/>
+        <!--
+        <module name="DescendantToken"/>
+        -->
+        <module name="Indentation"/>
+        <module name="TrailingComment">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="Regexp">
+            <property name="format" value="[ \t]+$"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message" value="Line has trailing spaces."/>
+        </module>
+
+        <!-- Modifiers -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Naming -->
+        <module name="AbstractClassName"/>
+        <module name="ClassTypeParameterName"/>
+        <module name="ConstantName"/>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="MethodName"/>
+        <module name="MethodTypeParameterName"/>
+        <module name="PackageName"/>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+        <module name="TypeName"/>
+
+        <!-- Size Violations -->
+        <module name="ExecutableStatementCount">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="LineLength">
+            <property name="max" value="120"/>
+        </module>
+        <module name="MethodLength"/>
+        <module name="AnonInnerLength"/>
+        <module name="ParameterNumber"/>
+        <module name="OuterTypeNumber"/>
+
+        <!-- Whitespace -->
+        <module name="GenericWhitespace"/>
+        <module name="EmptyForInitializerPad"/>
+        <module name="EmptyForIteratorPad"/>
+        <module name="MethodParamPad"/>
+        <module name="NoWhitespaceAfter">
+            <property name="tokens" value="BNOT, DEC, DOT, INC, LNOT,
+                UNARY_MINUS, UNARY_PLUS"/>
+        </module>
+        <module name="NoWhitespaceBefore"/>
+        <module name="OperatorWrap">
+            <!-- Everything except QUESTION and COLON -->
+            <property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR,
+                BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, DIV,
+                DIV_ASSIGN, EQUAL, GE, GT, LAND, LE, LITERAL_INSTANCEOF,
+                LOR, LT, MINUS, MINUS_ASSIGN, MOD, MOD_ASSIGN, NOT_EQUAL,
+                PLUS, PLUS_ASSIGN, SL, SL_ASSIGN, SR, SR_ASSIGN, STAR,
+                STAR_ASSIGN"/>
+            <property name="option" value="eol"/>
+        </module>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad"/>
+        <module name="WhitespaceAfter">
+            <!-- Everything except TYPECAST -->
+            <property name="tokens" value="COMMA, SEMI"/>
+        </module>
+        <module name="WhitespaceAround">
+            <!-- Everything except GENERIC_START, GENERIC_END and WILDCARD_TYPE -->
+            <property name="tokens" value="ASSIGN, BAND, BAND_ASSIGN, BOR,
+                BOR_ASSIGN, BSR, BSR_ASSIGN, BXOR, BXOR_ASSIGN, COLON, DIV,
+                DIV_ASSIGN, EQUAL, GE, GT, LAND, LCURLY, LE, LITERAL_ASSERT,
+                LITERAL_CATCH, LITERAL_DO, LITERAL_ELSE, LITERAL_FINALLY,
+                LITERAL_FOR, LITERAL_IF, LITERAL_RETURN, LITERAL_SYNCHRONIZED,
+                LITERAL_TRY, LITERAL_WHILE, LOR, LT, MINUS, MINUS_ASSIGN, MOD,
+                MOD_ASSIGN, NOT_EQUAL, PLUS, PLUS_ASSIGN, QUESTION, RCURLY, SL,
+                SLIST, SL_ASSIGN, SR, SR_ASSIGN, STAR, STAR_ASSIGN,
+                TYPE_EXTENSION_AND"/>
+        </module>
+
+    </module>
+
+    <module name="SuppressionCommentFilter">
+        <property name="offCommentFormat" value="CSOFF\: ([\w\|]+)"/>
+        <property name="onCommentFormat" value="CSON\: ([\w\|]+)"/>
+        <property name="checkFormat" value="$1"/>
+    </module>
+
+    <module name="SuppressionFilter">
+        <property name="file" value="config/checkstyle/suppressions.xml"/>
+    </module>
+
+</module>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.0//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+
+    <!-- sacrifice some coding styles for the sake of performance -->
+
+    <suppress files="CsvParser.java" checks="InnerAssignment"/>
+    <suppress files="CsvParser.java" checks="CyclomaticComplexity"/>
+    <suppress files="CsvParser.java" checks="JavaNCSS"/>
+    <suppress files="CsvParser.java" checks="NestedIfDepth"/>
+    <suppress files="CsvParser.java" checks="ExecutableStatementCount"/>
+
+    <suppress files="CsvAppender.java" checks="CyclomaticComplexity"/>
+    <suppress files="CsvAppender.java" checks="NPathComplexity"/>
+    <suppress files="CsvAppender.java" checks="InnerAssignment"/>
+
+</suppressions>
