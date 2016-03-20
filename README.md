@@ -7,6 +7,30 @@ FastCSV is a ultra fast and simple [RFC 4180](http://tools.ietf.org/html/rfc4180
 library for Java, licensed under the Apache License, Version 2.0.
 
 
+Latest release
+--------------
+
+The most recent release is 1.0.1, released March 20, 2016.
+
+To add a dependency using Maven, use the following:
+
+```xml
+<dependency>
+    <groupId>de.siegmar</groupId>
+    <artifactId>fastcsv</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
+To add a dependency using Gradle:
+
+```gradle
+dependencies {
+    compile 'de.siegmar:fastcsv:1.0.1'
+}
+```
+
+
 Features
 --------
 
