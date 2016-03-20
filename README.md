@@ -2,6 +2,7 @@ FastCSV
 =======
 
 [![Build Status](https://api.travis-ci.org/osiegmar/FastCSV.svg)](https://travis-ci.org/osiegmar/FastCSV)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
 
 FastCSV is a ultra fast and simple [RFC 4180](http://tools.ietf.org/html/rfc4180) compliant CSV 
 library for Java, licensed under the Apache License, Version 2.0.
