@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+package de.siegmar.fastcsv.reader;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 @Test
 public class ReusableStringBuilderTest {
@@ -34,7 +35,7 @@ public class ReusableStringBuilderTest {
 
     public void empty() {
         assertFalse(sb.hasContent());
-        String s = sb.toStringAndReset();
+        final String s = sb.toStringAndReset();
         assertEquals(s, "");
     }
 

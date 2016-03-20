@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
+
+package de.siegmar.fastcsv.reader;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,8 @@ public final class CsvContainer {
     }
 
     /**
-     * Returns the header row - might be {@code null} if no header exists. The returned list is unmodifiable.
+     * Returns the header row - might be {@code null} if no header exists.
+     * The returned list is unmodifiable.
      *
      * @return the header row - might be {@code null} if no header exists
      */

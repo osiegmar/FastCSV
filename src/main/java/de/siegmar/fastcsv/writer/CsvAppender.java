@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.writer;
+
+package de.siegmar.fastcsv.writer;
 
 import java.io.Closeable;
 import java.io.Flushable;
@@ -48,7 +49,8 @@ public final class CsvAppender implements Closeable, Flushable {
     }
 
     /**
-     * Appends a field to the current row. Automatically adds field separator and text delimiters as required.
+     * Appends a field to the current row. Automatically adds field separator and text delimiters
+     * as required.
      *
      * @param value the field to append ({@code null} is handled as empty string)
      * @throws IOException if a write error occurs

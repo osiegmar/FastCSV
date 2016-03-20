@@ -1,0 +1,101 @@
+apply plugin: 'java'
+apply plugin: 'findbugs'
+apply plugin: 'checkstyle'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = "de.siegmar"
+archivesBaseName = "fastcsv"
+version = "1.0.1-SNAPSHOT"
+
+sourceCompatibility = 1.7
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testCompile 'org.testng:testng:6.8.21'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+checkstyle {
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    configProperties = [samedir: "${rootDir}/config/checkstyle", project_loc: "${rootDir}"]
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+if (hasProperty('signing.keyId')) {
+    signing {
+        sign configurations.archives
+    }
+}
+
+if (hasProperty('ossrhUsername')) {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name 'FastCSV'
+                    packaging 'jar'
+                    description 'Ultra fast and simple RFC 4180 compliant CSV library.'
+                    url 'https://github.com/osiegmar/FastCSV'
+
+                    scm {
+                        connection 'scm:git:https://github.com/osiegmar/FastCSV.git'
+                        developerConnection 'scm:git:https://github.com/osiegmar/FastCSV.git'
+                        url 'https://github.com/osiegmar/FastCSV'
+                    }
+
+                    licenses {
+                        license {
+                            name 'Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'osiegmar'
+                            name 'Oliver Siegmar'
+                            email 'oliver@siegmar.de'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}

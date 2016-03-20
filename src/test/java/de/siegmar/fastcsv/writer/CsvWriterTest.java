@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.writer;
+
+package de.siegmar.fastcsv.writer;
+
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -23,8 +26,6 @@ import java.util.Collection;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-
 @Test
 public class CsvWriterTest {
 
@@ -33,7 +34,7 @@ public class CsvWriterTest {
     @BeforeMethod
     public void init() {
         csvWriter = new CsvWriter();
-        csvWriter.setLineDelimiter(new char[] { '\n' });
+        csvWriter.setLineDelimiter(new char[] {'\n'});
     }
 
     public void oneLineSingleValue() throws IOException {
@@ -46,8 +47,8 @@ public class CsvWriterTest {
 
     public void twoLinesSingleValue() throws IOException {
         final Collection<String[]> rows = new ArrayList<>();
-        rows.add(new String[] { "foo" });
-        rows.add(new String[] { "bar" });
+        rows.add(new String[] {"foo"});
+        rows.add(new String[] {"bar"});
 
         assertEquals(write(rows), "foo\nbar\n");
     }
@@ -57,12 +58,14 @@ public class CsvWriterTest {
     }
 
     public void delimitText() throws IOException {
-        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null), "a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
+        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null),
+            "a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
     }
 
     public void alwaysDelimitText() throws IOException {
         csvWriter.setAlwaysDelimitText(true);
-        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null), "\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n");
+        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null),
+            "\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n");
     }
 
     public void fieldSeparator() throws IOException {
@@ -92,7 +95,7 @@ public class CsvWriterTest {
     }
 
     private String write(final Collection<String[]> rows) throws IOException {
-        StringWriter stringWriter = new StringWriter();
+        final StringWriter stringWriter = new StringWriter();
         csvWriter.write(stringWriter, rows);
 
         return stringWriter.toString();

@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
+
+package de.siegmar.fastcsv.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,17 +36,17 @@ import java.util.Objects;
 public final class CsvReader {
 
     /**
-     * Field separator character (default: ',' - comma)
+     * Field separator character (default: ',' - comma).
      */
     private char fieldSeparator = ',';
 
     /**
-     * Text delimiter character (default: '"' - double quotes)
+     * Text delimiter character (default: '"' - double quotes).
      */
     private char textDelimiter = '"';
 
     /**
-     * Read first line as header line? (default: false)
+     * Read first line as header line? (default: false).
      */
     private boolean containsHeader;
 
@@ -55,7 +56,7 @@ public final class CsvReader {
     private boolean skipEmptyRows = true;
 
     /**
-     * Throw an exception if CSV data contains different field count? (default: false)
+     * Throw an exception if CSV data contains different field count? (default: false).
      */
     private boolean errorOnDifferentFieldCount;
 
@@ -88,7 +89,8 @@ public final class CsvReader {
     }
 
     /**
-     * Specifies if an exception should be thrown, if CSV data contains different field count (default: false).
+     * Specifies if an exception should be thrown, if CSV data contains different field count
+     * (default: false).
      */
     public void setErrorOnDifferentFieldCount(final boolean errorOnDifferentFieldCount) {
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
@@ -128,15 +130,17 @@ public final class CsvReader {
     /**
      * Reads from the provided reader until the end and returns a CsvContainer containing the data.
      *
-     * This library uses built-in buffering, so you do not need to pass in a buffered Reader implementation such as
-     * {@link java.io.BufferedReader}. Performance may be even likely better if you do not.
+     * This library uses built-in buffering, so you do not need to pass in a buffered Reader
+     * implementation such as {@link java.io.BufferedReader}.
+     * Performance may be even likely better if you do not.
      *
      * @param reader the data source to read from.
      * @return the entire file's data - never {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public CsvContainer read(final Reader reader) throws IOException {
-        final CsvParser csvParser = parse(Objects.requireNonNull(reader, "reader must not be null"));
+        final CsvParser csvParser =
+            parse(Objects.requireNonNull(reader, "reader must not be null"));
 
         final List<CsvRow> rows = new ArrayList<>();
         CsvRow csvRow;
@@ -185,8 +189,9 @@ public final class CsvReader {
     /**
      * Constructs a new {@link CsvParser} for the specified arguments.
      *
-     * This library uses built-in buffering, so you do not need to pass in a buffered Reader implementation such as
-     * {@link java.io.BufferedReader}. Performance may be even likely better if you do not.
+     * This library uses built-in buffering, so you do not need to pass in a buffered Reader
+     * implementation such as {@link java.io.BufferedReader}.
+     * Performance may be even likely better if you do not.
      *
      * @param reader the data source to read from.
      * @return a new CsvParser - never {@code null}.
@@ -194,7 +199,8 @@ public final class CsvReader {
      */
     public CsvParser parse(final Reader reader) throws IOException {
         return new CsvParser(Objects.requireNonNull(reader, "reader must not be null"),
-            fieldSeparator, textDelimiter, containsHeader, skipEmptyRows, errorOnDifferentFieldCount);
+            fieldSeparator, textDelimiter, containsHeader, skipEmptyRows,
+            errorOnDifferentFieldCount);
     }
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {

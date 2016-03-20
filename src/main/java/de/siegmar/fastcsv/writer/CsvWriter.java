@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.writer;
+
+package de.siegmar.fastcsv.writer;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,22 +35,22 @@ import java.util.Objects;
 public final class CsvWriter {
 
     /**
-     * Field separator character (default: ',' - comma)
+     * Field separator character (default: ',' - comma).
      */
     private char fieldSeparator = ',';
 
     /**
-     * Text delimiter character (default: '"' - double quotes)
+     * Text delimiter character (default: '"' - double quotes).
      */
     private char textDelimiter = '"';
 
     /**
-     * Should fields always delimited using the {@link #textDelimiter}? (default: false)
+     * Should fields always delimited using the {@link #textDelimiter}? (default: false).
      */
     private boolean alwaysDelimitText;
 
     /**
-     * The line delimiter character(s) to be used (default: {@link System#lineSeparator()})
+     * The line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
      */
     private char[] lineDelimiter = System.lineSeparator().toCharArray();
 
@@ -89,7 +90,9 @@ public final class CsvWriter {
      * @throws IOException if a write error occurs
      * @throws NullPointerException if file, charset or data is null
      */
-    public void write(final File file, final Charset charset, final Collection<String[]> data) throws IOException {
+    public void write(final File file, final Charset charset, final Collection<String[]> data)
+        throws IOException {
+
         write(
             Objects.requireNonNull(file, "file must not be null").toPath(),
             Objects.requireNonNull(charset, "charset must not be null"),
@@ -105,7 +108,9 @@ public final class CsvWriter {
      * @throws IOException if a write error occurs
      * @throws NullPointerException if path, charset or data is null
      */
-    public void write(final Path path, final Charset charset, final Collection<String[]> data) throws IOException {
+    public void write(final Path path, final Charset charset, final Collection<String[]> data)
+        throws IOException {
+
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
         try (final Writer writer = newWriter(path, charset)) {
@@ -165,8 +170,9 @@ public final class CsvWriter {
     /**
      * Constructs a {@link CsvAppender} for the specified Writer.
      *
-     * This library uses built-in buffering, so you do not need to pass in a buffered Writer implementation such as
-     * {@link java.io.BufferedWriter}. Performance may be even likely better if you do not.
+     * This library uses built-in buffering, so you do not need to pass in a buffered Writer
+     * implementation such as {@link java.io.BufferedWriter}.
+     * Performance may be even likely better if you do not.
      *
      * @param writer the Writer to use for writing CSV data.
      * @return a new CsvAppender instance
@@ -178,8 +184,8 @@ public final class CsvWriter {
     }
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {
-        return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE),
-            charset);
+        return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
+            StandardOpenOption.WRITE), charset);
     }
 
 }

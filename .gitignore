@@ -1,6 +1,13 @@
-# Maven
-target
+# Gradle
+.gradle/
+build/
+gradle.properties
 
 # IntelliJ IDEA
-.idea
+.idea/
 *.iml
+*.ipr
+*.iws
+
+# Mac
+.DS_Store

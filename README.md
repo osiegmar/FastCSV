@@ -1,8 +1,10 @@
 FastCSV
 =======
 
-FastCSV is a ultra fast and simple [RFC 4180](http://tools.ietf.org/html/rfc4180) compliant CSV library for Java,
-licensed under the Apache License, Version 2.0.
+[![Build Status](https://api.travis-ci.org/osiegmar/FastCSV.svg)](https://travis-ci.org/osiegmar/FastCSV)
+
+FastCSV is a ultra fast and simple [RFC 4180](http://tools.ietf.org/html/rfc4180) compliant CSV 
+library for Java, licensed under the Apache License, Version 2.0.
 
 
 Features
@@ -31,47 +33,54 @@ CsvReader Examples
 
 Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
 
-    File file = new File("foo.csv");
-    CsvReader csvReader = new CsvReader();
+```java
+File file = new File("foo.csv");
+CsvReader csvReader = new CsvReader();
 
-    try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
-        CsvRow row;
-        while ((row = csvParser.nextRow()) != null) {
-            System.out.println("Read line: " + row);
-            System.out.println("First column of line: " + row.getField(0));
-        }
-    }
-
-
-Read full CSV file at once (RFC standard format, UTF-8 encoded)
-
-    File file = new File("foo.csv");
-    CsvReader csvReader = new CsvReader();
-
-    CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
-    for (CsvRow row : csv.getRows()) {
+try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
+    CsvRow row;
+    while ((row = csvParser.nextRow()) != null) {
         System.out.println("Read line: " + row);
         System.out.println("First column of line: " + row.getField(0));
     }
+}
+```
+
+Read full CSV file at once (RFC standard format, UTF-8 encoded)
+
+```java
+File file = new File("foo.csv");
+CsvReader csvReader = new CsvReader();
+
+CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
+for (CsvRow row : csv.getRows()) {
+    System.out.println("Read line: " + row);
+    System.out.println("First column of line: " + row.getField(0));
+}
+```
 
 
 Read full CSV file with header at once (RFC standard format, UTF-8 encoded)
 
-    File file = new File("foo.csv");
-    CsvReader csvReader = new CsvReader();
-    csvReader.setContainsHeader(true);
+```java
+File file = new File("foo.csv");
+CsvReader csvReader = new CsvReader();
+csvReader.setContainsHeader(true);
 
-    CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
-    for (CsvRow row : csv.getRows()) {
-        System.out.println("First column of line: " + row.getField("name"));
-    }
+CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
+for (CsvRow row : csv.getRows()) {
+    System.out.println("First column of line: " + row.getField("name"));
+}
+```
 
 
 Custom settings
 
-    CsvReader csvReader = new CsvReader();
-    csvReader.setFieldSeparator(';');
-    csvReader.setTextDelimiter('\'');
+```java
+CsvReader csvReader = new CsvReader();
+csvReader.setFieldSeparator(';');
+csvReader.setTextDelimiter('\'');
+```
 
 
 CsvWriter Examples
@@ -79,42 +88,48 @@ CsvWriter Examples
 
 Iterative writing of a CSV file (RFC standard format, UTF-8 encoded)
 
-    File file = new File("foo.csv");
-    CsvWriter csvWriter = new CsvWriter();
+```java
+File file = new File("foo.csv");
+CsvWriter csvWriter = new CsvWriter();
 
-    try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
-        // header
-        csvAppender.appendLine("header1", "header2");
+try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
+    // header
+    csvAppender.appendLine("header1", "header2");
 
-        // 1st line in one operation
-        csvAppender.appendLine("value1", "value2");
+    // 1st line in one operation
+    csvAppender.appendLine("value1", "value2");
 
-        // 2nd line in split operations
-        csvAppender.appendField("value3");
-        csvAppender.appendField("value4");
-        csvAppender.endLine();
-    }
+    // 2nd line in split operations
+    csvAppender.appendField("value3");
+    csvAppender.appendField("value4");
+    csvAppender.endLine();
+}
+```
 
 
 Write full CSV file at once (RFC standard format, UTF-8 encoded)
 
-    File file = new File("foo.csv");
-    CsvWriter csvWriter = new CsvWriter();
+```java
+File file = new File("foo.csv");
+CsvWriter csvWriter = new CsvWriter();
 
-    final Collection<String[]> data = new ArrayList<>();
-    data.add(new String[] { "header1", "header2" });
-    data.add(new String[] { "value1", "value2" });
+final Collection<String[]> data = new ArrayList<>();
+data.add(new String[] { "header1", "header2" });
+data.add(new String[] { "value1", "value2" });
 
-    csvWriter.write(file, StandardCharsets.UTF_8, data);
+csvWriter.write(file, StandardCharsets.UTF_8, data);
+```
 
 
 Custom settings
 
-    CsvWriter csvWriter = new CsvWriter();
-    csvWriter.setFieldSeparator(';');
-    csvWriter.setTextDelimiter('\'');
-    csvWriter.setLineDelimiter("\r\n".toCharArray());
-    csvWriter.setAlwaysDelimitText(true);
+```java
+CsvWriter csvWriter = new CsvWriter();
+csvWriter.setFieldSeparator(';');
+csvWriter.setTextDelimiter('\'');
+csvWriter.setLineDelimiter("\r\n".toCharArray());
+csvWriter.setAlwaysDelimitText(true);
+```
 
 
 Contribution

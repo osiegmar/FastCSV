@@ -14,4 +14,6 @@
     <suppress files="CsvAppender.java" checks="NPathComplexity"/>
     <suppress files="CsvAppender.java" checks="InnerAssignment"/>
 
+    <suppress files=".*Test.java" checks="MagicNumber"/>
+
 </suppressions>

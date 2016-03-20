@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
+
+package de.siegmar.fastcsv.reader;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -23,9 +28,6 @@ import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 @Test
 public class CsvReaderTest {
@@ -41,7 +43,11 @@ public class CsvReaderTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void nullInput() throws IOException {
-        parse(null);
+        parse(findBugsSafeNullInput());
+    }
+
+    private static String findBugsSafeNullInput() {
+        return null;
     }
 
     public void empty() throws IOException {
@@ -115,7 +121,8 @@ public class CsvReaderTest {
 
     @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void getNonExistingFieldByIndex() throws IOException {
-        parse("foo").nextRow().getField(1);
+        final String findbugsSafeReturn = parse("foo").nextRow().getField(1);
+        fail("must not return: " + findbugsSafeReturn);
     }
 
     // field by name (header)
@@ -234,7 +241,8 @@ public class CsvReaderTest {
     public void toStringWithHeader() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvRow csvRow = parse("headerA,headerB,headerC\nfieldA,fieldB\n").nextRow();
-        assertEquals(csvRow.toString(), "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}");
+        assertEquals(csvRow.toString(),
+            "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}");
     }
 
     // test helpers

@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
+
+package de.siegmar.fastcsv.reader;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -57,8 +58,9 @@ public final class CsvParser implements Closeable {
     private boolean inQuotes;
     private boolean finished;
 
-    CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter, final boolean containsHeader,
-              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
+    CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter,
+              final boolean containsHeader, final boolean skipEmptyRows,
+              final boolean errorOnDifferentFieldCount) {
         this.reader = reader;
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
@@ -68,12 +70,14 @@ public final class CsvParser implements Closeable {
     }
 
     /**
-     * Returns the header fields - {@code null} if no header exists. The returned list is unmodifiable.
-     * Use {@link CsvReader#setContainsHeader(boolean)} to enable header parsing.
-     * Also note, that the header is only available <strong>after</strong> first invocation of {@link #nextRow()}.
+     * Returns the header fields - {@code null} if no header exists. The returned list is
+     * unmodifiable. Use {@link CsvReader#setContainsHeader(boolean)} to enable header parsing.
+     * Also note, that the header is only available <strong>after</strong> first invocation of
+     * {@link #nextRow()}.
      *
      * @return the header fields
-     * @throws IllegalStateException if header parsing is not enabled or {@link #nextRow()} wasn't called before.
+     * @throws IllegalStateException if header parsing is not enabled or {@link #nextRow()} wasn't
+     * called before.
      */
     public List<String> getHeader() {
         if (!containsHeader) {
@@ -86,7 +90,8 @@ public final class CsvParser implements Closeable {
     }
 
     /**
-     * Reads a complete {@link CsvRow} that might be made up of multiple lines in the underlying CSV file.
+     * Reads a complete {@link CsvRow} that might be made up of multiple lines in the underlying
+     * CSV file.
      *
      * @return a CsvRow or {@code null} if end of file reached
      * @throws IOException if an error occurred while reading data
@@ -113,7 +118,8 @@ public final class CsvParser implements Closeable {
                 if (firstLineFieldCount == -1) {
                     firstLineFieldCount = fieldCount;
                 } else if (fieldCount != firstLineFieldCount) {
-                    throw new IOException(String.format("Line %d has %d fields, but first line has %d fields",
+                    throw new IOException(
+                        String.format("Line %d has %d fields, but first line has %d fields",
                         lineNo, fieldCount, firstLineFieldCount));
                 }
             }
@@ -152,7 +158,8 @@ public final class CsvParser implements Closeable {
      * ugly, performance optimized code begins
      */
     private List<String> readLine() throws IOException {
-        final List<String> currentFields = new ArrayList<>(maxFieldCount > 0 ? maxFieldCount : DEFAULT_ROW_CAPACITY);
+        final List<String> currentFields =
+            new ArrayList<>(maxFieldCount > 0 ? maxFieldCount : DEFAULT_ROW_CAPACITY);
 
         // get fields local for higher performance
         final ReusableStringBuilder localCurrentField = currentField;

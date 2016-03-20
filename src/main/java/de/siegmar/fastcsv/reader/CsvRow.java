@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.siegmar.fastcsv.reader;
+
+package de.siegmar.fastcsv.reader;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -36,15 +37,17 @@ public final class CsvRow {
     private final Map<String, Integer> headerMap;
     private final List<String> fields;
 
-    CsvRow(final long originalLineNumber, final Map<String, Integer> headerMap, final List<String> fields) {
+    CsvRow(final long originalLineNumber, final Map<String, Integer> headerMap,
+           final List<String> fields) {
+
         this.originalLineNumber = originalLineNumber;
         this.headerMap = headerMap;
         this.fields = fields;
     }
 
     /**
-     * Returns the original line number (starting with 1). On multi-line rows this is the starting line number.
-     * Empty lines could be skipped via {@link CsvReader#setSkipEmptyRows(boolean)}.
+     * Returns the original line number (starting with 1). On multi-line rows this is the starting
+     * line number. Empty lines could be skipped via {@link CsvReader#setSkipEmptyRows(boolean)}.
      *
      * @return the original line number
      */
@@ -68,7 +71,8 @@ public final class CsvRow {
      *
      * @param name field name
      * @return field value, {@code null} if this row has no such field
-     * @throws IllegalStateException if CSV is read without headers - see {@link CsvReader#containsHeader}
+     * @throws IllegalStateException if CSV is read without headers -
+     * see {@link CsvReader#containsHeader}
      */
     public String getField(final String name) {
         if (headerMap == null) {
@@ -98,7 +102,8 @@ public final class CsvRow {
      * The map will always contain all header names - even if their value is {@code null}.
      *
      * @return an unmodifiable map of header names and field values of this row
-     * @throws IllegalStateException if CSV is read without headers - see {@link CsvReader#containsHeader}
+     * @throws IllegalStateException if CSV is read without headers - see
+     * {@link CsvReader#containsHeader}
      */
     public Map<String, String> getFieldMap() {
         if (headerMap == null) {
@@ -135,7 +140,9 @@ public final class CsvRow {
         sb.append("fields=");
         if (headerMap != null) {
             sb.append('{');
-            for (final Iterator<Map.Entry<String, String>> it = getFieldMap().entrySet().iterator(); it.hasNext();) {
+            for (final Iterator<Map.Entry<String, String>> it =
+                 getFieldMap().entrySet().iterator(); it.hasNext();) {
+
                 final Map.Entry<String, String> entry = it.next();
                 sb.append(entry.getKey());
                 sb.append('=');
