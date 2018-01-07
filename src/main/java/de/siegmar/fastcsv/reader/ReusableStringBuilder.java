@@ -38,7 +38,7 @@ final class ReusableStringBuilder {
      *
      * @param initialCapacity the initial buffer capacity.
      */
-    public ReusableStringBuilder(final int initialCapacity) {
+    ReusableStringBuilder(final int initialCapacity) {
         buf = new char[initialCapacity];
     }
 
