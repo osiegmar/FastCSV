@@ -146,7 +146,7 @@ Write full CSV file at once (RFC standard format, UTF-8 encoded)
 File file = new File("foo.csv");
 CsvWriter csvWriter = new CsvWriter();
 
-final Collection<String[]> data = new ArrayList<>();
+Collection<String[]> data = new ArrayList<>();
 data.add(new String[] { "header1", "header2" });
 data.add(new String[] { "value1", "value2" });
 
