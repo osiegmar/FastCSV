@@ -173,7 +173,7 @@ final class RowReader implements Closeable {
         return finished;
     }
 
-    final class Line {
+    static final class Line {
 
         private String[] fields;
         private int linePos;
