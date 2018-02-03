@@ -37,6 +37,11 @@ public final class CsvParser implements Closeable {
     private static final int BUFFER_SIZE = 8192;
     private static final int DEFAULT_ROW_CAPACITY = 10;
 
+    private static final int FIELD_MODE_RESET = 0;
+    private static final int FIELD_MODE_QUOTED = 1;
+    private static final int FIELD_MODE_NON_QUOTED = 2;
+    private static final int FIELD_MODE_QUOTE_ON = 4;
+
     private final Reader reader;
     private final char fieldSeparator;
     private final char textDelimiter;
@@ -55,7 +60,6 @@ public final class CsvParser implements Closeable {
     private long lineNo;
     private int firstLineFieldCount = -1;
     private int maxFieldCount;
-    private boolean inQuotes;
     private boolean finished;
 
     CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter,
@@ -169,6 +173,8 @@ public final class CsvParser implements Closeable {
         int localCopyStart = copyStart;
         int copyLen = 0;
 
+        int fieldMode = FIELD_MODE_RESET;
+
         while (true) {
             if (bufLen == localBufPos) {
                 // end of buffer
@@ -194,10 +200,10 @@ public final class CsvParser implements Closeable {
 
             final char c = localBuf[localBufPos++];
 
-            if (inQuotes) {
+            if ((fieldMode & FIELD_MODE_QUOTE_ON) != 0) {
                 if (c == textDelimiter) {
                     // End of quoted text
-                    inQuotes = false;
+                    fieldMode &= ~(FIELD_MODE_QUOTE_ON);
                     if (copyLen > 0) {
                         localCurrentField.append(localBuf, localCopyStart, copyLen);
                         copyLen = 0;
@@ -217,9 +223,10 @@ public final class CsvParser implements Closeable {
                     }
                     currentFields.add(localCurrentField.toStringAndReset());
                     localCopyStart = localBufPos;
-                } else if (c == textDelimiter) {
+                    fieldMode = FIELD_MODE_RESET;
+                } else if (c == textDelimiter && (fieldMode & FIELD_MODE_NON_QUOTED) == 0) {
                     // Quoted text starts
-                    inQuotes = true;
+                    fieldMode = FIELD_MODE_QUOTED | FIELD_MODE_QUOTE_ON;
 
                     if (localPrevChar == textDelimiter) {
                         // escaped quote
@@ -248,6 +255,9 @@ public final class CsvParser implements Closeable {
                     localCopyStart = localBufPos;
                 } else {
                     copyLen++;
+                    if (fieldMode == FIELD_MODE_RESET) {
+                        fieldMode = FIELD_MODE_NON_QUOTED;
+                    }
                 }
             }
 

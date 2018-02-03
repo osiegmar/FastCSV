@@ -55,7 +55,7 @@ public class CsvReaderTest {
     }
 
     public void simple() throws IOException {
-        assertEquals(getOneRow("foo").getField(0), "foo");
+        assertEquals(readCsvRow("foo").getField(0), "foo");
     }
 
     // skipped rows
@@ -174,7 +174,7 @@ public class CsvReaderTest {
     // enclosure escaping
 
     public void escapedQuote() throws IOException {
-        assertEquals(getOneRow("foo,\"bar \"\"is\"\" ok\"").getField(1), "bar \"is\" ok");
+        assertEquals(readCsvRow("foo,\"bar \"\"is\"\" ok\"").getField(1), "bar \"is\" ok");
     }
 
     public void dataAfterNewlineAfterEnclosure() throws IOException {
@@ -192,6 +192,43 @@ public class CsvReaderTest {
         assertEquals(csv.getRowCount(), 2);
         assertEquals(csv.getRow(0).getField(0), "foo");
         assertEquals(csv.getRow(1).getField(0), "bar");
+    }
+
+    public void invalidQuotes() throws IOException {
+        assertEquals(readRow("bbb\"a\", ccc,ddd\"a,b\"eee,fff,ggg\"a\"\"b,\",a, b"),
+            Arrays.asList(
+                "bbb\"a\"",
+                " ccc",
+                "ddd\"a",
+                "b\"eee",
+                "fff",
+                "ggg\"a\"\"b",
+                ",a, b"
+            ));
+    }
+
+    public void textBeforeQuotes() throws IOException {
+        assertEquals(readRow("a\"b\",c"), Arrays.asList("a\"b\"", "c"));
+    }
+
+    public void textAfterQuotes() throws IOException {
+        assertEquals(readRow("\"a\"b,c"), Arrays.asList("ab", "c"));
+    }
+
+    public void spaceBeforeQuotes() throws IOException {
+        assertEquals(readRow(" \"a\",b"), Arrays.asList(" \"a\"", "b"));
+    }
+
+    public void spaceAfterQuotes() throws IOException {
+        assertEquals(readRow("\"a\" ,b"), Arrays.asList("a ", "b"));
+    }
+
+    public void openingQuotes() throws IOException {
+        assertEquals(readCsvRow("\"aaa").getField(0), "aaa");
+    }
+
+    public void closingQuotes() throws IOException {
+        assertEquals(readCsvRow("aaa\"").getField(0), "aaa\"");
     }
 
     // line breaks
@@ -247,12 +284,16 @@ public class CsvReaderTest {
 
     // test helpers
 
-    private CsvRow getOneRow(final String data) throws IOException {
+    private CsvRow readCsvRow(final String data) throws IOException {
         try (final CsvParser csvParser = parse(data)) {
             final CsvRow csvRow = csvParser.nextRow();
             assertNull(csvParser.nextRow());
             return csvRow;
         }
+    }
+
+    private List<String> readRow(final String data) throws IOException {
+        return readCsvRow(data).getFields();
     }
 
     private CsvContainer read(final String data) throws IOException {
