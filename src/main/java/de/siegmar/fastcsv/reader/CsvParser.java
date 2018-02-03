@@ -19,7 +19,7 @@ package de.siegmar.fastcsv.reader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,42 +32,21 @@ import java.util.Map;
  */
 public final class CsvParser implements Closeable {
 
-    private static final char LF = '\n';
-    private static final char CR = '\r';
-    private static final int BUFFER_SIZE = 8192;
-    private static final int DEFAULT_ROW_CAPACITY = 10;
-
-    private static final int FIELD_MODE_RESET = 0;
-    private static final int FIELD_MODE_QUOTED = 1;
-    private static final int FIELD_MODE_NON_QUOTED = 2;
-    private static final int FIELD_MODE_QUOTE_ON = 4;
-
-    private final Reader reader;
-    private final char fieldSeparator;
-    private final char textDelimiter;
+    private final RowReader rowReader;
     private final boolean containsHeader;
     private final boolean skipEmptyRows;
     private final boolean errorOnDifferentFieldCount;
-    private final char[] buf = new char[BUFFER_SIZE];
-    private final ReusableStringBuilder currentField = new ReusableStringBuilder(512);
 
-    private int bufPos;
-    private int bufLen;
-    private int prevChar = -1;
-    private int copyStart;
     private Map<String, Integer> headerMap;
     private List<String> headerList;
     private long lineNo;
     private int firstLineFieldCount = -1;
-    private int maxFieldCount;
-    private boolean finished;
 
     CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter,
               final boolean containsHeader, final boolean skipEmptyRows,
               final boolean errorOnDifferentFieldCount) {
-        this.reader = reader;
-        this.fieldSeparator = fieldSeparator;
-        this.textDelimiter = textDelimiter;
+
+        rowReader = new RowReader(reader, fieldSeparator, textDelimiter);
         this.containsHeader = containsHeader;
         this.skipEmptyRows = skipEmptyRows;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
@@ -101,11 +80,13 @@ public final class CsvParser implements Closeable {
      * @throws IOException if an error occurred while reading data
      */
     public CsvRow nextRow() throws IOException {
-        while (!finished) {
-            final long startingLineNo = ++lineNo;
-            final List<String> currentFields = readLine();
+        while (!rowReader.isFinished()) {
+            final long startingLineNo = lineNo + 1;
+            final RowReader.Line line = rowReader.readLine();
+            final String[] currentFields = line.getFields();
+            lineNo += line.getLines();
 
-            final int fieldCount = currentFields.size();
+            final int fieldCount = currentFields.length;
 
             // reached end of data in a new line?
             if (fieldCount == 0) {
@@ -113,7 +94,7 @@ public final class CsvParser implements Closeable {
             }
 
             // skip empty rows
-            if (skipEmptyRows && fieldCount == 1 && currentFields.get(0).isEmpty()) {
+            if (skipEmptyRows && fieldCount == 1 && currentFields[0].isEmpty()) {
                 continue;
             }
 
@@ -128,18 +109,15 @@ public final class CsvParser implements Closeable {
                 }
             }
 
-            // remember maximum field count for array initialization in next loop iteration
-            if (fieldCount > maxFieldCount) {
-                maxFieldCount = fieldCount;
-            }
+            final List<String> fieldList = Arrays.asList(currentFields);
 
             // initialize header
             if (containsHeader && headerList == null) {
-                initHeader(currentFields);
+                initHeader(fieldList);
                 continue;
             }
 
-            return new CsvRow(startingLineNo, headerMap, currentFields);
+            return new CsvRow(startingLineNo, headerMap, fieldList);
         }
 
         return null;
@@ -158,123 +136,9 @@ public final class CsvParser implements Closeable {
         headerMap = Collections.unmodifiableMap(localHeaderMap);
     }
 
-    /*
-     * ugly, performance optimized code begins
-     */
-    private List<String> readLine() throws IOException {
-        final List<String> currentFields =
-            new ArrayList<>(maxFieldCount > 0 ? maxFieldCount : DEFAULT_ROW_CAPACITY);
-
-        // get fields local for higher performance
-        final ReusableStringBuilder localCurrentField = currentField;
-        final char[] localBuf = buf;
-        int localBufPos = bufPos;
-        int localPrevChar = prevChar;
-        int localCopyStart = copyStart;
-        int copyLen = 0;
-
-        int fieldMode = FIELD_MODE_RESET;
-
-        while (true) {
-            if (bufLen == localBufPos) {
-                // end of buffer
-
-                if (copyLen > 0) {
-                    localCurrentField.append(localBuf, localCopyStart, copyLen);
-                }
-                bufLen = reader.read(localBuf, 0, localBuf.length);
-
-                if (bufLen < 0) {
-                    // end of data
-                    finished = true;
-
-                    if (localPrevChar == fieldSeparator || localCurrentField.hasContent()) {
-                        currentFields.add(localCurrentField.toStringAndReset());
-                    }
-
-                    break;
-                }
-
-                localCopyStart = localBufPos = copyLen = 0;
-            }
-
-            final char c = localBuf[localBufPos++];
-
-            if ((fieldMode & FIELD_MODE_QUOTE_ON) != 0) {
-                if (c == textDelimiter) {
-                    // End of quoted text
-                    fieldMode &= ~(FIELD_MODE_QUOTE_ON);
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        copyLen = 0;
-                    }
-                    localCopyStart = localBufPos;
-                } else {
-                    if (c == CR || c == LF && prevChar != CR) {
-                        lineNo++;
-                    }
-                    copyLen++;
-                }
-            } else {
-                if (c == fieldSeparator) {
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        copyLen = 0;
-                    }
-                    currentFields.add(localCurrentField.toStringAndReset());
-                    localCopyStart = localBufPos;
-                    fieldMode = FIELD_MODE_RESET;
-                } else if (c == textDelimiter && (fieldMode & FIELD_MODE_NON_QUOTED) == 0) {
-                    // Quoted text starts
-                    fieldMode = FIELD_MODE_QUOTED | FIELD_MODE_QUOTE_ON;
-
-                    if (localPrevChar == textDelimiter) {
-                        // escaped quote
-                        copyLen++;
-                    } else {
-                        localCopyStart = localBufPos;
-                    }
-                } else if (c == CR) {
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                    }
-                    currentFields.add(localCurrentField.toStringAndReset());
-                    localPrevChar = c;
-                    localCopyStart = localBufPos;
-                    break;
-                } else if (c == LF) {
-                    if (localPrevChar != CR) {
-                        if (copyLen > 0) {
-                            localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        }
-                        currentFields.add(localCurrentField.toStringAndReset());
-                        localPrevChar = c;
-                        localCopyStart = localBufPos;
-                        break;
-                    }
-                    localCopyStart = localBufPos;
-                } else {
-                    copyLen++;
-                    if (fieldMode == FIELD_MODE_RESET) {
-                        fieldMode = FIELD_MODE_NON_QUOTED;
-                    }
-                }
-            }
-
-            localPrevChar = c;
-        }
-
-        // restore fields
-        bufPos = localBufPos;
-        prevChar = localPrevChar;
-        copyStart = localCopyStart;
-
-        return currentFields;
-    }
-
     @Override
     public void close() throws IOException {
-        reader.close();
+        rowReader.close();
     }
 
 }

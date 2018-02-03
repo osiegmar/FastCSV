@@ -60,6 +60,7 @@
     <module name="Header">
         <property name="headerFile" value="${samedir}/java.header"/>
         <property name="fileExtensions" value="java"/>
+        <property name="ignoreLines" value="2"/>
     </module>
 
     <module name="TreeWalker">

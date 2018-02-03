@@ -4,11 +4,13 @@
 
     <!-- sacrifice some coding styles for the sake of performance -->
 
-    <suppress files="CsvParser.java" checks="InnerAssignment"/>
     <suppress files="CsvParser.java" checks="CyclomaticComplexity"/>
-    <suppress files="CsvParser.java" checks="JavaNCSS"/>
-    <suppress files="CsvParser.java" checks="NestedIfDepth"/>
-    <suppress files="CsvParser.java" checks="ExecutableStatementCount"/>
+
+    <suppress files="RowReader.java" checks="CyclomaticComplexity"/>
+    <suppress files="RowReader.java" checks="InnerAssignment"/>
+    <suppress files="RowReader.java" checks="JavaNCSS"/>
+    <suppress files="RowReader.java" checks="NestedIfDepth"/>
+    <suppress files="RowReader.java" checks="ExecutableStatementCount"/>
 
     <suppress files="CsvAppender.java" checks="CyclomaticComplexity"/>
     <suppress files="CsvAppender.java" checks="NPathComplexity"/>

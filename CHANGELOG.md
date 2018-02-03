@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix reading of non RFC 4180 compliant CSV data [\#2](https://github.com/osiegmar/FastCSV/issues/2)
 
+### Changed
+- Refactored csv parser code
+
 ## [1.0.1] - 2016-03-20
 ### Changed
 - Replaced Maven with Gradle (and cleaned up / reformatted code for checkstyle update)
