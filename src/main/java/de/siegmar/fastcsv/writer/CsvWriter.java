@@ -185,7 +185,7 @@ public final class CsvWriter {
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {
         return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
-            StandardOpenOption.WRITE), charset);
+            StandardOpenOption.TRUNCATE_EXISTING), charset);
     }
 
 }
