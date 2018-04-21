@@ -196,7 +196,7 @@ public final class CsvWriter {
         StandardOpenOption[] options = {
                 StandardOpenOption.CREATE,
                 (isIgnore ?
-                        StandardOpenOption.WRITE :
+                        StandardOpenOption.TRUNCATE_EXISTING :
                         StandardOpenOption.APPEND
                 )
         };
