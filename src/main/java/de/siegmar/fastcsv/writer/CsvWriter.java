@@ -212,8 +212,11 @@ public final class CsvWriter {
             final Charset charset,
             final boolean oldIgnore
     ) throws IOException {
-        final StandardOpenOption[] options = {StandardOpenOption.CREATE, 
-                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND,
+        final StandardOpenOption[] options = {
+                StandardOpenOption.CREATE,
+                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING
+                        : StandardOpenOption.APPEND,
+                
         };
         return new OutputStreamWriter(
                 Files.newOutputStream(path, options),
