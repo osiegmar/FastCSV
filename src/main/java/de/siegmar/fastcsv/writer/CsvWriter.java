@@ -87,16 +87,16 @@ public final class CsvWriter {
      *
      * @param file where the data should be written to.
      * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if file, charset or data is null
      */
-    public void write(final File file, final Charset charset, final Collection<String[]> data)
-        throws IOException {
+    public void write(final File file, final Charset charset, final Collection<String[]> data, boolean oldIgnore)
+            throws IOException {
 
         write(
-            Objects.requireNonNull(file, "file must not be null").toPath(),
-            Objects.requireNonNull(charset, "charset must not be null"),
-            data
+                Objects.requireNonNull(file, "file must not be null").toPath(),
+                Objects.requireNonNull(charset, "charset must not be null"),
+                data, oldIgnore
         );
     }
 
@@ -105,15 +105,15 @@ public final class CsvWriter {
      *
      * @param path where the data should be written to.
      * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if path, charset or data is null
      */
-    public void write(final Path path, final Charset charset, final Collection<String[]> data)
-        throws IOException {
+    public void write(final Path path, final Charset charset, final Collection<String[]> data, boolean oldIgnore)
+            throws IOException {
 
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
-        try (final Writer writer = newWriter(path, charset)) {
+        try (final Writer writer = newWriter(path, charset, oldIgnore)) {
             write(writer, data);
         }
     }
@@ -122,8 +122,8 @@ public final class CsvWriter {
      * Writes all specified data to the writer.
      *
      * @param writer where the data should be written to.
-     * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
+     * @param data   lines/columns to be written.
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if writer or data is null
      */
     public void write(final Writer writer, final Collection<String[]> data) throws IOException {
@@ -138,38 +138,47 @@ public final class CsvWriter {
     /**
      * Constructs a {@link CsvAppender} for the specified File.
      *
-     * @param file the file to write data to.
+     * @param file    the file to write data to.
      * @param charset the character set to be used for writing data to the file.
      * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if file or charset is null
      */
     public CsvAppender append(final File file, final Charset charset) throws IOException {
+        return append(file, charset, true);
+    }
+    public CsvAppender append(final File file, final Charset charset, boolean isIgnore) throws IOException {
         return append(
-            Objects.requireNonNull(file, "file must not be null").toPath(),
-            Objects.requireNonNull(charset, "charset must not be null")
+                Objects.requireNonNull(file, "file must not be null").toPath(),
+                Objects.requireNonNull(charset, "charset must not be null"),
+                isIgnore
         );
     }
 
     /**
      * Constructs a {@link CsvAppender} for the specified Path.
      *
-     * @param path the Path (file) to write data to.
+     * @param path    the Path (file) to write data to.
      * @param charset the character set to be used for writing data to the file.
      * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if path or charset is null
      */
     public CsvAppender append(final Path path, final Charset charset) throws IOException {
+        return append(path, charset, true);
+    }
+
+    public CsvAppender append(final Path path, final Charset charset, boolean isIgnore) throws IOException {
         return append(newWriter(
-            Objects.requireNonNull(path, "path must not be null"),
-            Objects.requireNonNull(charset, "charset must not be null")
+                Objects.requireNonNull(path, "path must not be null"),
+                Objects.requireNonNull(charset, "charset must not be null"),
+                isIgnore
         ));
     }
 
     /**
      * Constructs a {@link CsvAppender} for the specified Writer.
-     *
+     * <p>
      * This library uses built-in buffering, so you do not need to pass in a buffered Writer
      * implementation such as {@link java.io.BufferedWriter}.
      * Performance may be even likely better if you do not.
@@ -180,12 +189,20 @@ public final class CsvWriter {
      */
     public CsvAppender append(final Writer writer) {
         return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
-            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
+                fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
     }
 
-    private static Writer newWriter(final Path path, final Charset charset) throws IOException {
-        return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING), charset);
+    private static Writer newWriter(final Path path, final Charset charset, boolean isIgnore) throws IOException {
+        StandardOpenOption[] options = {
+                StandardOpenOption.CREATE,
+                (isIgnore ?
+                        StandardOpenOption.WRITE :
+                        StandardOpenOption.APPEND
+                )
+        };
+        return new OutputStreamWriter(
+                Files.newOutputStream(path, options),
+                charset
+        );
     }
-
 }
