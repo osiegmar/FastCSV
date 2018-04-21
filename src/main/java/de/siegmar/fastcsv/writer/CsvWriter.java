@@ -207,9 +207,13 @@ public final class CsvWriter {
                 fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
     }
 
-    private static Writer newWriter(final Path path, final Charset charset, final boolean oldIgnore) throws IOException {
+    private static Writer newWriter(
+            final Path path,
+            final Charset charset,
+            final boolean oldIgnore
+    ) throws IOException {
         final StandardOpenOption[] options = {StandardOpenOption.CREATE, 
-                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND};
+                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND,};
         return new OutputStreamWriter(
                 Files.newOutputStream(path, options),
                 charset);
