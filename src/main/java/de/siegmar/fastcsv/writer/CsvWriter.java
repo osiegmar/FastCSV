@@ -94,7 +94,7 @@ public final class CsvWriter {
             final File file,
             final Charset charset,
             final Collection<String[]> data,
-            boolean oldIgnore
+            final boolean oldIgnore
     ) throws IOException {
         write(
                 Objects.requireNonNull(file, "file must not be null").toPath(),
@@ -115,7 +115,7 @@ public final class CsvWriter {
             final Path path,
             final Charset charset,
             final Collection<String[]> data,
-            boolean oldIgnore
+            final boolean oldIgnore
     ) throws IOException {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
@@ -153,10 +153,11 @@ public final class CsvWriter {
     public CsvAppender append(final File file, final Charset charset) throws IOException {
         return append(file, charset, true);
     }
+
     public CsvAppender append(
             final File file,
             final Charset charset,
-            boolean oldIgnore
+            final boolean oldIgnore
     ) throws IOException {
         return append(
                 Objects.requireNonNull(file, "file must not be null").toPath(),
@@ -181,7 +182,7 @@ public final class CsvWriter {
     public CsvAppender append(
             final Path path,
             final Charset charset,
-            boolean oldIgnore
+            final boolean oldIgnore
     ) throws IOException {
         return append(newWriter(
                 Objects.requireNonNull(path, "path must not be null"),
@@ -206,9 +207,9 @@ public final class CsvWriter {
                 fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
     }
 
-    private static Writer newWriter(final Path path, final Charset charset, boolean oldIgnore) throws IOException {
-        final StandardOpenOption[] options = {StandardOpenOption.CREATE,
-                (oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND)};
+    private static Writer newWriter(final Path path, final Charset charset, final boolean oldIgnore) throws IOException {
+        final StandardOpenOption[] options = {StandardOpenOption.CREATE, 
+                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND};
         return new OutputStreamWriter(
                 Files.newOutputStream(path, options),
                 charset);
