@@ -195,10 +195,7 @@ public final class CsvWriter {
     private static Writer newWriter(final Path path, final Charset charset, boolean isIgnore) throws IOException {
         StandardOpenOption[] options = {
                 StandardOpenOption.CREATE,
-                (isIgnore ?
-                        StandardOpenOption.TRUNCATE_EXISTING :
-                        StandardOpenOption.APPEND
-                )
+                (isIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND)
         };
         return new OutputStreamWriter(
                 Files.newOutputStream(path, options),
