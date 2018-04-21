@@ -213,7 +213,7 @@ public final class CsvWriter {
             final boolean oldIgnore
     ) throws IOException {
         final StandardOpenOption[] options = {StandardOpenOption.CREATE, 
-                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND,};
+                oldIgnore ? StandardOpenOption.TRUNCATE_EXISTING : StandardOpenOption.APPEND, };
         return new OutputStreamWriter(
                 Files.newOutputStream(path, options),
                 charset);
