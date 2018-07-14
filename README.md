@@ -45,6 +45,8 @@ Features
 
 - RFC 4180 compliant CSV reader and writer
 - Ultra fast
+- Small footprint
+- Zero runtime dependencies
 - Configurable field separator
 - Configurable text delimiter
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
