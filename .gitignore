@@ -5,6 +5,7 @@ gradle.properties
 
 # IntelliJ IDEA
 .idea/
+out/
 *.iml
 *.ipr
 *.iws
