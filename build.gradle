@@ -1,8 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'findbugs'
 apply plugin: 'checkstyle'
-apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'maven-publish'
 
 group = "de.siegmar"
 archivesBaseName = "fastcsv"
@@ -18,18 +18,14 @@ dependencies {
     testCompile 'org.testng:testng:6.8.21'
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
 task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
     classifier = 'sources'
-    from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
 }
 
 checkstyle {
@@ -44,58 +40,54 @@ tasks.withType(FindBugs) {
     }
 }
 
-if (hasProperty('signing.keyId')) {
-    signing {
-        sign configurations.archives
-    }
-}
-
 if (hasProperty('ossrhUsername')) {
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = jar.baseName
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                pom.project {
-                    name 'FastCSV'
-                    packaging 'jar'
-                    description 'Ultra fast and simple RFC 4180 compliant CSV library.'
-                    url 'https://github.com/osiegmar/FastCSV'
-
-                    scm {
-                        connection 'scm:git:https://github.com/osiegmar/FastCSV.git'
-                        developerConnection 'scm:git:https://github.com/osiegmar/FastCSV.git'
-                        url 'https://github.com/osiegmar/FastCSV'
-                    }
-
+                pom {
+                    name = 'FastCSV'
+                    description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
+                    url = 'https://github.com/osiegmar/FastCSV'
                     licenses {
                         license {
-                            name 'Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
-
+                    scm {
+                        url = 'https://github.com/osiegmar/FastCSV'
+                        connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
+                    }
                     developers {
                         developer {
-                            id 'osiegmar'
-                            name 'Oliver Siegmar'
-                            email 'oliver@siegmar.de'
+                            id = 'osiegmar'
+                            name = 'Oliver Siegmar'
+                            email = 'oliver@siegmar.de'
                         }
                     }
                 }
             }
         }
+        repositories {
+            maven {
+                credentials {
+                    username "$ossrhUsername"
+                    password "$ossrhPassword"
+                }
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
     }
-}
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+    signing {
+        sign publishing.publications.mavenJava
+    }
 }
