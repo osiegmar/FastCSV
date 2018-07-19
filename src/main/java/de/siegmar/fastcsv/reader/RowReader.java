@@ -31,6 +31,7 @@ final class RowReader implements Closeable {
     private static final int FIELD_MODE_QUOTED = 1;
     private static final int FIELD_MODE_NON_QUOTED = 2;
     private static final int FIELD_MODE_QUOTE_ON = 4;
+    private static final int FIELD_MODE_QUOTED_EMPTY = 8;
 
     private final Reader reader;
     private final char fieldSeparator;
@@ -79,7 +80,10 @@ final class RowReader implements Closeable {
                     // end of data
                     finished = true;
 
-                    if (localPrevChar == fieldSeparator || localCurrentField.hasContent()) {
+                    if (localPrevChar == fieldSeparator
+                            || (fieldMode & FIELD_MODE_QUOTED_EMPTY) == FIELD_MODE_QUOTED_EMPTY
+                            || localCurrentField.hasContent()
+                    ) {
                         localLine.addField(localCurrentField.toStringAndReset());
                     }
 
@@ -98,6 +102,8 @@ final class RowReader implements Closeable {
                     if (copyLen > 0) {
                         localCurrentField.append(localBuf, localCopyStart, copyLen);
                         copyLen = 0;
+                    } else {
+                        fieldMode |= FIELD_MODE_QUOTED_EMPTY;
                     }
                     localCopyStart = localBufPos;
                 } else {
