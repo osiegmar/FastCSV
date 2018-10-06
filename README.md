@@ -19,7 +19,7 @@ Benchmark from the
 Latest release
 --------------
 
-The most recent release is 1.0.2, released February 3, 2018.
+The most recent release is 1.0.3, released October 6, 2018.
 
 To add a dependency using Maven, use the following:
 
@@ -27,7 +27,7 @@ To add a dependency using Maven, use the following:
 <dependency>
     <groupId>de.siegmar</groupId>
     <artifactId>fastcsv</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ To add a dependency using Gradle:
 
 ```gradle
 dependencies {
-    compile 'de.siegmar:fastcsv:1.0.2'
+    compile 'de.siegmar:fastcsv:1.0.3'
 }
 ```
 

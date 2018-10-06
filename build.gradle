@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 
 group = "de.siegmar"
 archivesBaseName = "fastcsv"
-version = "1.0.2"
+version = "1.0.3"
 
 sourceCompatibility = 1.7
 
