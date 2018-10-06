@@ -177,6 +177,10 @@ public class CsvReaderTest {
         assertEquals(readCsvRow("foo,\"bar \"\"is\"\" ok\"").getField(1), "bar \"is\" ok");
     }
 
+    public void handlesEmptyQuotedFieldsAtEndOfRow() throws IOException {
+        assertEquals(readCsvRow("foo,\"\"").getField(1), "");
+    }
+
     public void dataAfterNewlineAfterEnclosure() throws IOException {
         CsvContainer csv = read("\"foo\"\nbar");
         assertEquals(csv.getRowCount(), 2);
