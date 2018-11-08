@@ -87,6 +87,60 @@ public class CsvWriterTest {
         assertEquals(sw.toString(), "foo,bar");
     }
 
+    public void distinguishNullFromEmpty1() throws IOException {
+        try {
+            csvWriter.setDistinguishNullAndEmpty(true);
+
+            Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] { "test", null, ""});
+
+            StringWriter stringWriter = new StringWriter();
+            csvWriter.write(stringWriter, collection);
+
+            String string = stringWriter.toString().trim();
+            assertEquals(string, "\"test\",,\"\"");
+
+        } finally {
+            csvWriter.setDistinguishNullAndEmpty(false);
+        }
+    }
+
+    public void distinguishNullFromEmpty2() throws IOException {
+        try {
+            csvWriter.setDistinguishNullAndEmpty(true);
+
+            Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] { "", "test", null});
+
+            StringWriter stringWriter = new StringWriter();
+            csvWriter.write(stringWriter, collection);
+
+            String string = stringWriter.toString().trim();
+            assertEquals(string, "\"\",\"test\",");
+
+        } finally {
+            csvWriter.setDistinguishNullAndEmpty(false);
+        }
+    }
+
+    public void distinguishNullFromEmpty3() throws IOException {
+        try {
+            csvWriter.setDistinguishNullAndEmpty(true);
+
+            Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] { null, "", "test"});
+
+            StringWriter stringWriter = new StringWriter();
+            csvWriter.write(stringWriter, collection);
+
+            String string = stringWriter.toString().trim();
+            assertEquals(string, ",\"\",\"test\"");
+
+        } finally {
+            csvWriter.setDistinguishNullAndEmpty(false);
+        }
+    }
+
     private String write(final String... cols) throws IOException {
         final Collection<String[]> rows = new ArrayList<>();
         rows.add(cols);
@@ -100,6 +154,5 @@ public class CsvWriterTest {
 
         return stringWriter.toString();
     }
-
 
 }

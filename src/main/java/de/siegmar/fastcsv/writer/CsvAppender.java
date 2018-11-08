@@ -36,16 +36,24 @@ public final class CsvAppender implements Closeable, Flushable {
     private final char textDelimiter;
     private final boolean alwaysDelimitText;
     private final char[] lineDelimiter;
+    private final boolean distinguishNullAndEmpty;
 
     private boolean newline = true;
 
     CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
                 final boolean alwaysDelimitText, final char[] lineDelimiter) {
+        this(writer, fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter, false);
+    }
+
+    CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
+                final boolean alwaysDelimitText, final char[] lineDelimiter,
+                final boolean distinguishNullAndEmpty) {
         this.writer = new FastBufferedWriter(writer);
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
         this.alwaysDelimitText = alwaysDelimitText;
         this.lineDelimiter = lineDelimiter;
+        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
     }
 
     /**
@@ -63,7 +71,7 @@ public final class CsvAppender implements Closeable, Flushable {
         }
 
         if (value == null) {
-            if (alwaysDelimitText) {
+            if (alwaysDelimitText && !distinguishNullAndEmpty) {
                 writer.write(textDelimiter);
                 writer.write(textDelimiter);
             }

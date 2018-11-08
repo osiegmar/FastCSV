@@ -282,10 +282,10 @@ public class CsvReaderTest {
                 "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}");
     }
 
-    // tests that disttingush null from empty ("")
+    // tests that distinguish null from empty ("")
 
     @Test
-    public void distingushNullFromEmpty1() throws IOException {
+    public void distinguishNullFromEmpty1() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -300,7 +300,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty2() throws IOException {
+    public void distinguishNullFromEmpty2() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -315,7 +315,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty3() throws IOException {
+    public void distinguishNullFromEmpty3() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -330,7 +330,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty4() throws IOException {
+    public void distinguishNullFromEmpty4() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -345,7 +345,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty5() throws IOException {
+    public void distinguishNullFromEmpty5() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -360,7 +360,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty6() throws IOException {
+    public void distinguishNullFromEmpty6() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 
@@ -375,7 +375,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void distingushNullFromEmpty7() throws IOException {
+    public void distinguishNullFromEmpty7() throws IOException {
         try {
             csvReader.setDistinguishNullAndEmpty(true);
 

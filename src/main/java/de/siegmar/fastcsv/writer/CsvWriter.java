@@ -55,6 +55,11 @@ public final class CsvWriter {
     private char[] lineDelimiter = System.lineSeparator().toCharArray();
 
     /**
+     * Whether to distinguish null and empty column values.
+     */
+    private boolean distinguishNullAndEmpty;
+
+    /**
      * Sets the field separator character (default: ',' - comma).
      */
     public void setFieldSeparator(final char fieldSeparator) {
@@ -73,6 +78,7 @@ public final class CsvWriter {
      */
     public void setAlwaysDelimitText(final boolean alwaysDelimitText) {
         this.alwaysDelimitText = alwaysDelimitText;
+        this.distinguishNullAndEmpty = false;
     }
 
     /**
@@ -82,6 +88,15 @@ public final class CsvWriter {
         this.lineDelimiter = lineDelimiter.clone();
     }
 
+    /**
+     * Specifies whether to distinguish null and empty column values.
+     *
+     * @param distinguishNullAndEmpty
+     */
+    public void setDistinguishNullAndEmpty(boolean distinguishNullAndEmpty) {
+        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+        this.alwaysDelimitText = true;
+    }
     /**
      * Writes all specified data to the file.
      *
@@ -180,7 +195,7 @@ public final class CsvWriter {
      */
     public CsvAppender append(final Writer writer) {
         return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
-            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
+            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter, distinguishNullAndEmpty);
     }
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {
