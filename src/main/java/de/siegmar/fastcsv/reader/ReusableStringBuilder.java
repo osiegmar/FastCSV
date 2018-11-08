@@ -24,6 +24,7 @@ import java.util.Arrays;
  * This class is intended for internal use only.
  *
  * @author Oliver Siegmar
+ * @author Doug Hoard
  */
 
 final class ReusableStringBuilder {

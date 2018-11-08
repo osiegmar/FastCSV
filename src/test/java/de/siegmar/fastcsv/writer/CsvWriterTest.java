@@ -26,6 +26,10 @@ import java.util.Collection;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * @author Oliver Siegmar
+ * @author Doug Hoard
+ */
 @Test
 public class CsvWriterTest {
 
@@ -91,13 +95,13 @@ public class CsvWriterTest {
         try {
             csvWriter.setDistinguishNullAndEmpty(true);
 
-            Collection<String[]> collection = new ArrayList<>();
-            collection.add(new String[] { "test", null, ""});
+            final Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] {"test", null, ""});
 
-            StringWriter stringWriter = new StringWriter();
+            final StringWriter stringWriter = new StringWriter();
             csvWriter.write(stringWriter, collection);
 
-            String string = stringWriter.toString().trim();
+            final String string = stringWriter.toString().trim();
             assertEquals(string, "\"test\",,\"\"");
 
         } finally {
@@ -109,13 +113,13 @@ public class CsvWriterTest {
         try {
             csvWriter.setDistinguishNullAndEmpty(true);
 
-            Collection<String[]> collection = new ArrayList<>();
-            collection.add(new String[] { "", "test", null});
+            final Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] {"", "test", null});
 
-            StringWriter stringWriter = new StringWriter();
+            final StringWriter stringWriter = new StringWriter();
             csvWriter.write(stringWriter, collection);
 
-            String string = stringWriter.toString().trim();
+            final String string = stringWriter.toString().trim();
             assertEquals(string, "\"\",\"test\",");
 
         } finally {
@@ -127,13 +131,13 @@ public class CsvWriterTest {
         try {
             csvWriter.setDistinguishNullAndEmpty(true);
 
-            Collection<String[]> collection = new ArrayList<>();
-            collection.add(new String[] { null, "", "test"});
+            final Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] {null, "", "test"});
 
-            StringWriter stringWriter = new StringWriter();
+            final StringWriter stringWriter = new StringWriter();
             csvWriter.write(stringWriter, collection);
 
-            String string = stringWriter.toString().trim();
+            final String string = stringWriter.toString().trim();
             assertEquals(string, ",\"\",\"test\"");
 
         } finally {

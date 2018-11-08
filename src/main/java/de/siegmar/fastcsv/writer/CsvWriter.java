@@ -31,6 +31,7 @@ import java.util.Objects;
  * This is the main class for writing CSV data.
  *
  * @author Oliver Siegmar
+ * @author Doug Hoard
  */
 public final class CsvWriter {
 
@@ -93,10 +94,11 @@ public final class CsvWriter {
      *
      * @param distinguishNullAndEmpty
      */
-    public void setDistinguishNullAndEmpty(boolean distinguishNullAndEmpty) {
+    public void setDistinguishNullAndEmpty(final boolean distinguishNullAndEmpty) {
         this.distinguishNullAndEmpty = distinguishNullAndEmpty;
         this.alwaysDelimitText = true;
     }
+
     /**
      * Writes all specified data to the file.
      *
@@ -195,7 +197,8 @@ public final class CsvWriter {
      */
     public CsvAppender append(final Writer writer) {
         return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
-            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter, distinguishNullAndEmpty);
+            fieldSeparator, textDelimiter, alwaysDelimitText,
+                lineDelimiter, distinguishNullAndEmpty);
     }
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {

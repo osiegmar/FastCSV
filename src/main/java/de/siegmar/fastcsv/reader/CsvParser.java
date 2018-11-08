@@ -29,6 +29,7 @@ import java.util.Map;
  * This class is responsible for parsing CSV data from the passed-in Reader.
  *
  * @author Oliver Siegmar
+ * @author Doug Hoard
  */
 public final class CsvParser implements Closeable {
 

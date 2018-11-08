@@ -29,6 +29,10 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * @author Oliver Siegmar
+ * @author Doug Hoard
+ */
 @Test
 public class CsvReaderTest {
 

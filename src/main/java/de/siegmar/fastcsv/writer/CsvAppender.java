@@ -25,6 +25,7 @@ import java.io.Writer;
  * This is the main class for writing CSV data.
  *
  * @author Oliver Siegmar
+ * @author Doug Hoard
  */
 public final class CsvAppender implements Closeable, Flushable {
 

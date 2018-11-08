@@ -32,6 +32,7 @@ import java.util.Objects;
  * This is the main class for reading CSV data.
  *
  * @author Oliver Siegmar
+ * @author Doug Hoard
  */
 public final class CsvReader {
 
