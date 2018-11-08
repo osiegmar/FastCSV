@@ -45,8 +45,17 @@ public final class CsvParser implements Closeable {
     CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter,
               final boolean containsHeader, final boolean skipEmptyRows,
               final boolean errorOnDifferentFieldCount) {
+        this(reader, fieldSeparator, textDelimiter, containsHeader,
+                skipEmptyRows, errorOnDifferentFieldCount, false);
+    }
 
-        rowReader = new RowReader(reader, fieldSeparator, textDelimiter);
+    CsvParser(final Reader reader, final char fieldSeparator, final char textDelimiter,
+        final boolean containsHeader, final boolean skipEmptyRows,
+        final boolean errorOnDifferentFieldCount, final boolean distinguishNullAndEmpty) {
+
+        rowReader = new RowReader(reader, fieldSeparator,
+                textDelimiter, distinguishNullAndEmpty);
+
         this.containsHeader = containsHeader;
         this.skipEmptyRows = skipEmptyRows;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;

@@ -61,6 +61,11 @@ public final class CsvReader {
     private boolean errorOnDifferentFieldCount;
 
     /**
+     * Whether to distinguish null and empty column values.
+     */
+    private boolean distinguishNullAndEmpty;
+
+    /**
      * Sets the field separator character (default: ',' - comma).
      */
     public void setFieldSeparator(final char fieldSeparator) {
@@ -94,6 +99,15 @@ public final class CsvReader {
      */
     public void setErrorOnDifferentFieldCount(final boolean errorOnDifferentFieldCount) {
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
+    }
+
+    /**
+     * Specifies whether to distinguish null and empty column values.
+     *
+     * @param distinguishNullAndEmpty
+     */
+    public void setDistinguishNullAndEmpty(final boolean distinguishNullAndEmpty) {
+        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
     }
 
     /**
@@ -200,7 +214,7 @@ public final class CsvReader {
     public CsvParser parse(final Reader reader) throws IOException {
         return new CsvParser(Objects.requireNonNull(reader, "reader must not be null"),
             fieldSeparator, textDelimiter, containsHeader, skipEmptyRows,
-            errorOnDifferentFieldCount);
+            errorOnDifferentFieldCount, distinguishNullAndEmpty);
     }
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {

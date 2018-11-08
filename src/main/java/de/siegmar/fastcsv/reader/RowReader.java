@@ -26,6 +26,7 @@ final class RowReader implements Closeable {
     private static final char LF = '\n';
     private static final char CR = '\r';
     private static final int BUFFER_SIZE = 8192;
+    private static final int INITIAL_CAPACITY = 512;
 
     private static final int FIELD_MODE_RESET = 0;
     private static final int FIELD_MODE_QUOTED = 1;
@@ -36,9 +37,10 @@ final class RowReader implements Closeable {
     private final Reader reader;
     private final char fieldSeparator;
     private final char textDelimiter;
+    private final boolean distinguishNullAndEmpty;
     private final char[] buf = new char[BUFFER_SIZE];
     private final Line line = new Line(32);
-    private final ReusableStringBuilder currentField = new ReusableStringBuilder(512);
+    private final ReusableStringBuilder currentField;
     private int bufPos;
     private int bufLen;
     private int prevChar = -1;
@@ -46,9 +48,16 @@ final class RowReader implements Closeable {
     private boolean finished;
 
     RowReader(final Reader reader, final char fieldSeparator, final char textDelimiter) {
+        this(reader, fieldSeparator, textDelimiter, false);
+    }
+
+    RowReader(final Reader reader, final char fieldSeparator,
+              final char textDelimiter, final boolean distinguishNullAndEmpty) {
         this.reader = reader;
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
+        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+        this.currentField = new ReusableStringBuilder(INITIAL_CAPACITY, distinguishNullAndEmpty);
     }
 
     /*
@@ -111,6 +120,10 @@ final class RowReader implements Closeable {
                         lines++;
                     }
                     copyLen++;
+                }
+
+                if (distinguishNullAndEmpty) {
+                    localCurrentField.markHasContent();
                 }
             } else {
                 if (c == fieldSeparator) {

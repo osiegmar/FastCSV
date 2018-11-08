@@ -28,10 +28,10 @@ import java.util.Arrays;
 
 final class ReusableStringBuilder {
 
-    private static final String EMPTY = "";
-
     private char[] buf;
+    private boolean distinguishNullAndEmpty;
     private int pos;
+    private boolean hasContent;
 
     /**
      * Initializes the buffer with the specified capacity.
@@ -39,7 +39,25 @@ final class ReusableStringBuilder {
      * @param initialCapacity the initial buffer capacity.
      */
     ReusableStringBuilder(final int initialCapacity) {
-        buf = new char[initialCapacity];
+        this(initialCapacity, false);
+    }
+
+    /**
+     * Initializes the buffer with the specified capacity.
+     *
+     * @param initialCapacity the initial buffer capacity.
+     * @param distinguishNullAndEmpty whether to distinguish null and empty column values.
+     */
+    ReusableStringBuilder(final int initialCapacity, final boolean distinguishNullAndEmpty) {
+        this.buf = new char[initialCapacity];
+        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+    }
+
+    /**
+     * Marks the object has having data, even if nothing has been appended.
+     */
+    public void markHasContent() {
+        hasContent = true;
     }
 
     /**
@@ -70,7 +88,7 @@ final class ReusableStringBuilder {
      * @return {@code true} if the buffer contains content
      */
     public boolean hasContent() {
-        return pos > 0;
+        return (pos > 0) || hasContent;
     }
 
     /**
@@ -79,12 +97,22 @@ final class ReusableStringBuilder {
      * @return the string representation of the buffer
      */
     public String toStringAndReset() {
-        if (pos > 0) {
-            final String s = new String(buf, 0, pos);
-            pos = 0;
-            return s;
-        }
-        return EMPTY;
-    }
+        String result = null;
 
+        if (pos > 0) {
+            result = new String(buf, 0, pos);
+        } else if (hasContent()) {
+            result = "";
+        } else {
+            if (distinguishNullAndEmpty) {
+                result = null;
+            } else {
+                result = "";
+            }
+        }
+
+        pos = 0;
+        hasContent = false;
+        return result;
+    }
 }
