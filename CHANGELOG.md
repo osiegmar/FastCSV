@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.0.4]
 ### Changed
-- Added the ability to distinguish between null and empty columns
+- Added the ability to specify values to use for null / empty column values
 
 ## [1.0.3] - 2018-10-06
 ### Fixed
