@@ -30,7 +30,8 @@ import java.util.Arrays;
 final class ReusableStringBuilder {
 
     private char[] buf;
-    private boolean distinguishNullAndEmpty;
+    private String nullValue;
+    private String emptyValue;
     private int pos;
     private boolean hasContent;
 
@@ -40,18 +41,21 @@ final class ReusableStringBuilder {
      * @param initialCapacity the initial buffer capacity.
      */
     ReusableStringBuilder(final int initialCapacity) {
-        this(initialCapacity, false);
+        this(initialCapacity, "", "");
     }
 
     /**
      * Initializes the buffer with the specified capacity.
      *
      * @param initialCapacity the initial buffer capacity.
-     * @param distinguishNullAndEmpty whether to distinguish null and empty column values.
+     * @param nullValue the value to use for null column values
+     * @param emptyValue the value to use for empty column values
      */
-    ReusableStringBuilder(final int initialCapacity, final boolean distinguishNullAndEmpty) {
+    ReusableStringBuilder(final int initialCapacity, final String nullValue,
+                          final String emptyValue) {
         this.buf = new char[initialCapacity];
-        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+        this.nullValue = nullValue;
+        this.emptyValue = emptyValue;
     }
 
     /**
@@ -98,22 +102,19 @@ final class ReusableStringBuilder {
      * @return the string representation of the buffer
      */
     public String toStringAndReset() {
-        String result = null;
+        String result = nullValue;
 
         if (pos > 0) {
             result = new String(buf, 0, pos);
         } else if (hasContent()) {
-            result = "";
+            result = emptyValue;
         } else {
-            if (distinguishNullAndEmpty) {
-                result = null;
-            } else {
-                result = "";
-            }
+            result = nullValue;
         }
 
         pos = 0;
         hasContent = false;
+
         return result;
     }
 }

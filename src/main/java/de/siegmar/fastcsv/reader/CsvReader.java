@@ -52,7 +52,7 @@ public final class CsvReader {
     private boolean containsHeader;
 
     /**
-     * Skip empty rows? (default: true)
+     * Skip empty rows? (default: true).
      */
     private boolean skipEmptyRows = true;
 
@@ -62,9 +62,14 @@ public final class CsvReader {
     private boolean errorOnDifferentFieldCount;
 
     /**
-     * Whether to distinguish null and empty column values.
+     * The value to use for a null column value.
      */
-    private boolean distinguishNullAndEmpty;
+    private String nullValue = "";
+
+    /**
+     * The value to use for an empty column value.
+     */
+    private String emptyValue = "";
 
     /**
      * Sets the field separator character (default: ',' - comma).
@@ -103,12 +108,21 @@ public final class CsvReader {
     }
 
     /**
-     * Specifies whether to distinguish null and empty column values.
+     * Specifies the value to use for a null column value.
      *
-     * @param distinguishNullAndEmpty
+     * @param nullValue
      */
-    public void setDistinguishNullAndEmpty(final boolean distinguishNullAndEmpty) {
-        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+    public void setNullValue(final String nullValue) {
+        this.nullValue = nullValue;
+    }
+
+    /**
+     * Specifies the value to use for an empty column value.
+     *
+     * @param emptyValue
+     */
+    public void setEmptyValue(final String emptyValue) {
+        this.emptyValue = emptyValue;
     }
 
     /**
@@ -215,7 +229,7 @@ public final class CsvReader {
     public CsvParser parse(final Reader reader) throws IOException {
         return new CsvParser(Objects.requireNonNull(reader, "reader must not be null"),
             fieldSeparator, textDelimiter, containsHeader, skipEmptyRows,
-            errorOnDifferentFieldCount, distinguishNullAndEmpty);
+            errorOnDifferentFieldCount, nullValue, emptyValue);
     }
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {

@@ -261,7 +261,9 @@
         </module>
         <module name="MethodLength"/>
         <module name="AnonInnerLength"/>
-        <module name="ParameterNumber"/>
+        <module name="ParameterNumber">
+            <property name="max" value="8"/>
+        </module>
         <module name="OuterTypeNumber"/>
         <module name="MethodCount"/>
 

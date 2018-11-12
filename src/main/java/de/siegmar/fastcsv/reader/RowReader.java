@@ -37,7 +37,8 @@ final class RowReader implements Closeable {
     private final Reader reader;
     private final char fieldSeparator;
     private final char textDelimiter;
-    private final boolean distinguishNullAndEmpty;
+    private final String nullValue;
+    private final String emptyValue;
     private final char[] buf = new char[BUFFER_SIZE];
     private final Line line = new Line(32);
     private final ReusableStringBuilder currentField;
@@ -48,16 +49,17 @@ final class RowReader implements Closeable {
     private boolean finished;
 
     RowReader(final Reader reader, final char fieldSeparator, final char textDelimiter) {
-        this(reader, fieldSeparator, textDelimiter, false);
+        this(reader, fieldSeparator, textDelimiter, "", "");
     }
 
     RowReader(final Reader reader, final char fieldSeparator,
-              final char textDelimiter, final boolean distinguishNullAndEmpty) {
+              final char textDelimiter, final String nullValue, final String emptyValue) {
         this.reader = reader;
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
-        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
-        this.currentField = new ReusableStringBuilder(INITIAL_CAPACITY, distinguishNullAndEmpty);
+        this.nullValue = nullValue;
+        this.emptyValue = emptyValue;
+        this.currentField = new ReusableStringBuilder(INITIAL_CAPACITY, nullValue, emptyValue);
     }
 
     /*
@@ -122,9 +124,7 @@ final class RowReader implements Closeable {
                     copyLen++;
                 }
 
-                if (distinguishNullAndEmpty) {
-                    localCurrentField.markHasContent();
-                }
+                localCurrentField.markHasContent();
             } else {
                 if (c == fieldSeparator) {
                     if (copyLen > 0) {
@@ -148,6 +148,7 @@ final class RowReader implements Closeable {
                     if (copyLen > 0) {
                         localCurrentField.append(localBuf, localCopyStart, copyLen);
                     }
+                    localCurrentField.markHasContent();
                     localLine.addField(localCurrentField.toStringAndReset());
                     localPrevChar = c;
                     localCopyStart = localBufPos;
@@ -156,6 +157,8 @@ final class RowReader implements Closeable {
                     if (localPrevChar != CR) {
                         if (copyLen > 0) {
                             localCurrentField.append(localBuf, localCopyStart, copyLen);
+                        } else {
+                            localCurrentField.markHasContent();
                         }
                         localLine.addField(localCurrentField.toStringAndReset());
                         localPrevChar = c;

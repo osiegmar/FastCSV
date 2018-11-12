@@ -286,12 +286,13 @@ public class CsvReaderTest {
                 "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}");
     }
 
-    // tests that distinguish null from empty ("")
+    // tests that use nullValue and emptyValue
 
     @Test
-    public void distinguishNullFromEmpty1() throws IOException {
+    public void nullValueAndEmptyValue1() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse("\"test\",,\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -299,14 +300,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty2() throws IOException {
+    public void nullValueAndEmptyValue2() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse("test,,\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -314,14 +317,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty3() throws IOException {
+    public void nullValueAndEmptyValue3() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse("\"test\",,").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -329,14 +334,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), null);
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty4() throws IOException {
+    public void nullValueAndEmptyValue4() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse("test,,\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -344,14 +351,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty5() throws IOException {
+    public void nullValueAndEmptyValue5() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse(",,\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -359,14 +368,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty6() throws IOException {
+    public void nullValueAndEmptyValue6() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse("\"\",,\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -374,14 +385,16 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), null);
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
     @Test
-    public void distinguishNullFromEmpty7() throws IOException {
+    public void nullValueAndEmptyValue7() throws IOException {
         try {
-            csvReader.setDistinguishNullAndEmpty(true);
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("");
 
             final CsvRow row = parse(",\"test\",\"\"").nextRow();
             assertEquals(row.getFieldCount(), 3);
@@ -389,7 +402,8 @@ public class CsvReaderTest {
             assertEquals(row.getField(1), "test");
             assertEquals(row.getField(2), "");
         } finally {
-            csvReader.setDistinguishNullAndEmpty(false);
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
         }
     }
 
