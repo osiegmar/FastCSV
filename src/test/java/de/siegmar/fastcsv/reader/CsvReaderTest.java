@@ -407,6 +407,57 @@ public class CsvReaderTest {
         }
     }
 
+    @Test
+    public void alternateNullValueAndEmptyValue1() throws IOException {
+        try {
+            csvReader.setNullValue("_NULL_");
+            csvReader.setEmptyValue("_EMPTY_");
+
+            final CsvRow row = parse(",\"test\",\"\"").nextRow();
+            assertEquals(row.getFieldCount(), 3);
+            assertEquals(row.getField(0), "_NULL_");
+            assertEquals(row.getField(1), "test");
+            assertEquals(row.getField(2), "_EMPTY_");
+        } finally {
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
+        }
+    }
+
+    @Test
+    public void alternateNullValueAndEmptyValue2() throws IOException {
+        try {
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("_EMPTY_");
+
+            final CsvRow row = parse(",\"test\",\"\"").nextRow();
+            assertEquals(row.getFieldCount(), 3);
+            assertEquals(row.getField(0), null);
+            assertEquals(row.getField(1), "test");
+            assertEquals(row.getField(2), "_EMPTY_");
+        } finally {
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
+        }
+    }
+
+    @Test
+    public void alternateNullValueAndEmptyValue3() throws IOException {
+        try {
+            csvReader.setNullValue(null);
+            csvReader.setEmptyValue("\"\"");
+
+            final CsvRow row = parse(",\"test\",\"\"").nextRow();
+            assertEquals(row.getFieldCount(), 3);
+            assertEquals(row.getField(0), null);
+            assertEquals(row.getField(1), "test");
+            assertEquals(row.getField(2), "\"\"");
+        } finally {
+            csvReader.setNullValue("");
+            csvReader.setEmptyValue("");
+        }
+    }
+
     // test helpers
 
     private CsvRow readCsvRow(final String data) throws IOException {
