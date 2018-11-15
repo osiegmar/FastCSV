@@ -37,24 +37,26 @@ public final class CsvAppender implements Closeable, Flushable {
     private final char textDelimiter;
     private final boolean alwaysDelimitText;
     private final char[] lineDelimiter;
-    private final boolean distinguishNullAndEmpty;
+    private final String nullValue;
+    private final String emptyValue;
 
     private boolean newline = true;
 
     CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
                 final boolean alwaysDelimitText, final char[] lineDelimiter) {
-        this(writer, fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter, false);
+        this(writer, fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter, "", "");
     }
 
     CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
                 final boolean alwaysDelimitText, final char[] lineDelimiter,
-                final boolean distinguishNullAndEmpty) {
+                final String nullValue, final String emptyValue) {
         this.writer = new FastBufferedWriter(writer);
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
         this.alwaysDelimitText = alwaysDelimitText;
         this.lineDelimiter = lineDelimiter;
-        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
+        this.nullValue = nullValue;
+        this.emptyValue = emptyValue;
     }
 
     /**
@@ -71,11 +73,40 @@ public final class CsvAppender implements Closeable, Flushable {
             newline = false;
         }
 
+        //System.out.println("v = [" + value + "}");
+
         if (value == null) {
-            if (alwaysDelimitText && !distinguishNullAndEmpty) {
-                writer.write(textDelimiter);
-                writer.write(textDelimiter);
+            if (null != nullValue) {
+                if (alwaysDelimitText) {
+                    writer.write(textDelimiter);
+                    writer.write(textDelimiter);
+                } else if (null != nullValue) {
+                    writer.write(nullValue);
+                }
+            } else {
+                if (alwaysDelimitText) {
+                    writer.write(textDelimiter);
+                    writer.write(textDelimiter);
+                }
             }
+
+            return;
+        }
+
+        if ("".equals(value)) {
+            if (null != emptyValue) {
+                if (alwaysDelimitText) {
+                    writer.write(textDelimiter);
+                    writer.write(textDelimiter);
+                } else if ("".equals(emptyValue)) {
+                    writer.write("");
+                } else {
+                    writer.write(emptyValue);
+                }
+            } else {
+                writer.write("\"\"");
+            }
+
             return;
         }
 

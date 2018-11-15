@@ -63,7 +63,7 @@ public class CsvWriterTest {
 
     public void delimitText() throws IOException {
         assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null),
-            "a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
+                "a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
     }
 
     public void alwaysDelimitText() throws IOException {
@@ -91,9 +91,10 @@ public class CsvWriterTest {
         assertEquals(sw.toString(), "foo,bar");
     }
 
-    public void distinguishNullFromEmpty1() throws IOException {
+    public void alternateNullValueAndEmptyValue1() throws IOException {
         try {
-            csvWriter.setDistinguishNullAndEmpty(true);
+            csvWriter.setNullValue(null);
+            csvWriter.setEmptyValue("\"\"");
 
             final Collection<String[]> collection = new ArrayList<>();
             collection.add(new String[] {"test", null, ""});
@@ -102,16 +103,17 @@ public class CsvWriterTest {
             csvWriter.write(stringWriter, collection);
 
             final String string = stringWriter.toString().trim();
-            assertEquals(string, "\"test\",,\"\"");
-
+            assertEquals(string, "test,,\"\"");
         } finally {
-            csvWriter.setDistinguishNullAndEmpty(false);
+            csvWriter.setNullValue("");
+            csvWriter.setEmptyValue("");
         }
     }
 
-    public void distinguishNullFromEmpty2() throws IOException {
+    public void alternateNullValueAndEmptyValue2() throws IOException {
         try {
-            csvWriter.setDistinguishNullAndEmpty(true);
+            csvWriter.setNullValue(null);
+            csvWriter.setEmptyValue("\"\"");
 
             final Collection<String[]> collection = new ArrayList<>();
             collection.add(new String[] {"", "test", null});
@@ -120,16 +122,17 @@ public class CsvWriterTest {
             csvWriter.write(stringWriter, collection);
 
             final String string = stringWriter.toString().trim();
-            assertEquals(string, "\"\",\"test\",");
-
+            assertEquals(string, "\"\",test,");
         } finally {
-            csvWriter.setDistinguishNullAndEmpty(false);
+            csvWriter.setNullValue("");
+            csvWriter.setEmptyValue("");
         }
     }
 
-    public void distinguishNullFromEmpty3() throws IOException {
+    public void alternateNullValueAndEmptyValue3() throws IOException {
         try {
-            csvWriter.setDistinguishNullAndEmpty(true);
+            csvWriter.setNullValue(null);
+            csvWriter.setEmptyValue("\"\"");
 
             final Collection<String[]> collection = new ArrayList<>();
             collection.add(new String[] {null, "", "test"});
@@ -138,10 +141,49 @@ public class CsvWriterTest {
             csvWriter.write(stringWriter, collection);
 
             final String string = stringWriter.toString().trim();
-            assertEquals(string, ",\"\",\"test\"");
-
+            assertEquals(string, ",\"\",test");
         } finally {
-            csvWriter.setDistinguishNullAndEmpty(false);
+            csvWriter.setNullValue("");
+            csvWriter.setEmptyValue("");
+        }
+    }
+
+    public void alternateNullValueAndEmptyValue4() throws IOException {
+        try {
+            csvWriter.setNullValue("_NULL_");
+            csvWriter.setEmptyValue("\"\"");
+
+            final Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] {null, "", "test"});
+
+            final StringWriter stringWriter = new StringWriter();
+            csvWriter.write(stringWriter, collection);
+
+            final String string = stringWriter.toString().trim();
+            assertEquals(string, "_NULL_,\"\",test");
+        } finally {
+            csvWriter.setNullValue("");
+            csvWriter.setEmptyValue("");
+        }
+    }
+
+    public void alternateNullValueAndEmptyValue5() throws IOException {
+        try {
+            csvWriter.setNullValue(null);
+            csvWriter.setEmptyValue("\"\"");
+            csvWriter.setAlwaysDelimitText(true);
+
+            final Collection<String[]> collection = new ArrayList<>();
+            collection.add(new String[] {null, "", "test"});
+
+            final StringWriter stringWriter = new StringWriter();
+            csvWriter.write(stringWriter, collection);
+
+            final String string = stringWriter.toString().trim();
+            assertEquals(string, "\"\",\"\",\"test\"");
+        } finally {
+            csvWriter.setNullValue("");
+            csvWriter.setEmptyValue("");
         }
     }
 

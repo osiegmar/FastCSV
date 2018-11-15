@@ -56,9 +56,14 @@ public final class CsvWriter {
     private char[] lineDelimiter = System.lineSeparator().toCharArray();
 
     /**
-     * Whether to distinguish null and empty column values.
+     * The value to use for a null column value.
      */
-    private boolean distinguishNullAndEmpty;
+    private String nullValue = "";
+
+    /**
+     * The value to use for an empty column value.
+     */
+    private String emptyValue = "";
 
     /**
      * Sets the field separator character (default: ',' - comma).
@@ -79,7 +84,6 @@ public final class CsvWriter {
      */
     public void setAlwaysDelimitText(final boolean alwaysDelimitText) {
         this.alwaysDelimitText = alwaysDelimitText;
-        this.distinguishNullAndEmpty = false;
     }
 
     /**
@@ -90,13 +94,21 @@ public final class CsvWriter {
     }
 
     /**
-     * Specifies whether to distinguish null and empty column values.
+     * Specifies the value to use for a null column value.
      *
-     * @param distinguishNullAndEmpty
+     * @param nullValue
      */
-    public void setDistinguishNullAndEmpty(final boolean distinguishNullAndEmpty) {
-        this.distinguishNullAndEmpty = distinguishNullAndEmpty;
-        this.alwaysDelimitText = true;
+    public void setNullValue(final String nullValue) {
+        this.nullValue = nullValue;
+    }
+
+    /**
+     * Specifies the value to use for an empty column value.
+     *
+     * @param emptyValue
+     */
+    public void setEmptyValue(final String emptyValue) {
+        this.emptyValue = emptyValue;
     }
 
     /**
@@ -198,7 +210,7 @@ public final class CsvWriter {
     public CsvAppender append(final Writer writer) {
         return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
             fieldSeparator, textDelimiter, alwaysDelimitText,
-                lineDelimiter, distinguishNullAndEmpty);
+                lineDelimiter, nullValue, emptyValue);
     }
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {
