@@ -161,7 +161,7 @@ public final class CsvWriter {
      * @throws NullPointerException if path or charset is null
      */
     public CsvAppender append(final Path path, final Charset charset) throws IOException {
-        return append(newWriter(
+        return append(appendWriter(
             Objects.requireNonNull(path, "path must not be null"),
             Objects.requireNonNull(charset, "charset must not be null")
         ));
@@ -186,6 +186,11 @@ public final class CsvWriter {
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {
         return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
             StandardOpenOption.TRUNCATE_EXISTING), charset);
+    }
+
+    private static Writer appendWriter(final Path path, final Charset charset) throws IOException {
+        return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
+            StandardOpenOption.APPEND), charset);
     }
 
 }
