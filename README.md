@@ -34,9 +34,16 @@ To add a dependency using Maven, use the following:
 To add a dependency using Gradle:
 
 ```gradle
-dependencies {
-    compile 'de.siegmar:fastcsv:1.0.3'
-}
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+	dependencies {
+	        implementation 'com.github.lancewoo:FastCSV:v1.0.4'
+	}
 ```
 
 
@@ -138,6 +145,10 @@ try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
     csvAppender.appendField("value3");
     csvAppender.appendField("value4");
     csvAppender.endLine();
+
+    // flush and close
+    csvAppender.flush();
+    csvAppender.close();
 }
 ```
 
