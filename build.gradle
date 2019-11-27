@@ -1,15 +1,13 @@
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'checkstyle'
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
-apply plugin: 'maven'
+plugins {
+    id("java")
+    id("maven")
+    id("maven-publish")
+}
 
 group = "de.siegmar"
 archivesBaseName = "fastcsv"
 version = "1.0.4"
 
-sourceCompatibility = 1.7
 
 repositories {
     jcenter()
@@ -21,74 +19,23 @@ dependencies {
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
 }
 
-task javadocJar(type: Jar) {
-    from javadoc
-    classifier = 'javadoc'
-}
-
-checkstyle {
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-    configProperties = [samedir: "${rootDir}/config/checkstyle", project_loc: "${rootDir}"]
-}
-
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
-if (hasProperty('ossrhUsername')) {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = jar.baseName
-
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
-
-                pom {
-                    name = 'FastCSV'
-                    description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
-                    url = 'https://github.com/osiegmar/FastCSV'
-                    licenses {
-                        license {
-                            name = 'Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    scm {
-                        url = 'https://github.com/osiegmar/FastCSV'
-                        connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
-                    }
-                    developers {
-                        developer {
-                            id = 'osiegmar'
-                            name = 'Oliver Siegmar'
-                            email = 'oliver@siegmar.de'
-                        }
-                    }
-                }
-            }
-        }
-        repositories {
-            maven {
-                credentials {
-                    username "$ossrhUsername"
-                    password "$ossrhPassword"
-                }
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/stone-wall/FastCSV")
+            credentials {
+                username = ""
+                password = ""
             }
         }
     }
-
-    signing {
-        sign publishing.publications.mavenJava
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
     }
 }
+
