@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2018-11-30
+### Fixed
+- Fix destroying contents of an existing file with CsvWriter.append().
+
 ## [1.0.3] - 2018-10-06
 ### Fixed
 - Fix dropping empty quoted fields [\#19](https://github.com/osiegmar/FastCSV/issues/19)
