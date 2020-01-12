@@ -17,6 +17,7 @@
 package de.siegmar.fastcsv.reader;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 
@@ -56,6 +57,15 @@ public class CsvReaderTest {
 
     public void simple() throws IOException {
         assertEquals(readCsvRow("foo").getField(0), "foo");
+    }
+
+    public void emptyContainer() throws IOException {
+        csvReader.setContainsHeader(true);
+        final CsvContainer csv = read("");
+        assertNotNull(csv);
+        assertNull(csv.getHeader());
+        assertEquals(csv.getRowCount(), 0);
+        assertEquals(csv.getRows(), Collections.<CsvRow>emptyList());
     }
 
     // skipped rows
@@ -136,6 +146,14 @@ public class CsvReaderTest {
         csvReader.setContainsHeader(true);
         final CsvContainer csv = read("foo,bar\n1,2");
         assertEquals(csv.getHeader(), Arrays.asList("foo", "bar"));
+    }
+
+    public void getHeaderEmptyRows() throws IOException {
+        csvReader.setContainsHeader(true);
+        final CsvContainer csv = read("foo,bar");
+        assertEquals(csv.getHeader(), Arrays.asList("foo", "bar"));
+        assertEquals(csv.getRowCount(), 0);
+        assertEquals(csv.getRows(), Collections.<CsvRow>emptyList());
     }
 
     // Request field by name, but headers are not enabled

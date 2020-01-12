@@ -148,10 +148,6 @@ public final class CsvReader {
             rows.add(csvRow);
         }
 
-        if (rows.isEmpty()) {
-            return null;
-        }
-
         final List<String> header = containsHeader ? csvParser.getHeader() : null;
         return new CsvContainer(header, rows);
     }
