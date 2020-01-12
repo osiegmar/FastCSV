@@ -16,75 +16,82 @@
 
 package de.siegmar.fastcsv.writer;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@Test
 public class CsvWriterTest {
 
-    private CsvWriter csvWriter;
+    private CsvWriter csvWriter = new CsvWriter();
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
-        csvWriter = new CsvWriter();
         csvWriter.setLineDelimiter(new char[] {'\n'});
     }
 
+    @Test
     public void oneLineSingleValue() throws IOException {
-        assertEquals(write("foo"), "foo\n");
+        assertEquals("foo\n", write("foo"));
     }
 
+    @Test
     public void oneLineTwoValues() throws IOException {
-        assertEquals(write("foo", "bar"), "foo,bar\n");
+        assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
+    @Test
     public void twoLinesSingleValue() throws IOException {
         final Collection<String[]> rows = new ArrayList<>();
         rows.add(new String[] {"foo"});
         rows.add(new String[] {"bar"});
 
-        assertEquals(write(rows), "foo\nbar\n");
+        assertEquals("foo\nbar\n", write(rows));
     }
 
+    @Test
     public void twoLinesTwoValues() throws IOException {
-        assertEquals(write("foo", "bar"), "foo,bar\n");
+        assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
+    @Test
     public void delimitText() throws IOException {
-        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null),
-            "a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
+        assertEquals("a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
+            write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
+    @Test
     public void alwaysDelimitText() throws IOException {
         csvWriter.setAlwaysDelimitText(true);
-        assertEquals(write("a", "b,c", "d\ne", "f\"g", "", null),
-            "\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n");
+        assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
+            write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
+    @Test
     public void fieldSeparator() throws IOException {
         csvWriter.setFieldSeparator(';');
-        assertEquals(write("foo", "bar"), "foo;bar\n");
+        assertEquals("foo;bar\n", write("foo", "bar"));
     }
 
+    @Test
     public void textDelimiter() throws IOException {
         csvWriter.setTextDelimiter('\'');
-        assertEquals(write("foo,bar"), "'foo,bar'\n");
+        assertEquals("'foo,bar'\n", write("foo,bar"));
     }
 
+    @Test
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
         try (CsvAppender appender = csvWriter.append(sw)) {
             appender.appendField("foo");
             appender.appendField("bar");
         }
-        assertEquals(sw.toString(), "foo,bar");
+        assertEquals("foo,bar", sw.toString());
     }
 
     private String write(final String... cols) throws IOException {

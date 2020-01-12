@@ -16,10 +16,10 @@
 
 package de.siegmar.fastcsv.reader;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,84 +27,84 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-@Test
 public class CsvReaderTest {
 
-    private CsvReader csvReader;
-
-    @BeforeMethod
-    public void init() {
-        csvReader = new CsvReader();
-    }
+    private CsvReader csvReader = new CsvReader();
 
     // null / empty input
 
-    @Test(expectedExceptions = NullPointerException.class)
-    public void nullInput() throws IOException {
-        parse(findBugsSafeNullInput());
+    @Test
+    public void nullInput() {
+        assertThrows(NullPointerException.class, () -> parse(findBugsSafeNullInput()));
     }
 
     private static String findBugsSafeNullInput() {
         return null;
     }
 
+    @Test
     public void empty() throws IOException {
         assertNull(parse("").nextRow());
     }
 
+    @Test
     public void simple() throws IOException {
-        assertEquals(readCsvRow("foo").getField(0), "foo");
+        assertEquals("foo", readCsvRow("foo").getField(0));
     }
 
+    @Test
     public void emptyContainer() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvContainer csv = read("");
         assertNotNull(csv);
         assertNull(csv.getHeader());
-        assertEquals(csv.getRowCount(), 0);
-        assertEquals(csv.getRows(), Collections.<CsvRow>emptyList());
+        assertEquals(0, csv.getRowCount());
+        assertEquals(Collections.<CsvRow>emptyList(), csv.getRows());
     }
 
     // skipped rows
 
+    @Test
     public void singleRowNoSkipEmpty() throws IOException {
         csvReader.setSkipEmptyRows(false);
         assertNull(parse("").nextRow());
     }
 
+    @Test
     public void multipleRowsNoSkipEmpty() throws IOException {
         csvReader.setSkipEmptyRows(false);
         final CsvContainer csv = read("\n\n");
 
         final List<CsvRow> rows = csv.getRows();
-        assertEquals(rows.size(), 2);
+        assertEquals(2, rows.size());
 
         int line = 1;
         for (final CsvRow row : rows) {
-            assertEquals(row.getFieldCount(), 1);
-            assertEquals(row.getFields(), Collections.singletonList(""));
-            assertEquals(row.getOriginalLineNumber(), line++);
+            assertEquals(1, row.getFieldCount());
+            assertEquals(Collections.singletonList(""), row.getFields());
+            assertEquals(line++, row.getOriginalLineNumber());
         }
     }
 
+    @Test
     public void skippedRows() throws IOException {
         final CsvContainer csv = read("\n\nfoo\n\nbar\n\n");
-        assertEquals(csv.getRowCount(), 2);
+        assertEquals(2, csv.getRowCount());
 
         final CsvRow row1 = csv.getRow(0);
-        assertEquals(row1.getOriginalLineNumber(), 3);
-        assertEquals(row1.getField(0), "foo");
+        assertEquals(3, row1.getOriginalLineNumber());
+        assertEquals("foo", row1.getField(0));
 
         final CsvRow row2 = csv.getRow(1);
-        assertEquals(row2.getOriginalLineNumber(), 5);
-        assertEquals(row2.getField(0), "bar");
+        assertEquals(5, row2.getOriginalLineNumber());
+        assertEquals("bar", row2.getField(0));
     }
 
     // different field count
 
+    @Test
     public void differentFieldCountSuccess() throws IOException {
         csvReader.setErrorOnDifferentFieldCount(true);
         csvReader.setSkipEmptyRows(false);
@@ -119,71 +119,77 @@ public class CsvReaderTest {
         read(",bar\nfaz,baz");
     }
 
-    @Test(expectedExceptions = IOException.class)
-    public void differentFieldCountFail() throws IOException {
+    @Test
+    public void differentFieldCountFail() {
         csvReader.setErrorOnDifferentFieldCount(true);
         csvReader.setSkipEmptyRows(false);
 
-        read("foo\nbar,baz");
+        assertThrows(IOException.class, () -> read("foo\nbar,baz"));
     }
 
     // field by index
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
+    @SuppressWarnings("CheckReturnValue")
     public void getNonExistingFieldByIndex() throws IOException {
-        final String findbugsSafeReturn = parse("foo").nextRow().getField(1);
-        fail("must not return: " + findbugsSafeReturn);
+        final CsvRow csvRow = parse("foo").nextRow();
+        assertThrows(IndexOutOfBoundsException.class, () -> csvRow.getField(1).toString());
     }
 
     // field by name (header)
 
+    @Test
     public void getFieldByName() throws IOException {
         csvReader.setContainsHeader(true);
-        assertEquals(parse("foo\nbar").nextRow().getField("foo"), "bar");
+        assertEquals("bar", parse("foo\nbar").nextRow().getField("foo"));
     }
 
+    @Test
     public void getHeader() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvContainer csv = read("foo,bar\n1,2");
-        assertEquals(csv.getHeader(), Arrays.asList("foo", "bar"));
+        assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
     }
 
+    @Test
     public void getHeaderEmptyRows() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvContainer csv = read("foo,bar");
-        assertEquals(csv.getHeader(), Arrays.asList("foo", "bar"));
-        assertEquals(csv.getRowCount(), 0);
-        assertEquals(csv.getRows(), Collections.<CsvRow>emptyList());
+        assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
+        assertEquals(0, csv.getRowCount());
+        assertEquals(Collections.<CsvRow>emptyList(), csv.getRows());
     }
 
     // Request field by name, but headers are not enabled
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void getFieldByNameWithoutHeader() throws IOException {
-        parse("foo\n").nextRow().getField("bar");
+        final CsvRow csvRow = parse("foo\n").nextRow();
+        assertThrows(IllegalStateException.class, () -> csvRow.getField("bar"));
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void getNonExistingHeader() throws IOException {
         final CsvParser csv = parse("foo\n");
         csv.nextRow();
-        csv.getHeader();
+        assertThrows(IllegalStateException.class, csv::getHeader);
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void getNonExistingFieldMap() throws IOException {
         final CsvParser csv = parse("foo\n");
         final CsvRow csvRow = csv.nextRow();
-        csvRow.getFieldMap();
+        assertThrows(IllegalStateException.class, csvRow::getFieldMap);
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void getHeaderWithoutNextRowCall() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvParser csv = parse("foo\n");
-        csv.getHeader();
+        assertThrows(IllegalStateException.class, csv::getHeader);
     }
 
     // Request field by name, but column name doesn't exist
+    @Test
     public void getNonExistingFieldByName() throws IOException {
         csvReader.setContainsHeader(true);
         assertNull(parse("foo\nfaz").nextRow().getField("bar"));
@@ -191,117 +197,134 @@ public class CsvReaderTest {
 
     // enclosure escaping
 
+    @Test
     public void escapedQuote() throws IOException {
-        assertEquals(readCsvRow("foo,\"bar \"\"is\"\" ok\"").getField(1), "bar \"is\" ok");
+        assertEquals("bar \"is\" ok", readCsvRow("foo,\"bar \"\"is\"\" ok\"").getField(1));
     }
 
+    @Test
     public void handlesEmptyQuotedFieldsAtEndOfRow() throws IOException {
-        assertEquals(readCsvRow("foo,\"\"").getField(1), "");
+        assertEquals("", readCsvRow("foo,\"\"").getField(1));
     }
 
+    @Test
     public void dataAfterNewlineAfterEnclosure() throws IOException {
         CsvContainer csv = read("\"foo\"\nbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
 
         csv = read("\"foo\"\rbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
 
         csv = read("\"foo\"\r\nbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
     }
 
+    @Test
     public void invalidQuotes() throws IOException {
-        assertEquals(readRow("bbb\"a\", ccc,ddd\"a,b\"eee,fff,ggg\"a\"\"b,\",a, b"),
-            Arrays.asList(
-                "bbb\"a\"",
-                " ccc",
-                "ddd\"a",
-                "b\"eee",
-                "fff",
-                "ggg\"a\"\"b",
-                ",a, b"
-            ));
+        assertEquals(Arrays.asList(
+            "bbb\"a\"",
+            " ccc",
+            "ddd\"a",
+            "b\"eee",
+            "fff",
+            "ggg\"a\"\"b",
+            ",a, b"
+            ),
+            readRow("bbb\"a\", ccc,ddd\"a,b\"eee,fff,ggg\"a\"\"b,\",a, b"));
     }
 
+    @Test
     public void textBeforeQuotes() throws IOException {
-        assertEquals(readRow("a\"b\",c"), Arrays.asList("a\"b\"", "c"));
+        assertEquals(Arrays.asList("a\"b\"", "c"), readRow("a\"b\",c"));
     }
 
+    @Test
     public void textAfterQuotes() throws IOException {
-        assertEquals(readRow("\"a\"b,c"), Arrays.asList("ab", "c"));
+        assertEquals(Arrays.asList("ab", "c"), readRow("\"a\"b,c"));
     }
 
+    @Test
     public void spaceBeforeQuotes() throws IOException {
-        assertEquals(readRow(" \"a\",b"), Arrays.asList(" \"a\"", "b"));
+        assertEquals(Arrays.asList(" \"a\"", "b"), readRow(" \"a\",b"));
     }
 
+    @Test
     public void spaceAfterQuotes() throws IOException {
-        assertEquals(readRow("\"a\" ,b"), Arrays.asList("a ", "b"));
+        assertEquals(Arrays.asList("a ", "b"), readRow("\"a\" ,b"));
     }
 
+    @Test
     public void openingQuotes() throws IOException {
-        assertEquals(readCsvRow("\"aaa").getField(0), "aaa");
+        assertEquals("aaa", readCsvRow("\"aaa").getField(0));
     }
 
+    @Test
     public void closingQuotes() throws IOException {
-        assertEquals(readCsvRow("aaa\"").getField(0), "aaa\"");
+        assertEquals("aaa\"", readCsvRow("aaa\"").getField(0));
     }
 
     // line breaks
 
+    @Test
     public void lineFeed() throws IOException {
         final CsvContainer csv = read("foo\nbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
     }
 
+    @Test
     public void carriageReturn() throws IOException {
         final CsvContainer csv = read("foo\rbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
     }
 
+    @Test
     public void carriageReturnLineFeed() throws IOException {
         final CsvContainer csv = read("foo\r\nbar");
-        assertEquals(csv.getRowCount(), 2);
-        assertEquals(csv.getRow(0).getField(0), "foo");
-        assertEquals(csv.getRow(1).getField(0), "bar");
+        assertEquals(2, csv.getRowCount());
+        assertEquals("foo", csv.getRow(0).getField(0));
+        assertEquals("bar", csv.getRow(1).getField(0));
     }
 
     // line numbering
 
+    @Test
     public void lineNumbering() throws IOException {
         final CsvParser csv = parse("\"a multi-\nline string\"\n\"another\none\"");
 
         CsvRow row = csv.nextRow();
-        assertEquals(row.getFields(), Collections.singletonList("a multi-\nline string"));
-        assertEquals(row.getOriginalLineNumber(), 1);
+        assertEquals(Collections.singletonList("a multi-\nline string"), row.getFields());
+        assertEquals(1, row.getOriginalLineNumber());
 
         row = csv.nextRow();
-        assertEquals(row.getFields(), Collections.singletonList("another\none"));
-        assertEquals(row.getOriginalLineNumber(), 3);
+        assertEquals(Collections.singletonList("another\none"), row.getFields());
+        assertEquals(3, row.getOriginalLineNumber());
     }
 
     // to string
 
+    @Test
     public void toStringWithoutHeader() throws IOException {
         final CsvRow csvRow = parse("fieldA,fieldB\n").nextRow();
-        assertEquals(csvRow.toString(), "CsvRow{originalLineNumber=1, fields=[fieldA, fieldB]}");
+        assertEquals("CsvRow{originalLineNumber=1, fields=[fieldA, fieldB]}", csvRow.toString());
     }
 
+    @Test
     public void toStringWithHeader() throws IOException {
         csvReader.setContainsHeader(true);
         final CsvRow csvRow = parse("headerA,headerB,headerC\nfieldA,fieldB\n").nextRow();
-        assertEquals(csvRow.toString(),
-            "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}");
+        assertEquals(
+            "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}",
+            csvRow.toString());
     }
 
     // test helpers

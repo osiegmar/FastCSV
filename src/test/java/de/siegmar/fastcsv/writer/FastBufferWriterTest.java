@@ -16,26 +16,19 @@
 
 package de.siegmar.fastcsv.writer;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-@Test
 public class FastBufferWriterTest {
 
-    private FastBufferedWriter fbw;
-    private StringWriter sw;
+    private StringWriter sw = new StringWriter();
+    private FastBufferedWriter fbw = new FastBufferedWriter(sw);
 
-    @BeforeMethod
-    public void init() {
-        sw = new StringWriter();
-        fbw = new FastBufferedWriter(sw);
-    }
-
+    @Test
     public void appendSingle() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
@@ -46,9 +39,10 @@ public class FastBufferWriterTest {
         }
         fbw.close();
 
-        assertEquals(sw.toString(), sb.toString());
+        assertEquals(sb.toString(), sw.toString());
     }
 
+    @Test
     public void appendArray() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
@@ -58,9 +52,10 @@ public class FastBufferWriterTest {
         }
         fbw.close();
 
-        assertEquals(sw.toString(), sb.toString());
+        assertEquals(sb.toString(), sw.toString());
     }
 
+    @Test
     public void appendLarge() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
@@ -72,7 +67,7 @@ public class FastBufferWriterTest {
         // also test flush
         fbw.flush();
 
-        assertEquals(sw.toString(), sb.toString());
+        assertEquals(sb.toString(), sw.toString());
     }
 
 }

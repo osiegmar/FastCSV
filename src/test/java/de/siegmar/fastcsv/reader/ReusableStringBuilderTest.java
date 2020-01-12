@@ -16,56 +16,53 @@
 
 package de.siegmar.fastcsv.reader;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
-@Test
 public class ReusableStringBuilderTest {
 
-    private ReusableStringBuilder sb;
+    private ReusableStringBuilder sb = new ReusableStringBuilder(1);
 
-    @BeforeMethod
-    public void init() {
-        sb = new ReusableStringBuilder(1);
-    }
-
+    @Test
     public void empty() {
         assertFalse(sb.hasContent());
         final String s = sb.toStringAndReset();
-        assertEquals(s, "");
+        assertEquals("", s);
     }
 
+    @Test
     public void one() {
         sb.append('a');
         assertTrue(sb.hasContent());
         String s = sb.toStringAndReset();
         assertFalse(sb.hasContent());
-        assertEquals(s, "a");
+        assertEquals("a", s);
 
         s = sb.toStringAndReset();
-        assertEquals(s, "");
+        assertEquals("", s);
     }
 
+    @Test
     public void two() {
         sb.append('a');
         sb.append('b');
         assertTrue(sb.hasContent());
         String s = sb.toStringAndReset();
         assertFalse(sb.hasContent());
-        assertEquals(s, "ab");
+        assertEquals("ab", s);
 
         s = sb.toStringAndReset();
-        assertEquals(s, "");
+        assertEquals("", s);
     }
 
+    @Test
     public void larger() {
         final String str = "A larger string to test re-sizing";
         sb.append(str.toCharArray(), 0, str.length());
-        assertEquals(sb.toStringAndReset(), str);
+        assertEquals(str, sb.toStringAndReset());
     }
 
 }

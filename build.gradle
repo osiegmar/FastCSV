@@ -20,11 +20,12 @@ repositories {
 }
 
 dependencies {
-    testCompile 'org.testng:testng:6.8.21'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
 }
 
 test {
-    useTestNG()
+    useJUnitPlatform()
 }
 
 tasks.withType(com.github.spotbugs.SpotBugsTask) {
