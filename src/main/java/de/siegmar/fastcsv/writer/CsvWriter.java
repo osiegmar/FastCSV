@@ -45,9 +45,10 @@ public final class CsvWriter {
     private char textDelimiter = '"';
 
     /**
-     * Should fields always delimited using the {@link #textDelimiter}? (default: false).
+     * The strategy when fields should be delimited using the {@link #textDelimiter}
+     * (default: {@link TextDelimitStrategy#REQUIRED}).
      */
-    private boolean alwaysDelimitText;
+    private TextDelimitStrategy textDelimitStrategy = TextDelimitStrategy.REQUIRED;
 
     /**
      * The line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
@@ -69,10 +70,11 @@ public final class CsvWriter {
     }
 
     /**
-     * Sets if fields should always delimited using the {@link #textDelimiter} (default: false).
+     * Sets the strategy when fields should be delimited using the {@link #textDelimiter}
+     * (default: {@link TextDelimitStrategy#REQUIRED}).
      */
-    public void setAlwaysDelimitText(final boolean alwaysDelimitText) {
-        this.alwaysDelimitText = alwaysDelimitText;
+    public void setTextDelimitStrategy(final TextDelimitStrategy textDelimitStrategy) {
+        this.textDelimitStrategy = textDelimitStrategy;
     }
 
     /**
@@ -180,7 +182,7 @@ public final class CsvWriter {
      */
     public CsvAppender append(final Writer writer) {
         return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
-            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
+            fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
     }
 
     private static Writer newWriter(final Path path, final Charset charset) throws IOException {

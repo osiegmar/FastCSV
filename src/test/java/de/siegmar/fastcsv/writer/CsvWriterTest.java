@@ -36,6 +36,21 @@ public class CsvWriterTest {
     }
 
     @Test
+    public void nullDelimit() throws IOException {
+        assertEquals("foo,,bar\n", write("foo", null, "bar"));
+        assertEquals("foo,,bar\n", write("foo", "", "bar"));
+        assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
+    }
+
+    @Test
+    public void emptyDelimit() throws IOException {
+        csvWriter.setTextDelimitStrategy(TextDelimitStrategy.EMPTY);
+        assertEquals("foo,,bar\n", write("foo", null, "bar"));
+        assertEquals("foo,\"\",bar\n", write("foo", "", "bar"));
+        assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
+    }
+
+    @Test
     public void oneLineSingleValue() throws IOException {
         assertEquals("foo\n", write("foo"));
     }
@@ -67,7 +82,7 @@ public class CsvWriterTest {
 
     @Test
     public void alwaysDelimitText() throws IOException {
-        csvWriter.setAlwaysDelimitText(true);
+        csvWriter.setTextDelimitStrategy(TextDelimitStrategy.ALWAYS);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
