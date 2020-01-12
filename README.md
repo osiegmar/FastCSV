@@ -4,7 +4,7 @@ FastCSV
 [![Build Status](https://api.travis-ci.org/osiegmar/FastCSV.svg)](https://travis-ci.org/osiegmar/FastCSV)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
 
-FastCSV is a ultra fast and simple [RFC 4180](http://tools.ietf.org/html/rfc4180) compliant CSV 
+FastCSV is a ultra fast and simple [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
 library for Java, licensed under the Apache License, Version 2.0.
 
 
@@ -14,30 +14,6 @@ Benchmark from the
 [Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project:
 
 ![Benchmark](benchmark.png "Benchmark")
-
-
-Latest release
---------------
-
-The most recent release is 1.0.3, released October 6, 2018.
-
-To add a dependency using Maven, use the following:
-
-```xml
-<dependency>
-    <groupId>de.siegmar</groupId>
-    <artifactId>fastcsv</artifactId>
-    <version>1.0.3</version>
-</dependency>
-```
-
-To add a dependency using Gradle:
-
-```gradle
-dependencies {
-    compile 'de.siegmar:fastcsv:1.0.3'
-}
-```
 
 
 Features
@@ -180,7 +156,7 @@ Contribution
 Copyright
 ---------
 
-Copyright 2018 Oliver Siegmar
+Copyright 2020 Oliver Siegmar
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
