@@ -80,7 +80,7 @@ public class CsvWriterTest {
 
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
-        try (final CsvAppender appender = csvWriter.append(sw)) {
+        try (CsvAppender appender = csvWriter.append(sw)) {
             appender.appendField("foo");
             appender.appendField("bar");
         }

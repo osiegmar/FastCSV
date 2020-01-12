@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
     <!--<property name="fileExtensions" value="java, properties, xml"/>-->
+
+    <property name="cacheFile" value="${config_loc}/../../build/checkstyle-cachefile"/>
 
     <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
     <!--<module name="JavadocPackage"/>-->
@@ -51,21 +53,25 @@
     </module>
 
     <module name="SuppressionFilter">
-        <property name="file" value="${samedir}/suppressions.xml"/>
+        <property name="file" value="${config_loc}/suppressions.xml"/>
     </module>
 
     <module name="SuppressWarningsFilter"/>
 
     <!-- Checks for Header - http://checkstyle.sf.net/config_header.html -->
     <module name="Header">
-        <property name="headerFile" value="${samedir}/java.header"/>
+        <property name="headerFile" value="${config_loc}/java.header"/>
         <property name="fileExtensions" value="java"/>
         <property name="ignoreLines" value="2"/>
     </module>
 
+    <module name="LineLength">
+        <property name="max" value="100"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
     <module name="TreeWalker">
 
-        <property name="cacheFile" value="${project_loc}/build/checkstyle-cachefile"/>
         <property name="tabWidth" value="4"/>
 
         <!-- Checks for Annotations - See http://checkstyle.sf.net/config_annotation.html -->
@@ -85,14 +91,12 @@
         <!--<module name="EmptyCatchBlock">-->
             <!--<property name="exceptionVariableName" value="expected"/>-->
         <!--</module>-->
-        <module name="LeftCurly">
-            <property name="maxLineLength" value="100"/>
-        </module>
+        <module name="LeftCurly"/>
         <module name="NeedBraces"/>
         <module name="RightCurly"/>
         <module name="RightCurly">
             <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
         </module>
         <module name="AvoidNestedBlocks"/>
 
@@ -178,14 +182,11 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="ImportOrder">
-            <property name="groups" value="/^javax?\./,org,com"/>
+            <property name="groups" value="/^java\./,javax,org,com"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="top"/>
         </module>
-        <!--<module name="ImportControl">-->
-            <!--<property name="file" value="${samedir}/import-control.xml"/>-->
-        <!--</module>-->
         <!--<module name="CustomImportOrder"/>-->
 
         <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
@@ -255,10 +256,6 @@
 
         <!-- Checks for Size Violations - http://checkstyle.sf.net/config_sizes.html -->
         <module name="ExecutableStatementCount"/>
-        <module name="LineLength">
-            <property name="max" value="100"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        </module>
         <module name="MethodLength"/>
         <module name="AnonInnerLength"/>
         <module name="ParameterNumber"/>

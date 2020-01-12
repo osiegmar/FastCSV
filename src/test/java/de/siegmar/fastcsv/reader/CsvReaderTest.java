@@ -307,7 +307,7 @@ public class CsvReaderTest {
     // test helpers
 
     private CsvRow readCsvRow(final String data) throws IOException {
-        try (final CsvParser csvParser = parse(data)) {
+        try (CsvParser csvParser = parse(data)) {
             final CsvRow csvRow = csvParser.nextRow();
             assertNull(csvParser.nextRow());
             return csvRow;

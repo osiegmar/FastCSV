@@ -1,17 +1,22 @@
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'checkstyle'
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '3.0.0'
+}
 
 group = "de.siegmar"
-archivesBaseName = "fastcsv"
-version = "1.0.4"
+version = "2.0.0-SNAPSHOT"
 
-sourceCompatibility = 1.7
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
+}
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -22,22 +27,7 @@ test {
     useTestNG()
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    classifier = 'sources'
-}
-
-task javadocJar(type: Jar) {
-    from javadoc
-    classifier = 'javadoc'
-}
-
-checkstyle {
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-    configProperties = [samedir: "${rootDir}/config/checkstyle", project_loc: "${rootDir}"]
-}
-
-tasks.withType(FindBugs) {
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
     reports {
         xml.enabled = false
         html.enabled = true
@@ -49,10 +39,7 @@ if (hasProperty('ossrhUsername')) {
         publications {
             mavenJava(MavenPublication) {
                 artifactId = jar.baseName
-
                 from components.java
-                artifact sourcesJar
-                artifact javadocJar
 
                 pom {
                     name = 'FastCSV'

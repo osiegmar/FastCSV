@@ -122,7 +122,7 @@ public final class CsvReader {
     public CsvContainer read(final Path path, final Charset charset) throws IOException {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
-        try (final Reader reader = newPathReader(path, charset)) {
+        try (Reader reader = newPathReader(path, charset)) {
             return read(reader);
         }
     }

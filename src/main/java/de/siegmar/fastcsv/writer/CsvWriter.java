@@ -113,7 +113,7 @@ public final class CsvWriter {
 
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
-        try (final Writer writer = newWriter(path, charset)) {
+        try (Writer writer = newWriter(path, charset)) {
             write(writer, data);
         }
     }
