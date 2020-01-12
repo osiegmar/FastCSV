@@ -18,6 +18,10 @@ dependencies {
     testCompile 'org.testng:testng:6.8.21'
 }
 
+test {
+    useTestNG()
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
     classifier = 'sources'
