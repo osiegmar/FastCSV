@@ -70,11 +70,11 @@ public final class CsvAppender implements Closeable, Flushable {
             return;
         }
 
-        final char[] valueChars = value.toCharArray();
         boolean needsTextDelimiter = alwaysDelimitText;
         boolean containsTextDelimiter = false;
 
-        for (final char c : valueChars) {
+        for (int i = 0; i < value.length(); i++) {
+            final char c = value.charAt(i);
             if (c == textDelimiter) {
                 containsTextDelimiter = needsTextDelimiter = true;
                 break;
@@ -88,14 +88,15 @@ public final class CsvAppender implements Closeable, Flushable {
         }
 
         if (containsTextDelimiter) {
-            for (final char c : valueChars) {
+            for (int i = 0; i < value.length(); i++) {
+                final char c = value.charAt(i);
                 if (c == textDelimiter) {
                     writer.write(textDelimiter);
                 }
                 writer.write(c);
             }
         } else {
-            writer.write(valueChars);
+            writer.write(value);
         }
 
         if (needsTextDelimiter) {
