@@ -26,38 +26,54 @@ import java.io.Writer;
  *
  * @author Oliver Siegmar
  */
-final class FastBufferedWriter extends Writer {
+public final class FastBufferedWriter extends Writer {
 
     private static final int BUFFER_SIZE = 8192;
 
-    private Writer out;
-    private char[] buf = new char[BUFFER_SIZE];
+    private final Writer out;
+    private final char[] buf = new char[BUFFER_SIZE];
     private int pos;
 
-    FastBufferedWriter(final Writer writer) {
+    public FastBufferedWriter(final Writer writer) {
         this.out = writer;
     }
 
+    @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
     @Override
-    public void write(final char[] cbuf, final int off, final int len) throws IOException {
-        if (pos + len >= buf.length) {
-            flushBuffer();
-        }
-
-        if (len >= buf.length) {
-            out.write(cbuf, off, len);
-        } else {
-            System.arraycopy(cbuf, off, buf, pos, len);
-            pos += len;
-        }
+    public void write(final char[] cbuf, int off, int len) throws IOException {
+        do {
+            final int copyLen = Math.min(BUFFER_SIZE - pos, len);
+            System.arraycopy(cbuf, off, buf, pos, copyLen);
+            pos += copyLen;
+            off += copyLen;
+            len -= copyLen;
+            if (pos >= BUFFER_SIZE) {
+                flushBuffer();
+            }
+        } while (len > 0);
     }
 
     @Override
     public void write(final int c) throws IOException {
-        if (pos == buf.length) {
+        buf[pos++] = (char) c;
+        if (pos >= BUFFER_SIZE) {
             flushBuffer();
         }
-        buf[pos++] = (char) c;
+    }
+
+    @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
+    @Override
+    public void write(final String str, int off, int len) throws IOException {
+        do {
+            final int copyLen = Math.min(BUFFER_SIZE - pos, len);
+            str.getChars(off, off + copyLen, buf, pos);
+            pos += copyLen;
+            off += copyLen;
+            len -= copyLen;
+            if (pos >= BUFFER_SIZE) {
+                flushBuffer();
+            }
+        } while (len > 0);
     }
 
     @Override

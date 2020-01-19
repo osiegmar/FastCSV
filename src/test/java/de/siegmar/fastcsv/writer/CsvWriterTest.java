@@ -23,17 +23,11 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class CsvWriterTest {
 
-    private CsvWriter csvWriter = new CsvWriter();
-
-    @BeforeEach
-    public void init() {
-        csvWriter.setLineDelimiter(new char[] {'\n'});
-    }
+    private CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter("\n");
 
     @Test
     public void nullDelimit() throws IOException {
@@ -44,7 +38,7 @@ public class CsvWriterTest {
 
     @Test
     public void emptyDelimit() throws IOException {
-        csvWriter.setTextDelimitStrategy(TextDelimitStrategy.EMPTY);
+        csvWriter.textDelimitStrategy(TextDelimitStrategy.EMPTY);
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,\"\",bar\n", write("foo", "", "bar"));
         assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
@@ -82,30 +76,30 @@ public class CsvWriterTest {
 
     @Test
     public void alwaysDelimitText() throws IOException {
-        csvWriter.setTextDelimitStrategy(TextDelimitStrategy.ALWAYS);
+        csvWriter.textDelimitStrategy(TextDelimitStrategy.ALWAYS);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
     public void fieldSeparator() throws IOException {
-        csvWriter.setFieldSeparator(';');
+        csvWriter.fieldSeparator(';');
         assertEquals("foo;bar\n", write("foo", "bar"));
     }
 
     @Test
     public void textDelimiter() throws IOException {
-        csvWriter.setTextDelimiter('\'');
+        csvWriter.textDelimiter('\'');
         assertEquals("'foo,bar'\n", write("foo,bar"));
     }
 
     @Test
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
-        try (CsvAppender appender = csvWriter.append(sw)) {
-            appender.appendField("foo");
-            appender.appendField("bar");
-        }
+        final CsvWriter appender = csvWriter.writer(sw);
+        appender.appendField("foo");
+        appender.appendField("bar");
+        appender.close();
         assertEquals("foo,bar", sw.toString());
     }
 
@@ -118,7 +112,7 @@ public class CsvWriterTest {
 
     private String write(final Collection<String[]> rows) throws IOException {
         final StringWriter stringWriter = new StringWriter();
-        csvWriter.write(stringWriter, rows);
+        csvWriter.writeAll(rows, stringWriter);
 
         return stringWriter.toString();
     }
