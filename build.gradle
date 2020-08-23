@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'checkstyle'
-    id 'com.github.spotbugs' version '3.0.0'
+    id 'com.github.spotbugs' version '4.5.0'
 }
 
 group = "de.siegmar"
@@ -28,10 +28,13 @@ test {
     useJUnitPlatform()
 }
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
+spotbugsMain {
     reports {
-        xml.enabled = false
-        html.enabled = true
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
     }
 }
 
@@ -39,7 +42,7 @@ if (hasProperty('ossrhUsername')) {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                artifactId = jar.baseName
+                artifactId = 'fastcsv'
                 from components.java
 
                 pom {
