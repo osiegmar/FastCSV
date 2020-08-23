@@ -16,12 +16,8 @@
 
 package de.siegmar.fastcsv.writer;
 
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -29,26 +25,26 @@ import java.util.Objects;
  *
  * @author Oliver Siegmar
  */
-public final class CsvWriter implements Closeable, Flushable {
+public class CsvWriter {
 
     private static final char LF = '\n';
     private static final char CR = '\r';
 
-    private final Writer writer;
+    protected final Writer writer;
     private final char fieldSeparator;
     private final char textDelimiter;
     private final TextDelimitStrategy textDelimitStrategy;
     private final String lineDelimiter;
 
-    private boolean newline = true;
+    private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char textDelimiter,
-              final TextDelimitStrategy textDelimitStrategy, final char[] lineDelimiter) {
+              final TextDelimitStrategy textDelimitStrategy, final String lineDelimiter) {
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
         this.textDelimitStrategy = Objects.requireNonNull(textDelimitStrategy);
-        this.lineDelimiter = new String(lineDelimiter);
+        this.lineDelimiter = lineDelimiter;
     }
 
     public static CsvWriterBuilder builder() {
@@ -60,13 +56,14 @@ public final class CsvWriter implements Closeable, Flushable {
      * as required.
      *
      * @param value the field to append (can be {@code null})
-     * @throws UncheckedIOException if a write error occurs
+     * @throws IOException if a write error occurs
+     * @return This CsvWriter.
      */
-    public void writeField(final String value) {
-        if (!newline) {
+    public CsvWriter writeField(final String value) throws IOException {
+        if (!isNewline) {
             write(fieldSeparator);
         } else {
-            newline = false;
+            isNewline = false;
         }
 
         if (value == null) {
@@ -74,7 +71,7 @@ public final class CsvWriter implements Closeable, Flushable {
                 write(textDelimiter);
                 write(textDelimiter);
             }
-            return;
+            return this;
         }
 
         if (value.isEmpty()) {
@@ -83,7 +80,7 @@ public final class CsvWriter implements Closeable, Flushable {
                 write(textDelimiter);
                 write(textDelimiter);
             }
-            return;
+            return this;
         }
 
         final int length = value.length();
@@ -107,7 +104,7 @@ public final class CsvWriter implements Closeable, Flushable {
         }
 
         if (nextDelimPos > -1) {
-            appendEscaped(value, length, nextDelimPos);
+            writeEscaped(value, length, nextDelimPos);
         } else {
             write(value, 0, length);
         }
@@ -115,10 +112,14 @@ public final class CsvWriter implements Closeable, Flushable {
         if (needsTextDelimiter) {
             write(textDelimiter);
         }
+
+        return this;
     }
 
     @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-    private void appendEscaped(final String value, final int length, int nextDelimPos) {
+    private void writeEscaped(final String value, final int length, int nextDelimPos)
+        throws IOException {
+
         int startPos = 0;
         do {
             final int len = nextDelimPos - startPos + 1;
@@ -140,63 +141,41 @@ public final class CsvWriter implements Closeable, Flushable {
         }
     }
 
-    public void writeLines(final Collection<String[]> rows) {
-        rows.forEach(this::writeLine);
-    }
-
     /**
      * Appends a complete line - one or more fields and new line character(s) at the end.
      *
      * @param values the fields to append ({@code null} values are handled as empty strings)
-     * @throws UncheckedIOException if a write error occurs
+     * @throws IOException if a write error occurs
+     * @return This CsvWriter.
      */
-    public void writeLine(final String... values) {
+    public CsvWriter writeLine(final String... values) throws IOException {
         for (final String value : values) {
             writeField(value);
         }
         endLine();
+        return this;
     }
 
     /**
      * Appends new line character(s) to the current line.
      *
-     * @throws UncheckedIOException if a write error occurs
+     * @throws IOException if a write error occurs
+     * @return This CsvWriter.
      */
-    public void endLine() {
+    public CsvWriter endLine() throws IOException {
         write(lineDelimiter, 0, lineDelimiter.length());
-        newline = true;
+        isNewline = true;
+        return this;
     }
 
-    private void write(final String value, final int off, final int length) {
-        try {
-            writer.write(value, off, length);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private void write(final String value, final int off, final int length)
+        throws IOException {
+
+        writer.write(value, off, length);
     }
 
-    private void write(final char c) {
-        try {
-            writer.write(c);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws IOException {
-        writer.close();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void flush() throws IOException {
-        writer.flush();
+    private void write(final char c) throws IOException {
+        writer.write(c);
     }
 
 }

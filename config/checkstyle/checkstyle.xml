@@ -101,7 +101,9 @@
         <module name="AvoidNestedBlocks"/>
 
         <!-- Checks for Class Design - http://checkstyle.sf.net/config_design.html -->
-        <module name="VisibilityModifier"/>
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
         <module name="FinalClass"/>
         <module name="InterfaceIsType"/>
         <module name="HideUtilityClassConstructor"/>

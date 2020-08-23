@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 public class CsvWriterTest {
 
-    private CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter("\n");
+    private final CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter("\n");
 
     @Test
     public void nullDelimit() throws IOException {
@@ -99,7 +99,6 @@ public class CsvWriterTest {
         final CsvWriter appender = csvWriter.to(sw);
         appender.writeField("foo");
         appender.writeField("bar");
-        appender.close();
         assertEquals("foo,bar", sw.toString());
     }
 
@@ -111,11 +110,12 @@ public class CsvWriterTest {
     }
 
     private String write(final Collection<String[]> rows) throws IOException {
-        final StringWriter stringWriter = new StringWriter();
-        csvWriter.to(stringWriter).writeLines(rows);
-
-        return stringWriter.toString();
+        final StringWriter sb = new StringWriter();
+        final CsvWriter to = csvWriter.to(sb);
+        for (String[] row : rows) {
+            to.writeLine(row);
+        }
+        return sb.toString();
     }
-
 
 }

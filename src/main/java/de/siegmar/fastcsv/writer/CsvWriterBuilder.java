@@ -19,6 +19,7 @@ package de.siegmar.fastcsv.writer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -53,13 +54,13 @@ public final class CsvWriterBuilder {
     /**
      * The line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
      */
-    private char[] lineDelimiter = System.lineSeparator().toCharArray();
+    private String lineDelimiter = System.lineSeparator();
 
     CsvWriterBuilder() {
     }
 
     /**
-     * Sets the field separator character (default: ',' - comma).
+     * @param fieldSeparator the field separator character.
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
@@ -68,7 +69,7 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * Sets the text delimiter character (default: '"' - double quotes).
+     * @param textDelimiter the text delimiter character (default: '"' - double quotes).
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder textDelimiter(final char textDelimiter) {
@@ -77,8 +78,9 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * Sets the strategy when fields should be delimited using the {@link #textDelimiter}
-     * (default: {@link TextDelimitStrategy#REQUIRED}).
+     * @param textDelimitStrategy the strategy when fields should be delimited using the
+     *                            {@link #textDelimiter}
+     *                            (default: {@link TextDelimitStrategy#REQUIRED}).
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder textDelimitStrategy(final TextDelimitStrategy textDelimitStrategy) {
@@ -87,29 +89,17 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * Sets the line delimiter string to be used (default: {@link System#lineSeparator()}).
+     * @param lineDelimiter the line delimiter string to be used
+     *                      (default: {@link System#lineSeparator()}).
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder lineDelimiter(final String lineDelimiter) {
-        this.lineDelimiter = lineDelimiter.toCharArray();
-        return this;
-    }
-
-    /**
-     * Sets the line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
-     * @return This updated object, so that additional method calls can be chained together.
-     */
-    public CsvWriterBuilder lineDelimiter(final char[] lineDelimiter) {
-        this.lineDelimiter = lineDelimiter.clone();
+        this.lineDelimiter = lineDelimiter;
         return this;
     }
 
     /**
      * Constructs a {@link CsvWriter} for the specified Writer.
-     *
-     * This library uses built-in buffering, so you do not need to pass in a buffered Writer
-     * implementation such as {@link java.io.BufferedWriter}.
-     * Performance may be even likely better if you do not.
      *
      * @param writer the Writer to use for writing CSV data.
      * @return a new CsvWriter instance
@@ -125,42 +115,47 @@ public final class CsvWriterBuilder {
     /**
      * Constructs a {@link CsvWriter} for the specified Path.
      *
-     * @param path the Path (file) to write data to.
-     * @param charset the character set to be used for writing data to the file.
+     * @param path        the Path (file) to write data to.
+     * @param charset     the character set to be used for writing data to the file.
      * @param openOptions options specifying how the file is opened.
      *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
      * @return a new CsvWriter instance
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if path or charset is null
      */
-    public CsvWriter to(final Path path, final Charset charset, final OpenOption... openOptions)
+    public CloseableCsvWriter to(final Path path, final Charset charset,
+                                 final OpenOption... openOptions)
         throws IOException {
 
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
 
-        return to(new FastBufferedWriter(new OutputStreamWriter(
-            Files.newOutputStream(path, openOptions), charset)));
+        return new CloseableCsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
+            fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
     }
 
     /**
      * Constructs a {@link CsvWriter} for the specified File.
      *
-     * @param file the file to write data to.
+     * @param file    the file to write data to.
      * @param charset the character set to be used for writing data to the file.
-     * @param append if {@code true}, then file is opened in append mode rather overwriting it.
+     * @param append  if {@code true}, then file is opened in append mode rather overwriting it.
      * @return a new CsvWriter instance
-     * @throws IOException if a write error occurs
+     * @throws IOException          if a write error occurs
      * @throws NullPointerException if file or charset is null
      */
-    public CsvWriter to(final File file, final Charset charset, final boolean append)
+    public CloseableCsvWriter to(final File file, final Charset charset, final boolean append)
         throws IOException {
 
         Objects.requireNonNull(file, "file must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
 
-        return to(new FastBufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append),
-            charset)));
+        return new CloseableCsvWriter(fastBuffer(new FileOutputStream(file, append), charset),
+            fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
+    }
+
+    private static FastBufferedWriter fastBuffer(final OutputStream out, final Charset charset) {
+        return new FastBufferedWriter(new OutputStreamWriter(out, charset));
     }
 
 }
