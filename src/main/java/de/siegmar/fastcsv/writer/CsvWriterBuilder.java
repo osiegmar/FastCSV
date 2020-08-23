@@ -20,13 +20,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -62,7 +60,7 @@ public final class CsvWriterBuilder {
 
     /**
      * Sets the field separator character (default: ',' - comma).
-     * @return
+     * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
         this.fieldSeparator = fieldSeparator;
@@ -71,7 +69,7 @@ public final class CsvWriterBuilder {
 
     /**
      * Sets the text delimiter character (default: '"' - double quotes).
-     * @return
+     * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder textDelimiter(final char textDelimiter) {
         this.textDelimiter = textDelimiter;
@@ -81,13 +79,17 @@ public final class CsvWriterBuilder {
     /**
      * Sets the strategy when fields should be delimited using the {@link #textDelimiter}
      * (default: {@link TextDelimitStrategy#REQUIRED}).
-     * @return
+     * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder textDelimitStrategy(final TextDelimitStrategy textDelimitStrategy) {
         this.textDelimitStrategy = textDelimitStrategy;
         return this;
     }
 
+    /**
+     * Sets the line delimiter string to be used (default: {@link System#lineSeparator()}).
+     * @return This updated object, so that additional method calls can be chained together.
+     */
     public CsvWriterBuilder lineDelimiter(final String lineDelimiter) {
         this.lineDelimiter = lineDelimiter.toCharArray();
         return this;
@@ -95,106 +97,11 @@ public final class CsvWriterBuilder {
 
     /**
      * Sets the line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
-     * @return
+     * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder lineDelimiter(final char[] lineDelimiter) {
         this.lineDelimiter = lineDelimiter.clone();
         return this;
-    }
-
-    /**
-     * Writes all specified data to the file.
-     *
-     * @param data lines/columns to be written.
-     * @param file where the data should be written to.
-     * @param charset the character set to be used for writing data to the file.
-     * @param append if {@code true}, then file is opened in append mode rather overwriting it.
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if file, charset or data is null
-     */
-    public void writeAll(final Collection<String[]> data, final File file, final Charset charset,
-                         final boolean append) throws IOException {
-
-        try (CsvWriter writer = writer(file, charset, append)) {
-            data.forEach(writer::appendLine);
-        }
-    }
-
-    /**
-     * Writes all specified data to the path.
-     *
-     * @param data lines/columns to be written.
-     * @param path where the data should be written to.
-     * @param charset the character set to be used for writing data to the file.
-     * @param openOptions options specifying how the file is opened.
-     *                    Default if not specified is
-     *                    {@link java.nio.file.StandardOpenOption#CREATE} and
-     *                    {@link java.nio.file.StandardOpenOption#TRUNCATE_EXISTING}.
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if path, charset or data is null
-     */
-    public void writeAll(final Collection<String[]> data, final Path path, final Charset charset,
-                         final OpenOption... openOptions) throws IOException {
-
-        try (CsvWriter writer = writer(path, charset, openOptions)) {
-            data.forEach(writer::appendLine);
-        }
-    }
-
-    /**
-     * Writes all specified data to the writer.
-     *
-     * @param data lines/columns to be written.
-     * @param writer where the data should be written to.
-     * @throws UncheckedIOException if a write error occurs
-     * @throws NullPointerException if writer or data is null
-     */
-    public void writeAll(final Collection<String[]> data, final Writer writer) {
-        Objects.requireNonNull(data, "data must not be null");
-        final CsvWriter csvWriter = writer(writer);
-        data.forEach(csvWriter::appendLine);
-        try {
-            csvWriter.flush();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Constructs a {@link CsvWriter} for the specified File.
-     *
-     * @param file the file to write data to.
-     * @param charset the character set to be used for writing data to the file.
-     * @param append if {@code true}, then file is opened in append mode rather overwriting it.
-     * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if file or charset is null
-     */
-    public CsvWriter writer(final File file, final Charset charset, final boolean append) throws IOException {
-        Objects.requireNonNull(file, "file must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-
-        return writer(new OutputStreamWriter(new FileOutputStream(file, append), charset));
-    }
-
-    /**
-     * Constructs a {@link CsvWriter} for the specified Path.
-     *
-     * @param path the Path (file) to write data to.
-     * @param charset the character set to be used for writing data to the file.
-     * @param openOptions options specifying how the file is opened.
-     *                    Default if not specified is
-     *                    {@link java.nio.file.StandardOpenOption#CREATE} and
-     *                    {@link java.nio.file.StandardOpenOption#TRUNCATE_EXISTING}.
-     * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if path or charset is null
-     */
-    public CsvWriter writer(final Path path, final Charset charset, final OpenOption... openOptions) throws IOException {
-        Objects.requireNonNull(path, "path must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-
-        return writer(new OutputStreamWriter(Files.newOutputStream(path, openOptions), charset));
     }
 
     /**
@@ -205,12 +112,55 @@ public final class CsvWriterBuilder {
      * Performance may be even likely better if you do not.
      *
      * @param writer the Writer to use for writing CSV data.
-     * @return a new CsvAppender instance
+     * @return a new CsvWriter instance
      * @throws NullPointerException if writer is null
      */
-    public CsvWriter writer(final Writer writer) {
+    public CsvWriter to(final Writer writer) {
         Objects.requireNonNull(writer, "writer must not be null");
-        return new CsvWriter(writer, fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
+
+        return new CsvWriter(writer, fieldSeparator, textDelimiter, textDelimitStrategy,
+            lineDelimiter);
+    }
+
+    /**
+     * Constructs a {@link CsvWriter} for the specified Path.
+     *
+     * @param path the Path (file) to write data to.
+     * @param charset the character set to be used for writing data to the file.
+     * @param openOptions options specifying how the file is opened.
+     *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
+     * @return a new CsvWriter instance
+     * @throws IOException if a write error occurs
+     * @throws NullPointerException if path or charset is null
+     */
+    public CsvWriter to(final Path path, final Charset charset, final OpenOption... openOptions)
+        throws IOException {
+
+        Objects.requireNonNull(path, "path must not be null");
+        Objects.requireNonNull(charset, "charset must not be null");
+
+        return to(new FastBufferedWriter(new OutputStreamWriter(
+            Files.newOutputStream(path, openOptions), charset)));
+    }
+
+    /**
+     * Constructs a {@link CsvWriter} for the specified File.
+     *
+     * @param file the file to write data to.
+     * @param charset the character set to be used for writing data to the file.
+     * @param append if {@code true}, then file is opened in append mode rather overwriting it.
+     * @return a new CsvWriter instance
+     * @throws IOException if a write error occurs
+     * @throws NullPointerException if file or charset is null
+     */
+    public CsvWriter to(final File file, final Charset charset, final boolean append)
+        throws IOException {
+
+        Objects.requireNonNull(file, "file must not be null");
+        Objects.requireNonNull(charset, "charset must not be null");
+
+        return to(new FastBufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append),
+            charset)));
     }
 
 }

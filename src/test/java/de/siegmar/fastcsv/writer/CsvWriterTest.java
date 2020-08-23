@@ -96,9 +96,9 @@ public class CsvWriterTest {
     @Test
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
-        final CsvWriter appender = csvWriter.writer(sw);
-        appender.appendField("foo");
-        appender.appendField("bar");
+        final CsvWriter appender = csvWriter.to(sw);
+        appender.writeField("foo");
+        appender.writeField("bar");
         appender.close();
         assertEquals("foo,bar", sw.toString());
     }
@@ -112,7 +112,7 @@ public class CsvWriterTest {
 
     private String write(final Collection<String[]> rows) throws IOException {
         final StringWriter stringWriter = new StringWriter();
-        csvWriter.writeAll(rows, stringWriter);
+        csvWriter.to(stringWriter).writeLines(rows);
 
         return stringWriter.toString();
     }

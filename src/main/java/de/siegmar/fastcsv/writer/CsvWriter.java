@@ -21,6 +21,7 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -41,10 +42,6 @@ public final class CsvWriter implements Closeable, Flushable {
 
     private boolean newline = true;
 
-    public static CsvWriterBuilder builder() {
-        return new CsvWriterBuilder();
-    }
-
     CsvWriter(final Writer writer, final char fieldSeparator, final char textDelimiter,
               final TextDelimitStrategy textDelimitStrategy, final char[] lineDelimiter) {
         this.writer = writer;
@@ -54,6 +51,10 @@ public final class CsvWriter implements Closeable, Flushable {
         this.lineDelimiter = new String(lineDelimiter);
     }
 
+    public static CsvWriterBuilder builder() {
+        return new CsvWriterBuilder();
+    }
+
     /**
      * Appends a field to the current row. Automatically adds field separator and text delimiters
      * as required.
@@ -61,7 +62,7 @@ public final class CsvWriter implements Closeable, Flushable {
      * @param value the field to append (can be {@code null})
      * @throws UncheckedIOException if a write error occurs
      */
-    public void appendField(final String value) {
+    public void writeField(final String value) {
         if (!newline) {
             write(fieldSeparator);
         } else {
@@ -139,15 +140,19 @@ public final class CsvWriter implements Closeable, Flushable {
         }
     }
 
+    public void writeLines(final Collection<String[]> rows) {
+        rows.forEach(this::writeLine);
+    }
+
     /**
      * Appends a complete line - one or more fields and new line character(s) at the end.
      *
      * @param values the fields to append ({@code null} values are handled as empty strings)
      * @throws UncheckedIOException if a write error occurs
      */
-    public void appendLine(final String... values) {
+    public void writeLine(final String... values) {
         for (final String value : values) {
-            appendField(value);
+            writeField(value);
         }
         endLine();
     }

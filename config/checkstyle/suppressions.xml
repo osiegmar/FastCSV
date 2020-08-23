@@ -12,9 +12,11 @@
     <suppress files="RowReader.java" checks="NestedIfDepth"/>
     <suppress files="RowReader.java" checks="ExecutableStatementCount"/>
 
-    <suppress files="CsvAppender.java" checks="CyclomaticComplexity"/>
-    <suppress files="CsvAppender.java" checks="NPathComplexity"/>
-    <suppress files="CsvAppender.java" checks="InnerAssignment"/>
+    <suppress files="CsvWriter.java" checks="CyclomaticComplexity"/>
+    <suppress files="CsvWriter.java" checks="NPathComplexity"/>
+    <suppress files="CsvWriter.java" checks="InnerAssignment"/>
+
+    <suppress files="CsvWriterBuilder.java" checks="HiddenField"/>
 
     <suppress files=".*Test.java" checks="MagicNumber"/>
 
