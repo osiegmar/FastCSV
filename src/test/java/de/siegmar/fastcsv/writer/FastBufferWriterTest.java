@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 
 public class FastBufferWriterTest {
 
-    private StringWriter sw = new StringWriter();
-    private FastBufferedWriter fbw = new FastBufferedWriter(sw);
+    private final StringWriter sw = new StringWriter();
+    private final FastBufferedWriter fbw = new FastBufferedWriter(sw);
 
     @Test
     public void appendSingle() throws IOException {

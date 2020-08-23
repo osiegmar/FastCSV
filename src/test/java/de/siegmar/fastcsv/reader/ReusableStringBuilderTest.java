@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 public class ReusableStringBuilderTest {
 
-    private ReusableStringBuilder sb = new ReusableStringBuilder(1);
+    private final ReusableStringBuilder sb = new ReusableStringBuilder(1);
 
     @Test
     public void empty() {

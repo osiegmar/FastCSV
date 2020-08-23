@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 public class CsvReaderTest {
 
-    private CsvReader csvReader = new CsvReader();
+    private final CsvReader csvReader = new CsvReader();
 
     // null / empty input
 
