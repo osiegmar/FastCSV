@@ -24,9 +24,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,12 +69,8 @@ public class CsvWriterExampleTest {
     public void path() throws IOException {
         final Path path = Files.createTempFile("fastcsv", ".csv");
         final Charset charset = StandardCharsets.UTF_8;
-        final OpenOption[] option = {
-            StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING,
-        };
 
-        try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset, option)) {
+        try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset)) {
             csv.writeLine("foo", "bar").writeLine("foo1", "bar1");
         }
 
