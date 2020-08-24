@@ -33,8 +33,8 @@ public class CsvWriterExampleTest {
     @Test
     public void simple() throws IOException {
         final StringWriter sw = new StringWriter();
-        CsvWriter.builder().to(sw).writeLine("foo", "bar");
-        assertEquals("foo,bar\r\n", sw.toString());
+        CsvWriter.builder().to(sw).writeLine("value1", "value2");
+        assertEquals("value1,value2\r\n", sw.toString());
     }
 
     @Test
@@ -47,10 +47,10 @@ public class CsvWriterExampleTest {
             .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
             .lineDelimiter("\n")
             .to(sw)
-            .writeField("foo").writeField("bar").endLine()
-            .writeLine("foo1", "bar1");
+            .writeField("header1").writeField("header2").endLine()
+            .writeLine("value1", "value2");
 
-        assertEquals("foo,bar\nfoo1,bar1\n", sw.toString());
+        assertEquals("header1,header2\nvalue1,value2\n", sw.toString());
     }
 
     @Test
@@ -59,10 +59,10 @@ public class CsvWriterExampleTest {
 
         CsvWriter.builder()
             .to(sw)
-            .writeLine("foo", "bar")
-            .writeLine("foo1", "bar1");
+            .writeLine("header1", "header2")
+            .writeLine("value1", "value2");
 
-        assertEquals("foo,bar\r\nfoo1,bar1\r\n", sw.toString());
+        assertEquals("header1,header2\r\nvalue1,value2\r\n", sw.toString());
     }
 
     @Test
@@ -71,26 +71,25 @@ public class CsvWriterExampleTest {
         final Charset charset = StandardCharsets.UTF_8;
 
         try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset)) {
-            csv.writeLine("foo", "bar").writeLine("foo1", "bar1");
+            csv.writeLine("header1", "header2").writeLine("value1", "value2");
         }
 
-        assertEquals("foo,bar\r\nfoo1,bar1\r\n",
+        assertEquals("header1,header2\r\nvalue1,value2\r\n",
             new String(Files.readAllBytes(path), charset));
     }
 
     @Test
     public void file() throws IOException {
-        final Path path = Files.createTempFile("fastcsv", ".csv");
-        final File file = path.toFile();
+        final File file = File.createTempFile("fastcsv", ".csv");
         final Charset charset = StandardCharsets.UTF_8;
         final boolean append = false;
 
         try (CloseableCsvWriter csv = CsvWriter.builder().to(file, charset, append)) {
-            csv.writeLine("foo", "bar").writeLine("foo1", "bar1");
+            csv.writeLine("header1", "header2").writeLine("value1", "value2");
         }
 
-        assertEquals("foo,bar\r\nfoo1,bar1\r\n",
-            new String(Files.readAllBytes(path), charset));
+        assertEquals("header1,header2\r\nvalue1,value2\r\n",
+            new String(Files.readAllBytes(file.toPath()), charset));
     }
 
 }

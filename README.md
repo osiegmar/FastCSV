@@ -1,13 +1,10 @@
-FastCSV
-=======
+# FastCSV
 
-[![build](https://github.com/osiegmar/FastCSV/workflows/build/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions?query=branch%3Amaster)
-[![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
-[![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv.svg)](https://search.maven.org/search?q=g:%22de.siegmar%22%20AND%20a:%22fastcsv%22)
+[![Build Status](https://travis-ci.org/osiegmar/FastCSV.svg?branch=master)](https://travis-ci.org/osiegmar/FastCSV)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
 
 FastCSV is a ultra fast and simple [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
 library for Java, licensed under the Apache License, Version 2.0.
-
 
 ## Benchmark
 
@@ -16,9 +13,7 @@ Benchmark from the
 
 ![Benchmark](benchmark.png "Benchmark")
 
-
-Features
---------
+## Features
 
 - RFC 4180 compliant CSV reader and writer
 - Ultra fast
@@ -33,15 +28,11 @@ Features
 - Support for reading and writing in an iterative or all at once way
 - Support for skipping empty rows and preserving the original line number (useful for error messages)
 
-
-Requirements
-------------
+## Requirements
 
 - Java 8
 
-
-CsvReader Examples
-------------------
+## CsvReader Examples
 
 Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
 
@@ -71,7 +62,6 @@ for (CsvRow row : csv.getRows()) {
 }
 ```
 
-
 Read full CSV file with header at once (RFC standard format, UTF-8 encoded)
 
 ```java
@@ -85,7 +75,6 @@ for (CsvRow row : csv.getRows()) {
 }
 ```
 
-
 Custom settings
 
 ```java
@@ -94,58 +83,38 @@ csvReader.setFieldSeparator(';');
 csvReader.setTextDelimiter('\'');
 ```
 
-
-CsvWriter Examples
-------------------
+## CsvWriter Examples
 
 Iterative writing of a CSV file (RFC standard format, UTF-8 encoded)
 
 ```java
-File file = new File("foo.csv");
-CsvWriter csvWriter = new CsvWriter();
+Path path = Files.createTempFile("fastcsv", ".csv");
+Charset charset = StandardCharsets.UTF_8;
 
-try (CsvAppender csvAppender = csvWriter.append(file, StandardCharsets.UTF_8)) {
-    // header
-    csvAppender.appendLine("header1", "header2");
-
-    // 1st line in one operation
-    csvAppender.appendLine("value1", "value2");
-
-    // 2nd line in split operations
-    csvAppender.appendField("value3");
-    csvAppender.appendField("value4");
-    csvAppender.endLine();
+try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset)) {
+    csv.writeLine("header1", "header2").writeLine("value1", "value2");
 }
 ```
-
-
-Write full CSV file at once (RFC standard format, UTF-8 encoded)
-
-```java
-File file = new File("foo.csv");
-CsvWriter csvWriter = new CsvWriter();
-
-Collection<String[]> data = new ArrayList<>();
-data.add(new String[] { "header1", "header2" });
-data.add(new String[] { "value1", "value2" });
-
-csvWriter.write(file, StandardCharsets.UTF_8, data);
-```
-
 
 Custom settings
 
 ```java
-CsvWriter csvWriter = new CsvWriter();
-csvWriter.setFieldSeparator(';');
-csvWriter.setTextDelimiter('\'');
-csvWriter.setLineDelimiter("\r\n".toCharArray());
-csvWriter.setTextDelimitStrategy(TextDelimitStrategy.ALWAYS);
+CsvWriter.builder()
+    .fieldSeparator(',')
+    .textDelimiter('"')
+    .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
+    .lineDelimiter("\n");
 ```
 
+## Contribution
 
-Copyright
----------
+- Fork
+- Code
+- Add test(s)
+- Commit
+- Send me a pull request
+
+## Copyright
 
 Copyright 2020 Oliver Siegmar
 
