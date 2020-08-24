@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 public class CsvReaderTest {
 
-    private final CsvReader csvReader = new CsvReader();
+    private final CsvReaderBuilder crb = CsvReader.builder();
 
     // null / empty input
 
@@ -56,7 +56,7 @@ public class CsvReaderTest {
 
     @Test
     public void emptyContainer() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         final CsvContainer csv = read("");
         assertNotNull(csv);
         assertNull(csv.getHeader());
@@ -68,13 +68,13 @@ public class CsvReaderTest {
 
     @Test
     public void singleRowNoSkipEmpty() throws IOException {
-        csvReader.setSkipEmptyRows(false);
+        crb.skipEmptyRows(false);
         assertNull(parse("").nextRow());
     }
 
     @Test
     public void multipleRowsNoSkipEmpty() throws IOException {
-        csvReader.setSkipEmptyRows(false);
+        crb.skipEmptyRows(false);
         final CsvContainer csv = read("\n\n");
 
         final List<CsvRow> rows = csv.getRows();
@@ -106,8 +106,8 @@ public class CsvReaderTest {
 
     @Test
     public void differentFieldCountSuccess() throws IOException {
-        csvReader.setErrorOnDifferentFieldCount(true);
-        csvReader.setSkipEmptyRows(false);
+        crb.errorOnDifferentFieldCount(true);
+        crb.skipEmptyRows(false);
 
         read("foo\nbar");
         read("foo\nbar\n");
@@ -121,8 +121,8 @@ public class CsvReaderTest {
 
     @Test
     public void differentFieldCountFail() {
-        csvReader.setErrorOnDifferentFieldCount(true);
-        csvReader.setSkipEmptyRows(false);
+        crb.errorOnDifferentFieldCount(true);
+        crb.skipEmptyRows(false);
 
         assertThrows(IOException.class, () -> read("foo\nbar,baz"));
     }
@@ -140,20 +140,20 @@ public class CsvReaderTest {
 
     @Test
     public void getFieldByName() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         assertEquals("bar", parse("foo\nbar").nextRow().getField("foo"));
     }
 
     @Test
     public void getHeader() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         final CsvContainer csv = read("foo,bar\n1,2");
         assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
     }
 
     @Test
     public void getHeaderEmptyRows() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         final CsvContainer csv = read("foo,bar");
         assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
         assertEquals(0, csv.getRowCount());
@@ -169,29 +169,29 @@ public class CsvReaderTest {
 
     @Test
     public void getNonExistingHeader() throws IOException {
-        final CsvParser csv = parse("foo\n");
+        final CsvReader csv = parse("foo\n");
         csv.nextRow();
         assertThrows(IllegalStateException.class, csv::getHeader);
     }
 
     @Test
     public void getNonExistingFieldMap() throws IOException {
-        final CsvParser csv = parse("foo\n");
+        final CsvReader csv = parse("foo\n");
         final CsvRow csvRow = csv.nextRow();
         assertThrows(IllegalStateException.class, csvRow::getFieldMap);
     }
 
     @Test
     public void getHeaderWithoutNextRowCall() throws IOException {
-        csvReader.setContainsHeader(true);
-        final CsvParser csv = parse("foo\n");
+        crb.containsHeader(true);
+        final CsvReader csv = parse("foo\n");
         assertThrows(IllegalStateException.class, csv::getHeader);
     }
 
     // Request field by name, but column name doesn't exist
     @Test
     public void getNonExistingFieldByName() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         assertNull(parse("foo\nfaz").nextRow().getField("bar"));
     }
 
@@ -299,7 +299,7 @@ public class CsvReaderTest {
 
     @Test
     public void lineNumbering() throws IOException {
-        final CsvParser csv = parse("\"a multi-\nline string\"\n\"another\none\"");
+        final CsvReader csv = parse("\"a multi-\nline string\"\n\"another\none\"");
 
         CsvRow row = csv.nextRow();
         assertEquals(Collections.singletonList("a multi-\nline string"), row.getFields());
@@ -320,7 +320,7 @@ public class CsvReaderTest {
 
     @Test
     public void toStringWithHeader() throws IOException {
-        csvReader.setContainsHeader(true);
+        crb.containsHeader(true);
         final CsvRow csvRow = parse("headerA,headerB,headerC\nfieldA,fieldB\n").nextRow();
         assertEquals(
             "CsvRow{originalLineNumber=2, fields={headerA=fieldA, headerB=fieldB, headerC=}}",
@@ -330,9 +330,9 @@ public class CsvReaderTest {
     // test helpers
 
     private CsvRow readCsvRow(final String data) throws IOException {
-        try (CsvParser csvParser = parse(data)) {
-            final CsvRow csvRow = csvParser.nextRow();
-            assertNull(csvParser.nextRow());
+        try (CsvReader csvReader = parse(data)) {
+            final CsvRow csvRow = csvReader.nextRow();
+            assertNull(csvReader.nextRow());
             return csvRow;
         }
     }
@@ -342,11 +342,11 @@ public class CsvReaderTest {
     }
 
     private CsvContainer read(final String data) throws IOException {
-        return csvReader.read(new StringReader(data));
+        return crb.read(new StringReader(data));
     }
 
-    private CsvParser parse(final String data) throws IOException {
-        return csvReader.parse(new StringReader(data));
+    private CsvReader parse(final String data) throws IOException {
+        return crb.parse(new StringReader(data));
     }
 
 }

@@ -4,7 +4,7 @@
 
     <!-- sacrifice some coding styles for the sake of performance -->
 
-    <suppress files="CsvParser.java" checks="CyclomaticComplexity"/>
+    <suppress files="CsvReader.java" checks="CyclomaticComplexity"/>
 
     <suppress files="RowReader.java" checks="CyclomaticComplexity"/>
     <suppress files="RowReader.java" checks="InnerAssignment"/>
@@ -16,6 +16,7 @@
     <suppress files="CsvWriter.java" checks="NPathComplexity"/>
     <suppress files="CsvWriter.java" checks="InnerAssignment"/>
 
+    <suppress files="CsvReaderBuilder.java" checks="HiddenField"/>
     <suppress files="CsvWriterBuilder.java" checks="HiddenField"/>
 
     <suppress files=".*Test.java" checks="MagicNumber"/>
