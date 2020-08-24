@@ -34,7 +34,7 @@ public class CsvWriterExampleTest {
     public void simple() throws IOException {
         final StringWriter sw = new StringWriter();
         CsvWriter.builder().to(sw).writeLine("foo", "bar");
-        assertEquals("foo,bar\n", sw.toString());
+        assertEquals("foo,bar\r\n", sw.toString());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class CsvWriterExampleTest {
             .writeLine("foo", "bar")
             .writeLine("foo1", "bar1");
 
-        assertEquals("foo,bar\nfoo1,bar1\n", sw.toString());
+        assertEquals("foo,bar\r\nfoo1,bar1\r\n", sw.toString());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class CsvWriterExampleTest {
             csv.writeLine("foo", "bar").writeLine("foo1", "bar1");
         }
 
-        assertEquals("foo,bar\nfoo1,bar1\n",
+        assertEquals("foo,bar\r\nfoo1,bar1\r\n",
             new String(Files.readAllBytes(path), charset));
     }
 
@@ -89,7 +89,7 @@ public class CsvWriterExampleTest {
             csv.writeLine("foo", "bar").writeLine("foo1", "bar1");
         }
 
-        assertEquals("foo,bar\nfoo1,bar1\n",
+        assertEquals("foo,bar\r\nfoo1,bar1\r\n",
             new String(Files.readAllBytes(path), charset));
     }
 

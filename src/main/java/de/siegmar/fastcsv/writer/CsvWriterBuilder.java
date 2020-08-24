@@ -52,9 +52,9 @@ public final class CsvWriterBuilder {
     private TextDelimitStrategy textDelimitStrategy = TextDelimitStrategy.REQUIRED;
 
     /**
-     * The line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
+     * The line delimiter character(s) to be used (default: CRLF as defined in RFC 4180).
      */
-    private String lineDelimiter = System.lineSeparator();
+    private String lineDelimiter = "\r\n";
 
     CsvWriterBuilder() {
     }
