@@ -39,30 +39,30 @@ public class CsvWriterExampleTest {
 
     @Test
     public void complex() throws IOException {
-        final StringWriter sb = new StringWriter();
+        final StringWriter sw = new StringWriter();
 
         CsvWriter.builder()
             .fieldSeparator(',')
             .textDelimiter('"')
             .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
             .lineDelimiter("\n")
-            .to(sb)
+            .to(sw)
             .writeField("foo").writeField("bar").endLine()
             .writeLine("foo1", "bar1");
 
-        assertEquals("foo,bar\nfoo1,bar1\n", sb.toString());
+        assertEquals("foo,bar\nfoo1,bar1\n", sw.toString());
     }
 
     @Test
-    public void stringBuilder() throws IOException {
-        final StringWriter sb = new StringWriter();
+    public void stringWriter() throws IOException {
+        final StringWriter sw = new StringWriter();
 
         CsvWriter.builder()
-            .to(sb)
+            .to(sw)
             .writeLine("foo", "bar")
             .writeLine("foo1", "bar1");
 
-        assertEquals("foo,bar\nfoo1,bar1\n", sb.toString());
+        assertEquals("foo,bar\nfoo1,bar1\n", sw.toString());
     }
 
     @Test
