@@ -33,7 +33,7 @@ public class CsvWriterExampleTest {
     @Test
     public void simple() throws IOException {
         final StringWriter sw = new StringWriter();
-        CsvWriter.builder().to(sw).writeLine("value1", "value2");
+        CsvWriter.builder().build(sw).writeLine("value1", "value2");
         assertEquals("value1,value2\r\n", sw.toString());
     }
 
@@ -46,7 +46,7 @@ public class CsvWriterExampleTest {
             .textDelimiter('"')
             .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
             .lineDelimiter("\n")
-            .to(sw)
+            .build(sw)
             .writeField("header1").writeField("header2").endLine()
             .writeLine("value1", "value2");
 
@@ -58,7 +58,7 @@ public class CsvWriterExampleTest {
         final StringWriter sw = new StringWriter();
 
         CsvWriter.builder()
-            .to(sw)
+            .build(sw)
             .writeLine("header1", "header2")
             .writeLine("value1", "value2");
 
@@ -70,7 +70,7 @@ public class CsvWriterExampleTest {
         final Path path = Files.createTempFile("fastcsv", ".csv");
         final Charset charset = StandardCharsets.UTF_8;
 
-        try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset)) {
+        try (CloseableCsvWriter csv = CsvWriter.builder().build(path, charset)) {
             csv.writeLine("header1", "header2").writeLine("value1", "value2");
         }
 
@@ -84,7 +84,7 @@ public class CsvWriterExampleTest {
         final Charset charset = StandardCharsets.UTF_8;
         final boolean append = false;
 
-        try (CloseableCsvWriter csv = CsvWriter.builder().to(file, charset, append)) {
+        try (CloseableCsvWriter csv = CsvWriter.builder().build(file, charset, append)) {
             csv.writeLine("header1", "header2").writeLine("value1", "value2");
         }
 

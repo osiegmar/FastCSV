@@ -29,7 +29,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * This is the main class for writing CSV data.
+ * This builder is used to create configured instances of {@link CsvWriter}. The default
+ * configuration of this class complies with RFC 4180.
  *
  * @author Oliver Siegmar
  */
@@ -52,7 +53,7 @@ public final class CsvWriterBuilder {
     private TextDelimitStrategy textDelimitStrategy = TextDelimitStrategy.REQUIRED;
 
     /**
-     * The line delimiter character(s) to be used (default: CRLF as defined in RFC 4180).
+     * The line delimiter character(s) to be used (default: CRLF).
      */
     private String lineDelimiter = "\r\n";
 
@@ -105,7 +106,7 @@ public final class CsvWriterBuilder {
      * @return a new CsvWriter instance
      * @throws NullPointerException if writer is null
      */
-    public CsvWriter to(final Writer writer) {
+    public CsvWriter build(final Writer writer) {
         Objects.requireNonNull(writer, "writer must not be null");
 
         return new CsvWriter(writer, fieldSeparator, textDelimiter, textDelimitStrategy,
@@ -123,8 +124,8 @@ public final class CsvWriterBuilder {
      * @throws IOException          if a write error occurs
      * @throws NullPointerException if path or charset is null
      */
-    public CloseableCsvWriter to(final Path path, final Charset charset,
-                                 final OpenOption... openOptions)
+    public CloseableCsvWriter build(final Path path, final Charset charset,
+                                    final OpenOption... openOptions)
         throws IOException {
 
         Objects.requireNonNull(path, "path must not be null");
@@ -144,7 +145,7 @@ public final class CsvWriterBuilder {
      * @throws IOException          if a write error occurs
      * @throws NullPointerException if file or charset is null
      */
-    public CloseableCsvWriter to(final File file, final Charset charset, final boolean append)
+    public CloseableCsvWriter build(final File file, final Charset charset, final boolean append)
         throws IOException {
 
         Objects.requireNonNull(file, "file must not be null");

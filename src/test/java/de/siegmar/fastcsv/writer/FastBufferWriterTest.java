@@ -57,17 +57,32 @@ public class FastBufferWriterTest {
 
     @Test
     public void appendLarge() throws IOException {
-        final StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < 8192; i++) {
-            sb.append("ab");
-        }
-        fbw.append(sb.toString());
+        final String sb = buildLargeData();
+        fbw.append(sb);
 
         // also test flush
         fbw.flush();
 
-        assertEquals(sb.toString(), sw.toString());
+        assertEquals(sb, sw.toString());
+    }
+
+    private String buildLargeData() {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8192; i++) {
+            sb.append("ab");
+        }
+        return sb.toString();
+    }
+
+    @Test
+    public void appendLargeCharArray() throws IOException {
+        final String sb = buildLargeData();
+        fbw.write(sb.toCharArray());
+
+        // also test flush
+        fbw.flush();
+
+        assertEquals(sb, sw.toString());
     }
 
 }

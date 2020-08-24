@@ -94,9 +94,14 @@ public class CsvWriterTest {
     }
 
     @Test
+    public void escape() throws IOException {
+        assertEquals("foo,\"\"\"bar\"\"\"\n", write("foo", "\"bar\""));
+    }
+
+    @Test
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
-        final CsvWriter appender = csvWriter.to(sw);
+        final CsvWriter appender = csvWriter.build(sw);
         appender.writeField("foo");
         appender.writeField("bar");
         assertEquals("foo,bar", sw.toString());
@@ -110,12 +115,12 @@ public class CsvWriterTest {
     }
 
     private String write(final Collection<String[]> rows) throws IOException {
-        final StringWriter sb = new StringWriter();
-        final CsvWriter to = csvWriter.to(sb);
+        final StringWriter sw = new StringWriter();
+        final CsvWriter to = csvWriter.build(sw);
         for (String[] row : rows) {
             to.writeLine(row);
         }
-        return sb.toString();
+        return sw.toString();
     }
 
 }

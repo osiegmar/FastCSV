@@ -23,6 +23,13 @@ import java.util.Objects;
 /**
  * This is the main class for writing CSV data.
  *
+ * Example use:
+ * <pre>{@code
+ * CsvWriter.builder()
+ *     .build(new PrintWriter(System.out))
+ *     .writeLine("Hello", "world");
+ * }</pre>
+ *
  * @author Oliver Siegmar
  */
 public class CsvWriter {
@@ -47,6 +54,11 @@ public class CsvWriter {
         this.lineDelimiter = lineDelimiter;
     }
 
+    /**
+     * Creates a {@link CsvWriterBuilder} instance used to configure and create instances of
+     * this class.
+     * @return CsvWriterBuilder instance with default settings.
+     */
     public static CsvWriterBuilder builder() {
         return new CsvWriterBuilder();
     }

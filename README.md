@@ -91,7 +91,7 @@ Iterative writing of a CSV file (RFC standard format, UTF-8 encoded)
 Path path = Files.createTempFile("fastcsv", ".csv");
 Charset charset = StandardCharsets.UTF_8;
 
-try (CloseableCsvWriter csv = CsvWriter.builder().to(path, charset)) {
+try (CloseableCsvWriter csv = CsvWriter.builder().build(path, charset)) {
     csv.writeLine("header1", "header2").writeLine("value1", "value2");
 }
 ```
