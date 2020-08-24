@@ -32,9 +32,9 @@ public class CsvWriterExampleTest {
 
     @Test
     public void simple() throws IOException {
-        final StringWriter sb = new StringWriter();
-        CsvWriter.builder().to(sb).writeLine("foo", "bar");
-        assertEquals("foo,bar\n", sb.toString());
+        final StringWriter sw = new StringWriter();
+        CsvWriter.builder().to(sw).writeLine("foo", "bar");
+        assertEquals("foo,bar\n", sw.toString());
     }
 
     @Test
