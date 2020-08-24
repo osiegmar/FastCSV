@@ -25,17 +25,17 @@ import java.util.Objects;
  *
  * Example use:
  * <pre>{@code
- * CsvWriter.builder()
- *     .build(new PrintWriter(System.out))
- *     .writeLine("Hello", "world");
+ * try (CloseableCsvWriter csv = CsvWriter.builder().build(file, StandardCharsets.UTF_8)) {
+ *     csv.writeLine("Hello", "world");
+ * }
  * }</pre>
  *
  * @author Oliver Siegmar
  */
 public class CsvWriter {
 
-    private static final char LF = '\n';
     private static final char CR = '\r';
+    private static final char LF = '\n';
 
     protected final Writer writer;
     private final char fieldSeparator;
@@ -156,7 +156,24 @@ public class CsvWriter {
     /**
      * Appends a complete line - one or more fields and new line character(s) at the end.
      *
-     * @param values the fields to append ({@code null} values are handled as empty strings)
+     * @param values the fields to append ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link TextDelimitStrategy#EMPTY}))
+     * @throws IOException if a write error occurs
+     * @return This CsvWriter.
+     */
+    public CsvWriter writeLine(final Iterable<String> values) throws IOException {
+        for (final String value : values) {
+            writeField(value);
+        }
+        endLine();
+        return this;
+    }
+
+    /**
+     * Appends a complete line - one or more fields and new line character(s) at the end.
+     *
+     * @param values the fields to append ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link TextDelimitStrategy#EMPTY}))
      * @throws IOException if a write error occurs
      * @return This CsvWriter.
      */

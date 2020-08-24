@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -55,12 +55,11 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void twoLinesSingleValue() throws IOException {
-        final Collection<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"foo"});
-        rows.add(new String[] {"bar"});
-
-        assertEquals("foo\nbar\n", write(rows));
+    public void oneLineTwoValuesAsList() throws IOException {
+        final List<String> cols = new ArrayList<>();
+        cols.add("foo");
+        cols.add("bar");
+        assertEquals("foo,bar\n", write(cols));
     }
 
     @Test
@@ -108,18 +107,16 @@ public class CsvWriterTest {
     }
 
     private String write(final String... cols) throws IOException {
-        final Collection<String[]> rows = new ArrayList<>();
-        rows.add(cols);
-
-        return write(rows);
-    }
-
-    private String write(final Collection<String[]> rows) throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = csvWriter.build(sw);
-        for (String[] row : rows) {
-            to.writeLine(row);
-        }
+        to.writeLine(cols);
+        return sw.toString();
+    }
+
+    private String write(final List<String> cols) throws IOException {
+        final StringWriter sw = new StringWriter();
+        final CsvWriter to = csvWriter.build(sw);
+        to.writeLine(cols);
         return sw.toString();
     }
 
