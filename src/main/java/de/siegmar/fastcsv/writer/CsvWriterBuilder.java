@@ -16,8 +16,6 @@
 
 package de.siegmar.fastcsv.writer;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -132,26 +130,6 @@ public final class CsvWriterBuilder {
         Objects.requireNonNull(charset, "charset must not be null");
 
         return new CloseableCsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
-            fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
-    }
-
-    /**
-     * Constructs a {@link CsvWriter} for the specified File.
-     *
-     * @param file    the file to write data to.
-     * @param charset the character set to be used for writing data to the file.
-     * @param append  if {@code true}, then file is opened in append mode rather overwriting it.
-     * @return a new CsvWriter instance
-     * @throws IOException          if a write error occurs
-     * @throws NullPointerException if file or charset is null
-     */
-    public CloseableCsvWriter build(final File file, final Charset charset, final boolean append)
-        throws IOException {
-
-        Objects.requireNonNull(file, "file must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-
-        return new CloseableCsvWriter(fastBuffer(new FileOutputStream(file, append), charset),
             fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
     }
 

@@ -18,7 +18,6 @@ package de.siegmar.fastcsv.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
@@ -76,20 +75,6 @@ public class CsvWriterExampleTest {
 
         assertEquals("header1,header2\r\nvalue1,value2\r\n",
             new String(Files.readAllBytes(path), charset));
-    }
-
-    @Test
-    public void file() throws IOException {
-        final File file = File.createTempFile("fastcsv", ".csv");
-        final Charset charset = StandardCharsets.UTF_8;
-        final boolean append = false;
-
-        try (CloseableCsvWriter csv = CsvWriter.builder().build(file, charset, append)) {
-            csv.writeLine("header1", "header2").writeLine("value1", "value2");
-        }
-
-        assertEquals("header1,header2\r\nvalue1,value2\r\n",
-            new String(Files.readAllBytes(file.toPath()), charset));
     }
 
 }

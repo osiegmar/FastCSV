@@ -16,14 +16,12 @@
 
 package de.siegmar.fastcsv.reader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -110,21 +108,6 @@ public class CsvReaderBuilder {
     /**
      * Reads an entire file and returns a CsvContainer containing the data.
      *
-     * @param file    the file to read data from.
-     * @param charset the character set to use - must not be {@code null}.
-     * @return the entire file's data - never {@code null}.
-     * @throws IOException if an I/O error occurs.
-     */
-    public CsvContainer read(final File file, final Charset charset) throws IOException {
-        return read(
-            Objects.requireNonNull(file.toPath(), "file must not be null"),
-            Objects.requireNonNull(charset, "charset must not be null")
-        );
-    }
-
-    /**
-     * Reads an entire file and returns a CsvContainer containing the data.
-     *
      * @param path    the file to read data from.
      * @param charset the character set to use - must not be {@code null}.
      * @return the entire file's data - never {@code null}.
@@ -136,6 +119,10 @@ public class CsvReaderBuilder {
         try (Reader reader = newPathReader(path, charset)) {
             return read(reader);
         }
+    }
+
+    private static Reader newPathReader(final Path path, final Charset charset) throws IOException {
+        return new InputStreamReader(Files.newInputStream(path), charset);
     }
 
     /**
@@ -168,7 +155,7 @@ public class CsvReaderBuilder {
      *
      * @param path    the file to read data from.
      * @param charset the character set to use - must not be {@code null}.
-     * @return a new CsvParser - never {@code null}.
+     * @return a new CsvReader - never {@code null}.
      * @throws IOException if an I/O error occurs.
      */
     public CsvReader parse(final Path path, final Charset charset) throws IOException {
@@ -180,37 +167,18 @@ public class CsvReaderBuilder {
 
     /**
      * Constructs a new {@link CsvReader} for the specified arguments.
-     *
-     * @param file    the file to read data from.
-     * @param charset the character set to use - must not be {@code null}.
-     * @return a new CsvParser - never {@code null}.
-     * @throws IOException if an I/O error occurs.
-     */
-    public CsvReader parse(final File file, final Charset charset) throws IOException {
-        return parse(
-            Objects.requireNonNull(file, "file must not be null").toPath(),
-            Objects.requireNonNull(charset, "charset must not be null")
-        );
-    }
-
-    /**
-     * Constructs a new {@link CsvReader} for the specified arguments.
      * <p>
      * This library uses built-in buffering, so you do not need to pass in a buffered Reader
      * implementation such as {@link java.io.BufferedReader}.
      * Performance may be even likely better if you do not.
      *
      * @param reader the data source to read from.
-     * @return a new CsvParser - never {@code null}.
+     * @return a new CsvReader - never {@code null}.
      */
     public CsvReader parse(final Reader reader) {
         return new CsvReader(Objects.requireNonNull(reader, "reader must not be null"),
             fieldSeparator, textDelimiter, containsHeader, skipEmptyRows,
             errorOnDifferentFieldCount);
-    }
-
-    private static Reader newPathReader(final Path path, final Charset charset) throws IOException {
-        return new InputStreamReader(Files.newInputStream(path, StandardOpenOption.READ), charset);
     }
 
 }
