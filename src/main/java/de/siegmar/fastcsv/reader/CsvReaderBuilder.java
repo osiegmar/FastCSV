@@ -121,10 +121,6 @@ public class CsvReaderBuilder {
         }
     }
 
-    private static Reader newPathReader(final Path path, final Charset charset) throws IOException {
-        return new InputStreamReader(Files.newInputStream(path), charset);
-    }
-
     /**
      * Reads from the provided reader until the end and returns a CsvContainer containing the data.
      * <p>
@@ -179,6 +175,10 @@ public class CsvReaderBuilder {
         return new CsvReader(Objects.requireNonNull(reader, "reader must not be null"),
             fieldSeparator, textDelimiter, containsHeader, skipEmptyRows,
             errorOnDifferentFieldCount);
+    }
+
+    private static Reader newPathReader(final Path path, final Charset charset) throws IOException {
+        return new InputStreamReader(Files.newInputStream(path), charset);
     }
 
 }
