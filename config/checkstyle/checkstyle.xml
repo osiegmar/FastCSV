@@ -206,7 +206,9 @@
 
         <!-- Checks for Metrics - http://checkstyle.sf.net/config_metrics.html -->
         <module name="BooleanExpressionComplexity"/>
-        <module name="ClassDataAbstractionCoupling"/>
+        <module name="ClassDataAbstractionCoupling">
+            <property name="excludeClassesRegexps" value="^.*Exception$"/>
+        </module>
         <module name="ClassFanOutComplexity"/>
         <module name="CyclomaticComplexity"/>
         <module name="NPathComplexity"/>

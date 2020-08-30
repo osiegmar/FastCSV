@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -30,6 +32,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private final CsvReader csvReader;
     private final Iterator<CsvRow> csvIterator;
+    private final Iterator<NamedCsvRow> namedCsvIterator;
 
     private List<String> header;
     private Map<String, Integer> headerMap;
@@ -38,6 +41,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     public NamedCsvReader(final CsvReader csvReader) {
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
+        namedCsvIterator = new CsvRowIterator();
     }
 
     public List<String> getHeader() {
@@ -78,17 +82,12 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
             initialize();
         }
 
-        return new Iterator<NamedCsvRow>() {
-            @Override
-            public boolean hasNext() {
-                return csvIterator.hasNext();
-            }
+        return namedCsvIterator;
+    }
 
-            @Override
-            public NamedCsvRow next() {
-                return new NamedCsvRowImpl(csvIterator.next(), headerMap);
-            }
-        };
+    @Override
+    public Spliterator<NamedCsvRow> spliterator() {
+        return new CsvRowSpliterator(iterator());
     }
 
     public Stream<NamedCsvRow> stream() {
@@ -98,6 +97,62 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     @Override
     public void close() throws IOException {
         csvReader.close();
+    }
+
+    private final class CsvRowIterator implements Iterator<NamedCsvRow> {
+
+        @Override
+        public boolean hasNext() {
+            return csvIterator.hasNext();
+        }
+
+        @Override
+        public NamedCsvRow next() {
+            return new NamedCsvRowImpl(csvIterator.next(), headerMap);
+        }
+
+    }
+
+    private static final class CsvRowSpliterator implements Spliterator<NamedCsvRow> {
+
+        private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
+
+        private final Iterator<NamedCsvRow> iterator;
+
+        CsvRowSpliterator(final Iterator<NamedCsvRow> iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public boolean tryAdvance(final Consumer<? super NamedCsvRow> action) {
+            if (!iterator.hasNext()) {
+                return false;
+            }
+
+            action.accept(iterator.next());
+            return true;
+        }
+
+        @Override
+        public void forEachRemaining(final Consumer<? super NamedCsvRow> action) {
+            iterator.forEachRemaining(action);
+        }
+
+        @Override
+        public Spliterator<NamedCsvRow> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return CHARACTERISTICS;
+        }
+
     }
 
 }

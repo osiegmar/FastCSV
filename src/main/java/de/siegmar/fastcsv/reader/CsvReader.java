@@ -23,6 +23,8 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -37,6 +39,11 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private final boolean skipEmptyRows;
     private final boolean errorOnDifferentFieldCount;
     private final Iterator<CsvRow> csvRowIterator = new CsvRowIterator();
+
+    private final RowHandler rowHandler = new RowHandler(32);
+    private long lineNo;
+    private int firstLineFieldCount = -1;
+    private boolean finished;
 
     CsvReader(final Reader reader, final char fieldSeparator, final char textDelimiter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
@@ -59,8 +66,49 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         return csvRowIterator;
     }
 
+    @Override
+    public Spliterator<CsvRow> spliterator() {
+        return new CsvRowSpliterator(csvRowIterator);
+    }
+
     public Stream<CsvRow> stream() {
         return StreamSupport.stream(spliterator(), false);
+    }
+
+    private CsvRow fetchRow() throws IOException {
+        while (!finished) {
+            final long startingLineNo = lineNo + 1;
+            finished = rowReader.readLine(rowHandler);
+            final String[] currentFields = rowHandler.end();
+            lineNo += rowHandler.getLines();
+
+            final int fieldCount = currentFields.length;
+
+            // reached end of data in a new line?
+            if (fieldCount == 0) {
+                break;
+            }
+
+            // skip empty rows
+            if (skipEmptyRows && fieldCount == 1 && currentFields[0].isEmpty()) {
+                continue;
+            }
+
+            // check the field count consistency on every row
+            if (errorOnDifferentFieldCount) {
+                if (firstLineFieldCount == -1) {
+                    firstLineFieldCount = fieldCount;
+                } else if (fieldCount != firstLineFieldCount) {
+                    throw new IOException(
+                        String.format("Line %d has %d fields, but first line has %d fields",
+                            lineNo, fieldCount, firstLineFieldCount));
+                }
+            }
+
+            return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
+        }
+
+        return null;
     }
 
     /**
@@ -73,13 +121,8 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
 
     private final class CsvRowIterator implements Iterator<CsvRow> {
 
-        private final RowHandler rowHandler = new RowHandler(32);
         private CsvRow fetchedRow;
         private boolean fetched;
-
-        private long lineNo;
-        private int firstLineFieldCount = -1;
-        private boolean finished;
 
         @Override
         public boolean hasNext() {
@@ -111,42 +154,47 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
             fetched = true;
         }
 
-        private CsvRow fetchRow() throws IOException {
-            while (!finished) {
-                final long startingLineNo = lineNo + 1;
-                finished = rowReader.readLine(rowHandler);
-                final String[] currentFields = rowHandler.end();
-                lineNo += rowHandler.getLines();
+    }
 
-                final int fieldCount = currentFields.length;
+    private static final class CsvRowSpliterator implements Spliterator<CsvRow> {
 
-                // reached end of data in a new line?
-                if (fieldCount == 0) {
-                    break;
-                }
+        private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
 
-                // skip empty rows
-                if (skipEmptyRows && fieldCount == 1 && currentFields[0].isEmpty()) {
-                    continue;
-                }
+        private final Iterator<CsvRow> iterator;
 
-                // check the field count consistency on every row
-                if (errorOnDifferentFieldCount) {
-                    if (firstLineFieldCount == -1) {
-                        firstLineFieldCount = fieldCount;
-                    } else if (fieldCount != firstLineFieldCount) {
-                        throw new IOException(
-                            String.format("Line %d has %d fields, but first line has %d fields",
-                                lineNo, fieldCount, firstLineFieldCount));
-                    }
-                }
+        CsvRowSpliterator(final Iterator<CsvRow> iterator) {
+            this.iterator = iterator;
+        }
 
-                return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
+        @Override
+        public boolean tryAdvance(final Consumer<? super CsvRow> action) {
+            if (!iterator.hasNext()) {
+                return false;
             }
 
+            action.accept(iterator.next());
+            return true;
+        }
+
+        @Override
+        public void forEachRemaining(final Consumer<? super CsvRow> action) {
+            iterator.forEachRemaining(action);
+        }
+
+        @Override
+        public Spliterator<CsvRow> trySplit() {
             return null;
         }
 
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return CHARACTERISTICS;
+        }
 
     }
 
