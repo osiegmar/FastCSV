@@ -22,7 +22,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -169,12 +168,12 @@ public class CsvReaderBuilder {
     }
 
     public NamedCsvContainer readNamed(final Reader reader) {
-        final CsvReader csvReader =
-            build(Objects.requireNonNull(reader, "reader must not be null"));
+        final NamedCsvReader csvReader =
+            build(Objects.requireNonNull(reader, "reader must not be null"))
+            .withHeader();
 
-        final NamedCsvReader namedCsvRows = csvReader.withHeader();
-        final List<CsvRow> rows = namedCsvRows.stream().collect(Collectors.toList());
-        return new NamedCsvContainer(namedCsvRows.getHeader(), rows);
+        return new NamedCsvContainer(csvReader.getHeader(),
+            csvReader.stream().collect(Collectors.toList()));
     }
 
 }
