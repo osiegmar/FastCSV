@@ -15,12 +15,6 @@ java {
     withSourcesJar()
 }
 
-plugins.withType(JavaPlugin).configureEach {
-    java {
-        modularity.inferModulePath = true
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -30,18 +24,15 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
 }
 
-test {
-    useJUnitPlatform()
+tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
+    it.reports {
+        html.enabled = true
+        xml.enabled = false
+    }
 }
 
-spotbugsMain {
-    reports {
-        html {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
-            stylesheet = 'fancy-hist.xsl'
-        }
-    }
+test {
+    useJUnitPlatform()
 }
 
 if (hasProperty('ossrhUsername')) {

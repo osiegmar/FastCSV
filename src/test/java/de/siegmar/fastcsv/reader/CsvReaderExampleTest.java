@@ -17,19 +17,97 @@
 package de.siegmar.fastcsv.reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 public class CsvReaderExampleTest {
 
     @Test
-    public void simple() throws IOException {
-        final CsvContainer csv = CsvReader.builder().read(new StringReader("foo,bar"));
-        assertEquals("foo", csv.getRow(0).getField(0));
-        assertEquals("bar", csv.getRow(0).getField(1));
+    public void simple() {
+        final Iterator<IndexedCsvRow> csv = CsvReader.builder()
+            .build(new StringReader("foo,bar"))
+            .iterator();
+
+        assertEquals(Arrays.asList("foo", "bar"), csv.next().getFields());
+        assertFalse(csv.hasNext());
+    }
+
+    @Test
+    public void configuration() {
+        final Iterator<IndexedCsvRow> csv = CsvReader.builder()
+            .fieldSeparator(';')
+            .textDelimiter('"')
+            .skipEmptyRows(true)
+            .errorOnDifferentFieldCount(true)
+            .build(new StringReader("foo;bar"))
+            .iterator();
+
+        assertEquals(Arrays.asList("foo", "bar"), csv.next().getFields());
+        assertFalse(csv.hasNext());
+    }
+
+    @Test
+    public void header() {
+        final Iterator<NamedCsvRow> csv = CsvReader.builder()
+            .build(new StringReader("header1,header2\nvalue1,value2"))
+            .withHeader()
+            .iterator();
+
+        assertEquals(Optional.of("value2"), csv.next().getField("header2"));
+    }
+
+    @Test
+    public void stream() {
+        final long streamCount = CsvReader.builder()
+            .build(new StringReader("foo\nbar"))
+            .stream()
+            .count();
+
+        assertEquals(2, streamCount);
+    }
+
+    @Test
+    public void path() throws IOException {
+        final Charset charset = StandardCharsets.UTF_8;
+
+        final Path path = Files.createTempFile("fastcsv", ".csv");
+        Files.write(path, "foo,bar\n".getBytes(charset));
+
+        try (CsvReader csvReader = CsvReader.builder().build(path, charset)) {
+            for (IndexedCsvRow row : csvReader) {
+                assertEquals(Arrays.asList("foo", "bar"), row.getFields());
+            }
+        }
+    }
+
+    @Test
+    public void container() {
+        final IndexedCsvContainer csv = CsvReader.builder()
+            .readIndexed(new StringReader("foo,bar"));
+
+        assertEquals(1, csv.getRowCount());
+        assertEquals(Arrays.asList("foo", "bar"), csv.getRows().get(0).getFields());
+    }
+
+    @Test
+    public void namedContainer() {
+        final NamedCsvContainer csv = CsvReader.builder()
+            .readNamed(new StringReader("header1,header2\nvalue1,value2"));
+
+        assertEquals(Arrays.asList("header1", "header2"), csv.getHeader());
+        assertEquals(1, csv.getRowCount());
+        assertEquals(Arrays.asList("value1", "value2"), csv.getRows().get(0).getFields());
     }
 
 }

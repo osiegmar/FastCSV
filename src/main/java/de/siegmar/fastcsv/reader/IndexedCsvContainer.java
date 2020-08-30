@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Oliver Siegmar
+ * Copyright 2020 Oliver Siegmar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.siegmar.fastcsv.reader;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,29 +24,27 @@ import java.util.List;
  *
  * @author Oliver Siegmar
  */
-public interface CsvContainer {
+public class IndexedCsvContainer implements CsvContainer {
 
-    /**
-     * Returns the number of rows in this container.
-     *
-     * @return the number of rows in this container
-     */
-    int getRowCount();
+    private final List<CsvRow> rows;
 
-    /**
-     * Returns a CsvRow by its index (starting with 0).
-     *
-     * @param index index of the row to return
-     * @return the row by its index
-     * @throws IndexOutOfBoundsException if index is out of range
-     */
-    CsvRow getRow(int index);
+    IndexedCsvContainer(final List<CsvRow> rows) {
+        this.rows = rows;
+    }
 
-    /**
-     * Returns an unmodifiable list of rows.
-     *
-     * @return an unmodifiable list of rows
-     */
-    List<CsvRow> getRows();
+    @Override
+    public int getRowCount() {
+        return rows.size();
+    }
+
+    @Override
+    public CsvRow getRow(final int index) {
+        return rows.get(index);
+    }
+
+    @Override
+    public List<CsvRow> getRows() {
+        return Collections.unmodifiableList(rows);
+    }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Oliver Siegmar
+ * Copyright 2020 Oliver Siegmar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,23 @@ import java.util.List;
  *
  * @author Oliver Siegmar
  */
-public interface CsvContainer {
+public class NamedCsvContainer extends IndexedCsvContainer {
+
+    private final List<String> header;
+
+    NamedCsvContainer(final List<String> header, final List<CsvRow> rows) {
+        super(rows);
+        this.header = header;
+    }
 
     /**
-     * Returns the number of rows in this container.
+     * Returns the header row - might be {@code null} if no header exists.
+     * The returned list is unmodifiable.
      *
-     * @return the number of rows in this container
+     * @return the header row - might be {@code null} if no header exists
      */
-    int getRowCount();
-
-    /**
-     * Returns a CsvRow by its index (starting with 0).
-     *
-     * @param index index of the row to return
-     * @return the row by its index
-     * @throws IndexOutOfBoundsException if index is out of range
-     */
-    CsvRow getRow(int index);
-
-    /**
-     * Returns an unmodifiable list of rows.
-     *
-     * @return an unmodifiable list of rows
-     */
-    List<CsvRow> getRows();
+    public List<String> getHeader() {
+        return header;
+    }
 
 }
