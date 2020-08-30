@@ -123,7 +123,7 @@ public final class CsvWriterBuilder {
      * @throws NullPointerException if path or charset is null
      */
     public CsvWriter build(final Path path, final Charset charset,
-                                    final OpenOption... openOptions)
+                           final OpenOption... openOptions)
         throws IOException {
 
         Objects.requireNonNull(path, "path must not be null");

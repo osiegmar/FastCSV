@@ -39,23 +39,8 @@ Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
 ```java
 Path path = Paths.get("foo.csv");
 try (CsvReader csvReader = CsvReader.builder().build(path, StandardCharsets.UTF_8)) {
-    for (CsvRow row : csvReader) {
-        System.out.println(row);
-    }
+    csvReader.forEach(System.out::println);
 }
-```
-
-Read full CSV file with header at once (RFC standard format, UTF-8 encoded)
-
-```java
-Path path = Paths.get("foo.csv");
-NamedCsvContainer csv = CsvReader.builder().readNamed(path, StandardCharsets.UTF_8);
-
-System.out.println(csv.getRowCount());
-System.out.println(csv.getHeader());
-
-NamedCsvRow row = csv.getRow(5);
-row.getField("name").ifPresent(name -> System.out.println("Name: " + name));
 ```
 
 Custom settings
