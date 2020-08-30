@@ -54,6 +54,13 @@ public class CsvReaderHeaderTest {
     }
 
     @Test
+    public void duplicateHeader() {
+        final IllegalStateException e =
+            assertThrows(IllegalStateException.class, () -> parse("a,b,a").getHeader());
+        assertEquals("Duplicate header field 'a' found", e.getMessage());
+    }
+
+    @Test
     public void onlyHeader() {
         final NamedCsvReader csv = parse("foo,bar\n");
         assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
