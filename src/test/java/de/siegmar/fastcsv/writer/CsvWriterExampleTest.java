@@ -69,7 +69,7 @@ public class CsvWriterExampleTest {
         final Path path = Files.createTempFile("fastcsv", ".csv");
         final Charset charset = StandardCharsets.UTF_8;
 
-        try (CloseableCsvWriter csv = CsvWriter.builder().build(path, charset)) {
+        try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
             csv.writeLine("header1", "header2").writeLine("value1", "value2");
         }
 

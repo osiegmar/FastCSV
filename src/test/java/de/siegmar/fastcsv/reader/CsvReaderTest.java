@@ -48,7 +48,7 @@ public class CsvReaderTest {
 
     @Test
     public void empty() {
-        final Iterator<IndexedCsvRow> it = parse("").iterator();
+        final Iterator<CsvRow> it = parse("").iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
     }
@@ -69,7 +69,7 @@ public class CsvReaderTest {
     @Test
     public void multipleRowsNoSkipEmpty() {
         crb.skipEmptyRows(false);
-        final Iterator<IndexedCsvRow> it = parse("\n\n").iterator();
+        final Iterator<CsvRow> it = parse("\n\n").iterator();
 
         CsvRow row = it.next();
         assertEquals(1, row.getFieldCount());
@@ -215,7 +215,7 @@ public class CsvReaderTest {
 
     @Test
     public void lineFeed() {
-        final Iterator<IndexedCsvRow> it = parse("foo\nbar").iterator();
+        final Iterator<CsvRow> it = parse("foo\nbar").iterator();
         assertEquals("foo", it.next().getField(0));
         assertEquals("bar", it.next().getField(0));
         assertFalse(it.hasNext());
@@ -223,7 +223,7 @@ public class CsvReaderTest {
 
     @Test
     public void carriageReturn() {
-        final Iterator<IndexedCsvRow> it = parse("foo\rbar").iterator();
+        final Iterator<CsvRow> it = parse("foo\rbar").iterator();
         assertEquals("foo", it.next().getField(0));
         assertEquals("bar", it.next().getField(0));
         assertFalse(it.hasNext());
@@ -231,7 +231,7 @@ public class CsvReaderTest {
 
     @Test
     public void carriageReturnLineFeed() {
-        final Iterator<IndexedCsvRow> it = parse("foo\r\nbar").iterator();
+        final Iterator<CsvRow> it = parse("foo\r\nbar").iterator();
         assertEquals("foo", it.next().getField(0));
         assertEquals("bar", it.next().getField(0));
         assertFalse(it.hasNext());
@@ -241,7 +241,7 @@ public class CsvReaderTest {
 
     @Test
     public void lineNumbering() {
-        final Iterator<IndexedCsvRow> it =
+        final Iterator<CsvRow> it =
             parse("\"a multi-\nline string\"\n\"another\none\"").iterator();
 
         CsvRow row = it.next();
@@ -259,7 +259,7 @@ public class CsvReaderTest {
 
     @Test
     public void toStringWithoutHeader() {
-        assertEquals("IndexedCsvRow[originalLineNumber=1, fields=[fieldA, fieldB]]",
+        assertEquals("CsvRowImpl[originalLineNumber=1, fields=[fieldA, fieldB]]",
             readSingleRow("fieldA,fieldB\n").toString());
     }
 

@@ -25,7 +25,7 @@ import java.util.StringJoiner;
  *
  * @author Oliver Siegmar
  */
-public final class IndexedCsvRow implements CsvRow {
+public final class CsvRowImpl implements CsvRow {
 
     /**
      * The original line number (empty lines may be skipped).
@@ -34,7 +34,7 @@ public final class IndexedCsvRow implements CsvRow {
 
     private final List<String> fields;
 
-    IndexedCsvRow(final long originalLineNumber, final List<String> fields) {
+    CsvRowImpl(final long originalLineNumber, final List<String> fields) {
         this.originalLineNumber = originalLineNumber;
         this.fields = fields;
     }
@@ -61,7 +61,7 @@ public final class IndexedCsvRow implements CsvRow {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", IndexedCsvRow.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", CsvRowImpl.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
             .add("fields=" + fields)
             .toString();

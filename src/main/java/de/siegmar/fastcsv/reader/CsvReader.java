@@ -31,12 +31,12 @@ import java.util.stream.StreamSupport;
  *
  * @author Oliver Siegmar
  */
-public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
+public class CsvReader implements Iterable<CsvRow>, Closeable {
 
     private final RowReader rowReader;
     private final boolean skipEmptyRows;
     private final boolean errorOnDifferentFieldCount;
-    private final Iterator<IndexedCsvRow> csvRowIterator = new CsvRowIterator();
+    private final Iterator<CsvRow> csvRowIterator = new CsvRowIterator();
 
     CsvReader(final Reader reader, final char fieldSeparator, final char textDelimiter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
@@ -55,23 +55,26 @@ public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
     }
 
     @Override
-    public Iterator<IndexedCsvRow> iterator() {
+    public Iterator<CsvRow> iterator() {
         return csvRowIterator;
     }
 
-    public Stream<IndexedCsvRow> stream() {
+    public Stream<CsvRow> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void close() throws IOException {
         rowReader.close();
     }
 
-    private final class CsvRowIterator implements Iterator<IndexedCsvRow> {
+    private final class CsvRowIterator implements Iterator<CsvRow> {
 
         private final RowHandler rowHandler = new RowHandler(32);
-        private IndexedCsvRow nextRow;
+        private CsvRow nextRow;
         private boolean isEnd;
 
         private long lineNo;
@@ -96,12 +99,12 @@ public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
         }
 
         @Override
-        public IndexedCsvRow next() {
+        public CsvRow next() {
             if (isEnd) {
                 throw new NoSuchElementException();
             }
 
-            final IndexedCsvRow row;
+            final CsvRow row;
             if (nextRow != null) {
                 row = nextRow;
                 nextRow = null;
@@ -112,7 +115,7 @@ public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
             return row;
         }
 
-        private IndexedCsvRow fetch() {
+        private CsvRow fetch() {
             try {
                 while (!finished) {
                     final long startingLineNo = lineNo + 1;
@@ -143,7 +146,7 @@ public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
                         }
                     }
 
-                    return new IndexedCsvRow(startingLineNo, Arrays.asList(currentFields));
+                    return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
                 }
 
                 return null;
@@ -151,6 +154,7 @@ public final class CsvReader implements Iterable<IndexedCsvRow>, Closeable {
                 throw new UncheckedIOException(e);
             }
         }
+
 
     }
 

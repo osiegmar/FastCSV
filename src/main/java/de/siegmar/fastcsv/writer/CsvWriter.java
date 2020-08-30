@@ -16,6 +16,7 @@
 
 package de.siegmar.fastcsv.writer;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Objects;
@@ -32,12 +33,12 @@ import java.util.Objects;
  *
  * @author Oliver Siegmar
  */
-public class CsvWriter {
+public class CsvWriter implements Closeable {
 
     private static final char CR = '\r';
     private static final char LF = '\n';
 
-    protected final Writer writer;
+    private final Writer writer;
     private final char fieldSeparator;
     private final char textDelimiter;
     private final TextDelimitStrategy textDelimitStrategy;
@@ -205,6 +206,14 @@ public class CsvWriter {
 
     private void write(final char c) throws IOException {
         writer.write(c);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        writer.close();
     }
 
 }

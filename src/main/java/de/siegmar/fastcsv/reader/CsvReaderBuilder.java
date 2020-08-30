@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author Oliver Siegmar
  */
-public class CsvReaderBuilder {
+public final class CsvReaderBuilder {
 
     /**
      * Field separator character (default: ',' - comma).
@@ -99,10 +99,11 @@ public class CsvReaderBuilder {
      * @throws IOException if an I/O error occurs.
      */
     public CsvReader build(final Path path, final Charset charset) throws IOException {
-        return build(newPathReader(
-            Objects.requireNonNull(path, "path must not be null"),
-            Objects.requireNonNull(charset, "charset must not be null")
-        ));
+        Objects.requireNonNull(path, "path must not be null");
+        Objects.requireNonNull(charset, "charset must not be null");
+
+        return new CsvReader(newPathReader(path, charset),
+            fieldSeparator, textDelimiter, skipEmptyRows, errorOnDifferentFieldCount);
     }
 
     /**
@@ -132,13 +133,11 @@ public class CsvReaderBuilder {
      * @return the entire file's data - never {@code null}.
      * @throws IOException if an I/O error occurs.
      */
-    public IndexedCsvContainer readIndexed(final Path path, final Charset charset)
+    public CsvContainer<CsvRow> readIndexed(final Path path, final Charset charset)
         throws IOException {
 
-        Objects.requireNonNull(path, "path must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-        try (Reader reader = newPathReader(path, charset)) {
-            return readIndexed(reader);
+        try (CsvReader reader = build(path, charset)) {
+            return new IndexedCsvContainer(reader.stream().collect(Collectors.toList()));
         }
     }
 
@@ -152,7 +151,7 @@ public class CsvReaderBuilder {
      * @param reader the data source to read from.
      * @return the entire file's data - never {@code null}.
      */
-    public IndexedCsvContainer readIndexed(final Reader reader) {
+    public CsvContainer<CsvRow> readIndexed(final Reader reader) {
         final CsvReader csvReader =
             build(Objects.requireNonNull(reader, "reader must not be null"));
 
@@ -162,8 +161,10 @@ public class CsvReaderBuilder {
     public NamedCsvContainer readNamed(final Path path, final Charset charset) throws IOException {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
-        try (Reader reader = newPathReader(path, charset)) {
-            return readNamed(reader);
+
+        try (NamedCsvReader reader = build(path, charset).withHeader()) {
+            return new NamedCsvContainer(reader.getHeader(),
+                reader.stream().collect(Collectors.toList()));
         }
     }
 

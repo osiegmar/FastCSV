@@ -35,7 +35,7 @@ public class CsvReaderExampleTest {
 
     @Test
     public void simple() {
-        final Iterator<IndexedCsvRow> csv = CsvReader.builder()
+        final Iterator<CsvRow> csv = CsvReader.builder()
             .build(new StringReader("foo,bar"))
             .iterator();
 
@@ -45,7 +45,7 @@ public class CsvReaderExampleTest {
 
     @Test
     public void configuration() {
-        final Iterator<IndexedCsvRow> csv = CsvReader.builder()
+        final Iterator<CsvRow> csv = CsvReader.builder()
             .fieldSeparator(';')
             .textDelimiter('"')
             .skipEmptyRows(true)
@@ -85,7 +85,7 @@ public class CsvReaderExampleTest {
         Files.write(path, "foo,bar\n".getBytes(charset));
 
         try (CsvReader csvReader = CsvReader.builder().build(path, charset)) {
-            for (IndexedCsvRow row : csvReader) {
+            for (CsvRow row : csvReader) {
                 assertEquals(Arrays.asList("foo", "bar"), row.getFields());
             }
         }
@@ -93,7 +93,7 @@ public class CsvReaderExampleTest {
 
     @Test
     public void container() {
-        final IndexedCsvContainer csv = CsvReader.builder()
+        final CsvContainer<CsvRow> csv = CsvReader.builder()
             .readIndexed(new StringReader("foo,bar"));
 
         assertEquals(1, csv.getRowCount());

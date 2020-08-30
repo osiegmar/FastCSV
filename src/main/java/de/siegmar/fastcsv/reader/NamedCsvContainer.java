@@ -16,6 +16,7 @@
 
 package de.siegmar.fastcsv.reader;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,13 +24,29 @@ import java.util.List;
  *
  * @author Oliver Siegmar
  */
-public class NamedCsvContainer extends IndexedCsvContainer {
+public final class NamedCsvContainer implements CsvContainer<NamedCsvRow> {
 
     private final List<String> header;
+    private final List<NamedCsvRow> rows;
 
-    NamedCsvContainer(final List<String> header, final List<CsvRow> rows) {
-        super(rows);
+    NamedCsvContainer(final List<String> header, final List<NamedCsvRow> rows) {
         this.header = header;
+        this.rows = rows;
+    }
+
+    @Override
+    public int getRowCount() {
+        return rows.size();
+    }
+
+    @Override
+    public NamedCsvRow getRow(final int index) {
+        return rows.get(index);
+    }
+
+    @Override
+    public List<NamedCsvRow> getRows() {
+        return Collections.unmodifiableList(rows);
     }
 
     /**

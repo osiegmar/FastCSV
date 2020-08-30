@@ -37,51 +37,39 @@ Benchmark from the
 Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
 
 ```java
-File file = new File("foo.csv");
-CsvReader csvReader = new CsvReader();
-
-try (CsvParser csvParser = csvReader.parse(file, StandardCharsets.UTF_8)) {
-    CsvRow row;
-    while ((row = csvParser.nextRow()) != null) {
-        System.out.println("Read line: " + row);
-        System.out.println("First column of line: " + row.getField(0));
+Path path = Paths.get("foo.csv");
+try (CsvReader csvReader = CsvReader.builder().build(path, StandardCharsets.UTF_8)) {
+    for (CsvRow row : csvReader) {
+        System.out.println(row);
     }
-}
-```
-
-Read full CSV file at once (RFC standard format, UTF-8 encoded)
-
-```java
-File file = new File("foo.csv");
-CsvReader csvReader = new CsvReader();
-
-CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
-for (CsvRow row : csv.getRows()) {
-    System.out.println("Read line: " + row);
-    System.out.println("First column of line: " + row.getField(0));
 }
 ```
 
 Read full CSV file with header at once (RFC standard format, UTF-8 encoded)
 
 ```java
-File file = new File("foo.csv");
-CsvReader csvReader = new CsvReader();
-csvReader.setContainsHeader(true);
+Path path = Paths.get("foo.csv");
+NamedCsvContainer csv = CsvReader.builder().readNamed(path, StandardCharsets.UTF_8);
 
-CsvContainer csv = csvReader.read(file, StandardCharsets.UTF_8);
-for (CsvRow row : csv.getRows()) {
-    System.out.println("First column of line: " + row.getField("name"));
-}
+System.out.println(csv.getRowCount());
+System.out.println(csv.getHeader());
+
+NamedCsvRow row = csv.getRow(5);
+row.getField("name").ifPresent(name -> System.out.println("Name: " + name));
 ```
 
 Custom settings
 
 ```java
-CsvReader csvReader = new CsvReader();
-csvReader.setFieldSeparator(';');
-csvReader.setTextDelimiter('\'');
+CsvReader.builder()
+    .fieldSeparator(';')
+    .textDelimiter('"')
+    .skipEmptyRows(true)
+    .errorOnDifferentFieldCount(false);
 ```
+
+For more example see
+[CsvReaderExampleTest.java](src/test/java/de/siegmar/fastcsv/reader/CsvReaderExampleTest.java)
 
 ## CsvWriter Examples
 
@@ -91,7 +79,7 @@ Iterative writing of a CSV file (RFC standard format, UTF-8 encoded)
 Path path = Files.createTempFile("fastcsv", ".csv");
 Charset charset = StandardCharsets.UTF_8;
 
-try (CloseableCsvWriter csv = CsvWriter.builder().build(path, charset)) {
+try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
     csv.writeLine("header1", "header2").writeLine("value1", "value2");
 }
 ```
@@ -105,6 +93,10 @@ CsvWriter.builder()
     .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
     .lineDelimiter("\n");
 ```
+
+For more example see
+[CsvWriterExampleTest.java](src/test/java/de/siegmar/fastcsv/writer/CsvWriterExampleTest.java)
+
 
 ## Contribution
 

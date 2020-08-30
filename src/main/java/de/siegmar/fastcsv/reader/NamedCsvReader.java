@@ -26,10 +26,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
+public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private final CsvReader csvReader;
-    private final Iterator<IndexedCsvRow> csvIterator;
+    private final Iterator<CsvRow> csvIterator;
 
     private List<String> header;
     private Map<String, Integer> headerMap;
@@ -52,7 +52,7 @@ public class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
             header = Collections.emptyList();
             headerMap = Collections.emptyMap();
         } else {
-            final IndexedCsvRow firstRow = csvIterator.next();
+            final CsvRow firstRow = csvIterator.next();
 
             header = Collections.unmodifiableList(firstRow.getFields());
             final Map<String, Integer> map = new LinkedHashMap<>(header.size());
@@ -86,7 +86,7 @@ public class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
             @Override
             public NamedCsvRow next() {
-                return new NamedCsvRow(csvIterator.next(), headerMap);
+                return new NamedCsvRowImpl(csvIterator.next(), headerMap);
             }
         };
     }

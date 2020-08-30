@@ -95,9 +95,8 @@ public class CsvReaderHeaderTest {
     @Test
     public void toStringWithHeader() {
         final NamedCsvRow csvRow = readSingleRow("headerA,headerB,headerC\nfieldA,fieldB\n");
-        assertEquals(
-            "NamedCsvRow[headerMap={headerA=0, headerB=1, headerC=2}, "
-                + "row=IndexedCsvRow[originalLineNumber=2, fields=[fieldA, fieldB]]]",
+        assertEquals("NamedCsvRowImpl[headerMap={headerA=0, headerB=1, headerC=2}, "
+                + "row=CsvRowImpl[originalLineNumber=2, fields=[fieldA, fieldB]]]",
             csvRow.toString());
 
         assertEquals("{headerA=fieldA, headerB=fieldB, headerC=null}",

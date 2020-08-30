@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author Oliver Siegmar
  */
-public class IndexedCsvContainer implements CsvContainer {
+public final class IndexedCsvContainer implements CsvContainer<CsvRow> {
 
     private final List<CsvRow> rows;
 

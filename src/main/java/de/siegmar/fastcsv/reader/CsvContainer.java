@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Oliver Siegmar
  */
-public interface CsvContainer {
+public interface CsvContainer<T extends CsvRow> {
 
     /**
      * Returns the number of rows in this container.
@@ -39,13 +39,13 @@ public interface CsvContainer {
      * @return the row by its index
      * @throws IndexOutOfBoundsException if index is out of range
      */
-    CsvRow getRow(int index);
+    T getRow(int index);
 
     /**
      * Returns an unmodifiable list of rows.
      *
      * @return an unmodifiable list of rows
      */
-    List<CsvRow> getRows();
+    List<T> getRows();
 
 }

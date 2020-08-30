@@ -122,14 +122,14 @@ public final class CsvWriterBuilder {
      * @throws IOException          if a write error occurs
      * @throws NullPointerException if path or charset is null
      */
-    public CloseableCsvWriter build(final Path path, final Charset charset,
+    public CsvWriter build(final Path path, final Charset charset,
                                     final OpenOption... openOptions)
         throws IOException {
 
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
 
-        return new CloseableCsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
+        return new CsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
             fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
     }
 
