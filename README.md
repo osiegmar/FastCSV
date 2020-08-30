@@ -34,7 +34,14 @@ Benchmark from the
 
 ## CsvReader Examples
 
-Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
+Iterative reading of some CSV data from a string
+
+```java
+CsvReader.builder().build(new StringReader("foo1,bar1\r\nfoo2,bar2"))
+    .forEach(System.out::println);
+```
+
+Iterative reading of a CSV file
 
 ```java
 Path path = Paths.get("foo.csv");
@@ -60,7 +67,15 @@ For more example see
 
 ## CsvWriter Examples
 
-Iterative writing of a CSV file (RFC standard format, UTF-8 encoded)
+Iterative writing of some data to a writer
+
+```java
+CsvWriter.builder().build(new PrintWriter(System.out, true))
+    .writeLine("header1", "header2")
+    .writeLine("value1", "value2");
+```
+
+Iterative writing of a CSV file
 
 ```java
 Path path = Files.createTempFile("fastcsv", ".csv");
