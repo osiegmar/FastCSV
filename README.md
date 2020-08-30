@@ -38,8 +38,10 @@ Iterative reading of a CSV file (RFC standard format, UTF-8 encoded)
 
 ```java
 Path path = Paths.get("foo.csv");
-try (CsvReader csvReader = CsvReader.builder().build(path, StandardCharsets.UTF_8)) {
-    csvReader.forEach(System.out::println);
+Charset charset = StandardCharsets.UTF_8;
+
+try (CsvReader csv = CsvReader.builder().build(path, charset)) {
+    csv.forEach(System.out::println);
 }
 ```
 
@@ -65,7 +67,9 @@ Path path = Files.createTempFile("fastcsv", ".csv");
 Charset charset = StandardCharsets.UTF_8;
 
 try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
-    csv.writeLine("header1", "header2").writeLine("value1", "value2");
+    csv
+        .writeLine("header1", "header2")
+        .writeLine("value1", "value2");
 }
 ```
 
