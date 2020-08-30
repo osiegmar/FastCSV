@@ -74,8 +74,8 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private final class CsvRowIterator implements Iterator<CsvRow> {
 
         private final RowHandler rowHandler = new RowHandler(32);
-        private CsvRow nextRow;
-        private boolean isEnd;
+        private CsvRow fetchedRow;
+        private boolean fetched;
 
         private long lineNo;
         private int firstLineFieldCount = -1;
@@ -83,76 +83,68 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
 
         @Override
         public boolean hasNext() {
-            if (isEnd) {
-                return false;
+            if (!fetched) {
+                fetch();
             }
-            if (nextRow == null) {
-                nextRow = fetch();
-
-                if (nextRow == null) {
-                    isEnd = true;
-                    return false;
-                }
-            }
-
-            return true;
+            return fetchedRow != null;
         }
 
         @Override
         public CsvRow next() {
-            if (isEnd) {
+            if (!fetched) {
+                fetch();
+            }
+            if (fetchedRow == null) {
                 throw new NoSuchElementException();
             }
+            fetched = false;
 
-            final CsvRow row;
-            if (nextRow != null) {
-                row = nextRow;
-                nextRow = null;
-            } else {
-                row = fetch();
-            }
-
-            return row;
+            return fetchedRow;
         }
 
-        private CsvRow fetch() {
+        private void fetch() {
             try {
-                while (!finished) {
-                    final long startingLineNo = lineNo + 1;
-                    finished = rowReader.readLine(rowHandler);
-                    final String[] currentFields = rowHandler.end();
-                    lineNo += rowHandler.getLines();
-
-                    final int fieldCount = currentFields.length;
-
-                    // reached end of data in a new line?
-                    if (fieldCount == 0) {
-                        break;
-                    }
-
-                    // skip empty rows
-                    if (skipEmptyRows && fieldCount == 1 && currentFields[0].isEmpty()) {
-                        continue;
-                    }
-
-                    // check the field count consistency on every row
-                    if (errorOnDifferentFieldCount) {
-                        if (firstLineFieldCount == -1) {
-                            firstLineFieldCount = fieldCount;
-                        } else if (fieldCount != firstLineFieldCount) {
-                            throw new IOException(
-                                String.format("Line %d has %d fields, but first line has %d fields",
-                                    lineNo, fieldCount, firstLineFieldCount));
-                        }
-                    }
-
-                    return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
-                }
-
-                return null;
+                fetchedRow = fetchRow();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+            fetched = true;
+        }
+
+        private CsvRow fetchRow() throws IOException {
+            while (!finished) {
+                final long startingLineNo = lineNo + 1;
+                finished = rowReader.readLine(rowHandler);
+                final String[] currentFields = rowHandler.end();
+                lineNo += rowHandler.getLines();
+
+                final int fieldCount = currentFields.length;
+
+                // reached end of data in a new line?
+                if (fieldCount == 0) {
+                    break;
+                }
+
+                // skip empty rows
+                if (skipEmptyRows && fieldCount == 1 && currentFields[0].isEmpty()) {
+                    continue;
+                }
+
+                // check the field count consistency on every row
+                if (errorOnDifferentFieldCount) {
+                    if (firstLineFieldCount == -1) {
+                        firstLineFieldCount = fieldCount;
+                    } else if (fieldCount != firstLineFieldCount) {
+                        throw new IOException(
+                            String.format("Line %d has %d fields, but first line has %d fields",
+                                lineNo, fieldCount, firstLineFieldCount));
+                    }
+                }
+
+                return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
+            }
+
+            return null;
         }
 
 
