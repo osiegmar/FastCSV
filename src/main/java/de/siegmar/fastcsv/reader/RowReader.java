@@ -19,201 +19,182 @@ package de.siegmar.fastcsv.reader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Arrays;
 
 final class RowReader implements Closeable {
 
     private static final char LF = '\n';
     private static final char CR = '\r';
-    private static final int BUFFER_SIZE = 8192;
+    private static final int READ_SIZE = 8192;
+    private static final int BUFFER_SIZE = READ_SIZE;
+    private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
 
-    private static final int FIELD_MODE_RESET = 0;
-    private static final int FIELD_MODE_QUOTED = 1;
-    private static final int FIELD_MODE_NON_QUOTED = 2;
-    private static final int FIELD_MODE_QUOTE_ON = 4;
-    private static final int FIELD_MODE_QUOTED_EMPTY = 8;
+    private static final int STATUS_QUOTED_MODE = 4;
+    private static final int STATUS_QUOTED_COLUMN = 2;
+    private static final int STATUS_DATA_COLUMN = 1;
+    private static final int STATUS_RESET = 0;
 
     private final Reader reader;
     private final char fieldSeparator;
     private final char textDelimiter;
-    private final char[] buf = new char[BUFFER_SIZE];
-    private final Line line = new Line(32);
-    private final ReusableStringBuilder currentField = new ReusableStringBuilder(512);
-    private int bufPos;
-    private int bufLen;
-    private int prevChar = -1;
-    private int copyStart;
-    private boolean finished;
+
+    private char[] buf = new char[BUFFER_SIZE];
+    private int len;
+    private int begin;
+    private int pos;
+    private char lastChar;
 
     RowReader(final Reader reader, final char fieldSeparator, final char textDelimiter) {
         this.reader = reader;
-        this.fieldSeparator = fieldSeparator;
         this.textDelimiter = textDelimiter;
+        this.fieldSeparator = fieldSeparator;
     }
 
     /*
      * ugly, performance optimized code begins
      */
-    Line readLine() throws IOException {
-        // get fields local for higher performance
-        final Line localLine = line.reset();
-        final ReusableStringBuilder localCurrentField = currentField;
-        final char[] localBuf = buf;
-        int localBufPos = bufPos;
-        int localPrevChar = prevChar;
-        int localCopyStart = copyStart;
-
-        int copyLen = 0;
-        int fieldMode = FIELD_MODE_RESET;
+    boolean readLine(final RowHandler rowHandler) throws IOException {
         int lines = 1;
 
+        int lPos = pos;
+        int lBegin = begin;
+        char[] lBuf = buf;
+        char lLastChar = lastChar;
+        int lStatus = STATUS_RESET;
+        int lLen = len;
+
         while (true) {
-            if (bufLen == localBufPos) {
-                // end of buffer
+            if (lLen == lPos) {
+                // cursor reached current EOD -- need to fetch
 
-                if (copyLen > 0) {
-                    localCurrentField.append(localBuf, localCopyStart, copyLen);
-                }
-                bufLen = reader.read(localBuf, 0, localBuf.length);
+                if (lBegin < lPos) {
+                    // we have data that can be relocated
 
-                if (bufLen < 0) {
-                    // end of data
-                    finished = true;
+                    if (READ_SIZE > lBuf.length - lPos) {
+                        // need to relocate data in buffer -- not enough capacity left
 
-                    if (localPrevChar == fieldSeparator
-                            || (fieldMode & FIELD_MODE_QUOTED_EMPTY) == FIELD_MODE_QUOTED_EMPTY
-                            || localCurrentField.hasContent()
-                    ) {
-                        localLine.addField(localCurrentField.toStringAndReset());
+                        final int lenToCopy = lPos - lBegin;
+                        if (READ_SIZE > lBuf.length - lenToCopy) {
+                            // need to relocate data in new, larger buffer
+                            buf = lBuf = extendAndRelocate(lBuf, lBegin);
+                        } else {
+                            // relocate data in existing buffer
+                            System.arraycopy(lBuf, lBegin, lBuf, 0, lenToCopy);
+                        }
+                        lPos -= lBegin;
+                        lBegin = 0;
                     }
-
-                    break;
+                } else {
+                    // all data was consumed -- nothing to relocate
+                    lPos = lBegin = 0;
                 }
 
-                localCopyStart = localBufPos = copyLen = 0;
+                final int cnt = reader.read(lBuf, lPos, READ_SIZE);
+                if (cnt == -1) {
+                    // reached end of stream
+                    if (lBegin < lPos) {
+                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin, lStatus, lines);
+                    }
+                    return true;
+                }
+                len = lLen = lPos + cnt;
             }
 
-            final char c = localBuf[localBufPos++];
+            do {
+                final char c = lBuf[lPos++];
 
-            if ((fieldMode & FIELD_MODE_QUOTE_ON) != 0) {
-                if (c == textDelimiter) {
-                    // End of quoted text
-                    fieldMode &= ~FIELD_MODE_QUOTE_ON;
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        copyLen = 0;
-                    } else {
-                        fieldMode |= FIELD_MODE_QUOTED_EMPTY;
-                    }
-                    localCopyStart = localBufPos;
-                } else {
-                    if (c == CR || c == LF && prevChar != CR) {
+                if ((lStatus & STATUS_QUOTED_MODE) != 0) {
+                    // we're in quotes
+                    if (c == textDelimiter) {
+                        lStatus &= ~STATUS_QUOTED_MODE;
+                    } else if (c == CR || c == LF && lLastChar != CR) {
                         lines++;
                     }
-                    copyLen++;
-                }
-            } else {
-                if (c == fieldSeparator) {
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        copyLen = 0;
-                    }
-                    localLine.addField(localCurrentField.toStringAndReset());
-                    localCopyStart = localBufPos;
-                    fieldMode = FIELD_MODE_RESET;
-                } else if (c == textDelimiter && (fieldMode & FIELD_MODE_NON_QUOTED) == 0) {
-                    // Quoted text starts
-                    fieldMode = FIELD_MODE_QUOTED | FIELD_MODE_QUOTE_ON;
-
-                    if (localPrevChar == textDelimiter) {
-                        // escaped quote
-                        copyLen++;
-                    } else {
-                        localCopyStart = localBufPos;
-                    }
-                } else if (c == CR) {
-                    if (copyLen > 0) {
-                        localCurrentField.append(localBuf, localCopyStart, copyLen);
-                    }
-                    localLine.addField(localCurrentField.toStringAndReset());
-                    localPrevChar = c;
-                    localCopyStart = localBufPos;
-                    break;
-                } else if (c == LF) {
-                    if (localPrevChar != CR) {
-                        if (copyLen > 0) {
-                            localCurrentField.append(localBuf, localCopyStart, copyLen);
-                        }
-                        localLine.addField(localCurrentField.toStringAndReset());
-                        localPrevChar = c;
-                        localCopyStart = localBufPos;
-                        break;
-                    }
-                    localCopyStart = localBufPos;
                 } else {
-                    copyLen++;
-                    if (fieldMode == FIELD_MODE_RESET) {
-                        fieldMode = FIELD_MODE_NON_QUOTED;
+                    // we're not in quotes
+                    if (c == fieldSeparator) {
+                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus, lines);
+                        lStatus = STATUS_RESET;
+                        lBegin = lPos;
+                    } else if (c == LF) {
+                        if (lLastChar != CR) {
+                            publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1,
+                                lStatus, lines);
+                            pos = begin = lPos;
+                            lastChar = c;
+                            return false;
+                        }
+
+                        lBegin = lPos;
+                    } else if (c == CR) {
+                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus, lines);
+                        pos = begin = lPos;
+                        lastChar = c;
+                        return false;
+                    } else if (c == textDelimiter && (lStatus & STATUS_DATA_COLUMN) == 0) {
+                        // quote and not in data-only mode
+                        lStatus |= STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
+                    } else if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
+                        lStatus |= STATUS_DATA_COLUMN;
                     }
+                }
+
+                lLastChar = c;
+            } while (lPos < lLen);
+        }
+    }
+
+    private static char[] extendAndRelocate(final char[] buf, final int begin) {
+        final int newBufferSize = buf.length * 2;
+        if (newBufferSize > MAX_BUFFER_SIZE) {
+            throw new IllegalStateException("Maximum buffer size "
+                + MAX_BUFFER_SIZE + " is not enough to read data");
+        }
+        final char[] newBuf = new char[newBufferSize];
+        System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
+        return newBuf;
+    }
+
+    private void publishColumn(final RowHandler rowHandler, final char[] lBuf,
+                               final int lBegin, final int lPos, final int status,
+                               final int lines) {
+        if ((status & STATUS_QUOTED_COLUMN) == 0) {
+            // column without quotes
+            rowHandler.add(lBuf, lBegin, lPos, lines);
+        } else {
+            // column with quotes
+            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, textDelimiter);
+            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift, lines);
+        }
+    }
+
+    private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
+                                       final char textDelimiter) {
+        int shift = 0;
+        boolean escape = false;
+        for (int i = begin; i < pos; i++) {
+            final char c = buf[i];
+
+            if (c == textDelimiter) {
+                if (!escape) {
+                    shift++;
+                    escape = true;
+                    continue;
+                } else {
+                    escape = false;
                 }
             }
 
-            localPrevChar = c;
+            if (shift > 0) {
+                buf[i - shift] = c;
+            }
         }
 
-        // restore fields
-        bufPos = localBufPos;
-        prevChar = localPrevChar;
-        copyStart = localCopyStart;
-
-        localLine.setLines(lines);
-        return localLine;
+        return shift;
     }
 
     @Override
     public void close() throws IOException {
         reader.close();
-    }
-
-    public boolean isFinished() {
-        return finished;
-    }
-
-    static final class Line {
-
-        private String[] fields;
-        private int linePos;
-        private int lines;
-
-        Line(final int initialCapacity) {
-            fields = new String[initialCapacity];
-        }
-
-        Line reset() {
-            linePos = 0;
-            lines = 1;
-            return this;
-        }
-
-        void addField(final String field) {
-            if (linePos == fields.length) {
-                fields = Arrays.copyOf(fields, fields.length * 2);
-            }
-            fields[linePos++] = field;
-        }
-
-        String[] getFields() {
-            return Arrays.copyOf(fields, linePos);
-        }
-
-        int getLines() {
-            return lines;
-        }
-
-        void setLines(final int lines) {
-            this.lines = lines;
-        }
-
     }
 
 }
