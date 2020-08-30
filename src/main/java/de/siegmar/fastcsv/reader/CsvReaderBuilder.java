@@ -23,7 +23,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * This builder is used to create configured instances of {@link CsvReader}. The default
@@ -123,58 +122,6 @@ public final class CsvReaderBuilder {
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {
         return new InputStreamReader(Files.newInputStream(path), charset);
-    }
-
-    /**
-     * Reads an entire file and returns a CsvContainer containing the data.
-     *
-     * @param path    the file to read data from.
-     * @param charset the character set to use - must not be {@code null}.
-     * @return the entire file's data - never {@code null}.
-     * @throws IOException if an I/O error occurs.
-     */
-    public CsvContainer<CsvRow> readIndexed(final Path path, final Charset charset)
-        throws IOException {
-
-        try (CsvReader reader = build(path, charset)) {
-            return new IndexedCsvContainer(reader.stream().collect(Collectors.toList()));
-        }
-    }
-
-    /**
-     * Reads from the provided reader until the end and returns a CsvContainer containing the data.
-     * <p>
-     * This library uses built-in buffering, so you do not need to pass in a buffered Reader
-     * implementation such as {@link java.io.BufferedReader}.
-     * Performance may be even likely better if you do not.
-     *
-     * @param reader the data source to read from.
-     * @return the entire file's data - never {@code null}.
-     */
-    public CsvContainer<CsvRow> readIndexed(final Reader reader) {
-        final CsvReader csvReader =
-            build(Objects.requireNonNull(reader, "reader must not be null"));
-
-        return new IndexedCsvContainer(csvReader.stream().collect(Collectors.toList()));
-    }
-
-    public NamedCsvContainer readNamed(final Path path, final Charset charset) throws IOException {
-        Objects.requireNonNull(path, "path must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-
-        try (NamedCsvReader reader = build(path, charset).withHeader()) {
-            return new NamedCsvContainer(reader.getHeader(),
-                reader.stream().collect(Collectors.toList()));
-        }
-    }
-
-    public NamedCsvContainer readNamed(final Reader reader) {
-        final NamedCsvReader csvReader =
-            build(Objects.requireNonNull(reader, "reader must not be null"))
-            .withHeader();
-
-        return new NamedCsvContainer(csvReader.getHeader(),
-            csvReader.stream().collect(Collectors.toList()));
     }
 
 }

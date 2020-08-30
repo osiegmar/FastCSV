@@ -91,23 +91,4 @@ public class CsvReaderExampleTest {
         }
     }
 
-    @Test
-    public void container() {
-        final CsvContainer<CsvRow> csv = CsvReader.builder()
-            .readIndexed(new StringReader("foo,bar"));
-
-        assertEquals(1, csv.getRowCount());
-        assertEquals(Arrays.asList("foo", "bar"), csv.getRows().get(0).getFields());
-    }
-
-    @Test
-    public void namedContainer() {
-        final NamedCsvContainer csv = CsvReader.builder()
-            .readNamed(new StringReader("header1,header2\nvalue1,value2"));
-
-        assertEquals(Arrays.asList("header1", "header2"), csv.getHeader());
-        assertEquals(1, csv.getRowCount());
-        assertEquals(Arrays.asList("value1", "value2"), csv.getRows().get(0).getFields());
-    }
-
 }
