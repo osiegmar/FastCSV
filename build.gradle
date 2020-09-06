@@ -45,11 +45,6 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.9
             }
-            limit {
-                counter = 'CLASS'
-                value = 'MISSEDCOUNT'
-                minimum = 0
-            }
         }
     }
 }
