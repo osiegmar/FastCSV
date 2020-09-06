@@ -37,7 +37,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     private Map<String, Integer> headerMap;
     private boolean isInitialized;
 
-    public NamedCsvReader(final CsvReader csvReader) {
+    NamedCsvReader(final CsvReader csvReader) {
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
         namedCsvIterator = new CsvRowIterator();

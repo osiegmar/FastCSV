@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public final class CsvRowSpliterator<T extends CsvRow> implements Spliterator<T> {
+final class CsvRowSpliterator<T extends CsvRow> implements Spliterator<T> {
 
     private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
 
