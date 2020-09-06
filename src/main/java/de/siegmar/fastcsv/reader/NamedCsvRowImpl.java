@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -43,14 +44,15 @@ final class NamedCsvRowImpl implements NamedCsvRow {
         return row.getField(index);
     }
 
-    /**
-     * Gets a field value by its name.
-     *
-     * @param name field name
-     * @return field value, {@link Optional#empty()} if this row has no such field
-     */
     @Override
-    public Optional<String> getField(final String name) {
+    public String getField(final String name) {
+        return findField(name).orElseThrow(() ->
+            new NoSuchElementException("No element with name '" + name + "' found. "
+                + "Valid names are: " + headerMap.keySet()));
+    }
+
+    @Override
+    public Optional<String> findField(final String name) {
         final Integer col = headerMap.get(name);
         return col != null && col < row.getFieldCount()
             ? Optional.of(row.getField(col))
@@ -67,13 +69,6 @@ final class NamedCsvRowImpl implements NamedCsvRow {
         return row.getFieldCount();
     }
 
-    /**
-     * Gets an unmodifiable map of header names and field values of this row.
-     * <p>
-     * The map will always contain all header names - even if their value is {@code null}.
-     *
-     * @return an unmodifiable map of header names and field values of this row
-     */
     @Override
     public Map<String, String> getFieldMap() {
         final Map<String, String> fieldMap = new LinkedHashMap<>(headerMap.size());

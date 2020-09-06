@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +63,7 @@ public class CsvReaderExampleTest {
             .withHeader()
             .iterator();
 
-        assertEquals(Optional.of("value2"), csv.next().getField("header2"));
+        assertEquals("value2", csv.next().getField("header2"));
     }
 
     @Test

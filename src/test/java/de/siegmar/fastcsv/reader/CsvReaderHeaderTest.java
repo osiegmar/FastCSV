@@ -70,7 +70,7 @@ public class CsvReaderHeaderTest {
 
     @Test
     public void getFieldByName() {
-        assertEquals(Optional.of("bar"), readSingleRow("foo\nbar").getField("foo"));
+        assertEquals("bar", readSingleRow("foo\nbar").getField("foo"));
     }
 
     @Test
@@ -96,7 +96,15 @@ public class CsvReaderHeaderTest {
     // Request field by name, but column name doesn't exist
     @Test
     public void getNonExistingFieldByName() {
-        assertEquals(Optional.empty(), readSingleRow("foo\nfaz").getField("bar"));
+        assertEquals(Optional.empty(), readSingleRow("foo\nfaz").findField("bar"));
+    }
+
+    @Test
+    public void findNonExistingFieldByName() {
+        final NoSuchElementException e = assertThrows(NoSuchElementException.class, () ->
+            readSingleRow("foo\nfaz").getField("bar"));
+        assertEquals("No element with name 'bar' found. Valid names are: [foo]",
+            e.getMessage());
     }
 
     @Test
