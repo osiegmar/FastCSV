@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'checkstyle'
+    id 'jacoco'
     id 'com.github.spotbugs' version '4.5.0'
 }
 
@@ -33,7 +34,27 @@ tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.9
+            }
+            limit {
+                counter = 'CLASS'
+                value = 'MISSEDCOUNT'
+                minimum = 0
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 if (hasProperty('ossrhUsername')) {
     publishing {
