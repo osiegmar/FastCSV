@@ -4,8 +4,6 @@
 
     <!-- sacrifice some coding styles for the sake of performance -->
 
-    <suppress files="CsvReader.java" checks="CyclomaticComplexity"/>
-
     <suppress files="RowReader.java" checks="CyclomaticComplexity"/>
     <suppress files="RowReader.java" checks="InnerAssignment"/>
     <suppress files="RowReader.java" checks="JavaNCSS"/>
