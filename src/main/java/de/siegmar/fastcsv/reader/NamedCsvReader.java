@@ -24,7 +24,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -87,7 +86,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     @Override
     public Spliterator<NamedCsvRow> spliterator() {
-        return new CsvRowSpliterator(iterator());
+        return new CsvRowSpliterator<>(iterator());
     }
 
     public Stream<NamedCsvRow> stream() {
@@ -109,48 +108,6 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         @Override
         public NamedCsvRow next() {
             return new NamedCsvRowImpl(csvIterator.next(), headerMap);
-        }
-
-    }
-
-    private static final class CsvRowSpliterator implements Spliterator<NamedCsvRow> {
-
-        private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
-
-        private final Iterator<NamedCsvRow> iterator;
-
-        CsvRowSpliterator(final Iterator<NamedCsvRow> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean tryAdvance(final Consumer<? super NamedCsvRow> action) {
-            if (!iterator.hasNext()) {
-                return false;
-            }
-
-            action.accept(iterator.next());
-            return true;
-        }
-
-        @Override
-        public void forEachRemaining(final Consumer<? super NamedCsvRow> action) {
-            iterator.forEachRemaining(action);
-        }
-
-        @Override
-        public Spliterator<NamedCsvRow> trySplit() {
-            return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return Long.MAX_VALUE;
-        }
-
-        @Override
-        public int characteristics() {
-            return CHARACTERISTICS;
         }
 
     }
