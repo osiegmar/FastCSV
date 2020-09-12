@@ -95,7 +95,7 @@ CsvWriter.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
     .quoteStrategy(QuoteStrategy.REQUIRED)
-    .lineDelimiter("\n");
+    .lineDelimiter(LineDelimiter.LF);
 ```
 
 For more example see

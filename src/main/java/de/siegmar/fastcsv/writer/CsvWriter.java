@@ -47,12 +47,12 @@ public class CsvWriter implements Closeable {
     private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
-              final QuoteStrategy quoteStrategy, final String lineDelimiter) {
+              final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
-        this.lineDelimiter = lineDelimiter;
+        this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
     }
 
     /**

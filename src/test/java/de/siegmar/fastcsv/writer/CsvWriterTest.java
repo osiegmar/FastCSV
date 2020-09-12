@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 public class CsvWriterTest {
 
-    private final CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter("\n");
+    private final CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter(LineDelimiter.LF);
 
     @Test
     public void nullQuote() throws IOException {

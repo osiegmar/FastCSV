@@ -44,7 +44,7 @@ public class CsvWriterExampleTest {
             .fieldSeparator(',')
             .quoteCharacter('"')
             .quoteStrategy(QuoteStrategy.REQUIRED)
-            .lineDelimiter("\n")
+            .lineDelimiter(LineDelimiter.LF)
             .build(sw)
             .writeField("header1").writeField("header2").endLine()
             .writeLine("value1", "value2");

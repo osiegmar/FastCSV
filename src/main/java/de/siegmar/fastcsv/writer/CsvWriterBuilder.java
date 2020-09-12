@@ -51,9 +51,9 @@ public final class CsvWriterBuilder {
     private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
 
     /**
-     * The line delimiter character(s) to be used (default: CRLF).
+     * The line delimiter to be used (default: {@link LineDelimiter#CRLF}).
      */
-    private String lineDelimiter = "\r\n";
+    private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
 
     CsvWriterBuilder() {
     }
@@ -88,11 +88,10 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * @param lineDelimiter the line delimiter string to be used
-     *                      (default: {@link System#lineSeparator()}).
+     * @param lineDelimiter the line delimiter to be used.
      * @return This updated object, so that additional method calls can be chained together.
      */
-    public CsvWriterBuilder lineDelimiter(final String lineDelimiter) {
+    public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
         this.lineDelimiter = lineDelimiter;
         return this;
     }
