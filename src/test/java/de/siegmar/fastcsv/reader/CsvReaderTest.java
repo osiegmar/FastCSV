@@ -133,7 +133,7 @@ public class CsvReaderTest {
     @SuppressWarnings("CheckReturnValue")
     public void getNonExistingFieldByIndex() {
         final CsvRow csvRow = readSingleRow("foo");
-        assertThrows(IndexOutOfBoundsException.class, () -> csvRow.getField(1).toString());
+        assertThrows(IndexOutOfBoundsException.class, () -> csvRow.getField(1));
     }
 
     // enclosure escaping
