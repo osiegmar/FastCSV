@@ -41,16 +41,24 @@ public class CsvWriter implements Closeable {
     private final char quoteCharacter;
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
+    private final boolean useInternalBuffer;
 
     private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
-              final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
-        this.writer = writer;
+              final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
+              final boolean useInternalBuffer) {
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
+        this.useInternalBuffer = useInternalBuffer;
+
+        if (useInternalBuffer) {
+            this.writer = new FastBufferedWriter(writer);
+        } else {
+            this.writer = writer;
+        }
     }
 
     /**
@@ -71,6 +79,14 @@ public class CsvWriter implements Closeable {
      * @return This CsvWriter.
      */
     public CsvWriter writeField(final String value) throws IOException {
+        writeInternal(value);
+        if (useInternalBuffer) {
+            ((FastBufferedWriter) writer).flushBuffer();
+        }
+        return this;
+    }
+
+    private void writeInternal(final String value) throws IOException {
         if (!isNewline) {
             write(fieldSeparator);
         } else {
@@ -82,7 +98,7 @@ public class CsvWriter implements Closeable {
                 write(quoteCharacter);
                 write(quoteCharacter);
             }
-            return this;
+            return;
         }
 
         if (value.isEmpty()) {
@@ -91,7 +107,7 @@ public class CsvWriter implements Closeable {
                 write(quoteCharacter);
                 write(quoteCharacter);
             }
-            return this;
+            return;
         }
 
         final int length = value.length();
@@ -123,8 +139,6 @@ public class CsvWriter implements Closeable {
         if (needsQuotes) {
             write(quoteCharacter);
         }
-
-        return this;
     }
 
     @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
@@ -162,7 +176,7 @@ public class CsvWriter implements Closeable {
      */
     public CsvWriter writeLine(final Iterable<String> values) throws IOException {
         for (final String value : values) {
-            writeField(value);
+            writeInternal(value);
         }
         endLine();
         return this;
@@ -178,7 +192,7 @@ public class CsvWriter implements Closeable {
      */
     public CsvWriter writeLine(final String... values) throws IOException {
         for (final String value : values) {
-            writeField(value);
+            writeInternal(value);
         }
         endLine();
         return this;
@@ -193,6 +207,9 @@ public class CsvWriter implements Closeable {
     public CsvWriter endLine() throws IOException {
         write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
+        if (useInternalBuffer) {
+            ((FastBufferedWriter) writer).flushBuffer();
+        }
         return this;
     }
 

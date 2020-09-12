@@ -24,7 +24,7 @@ import java.io.Writer;
  *
  * This class is intended for internal use only.
  */
-public final class FastBufferedWriter extends Writer {
+final class FastBufferedWriter extends Writer {
 
     private static final int BUFFER_SIZE = 8192;
 
@@ -32,7 +32,7 @@ public final class FastBufferedWriter extends Writer {
     private final char[] buf = new char[BUFFER_SIZE];
     private int pos;
 
-    public FastBufferedWriter(final Writer writer) {
+    FastBufferedWriter(final Writer writer) {
         this.out = writer;
     }
 
@@ -86,7 +86,7 @@ public final class FastBufferedWriter extends Writer {
         out.flush();
     }
 
-    private void flushBuffer() throws IOException {
+    void flushBuffer() throws IOException {
         out.write(buf, 0, pos);
         pos = 0;
     }

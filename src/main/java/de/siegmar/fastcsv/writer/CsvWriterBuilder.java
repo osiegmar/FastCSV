@@ -105,7 +105,7 @@ public final class CsvWriterBuilder {
         Objects.requireNonNull(writer, "writer must not be null");
 
         return new CsvWriter(writer, fieldSeparator, quoteCharacter, quoteStrategy,
-            lineDelimiter);
+            lineDelimiter, true);
     }
 
     /**
@@ -127,7 +127,7 @@ public final class CsvWriterBuilder {
         Objects.requireNonNull(charset, "charset must not be null");
 
         return new CsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
-            fieldSeparator, quoteCharacter, quoteStrategy, lineDelimiter);
+            fieldSeparator, quoteCharacter, quoteStrategy, lineDelimiter, false);
     }
 
     private static FastBufferedWriter fastBuffer(final OutputStream out, final Charset charset) {
