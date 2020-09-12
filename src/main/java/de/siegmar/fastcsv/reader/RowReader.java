@@ -49,10 +49,14 @@ final class RowReader implements Closeable {
         this.fieldSeparator = fieldSeparator;
     }
 
-    /*
-     * ugly, performance optimized code begins
+    /**
+     * Reads and parses data (one logical row that might span multiple lines) from reader into
+     * {@link RowHandler}.
+     *
+     * @return {@code true} if end of stream reached
      */
-    boolean readLine(final RowHandler rowHandler) throws IOException {
+    // ugly, performance optimized code begins
+    boolean readRow(final RowHandler rowHandler) throws IOException {
         int lines = 1;
 
         int lPos = pos;

@@ -77,7 +77,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private CsvRow fetchRow() throws IOException {
         while (!finished) {
             final long startingLineNo = lineNo + 1;
-            finished = rowReader.readLine(rowHandler);
+            finished = rowReader.readRow(rowHandler);
             final String[] currentFields = rowHandler.end();
             lineNo += rowHandler.getLines();
 
