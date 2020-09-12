@@ -29,8 +29,6 @@ import java.util.stream.StreamSupport;
 
 /**
  * This is the main class for reading CSV data.
- *
- * @author Oliver Siegmar
  */
 public class CsvReader implements Iterable<CsvRow>, Closeable {
 

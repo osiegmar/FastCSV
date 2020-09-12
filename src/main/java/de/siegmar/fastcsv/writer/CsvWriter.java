@@ -26,12 +26,10 @@ import java.util.Objects;
  *
  * Example use:
  * <pre>{@code
- * try (CloseableCsvWriter csv = CsvWriter.builder().build(file, StandardCharsets.UTF_8)) {
+ * try (CsvWriter csv = CsvWriter.builder().build(file, StandardCharsets.UTF_8)) {
  *     csv.writeLine("Hello", "world");
  * }
  * }</pre>
- *
- * @author Oliver Siegmar
  */
 public class CsvWriter implements Closeable {
 

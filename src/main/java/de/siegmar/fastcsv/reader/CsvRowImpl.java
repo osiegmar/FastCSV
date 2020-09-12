@@ -22,8 +22,6 @@ import java.util.StringJoiner;
 
 /**
  * This class represents a single CSV row.
- *
- * @author Oliver Siegmar
  */
 public final class CsvRowImpl implements CsvRow {
 

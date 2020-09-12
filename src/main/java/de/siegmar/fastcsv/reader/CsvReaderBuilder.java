@@ -27,8 +27,6 @@ import java.util.Objects;
 /**
  * This builder is used to create configured instances of {@link CsvReader}. The default
  * configuration of this class complies with RFC 4180.
- *
- * @author Oliver Siegmar
  */
 public final class CsvReaderBuilder {
 

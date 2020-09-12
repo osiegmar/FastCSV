@@ -29,8 +29,6 @@ import java.util.Objects;
 /**
  * This builder is used to create configured instances of {@link CsvWriter}. The default
  * configuration of this class complies with RFC 4180.
- *
- * @author Oliver Siegmar
  */
 public final class CsvWriterBuilder {
 

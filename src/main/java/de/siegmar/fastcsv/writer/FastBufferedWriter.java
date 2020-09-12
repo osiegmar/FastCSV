@@ -23,8 +23,6 @@ import java.io.Writer;
  * Unsynchronized and thus high performance replacement for BufferedWriter.
  *
  * This class is intended for internal use only.
- *
- * @author Oliver Siegmar
  */
 public final class FastBufferedWriter extends Writer {
 
