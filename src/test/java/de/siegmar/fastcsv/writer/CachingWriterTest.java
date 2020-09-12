@@ -23,10 +23,10 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-public class FastBufferWriterTest {
+public class CachingWriterTest {
 
     private final StringWriter sw = new StringWriter();
-    private final FastBufferedWriter fbw = new FastBufferedWriter(sw);
+    private final CachingWriter cw = new CachingWriter(sw);
 
     @Test
     public void appendSingle() throws IOException {
@@ -34,10 +34,10 @@ public class FastBufferWriterTest {
 
         for (int i = 0; i < 8192; i++) {
             sb.append("ab");
-            fbw.append('a');
-            fbw.append('b');
+            cw.write('a');
+            cw.write('b');
         }
-        fbw.close();
+        cw.close();
 
         assertEquals(sb.toString(), sw.toString());
     }
@@ -48,9 +48,9 @@ public class FastBufferWriterTest {
 
         for (int i = 0; i < 8192; i++) {
             sb.append("ab");
-            fbw.append("ab");
+            cw.write("ab", 0, 2);
         }
-        fbw.close();
+        cw.close();
 
         assertEquals(sb.toString(), sw.toString());
     }
@@ -58,10 +58,7 @@ public class FastBufferWriterTest {
     @Test
     public void appendLarge() throws IOException {
         final String sb = buildLargeData();
-        fbw.append(sb);
-
-        // also test flush
-        fbw.flush();
+        cw.write(sb, 0, sb.length());
 
         assertEquals(sb, sw.toString());
     }
@@ -72,17 +69,6 @@ public class FastBufferWriterTest {
             sb.append("ab");
         }
         return sb.toString();
-    }
-
-    @Test
-    public void appendLargeCharArray() throws IOException {
-        final String sb = buildLargeData();
-        fbw.write(sb.toCharArray());
-
-        // also test flush
-        fbw.flush();
-
-        assertEquals(sb, sw.toString());
     }
 
 }

@@ -17,7 +17,6 @@
 package de.siegmar.fastcsv.writer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -126,12 +125,9 @@ public final class CsvWriterBuilder {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
 
-        return new CsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
+        return new CsvWriter(new OutputStreamWriter(Files.newOutputStream(path, openOptions),
+            charset),
             fieldSeparator, quoteCharacter, quoteStrategy, lineDelimiter, false);
-    }
-
-    private static FastBufferedWriter fastBuffer(final OutputStream out, final Charset charset) {
-        return new FastBufferedWriter(new OutputStreamWriter(out, charset));
     }
 
 }

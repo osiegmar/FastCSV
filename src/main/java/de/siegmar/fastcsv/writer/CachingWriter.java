@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Oliver Siegmar
+ * Copyright 2020 Oliver Siegmar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,46 +21,29 @@ import java.io.Writer;
 
 /**
  * Unsynchronized and thus high performance replacement for BufferedWriter.
- *
+ * <p>
  * This class is intended for internal use only.
  */
-final class FastBufferedWriter extends Writer {
+final class CachingWriter {
 
     private static final int BUFFER_SIZE = 8192;
 
-    private final Writer out;
+    private final Writer writer;
     private final char[] buf = new char[BUFFER_SIZE];
     private int pos;
 
-    FastBufferedWriter(final Writer writer) {
-        this.out = writer;
+    CachingWriter(final Writer writer) {
+        this.writer = writer;
     }
 
-    @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-    @Override
-    public void write(final char[] cbuf, int off, int len) throws IOException {
-        do {
-            final int copyLen = Math.min(BUFFER_SIZE - pos, len);
-            System.arraycopy(cbuf, off, buf, pos, copyLen);
-            pos += copyLen;
-            off += copyLen;
-            len -= copyLen;
-            if (pos >= BUFFER_SIZE) {
-                flushBuffer();
-            }
-        } while (len > 0);
-    }
-
-    @Override
-    public void write(final int c) throws IOException {
-        buf[pos++] = (char) c;
+    public void write(final char c) throws IOException {
+        buf[pos++] = c;
         if (pos >= BUFFER_SIZE) {
             flushBuffer();
         }
     }
 
     @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-    @Override
     public void write(final String str, int off, int len) throws IOException {
         do {
             final int copyLen = Math.min(BUFFER_SIZE - pos, len);
@@ -74,21 +57,14 @@ final class FastBufferedWriter extends Writer {
         } while (len > 0);
     }
 
-    @Override
+    public void flushBuffer() throws IOException {
+        writer.write(buf, 0, pos);
+        pos = 0;
+    }
+
     public void close() throws IOException {
         flushBuffer();
-        out.close();
-    }
-
-    @Override
-    public void flush() throws IOException {
-        flushBuffer();
-        out.flush();
-    }
-
-    void flushBuffer() throws IOException {
-        out.write(buf, 0, pos);
-        pos = 0;
+        writer.close();
     }
 
 }

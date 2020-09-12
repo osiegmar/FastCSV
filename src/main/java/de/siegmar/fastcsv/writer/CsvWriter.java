@@ -36,29 +36,24 @@ public class CsvWriter implements Closeable {
     private static final char CR = '\r';
     private static final char LF = '\n';
 
-    private final Writer writer;
+    private final CachingWriter writer;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
-    private final boolean useInternalBuffer;
+    private final boolean earlyFlush;
 
     private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
-              final boolean useInternalBuffer) {
+              final boolean earlyFlush) {
+        this.writer = new CachingWriter(writer);
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
-        this.useInternalBuffer = useInternalBuffer;
-
-        if (useInternalBuffer) {
-            this.writer = new FastBufferedWriter(writer);
-        } else {
-            this.writer = writer;
-        }
+        this.earlyFlush = earlyFlush;
     }
 
     /**
@@ -80,23 +75,23 @@ public class CsvWriter implements Closeable {
      */
     public CsvWriter writeField(final String value) throws IOException {
         writeInternal(value);
-        if (useInternalBuffer) {
-            ((FastBufferedWriter) writer).flushBuffer();
+        if (earlyFlush) {
+            writer.flushBuffer();
         }
         return this;
     }
 
     private void writeInternal(final String value) throws IOException {
         if (!isNewline) {
-            write(fieldSeparator);
+            writer.write(fieldSeparator);
         } else {
             isNewline = false;
         }
 
         if (value == null) {
             if (quoteStrategy == QuoteStrategy.ALWAYS) {
-                write(quoteCharacter);
-                write(quoteCharacter);
+                writer.write(quoteCharacter);
+                writer.write(quoteCharacter);
             }
             return;
         }
@@ -104,8 +99,8 @@ public class CsvWriter implements Closeable {
         if (value.isEmpty()) {
             if (quoteStrategy == QuoteStrategy.ALWAYS
                 || quoteStrategy == QuoteStrategy.EMPTY) {
-                write(quoteCharacter);
-                write(quoteCharacter);
+                writer.write(quoteCharacter);
+                writer.write(quoteCharacter);
             }
             return;
         }
@@ -127,17 +122,17 @@ public class CsvWriter implements Closeable {
         }
 
         if (needsQuotes) {
-            write(quoteCharacter);
+            writer.write(quoteCharacter);
         }
 
         if (nextDelimPos > -1) {
             writeEscaped(value, length, nextDelimPos);
         } else {
-            write(value, 0, length);
+            writer.write(value, 0, length);
         }
 
         if (needsQuotes) {
-            write(quoteCharacter);
+            writer.write(quoteCharacter);
         }
     }
 
@@ -148,8 +143,8 @@ public class CsvWriter implements Closeable {
         int startPos = 0;
         do {
             final int len = nextDelimPos - startPos + 1;
-            write(value, startPos, len);
-            write(quoteCharacter);
+            writer.write(value, startPos, len);
+            writer.write(quoteCharacter);
             startPos += len;
 
             nextDelimPos = -1;
@@ -162,7 +157,7 @@ public class CsvWriter implements Closeable {
         } while (nextDelimPos > -1);
 
         if (length > startPos) {
-            write(value, startPos, length - startPos);
+            writer.write(value, startPos, length - startPos);
         }
     }
 
@@ -205,22 +200,12 @@ public class CsvWriter implements Closeable {
      * @return This CsvWriter.
      */
     public CsvWriter endLine() throws IOException {
-        write(lineDelimiter, 0, lineDelimiter.length());
+        writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
-        if (useInternalBuffer) {
-            ((FastBufferedWriter) writer).flushBuffer();
+        if (earlyFlush) {
+            writer.flushBuffer();
         }
         return this;
-    }
-
-    private void write(final String value, final int off, final int length)
-        throws IOException {
-
-        writer.write(value, off, length);
-    }
-
-    private void write(final char c) throws IOException {
-        writer.write(c);
     }
 
     /**
