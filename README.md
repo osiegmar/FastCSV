@@ -20,7 +20,7 @@ Benchmark from the
 - Small footprint
 - Zero runtime dependencies
 - Configurable field separator
-- Configurable text delimiter
+- Configurable quoting
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
 - Support for (optional) header lines (get field based on column name)
 - Support for multiple line values (using the text delimiter)
@@ -57,7 +57,7 @@ Custom settings
 ```java
 CsvReader.builder()
     .fieldSeparator(';')
-    .textDelimiter('"')
+    .quoteCharacter('"')
     .skipEmptyRows(true)
     .errorOnDifferentFieldCount(false);
 ```
@@ -93,8 +93,8 @@ Custom settings
 ```java
 CsvWriter.builder()
     .fieldSeparator(',')
-    .textDelimiter('"')
-    .textDelimitStrategy(TextDelimitStrategy.REQUIRED)
+    .quoteCharacter('"')
+    .quoteStrategy(QuoteStrategy.REQUIRED)
     .lineDelimiter("\n");
 ```
 

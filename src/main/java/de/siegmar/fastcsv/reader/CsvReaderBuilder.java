@@ -38,9 +38,9 @@ public final class CsvReaderBuilder {
     private char fieldSeparator = ',';
 
     /**
-     * Text delimiter character (default: '"' - double quotes).
+     * The character used to enclose fields (default: '"' - double quotes).
      */
-    private char textDelimiter = '"';
+    private char quoteCharacter = '"';
 
     /**
      * Skip empty rows? (default: true)
@@ -62,11 +62,11 @@ public final class CsvReaderBuilder {
     }
 
     /**
-     * @param textDelimiter the text delimiter character (default: '"' - double quotes).
+     * @param quoteCharacter the character used to enclose fields (default: '"' - double quotes).
      * @return This updated object, so that additional method calls can be chained together.
      */
-    public CsvReaderBuilder textDelimiter(final char textDelimiter) {
-        this.textDelimiter = textDelimiter;
+    public CsvReaderBuilder quoteCharacter(final char quoteCharacter) {
+        this.quoteCharacter = quoteCharacter;
         return this;
     }
 
@@ -102,7 +102,7 @@ public final class CsvReaderBuilder {
         Objects.requireNonNull(charset, "charset must not be null");
 
         return new CsvReader(newPathReader(path, charset),
-            fieldSeparator, textDelimiter, skipEmptyRows, errorOnDifferentFieldCount);
+            fieldSeparator, quoteCharacter, skipEmptyRows, errorOnDifferentFieldCount);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class CsvReaderBuilder {
      */
     public CsvReader build(final Reader reader) {
         return new CsvReader(Objects.requireNonNull(reader, "reader must not be null"),
-            fieldSeparator, textDelimiter, skipEmptyRows, errorOnDifferentFieldCount);
+            fieldSeparator, quoteCharacter, skipEmptyRows, errorOnDifferentFieldCount);
     }
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {

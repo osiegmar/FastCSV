@@ -16,7 +16,7 @@
 
 package de.siegmar.fastcsv.writer;
 
-public enum TextDelimitStrategy {
+public enum QuoteStrategy {
 
     /**
      * Delimits only text fields that requires it. Simple strings (not containing delimiters,

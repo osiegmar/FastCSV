@@ -30,15 +30,15 @@ public class CsvWriterTest {
     private final CsvWriterBuilder csvWriter = CsvWriter.builder().lineDelimiter("\n");
 
     @Test
-    public void nullDelimit() throws IOException {
+    public void nullQuote() throws IOException {
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,,bar\n", write("foo", "", "bar"));
         assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
     }
 
     @Test
-    public void emptyDelimit() throws IOException {
-        csvWriter.textDelimitStrategy(TextDelimitStrategy.EMPTY);
+    public void emptyQuote() throws IOException {
+        csvWriter.quoteStrategy(QuoteStrategy.EMPTY);
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,\"\",bar\n", write("foo", "", "bar"));
         assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
@@ -74,8 +74,8 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void alwaysDelimitText() throws IOException {
-        csvWriter.textDelimitStrategy(TextDelimitStrategy.ALWAYS);
+    public void alwaysQuoteText() throws IOException {
+        csvWriter.quoteStrategy(QuoteStrategy.ALWAYS);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
@@ -87,13 +87,13 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void textDelimiter() throws IOException {
-        csvWriter.textDelimiter('\'');
+    public void quoteCharacter() throws IOException {
+        csvWriter.quoteCharacter('\'');
         assertEquals("'foo,bar'\n", write("foo,bar"));
     }
 
     @Test
-    public void escape() throws IOException {
+    public void escapeQuotes() throws IOException {
         assertEquals("foo,\"\"\"bar\"\"\"\n", write("foo", "\"bar\""));
     }
 

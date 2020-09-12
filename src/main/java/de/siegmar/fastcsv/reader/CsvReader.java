@@ -44,10 +44,10 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private int firstLineFieldCount = -1;
     private boolean finished;
 
-    CsvReader(final Reader reader, final char fieldSeparator, final char textDelimiter,
+    CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
 
-        rowReader = new RowReader(reader, fieldSeparator, textDelimiter);
+        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter);
         this.skipEmptyRows = skipEmptyRows;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
     }

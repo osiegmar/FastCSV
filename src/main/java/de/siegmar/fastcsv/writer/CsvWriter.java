@@ -40,18 +40,18 @@ public class CsvWriter implements Closeable {
 
     private final Writer writer;
     private final char fieldSeparator;
-    private final char textDelimiter;
-    private final TextDelimitStrategy textDelimitStrategy;
+    private final char quoteCharacter;
+    private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
 
     private boolean isNewline = true;
 
-    CsvWriter(final Writer writer, final char fieldSeparator, final char textDelimiter,
-              final TextDelimitStrategy textDelimitStrategy, final String lineDelimiter) {
+    CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
+              final QuoteStrategy quoteStrategy, final String lineDelimiter) {
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
-        this.textDelimiter = textDelimiter;
-        this.textDelimitStrategy = Objects.requireNonNull(textDelimitStrategy);
+        this.quoteCharacter = quoteCharacter;
+        this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
         this.lineDelimiter = lineDelimiter;
     }
 
@@ -65,8 +65,8 @@ public class CsvWriter implements Closeable {
     }
 
     /**
-     * Appends a field to the current row. Automatically adds field separator and text delimiters
-     * as required.
+     * Appends a field to the current row. Automatically adds field separator and quotes as
+     * required.
      *
      * @param value the field to append (can be {@code null})
      * @throws IOException if a write error occurs
@@ -80,40 +80,40 @@ public class CsvWriter implements Closeable {
         }
 
         if (value == null) {
-            if (textDelimitStrategy == TextDelimitStrategy.ALWAYS) {
-                write(textDelimiter);
-                write(textDelimiter);
+            if (quoteStrategy == QuoteStrategy.ALWAYS) {
+                write(quoteCharacter);
+                write(quoteCharacter);
             }
             return this;
         }
 
         if (value.isEmpty()) {
-            if (textDelimitStrategy == TextDelimitStrategy.ALWAYS
-                || textDelimitStrategy == TextDelimitStrategy.EMPTY) {
-                write(textDelimiter);
-                write(textDelimiter);
+            if (quoteStrategy == QuoteStrategy.ALWAYS
+                || quoteStrategy == QuoteStrategy.EMPTY) {
+                write(quoteCharacter);
+                write(quoteCharacter);
             }
             return this;
         }
 
         final int length = value.length();
-        boolean needsTextDelimiter = textDelimitStrategy == TextDelimitStrategy.ALWAYS;
+        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS;
         int nextDelimPos = -1;
 
         for (int i = 0; i < length; i++) {
             final char c = value.charAt(i);
-            if (c == textDelimiter) {
-                needsTextDelimiter = true;
+            if (c == quoteCharacter) {
+                needsQuotes = true;
                 nextDelimPos = i;
                 break;
             }
-            if (!needsTextDelimiter && (c == fieldSeparator || c == LF || c == CR)) {
-                needsTextDelimiter = true;
+            if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR)) {
+                needsQuotes = true;
             }
         }
 
-        if (needsTextDelimiter) {
-            write(textDelimiter);
+        if (needsQuotes) {
+            write(quoteCharacter);
         }
 
         if (nextDelimPos > -1) {
@@ -122,8 +122,8 @@ public class CsvWriter implements Closeable {
             write(value, 0, length);
         }
 
-        if (needsTextDelimiter) {
-            write(textDelimiter);
+        if (needsQuotes) {
+            write(quoteCharacter);
         }
 
         return this;
@@ -137,12 +137,12 @@ public class CsvWriter implements Closeable {
         do {
             final int len = nextDelimPos - startPos + 1;
             write(value, startPos, len);
-            write(textDelimiter);
+            write(quoteCharacter);
             startPos += len;
 
             nextDelimPos = -1;
             for (int i = startPos; i < length; i++) {
-                if (value.charAt(i) == textDelimiter) {
+                if (value.charAt(i) == quoteCharacter) {
                     nextDelimPos = i;
                     break;
                 }
@@ -158,7 +158,7 @@ public class CsvWriter implements Closeable {
      * Appends a complete line - one or more fields and new line character(s) at the end.
      *
      * @param values the fields to append ({@code null} values are handled as empty strings, if
-     *               not configured otherwise ({@link TextDelimitStrategy#EMPTY}))
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
      * @throws IOException if a write error occurs
      * @return This CsvWriter.
      */
@@ -174,7 +174,7 @@ public class CsvWriter implements Closeable {
      * Appends a complete line - one or more fields and new line character(s) at the end.
      *
      * @param values the fields to append ({@code null} values are handled as empty strings, if
-     *               not configured otherwise ({@link TextDelimitStrategy#EMPTY}))
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
      * @throws IOException if a write error occurs
      * @return This CsvWriter.
      */

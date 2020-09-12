@@ -40,15 +40,15 @@ public final class CsvWriterBuilder {
     private char fieldSeparator = ',';
 
     /**
-     * Text delimiter character (default: '"' - double quotes).
+     * The character for enclosing fields (default: '"' - double quotes).
      */
-    private char textDelimiter = '"';
+    private char quoteCharacter = '"';
 
     /**
-     * The strategy when fields should be delimited using the {@link #textDelimiter}
-     * (default: {@link TextDelimitStrategy#REQUIRED}).
+     * The strategy when fields should be enclosed by the {@link #quoteCharacter}
+     * (default: {@link QuoteStrategy#REQUIRED}).
      */
-    private TextDelimitStrategy textDelimitStrategy = TextDelimitStrategy.REQUIRED;
+    private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
 
     /**
      * The line delimiter character(s) to be used (default: CRLF).
@@ -68,22 +68,22 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * @param textDelimiter the text delimiter character (default: '"' - double quotes).
+     * @param quoteCharacter the character for enclosing fields (default: '"' - double quotes).
      * @return This updated object, so that additional method calls can be chained together.
      */
-    public CsvWriterBuilder textDelimiter(final char textDelimiter) {
-        this.textDelimiter = textDelimiter;
+    public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
+        this.quoteCharacter = quoteCharacter;
         return this;
     }
 
     /**
-     * @param textDelimitStrategy the strategy when fields should be delimited using the
-     *                            {@link #textDelimiter}
-     *                            (default: {@link TextDelimitStrategy#REQUIRED}).
+     * @param quoteStrategy the strategy when fields should be enclosed using the
+     *                      {@link #quoteCharacter}
+     *                      (default: {@link QuoteStrategy#REQUIRED}).
      * @return This updated object, so that additional method calls can be chained together.
      */
-    public CsvWriterBuilder textDelimitStrategy(final TextDelimitStrategy textDelimitStrategy) {
-        this.textDelimitStrategy = textDelimitStrategy;
+    public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
+        this.quoteStrategy = quoteStrategy;
         return this;
     }
 
@@ -107,7 +107,7 @@ public final class CsvWriterBuilder {
     public CsvWriter build(final Writer writer) {
         Objects.requireNonNull(writer, "writer must not be null");
 
-        return new CsvWriter(writer, fieldSeparator, textDelimiter, textDelimitStrategy,
+        return new CsvWriter(writer, fieldSeparator, quoteCharacter, quoteStrategy,
             lineDelimiter);
     }
 
@@ -130,7 +130,7 @@ public final class CsvWriterBuilder {
         Objects.requireNonNull(charset, "charset must not be null");
 
         return new CsvWriter(fastBuffer(Files.newOutputStream(path, openOptions), charset),
-            fieldSeparator, textDelimiter, textDelimitStrategy, lineDelimiter);
+            fieldSeparator, quoteCharacter, quoteStrategy, lineDelimiter);
     }
 
     private static FastBufferedWriter fastBuffer(final OutputStream out, final Charset charset) {

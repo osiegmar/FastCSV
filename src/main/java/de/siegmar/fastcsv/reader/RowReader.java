@@ -35,7 +35,7 @@ final class RowReader implements Closeable {
 
     private final Reader reader;
     private final char fieldSeparator;
-    private final char textDelimiter;
+    private final char quoteCharacter;
 
     private char[] buf = new char[BUFFER_SIZE];
     private int len;
@@ -43,10 +43,10 @@ final class RowReader implements Closeable {
     private int pos;
     private char lastChar;
 
-    RowReader(final Reader reader, final char fieldSeparator, final char textDelimiter) {
+    RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter) {
         this.reader = reader;
-        this.textDelimiter = textDelimiter;
         this.fieldSeparator = fieldSeparator;
+        this.quoteCharacter = quoteCharacter;
     }
 
     /**
@@ -108,7 +108,7 @@ final class RowReader implements Closeable {
 
                 if ((lStatus & STATUS_QUOTED_MODE) != 0) {
                     // we're in quotes
-                    if (c == textDelimiter) {
+                    if (c == quoteCharacter) {
                         lStatus &= ~STATUS_QUOTED_MODE;
                     } else if (c == CR || c == LF && lLastChar != CR) {
                         lines++;
@@ -134,7 +134,7 @@ final class RowReader implements Closeable {
                         pos = begin = lPos;
                         lastChar = c;
                         return false;
-                    } else if (c == textDelimiter && (lStatus & STATUS_DATA_COLUMN) == 0) {
+                    } else if (c == quoteCharacter && (lStatus & STATUS_DATA_COLUMN) == 0) {
                         // quote and not in data-only mode
                         lStatus |= STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
                     } else if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
@@ -166,19 +166,19 @@ final class RowReader implements Closeable {
             rowHandler.add(lBuf, lBegin, lPos, lines);
         } else {
             // column with quotes
-            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, textDelimiter);
+            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, quoteCharacter);
             rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift, lines);
         }
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
-                                       final char textDelimiter) {
+                                       final char quoteCharacter) {
         int shift = 0;
         boolean escape = false;
         for (int i = begin; i < pos; i++) {
             final char c = buf[i];
 
-            if (c == textDelimiter) {
+            if (c == quoteCharacter) {
                 if (!escape) {
                     shift++;
                     escape = true;
