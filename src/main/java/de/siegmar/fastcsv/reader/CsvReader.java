@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.stream.Stream;
@@ -35,7 +34,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private final RowReader rowReader;
     private final boolean skipEmptyRows;
     private final boolean errorOnDifferentFieldCount;
-    private final Iterator<CsvRow> csvRowIterator = new CsvRowIterator();
+    private final CloseableIterator<CsvRow> csvRowIterator = new CsvRowIterator();
 
     private final Reader reader;
     private final RowHandler rowHandler = new RowHandler(32);
@@ -61,7 +60,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     }
 
     @Override
-    public Iterator<CsvRow> iterator() {
+    public CloseableIterator<CsvRow> iterator() {
         return csvRowIterator;
     }
 
@@ -118,7 +117,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         reader.close();
     }
 
-    private final class CsvRowIterator implements Iterator<CsvRow> {
+    private final class CsvRowIterator implements CloseableIterator<CsvRow> {
 
         private CsvRow fetchedRow;
         private boolean fetched;
@@ -151,6 +150,11 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
                 throw new UncheckedIOException(e);
             }
             fetched = true;
+        }
+
+        @Override
+        public void close() throws IOException {
+            reader.close();
         }
 
     }

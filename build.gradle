@@ -5,6 +5,7 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'com.github.spotbugs' version '4.5.0'
+    id 'me.champeau.gradle.jmh' version '0.5.1'
 }
 
 group = "de.siegmar"
@@ -50,6 +51,15 @@ jacocoTestCoverageVerification {
 }
 
 check.dependsOn jacocoTestCoverageVerification
+
+jmh {
+    include = ['read']
+    warmupIterations = 2
+    iterations = 5
+    benchmarkMode = ['thrpt']
+    fork = 2
+    operationsPerInvocation = 1
+}
 
 if (hasProperty('ossrhUsername')) {
     publishing {
