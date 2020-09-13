@@ -41,16 +41,29 @@ public enum LineDelimiter {
      */
     PLATFORM;
 
+    public static LineDelimiter of(final String str) {
+        if ("\r\n".equals(str)) {
+            return CRLF;
+        }
+        if ("\n".equals(str)) {
+            return LF;
+        }
+        if ("\r".equals(str)) {
+            return CR;
+        }
+        throw new IllegalArgumentException("Unknown line delimiter: " + str);
+    }
+
     @SuppressWarnings("checkstyle:returncount")
     @Override
     public String toString() {
         switch (this) {
+            case CRLF:
+                return "\r\n";
             case LF:
                 return "\n";
             case CR:
                 return "\r";
-            case CRLF:
-                return "\r\n";
             case PLATFORM:
                 return System.lineSeparator();
             default:
