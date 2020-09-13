@@ -23,20 +23,18 @@ final class RowHandler {
     private int len;
     private String[] row;
     private int idx;
-    private int lines;
+    private int lines = 1;
 
     RowHandler(final int len) {
         this.len = len;
         row = new String[len];
     }
 
-    void add(final char[] value, final int offset, final int count, final int linesCnt) {
+    void add(final char[] value, final int offset, final int count) {
         if (idx == len) {
             extendCapacity();
         }
         row[idx++] = new String(value, offset, count);
-
-        this.lines = linesCnt;
     }
 
     private void extendCapacity() {
@@ -52,6 +50,10 @@ final class RowHandler {
 
     long getLines() {
         return lines;
+    }
+
+    public void incLines() {
+        this.lines++;
     }
 
 }

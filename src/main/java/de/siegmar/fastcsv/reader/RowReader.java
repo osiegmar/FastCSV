@@ -38,7 +38,6 @@ final class RowReader {
 
     private char lastChar;
     private int status;
-    private int lines;
 
     RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter) {
         buffer = new Buffer(reader);
@@ -53,8 +52,6 @@ final class RowReader {
      * @return {@code true} if end of stream reached
      */
     boolean fetchAndRead(final RowHandler rowHandler) throws IOException {
-        lines = 1;
-
         do {
             if (buffer.len == buffer.pos) {
                 // cursor reached current EOD -- need to fetch
@@ -62,7 +59,7 @@ final class RowReader {
                     // reached end of stream
                     if (buffer.begin < buffer.pos) {
                         publishColumn(rowHandler, buffer.buf, buffer.begin,
-                            buffer.pos - buffer.begin, status, lines, quoteCharacter);
+                            buffer.pos - buffer.begin, status, quoteCharacter);
                     }
                     return true;
                 }
@@ -79,8 +76,6 @@ final class RowReader {
         final char[] lBuf = buffer.buf;
         final int lLen = buffer.len;
 
-        int lLines = lines;
-
         int lPos = buffer.pos;
         int lBegin = buffer.begin;
         int lStatus = status;
@@ -95,19 +90,19 @@ final class RowReader {
                     if (c == quoteCharacter) {
                         lStatus &= ~STATUS_QUOTED_MODE;
                     } else if (c == CR || c == LF && lLastChar != CR) {
-                        lines = lLines++;
+                        rowHandler.incLines();
                     }
                 } else {
                     // we're not in quotes
                     if (c == fieldSeparator) {
                         publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            lLines, quoteCharacter);
+                            quoteCharacter);
                         lStatus = STATUS_RESET;
                         lBegin = lPos;
                     } else if (c == LF) {
                         if (lLastChar != CR) {
                             publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1,
-                                lStatus, lLines, quoteCharacter);
+                                lStatus, quoteCharacter);
                             lStatus = STATUS_RESET;
                             lBegin = lPos;
                             lLastChar = c;
@@ -117,7 +112,7 @@ final class RowReader {
                         lBegin = lPos;
                     } else if (c == CR) {
                         publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            lLines, quoteCharacter);
+                            quoteCharacter);
                         lStatus = STATUS_RESET;
                         lBegin = lPos;
                         lLastChar = c;
@@ -144,15 +139,15 @@ final class RowReader {
 
     private static void publishColumn(final RowHandler rowHandler, final char[] lBuf,
                                       final int lBegin, final int lPos, final int lStatus,
-                                      final int lLines, final char quoteCharacter) {
+                                      final char quoteCharacter) {
         if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
             // column without quotes
-            rowHandler.add(lBuf, lBegin, lPos, lLines);
+            rowHandler.add(lBuf, lBegin, lPos);
         } else {
             // column with quotes
             final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
                 quoteCharacter);
-            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift, lLines);
+            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift);
         }
     }
 
