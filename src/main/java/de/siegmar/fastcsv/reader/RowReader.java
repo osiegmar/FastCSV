@@ -16,35 +16,32 @@
 
 package de.siegmar.fastcsv.reader;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
-final class RowReader implements Closeable {
+/*
+ * This class contains ugly, performance optimized code - be warned!
+ */
+final class RowReader {
 
     private static final char LF = '\n';
     private static final char CR = '\r';
-    private static final int READ_SIZE = 8192;
-    private static final int BUFFER_SIZE = READ_SIZE;
-    private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
 
     private static final int STATUS_QUOTED_MODE = 4;
     private static final int STATUS_QUOTED_COLUMN = 2;
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
-    private final Reader reader;
+    private final Buffer buffer;
     private final char fieldSeparator;
     private final char quoteCharacter;
 
-    private char[] buf = new char[BUFFER_SIZE];
-    private int len;
-    private int begin;
-    private int pos;
     private char lastChar;
+    private int status;
+    private int lines;
 
     RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter) {
-        this.reader = reader;
+        buffer = new Buffer(reader);
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
     }
@@ -55,54 +52,41 @@ final class RowReader implements Closeable {
      *
      * @return {@code true} if end of stream reached
      */
-    // ugly, performance optimized code begins
-    boolean readRow(final RowHandler rowHandler) throws IOException {
-        int lines = 1;
+    boolean fetchAndRead(final RowHandler rowHandler) throws IOException {
+        lines = 1;
 
-        int lPos = pos;
-        int lBegin = begin;
-        char[] lBuf = buf;
-        char lLastChar = lastChar;
-        int lStatus = STATUS_RESET;
-        int lLen = len;
-
-        while (true) {
-            if (lLen == lPos) {
+        do {
+            if (buffer.len == buffer.pos) {
                 // cursor reached current EOD -- need to fetch
-
-                if (lBegin < lPos) {
-                    // we have data that can be relocated
-
-                    if (READ_SIZE > lBuf.length - lPos) {
-                        // need to relocate data in buffer -- not enough capacity left
-
-                        final int lenToCopy = lPos - lBegin;
-                        if (READ_SIZE > lBuf.length - lenToCopy) {
-                            // need to relocate data in new, larger buffer
-                            buf = lBuf = extendAndRelocate(lBuf, lBegin);
-                        } else {
-                            // relocate data in existing buffer
-                            System.arraycopy(lBuf, lBegin, lBuf, 0, lenToCopy);
-                        }
-                        lPos -= lBegin;
-                        lBegin = 0;
-                    }
-                } else {
-                    // all data was consumed -- nothing to relocate
-                    lPos = lBegin = 0;
-                }
-
-                final int cnt = reader.read(lBuf, lPos, READ_SIZE);
-                if (cnt == -1) {
+                if (buffer.fetchData()) {
                     // reached end of stream
-                    if (lBegin < lPos) {
-                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin, lStatus, lines);
+                    if (buffer.begin < buffer.pos) {
+                        publishColumn(rowHandler, buffer.buf, buffer.begin,
+                            buffer.pos - buffer.begin, status, lines, quoteCharacter);
                     }
                     return true;
                 }
-                len = lLen = lPos + cnt;
             }
+        } while (consume(rowHandler));
 
+        return false;
+    }
+
+    /**
+     * @return {@code true}, if more data is needed to complete current row
+     */
+    boolean consume(final RowHandler rowHandler) {
+        final char[] lBuf = buffer.buf;
+        final int lLen = buffer.len;
+
+        int lLines = lines;
+
+        int lPos = buffer.pos;
+        int lBegin = buffer.begin;
+        int lStatus = status;
+        char lLastChar = lastChar;
+
+        try {
             do {
                 final char c = lBuf[lPos++];
 
@@ -111,28 +95,32 @@ final class RowReader implements Closeable {
                     if (c == quoteCharacter) {
                         lStatus &= ~STATUS_QUOTED_MODE;
                     } else if (c == CR || c == LF && lLastChar != CR) {
-                        lines++;
+                        lines = lLines++;
                     }
                 } else {
                     // we're not in quotes
                     if (c == fieldSeparator) {
-                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus, lines);
+                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            lLines, quoteCharacter);
                         lStatus = STATUS_RESET;
                         lBegin = lPos;
                     } else if (c == LF) {
                         if (lLastChar != CR) {
                             publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1,
-                                lStatus, lines);
-                            pos = begin = lPos;
-                            lastChar = c;
+                                lStatus, lLines, quoteCharacter);
+                            lStatus = STATUS_RESET;
+                            lBegin = lPos;
+                            lLastChar = c;
                             return false;
                         }
 
                         lBegin = lPos;
                     } else if (c == CR) {
-                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus, lines);
-                        pos = begin = lPos;
-                        lastChar = c;
+                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            lLines, quoteCharacter);
+                        lStatus = STATUS_RESET;
+                        lBegin = lPos;
+                        lLastChar = c;
                         return false;
                     } else if (c == quoteCharacter && (lStatus & STATUS_DATA_COLUMN) == 0) {
                         // quote and not in data-only mode
@@ -144,30 +132,27 @@ final class RowReader implements Closeable {
 
                 lLastChar = c;
             } while (lPos < lLen);
+        } finally {
+            buffer.pos = lPos;
+            buffer.begin = lBegin;
+            status = lStatus;
+            lastChar = lLastChar;
         }
+
+        return true;
     }
 
-    private static char[] extendAndRelocate(final char[] buf, final int begin) {
-        final int newBufferSize = buf.length * 2;
-        if (newBufferSize > MAX_BUFFER_SIZE) {
-            throw new IllegalStateException("Maximum buffer size "
-                + MAX_BUFFER_SIZE + " is not enough to read data");
-        }
-        final char[] newBuf = new char[newBufferSize];
-        System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
-        return newBuf;
-    }
-
-    private void publishColumn(final RowHandler rowHandler, final char[] lBuf,
-                               final int lBegin, final int lPos, final int status,
-                               final int lines) {
-        if ((status & STATUS_QUOTED_COLUMN) == 0) {
+    private static void publishColumn(final RowHandler rowHandler, final char[] lBuf,
+                                      final int lBegin, final int lPos, final int lStatus,
+                                      final int lLines, final char quoteCharacter) {
+        if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
             // column without quotes
-            rowHandler.add(lBuf, lBegin, lPos, lines);
+            rowHandler.add(lBuf, lBegin, lPos, lLines);
         } else {
             // column with quotes
-            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, quoteCharacter);
-            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift, lines);
+            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
+                quoteCharacter);
+            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift, lLines);
         }
     }
 
@@ -196,9 +181,68 @@ final class RowReader implements Closeable {
         return shift;
     }
 
-    @Override
-    public void close() throws IOException {
-        reader.close();
+    @SuppressWarnings("checkstyle:visibilitymodifier")
+    private static class Buffer {
+        private static final int READ_SIZE = 8192;
+        private static final int BUFFER_SIZE = READ_SIZE;
+        private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
+
+        char[] buf = new char[BUFFER_SIZE];
+        int len;
+        int begin;
+        int pos;
+
+        private final Reader reader;
+
+        Buffer(final Reader reader) {
+            this.reader = reader;
+        }
+
+        /**
+         * @return {@code true}, if EOD reached.
+         */
+        private boolean fetchData() throws IOException {
+            if (begin < pos) {
+                // we have data that can be relocated
+
+                if (READ_SIZE > buf.length - pos) {
+                    // need to relocate data in buffer -- not enough capacity left
+
+                    final int lenToCopy = pos - begin;
+                    if (READ_SIZE > buf.length - lenToCopy) {
+                        // need to relocate data in new, larger buffer
+                        buf = extendAndRelocate(buf, begin);
+                    } else {
+                        // relocate data in existing buffer
+                        System.arraycopy(buf, begin, buf, 0, lenToCopy);
+                    }
+                    pos -= begin;
+                    begin = 0;
+                }
+            } else {
+                // all data was consumed -- nothing to relocate
+                pos = begin = 0;
+            }
+
+            final int cnt = reader.read(buf, pos, READ_SIZE);
+            if (cnt == -1) {
+                return true;
+            }
+            len = pos + cnt;
+            return false;
+        }
+
+        private static char[] extendAndRelocate(final char[] buf, final int begin) {
+            final int newBufferSize = buf.length * 2;
+            if (newBufferSize > MAX_BUFFER_SIZE) {
+                throw new IllegalStateException("Maximum buffer size "
+                    + MAX_BUFFER_SIZE + " is not enough to read data");
+            }
+            final char[] newBuf = new char[newBufferSize];
+            System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
+            return newBuf;
+        }
+
     }
 
 }

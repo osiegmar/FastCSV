@@ -37,6 +37,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private final boolean errorOnDifferentFieldCount;
     private final Iterator<CsvRow> csvRowIterator = new CsvRowIterator();
 
+    private final Reader reader;
     private final RowHandler rowHandler = new RowHandler(32);
     private long lineNo;
     private int firstLineFieldCount = -1;
@@ -45,6 +46,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
 
+        this.reader = reader;
         rowReader = new RowReader(reader, fieldSeparator, quoteCharacter);
         this.skipEmptyRows = skipEmptyRows;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
@@ -75,7 +77,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private CsvRow fetchRow() throws IOException {
         while (!finished) {
             final long startingLineNo = lineNo + 1;
-            finished = rowReader.readRow(rowHandler);
+            finished = rowReader.fetchAndRead(rowHandler);
             final String[] currentFields = rowHandler.end();
             lineNo += rowHandler.getLines();
 
@@ -113,7 +115,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
      */
     @Override
     public void close() throws IOException {
-        rowReader.close();
+        reader.close();
     }
 
     private final class CsvRowIterator implements Iterator<CsvRow> {

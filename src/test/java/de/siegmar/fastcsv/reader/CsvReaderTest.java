@@ -241,16 +241,33 @@ public class CsvReaderTest {
 
     @Test
     public void lineNumbering() {
-        final Iterator<CsvRow> it =
-            parse("\"a multi-\nline string\"\n\"another\none\"").iterator();
+        final Iterator<CsvRow> it = parse(
+            "line 1\n"
+                + "line 2\r"
+                + "line 3\r\n"
+                + "\"line 4\rwith\r\nand\n\"\n"
+                + "line 8"
+        ).iterator();
 
         CsvRow row = it.next();
-        assertEquals(Collections.singletonList("a multi-\nline string"), row.getFields());
+        assertEquals(Collections.singletonList("line 1"), row.getFields());
         assertEquals(1, row.getOriginalLineNumber());
 
         row = it.next();
-        assertEquals(Collections.singletonList("another\none"), row.getFields());
+        assertEquals(Collections.singletonList("line 2"), row.getFields());
+        assertEquals(2, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertEquals(Collections.singletonList("line 3"), row.getFields());
         assertEquals(3, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertEquals(Collections.singletonList("line 4\rwith\r\nand\n"), row.getFields());
+        assertEquals(4, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertEquals(Collections.singletonList("line 8"), row.getFields());
+        assertEquals(8, row.getOriginalLineNumber());
 
         assertFalse(it.hasNext());
     }
