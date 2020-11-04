@@ -23,7 +23,7 @@ import java.util.StringJoiner;
 /**
  * This class represents a single CSV row.
  */
-public final class CsvRowImpl implements CsvRow {
+final class CsvRowImpl implements CsvRow {
 
     /**
      * The original line number (empty lines may be skipped).
