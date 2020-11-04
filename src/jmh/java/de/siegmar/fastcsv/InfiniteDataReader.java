@@ -18,12 +18,12 @@ package de.siegmar.fastcsv;
 
 import java.io.Reader;
 
-public class InfiniteDataReader extends Reader {
+class InfiniteDataReader extends Reader {
 
     private final char[] data;
     private int pos;
 
-    public InfiniteDataReader(final String data) {
+    InfiniteDataReader(final String data) {
         this.data = data.toCharArray();
     }
 

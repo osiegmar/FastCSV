@@ -41,7 +41,7 @@ public final class CsvReaderBuilder {
     private char quoteCharacter = '"';
 
     /**
-     * Skip empty rows? (default: true)
+     * Skip empty rows? (default: true).
      */
     private boolean skipEmptyRows = true;
 
@@ -51,6 +51,8 @@ public final class CsvReaderBuilder {
     private boolean errorOnDifferentFieldCount;
 
     /**
+     * Sets the {@code fieldSeparator} used when reading CSV data.
+     *
      * @param fieldSeparator the field separator character (default: ',' - comma).
      * @return This updated object, so that additional method calls can be chained together.
      */
@@ -60,6 +62,8 @@ public final class CsvReaderBuilder {
     }
 
     /**
+     * Sets the {@code quoteCharacter} used when reading CSV data.
+     *
      * @param quoteCharacter the character used to enclose fields (default: '"' - double quotes).
      * @return This updated object, so that additional method calls can be chained together.
      */
@@ -69,6 +73,8 @@ public final class CsvReaderBuilder {
     }
 
     /**
+     * Defines if empty rows should be skipped when reading data.
+     *
      * @param skipEmptyRows if empty rows should be skipped (default: true).
      * @return This updated object, so that additional method calls can be chained together.
      */
@@ -78,6 +84,8 @@ public final class CsvReaderBuilder {
     }
 
     /**
+     * Defines if an error should be thrown if lines do contain a different number of columns.
+     *
      * @param errorOnDifferentFieldCount if an exception should be thrown, if CSV data contains
      *                                   different field count (default: false).
      * @return This updated object, so that additional method calls can be chained together.

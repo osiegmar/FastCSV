@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-package de.siegmar.fastcsv.reader;
-
-import java.io.Closeable;
-import java.util.Iterator;
-
 /**
- * Iterator that supports closing underlying resources.
- *
- * @param <E> the type of elements returned by this iterator
+ * Package that contains the CSV writer code.
  */
-public interface CloseableIterator<E> extends Iterator<E>, Closeable {
-}
+package de.siegmar.fastcsv.writer;

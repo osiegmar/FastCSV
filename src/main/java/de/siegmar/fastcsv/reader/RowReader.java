@@ -49,7 +49,9 @@ final class RowReader {
      * Reads and parses data (one logical row that might span multiple lines) from reader into
      * {@link RowHandler}.
      *
+     * @param rowHandler the rowHandler to handle the fetched data
      * @return {@code true} if end of stream reached
+     * @throws IOException if a read error occurs
      */
     boolean fetchAndRead(final RowHandler rowHandler) throws IOException {
         do {
@@ -70,6 +72,9 @@ final class RowReader {
     }
 
     /**
+     * Parses data from the current buffer into {@link RowHandler}.
+     *
+     * @param rowHandler the rowHandler to handle the fetched data
      * @return {@code true}, if more data is needed to complete current row
      */
     boolean consume(final RowHandler rowHandler) {
@@ -194,7 +199,10 @@ final class RowReader {
         }
 
         /**
+         * Reads data from the underlying reader and manages the local buffer.
+         *
          * @return {@code true}, if EOD reached.
+         * @throws IOException if a read error occurs
          */
         private boolean fetchData() throws IOException {
             if (begin < pos) {

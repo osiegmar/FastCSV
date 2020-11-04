@@ -20,6 +20,9 @@ import java.io.Writer;
 
 import org.openjdk.jmh.infra.Blackhole;
 
+/**
+ * Writer implementation that sends all data to a black hole.
+ */
 class NullWriter extends Writer {
 
     private final Blackhole blackhole;

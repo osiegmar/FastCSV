@@ -25,14 +25,15 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.Blackhole;
 
-import de.siegmar.fastcsv.reader.CloseableIterator;
-import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 
-@SuppressWarnings({"checkstyle:VisibilityModifier", "checkstyle:InnerTypeLast"})
-public class FastCsvBenchmark {
+public class FastCsvWriteBenchmark {
+
+    @Benchmark
+    public void write(final WriteState state) throws IOException {
+        state.writer.writeLine(Constants.ROW);
+    }
 
     @State(Scope.Benchmark)
     public static class WriteState {
@@ -51,33 +52,6 @@ public class FastCsvBenchmark {
             writer.close();
         }
 
-    }
-
-    @Benchmark
-    public void write(final WriteState state) throws IOException {
-        state.writer.writeLine(Constants.ROW);
-    }
-
-    @State(Scope.Benchmark)
-    public static class ReadState {
-
-        private CloseableIterator<CsvRow> it;
-
-        @Setup
-        public void setup() {
-            it = CsvReader.builder().build(new InfiniteDataReader(Constants.DATA)).iterator();
-        }
-
-        @TearDown
-        public void teardown() throws IOException {
-            it.close();
-        }
-
-    }
-
-    @Benchmark
-    public CsvRow read(final ReadState state) {
-        return state.it.next();
     }
 
 }

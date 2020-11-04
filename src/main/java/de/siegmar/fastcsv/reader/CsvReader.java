@@ -28,6 +28,11 @@ import java.util.stream.StreamSupport;
 
 /**
  * This is the main class for reading CSV data.
+ *
+ * Obtain via:
+ * <pre>{@code
+ * CsvReader.builder().build(...)
+ * }</pre>
  */
 public class CsvReader implements Iterable<CsvRow>, Closeable {
 
@@ -51,10 +56,20 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
     }
 
+    /**
+     * Constructs a {@link CsvReaderBuilder} to configure and build instances of this class.
+     * @return a new {@link CsvReaderBuilder} instance.
+     */
     public static CsvReaderBuilder builder() {
         return new CsvReaderBuilder();
     }
 
+    /**
+     * Wraps this instance in a {@link NamedCsvReader} instance to allow accessing csv rows
+     * via {@link NamedCsvRow}.
+     * @return a new {@link NamedCsvReader} instance.
+     * @see NamedCsvRow
+     */
     public NamedCsvReader withHeader() {
         return new NamedCsvReader(this);
     }
@@ -69,6 +84,11 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         return new CsvRowSpliterator<>(csvRowIterator);
     }
 
+    /**
+     * Creates a new sequential {@code Stream} from this instance.
+     *
+     * @return a new sequential {@code Stream}.
+     */
     public Stream<CsvRow> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
@@ -109,9 +129,6 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() throws IOException {
         reader.close();

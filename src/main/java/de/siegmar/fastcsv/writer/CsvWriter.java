@@ -70,8 +70,8 @@ public class CsvWriter implements Closeable {
      * required.
      *
      * @param value the field to append (can be {@code null})
-     * @throws IOException if a write error occurs
      * @return This CsvWriter.
+     * @throws IOException if a write error occurs
      */
     public CsvWriter writeField(final String value) throws IOException {
         writeInternal(value);
@@ -166,8 +166,8 @@ public class CsvWriter implements Closeable {
      *
      * @param values the fields to append ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
-     * @throws IOException if a write error occurs
      * @return This CsvWriter.
+     * @throws IOException if a write error occurs
      */
     public CsvWriter writeLine(final Iterable<String> values) throws IOException {
         for (final String value : values) {
@@ -182,8 +182,8 @@ public class CsvWriter implements Closeable {
      *
      * @param values the fields to append ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
-     * @throws IOException if a write error occurs
      * @return This CsvWriter.
+     * @throws IOException if a write error occurs
      */
     public CsvWriter writeLine(final String... values) throws IOException {
         for (final String value : values) {
@@ -196,8 +196,8 @@ public class CsvWriter implements Closeable {
     /**
      * Appends new line character(s) to the current line.
      *
-     * @throws IOException if a write error occurs
      * @return This CsvWriter.
+     * @throws IOException if a write error occurs
      */
     public CsvWriter endLine() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
@@ -208,9 +208,6 @@ public class CsvWriter implements Closeable {
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() throws IOException {
         writer.close();

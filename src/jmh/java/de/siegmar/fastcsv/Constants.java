@@ -16,8 +16,11 @@
 
 package de.siegmar.fastcsv;
 
-public final class Constants {
+final class Constants {
 
+    /**
+     * Data to write CSV.
+     */
     static final String[] ROW = {
         "Simple field",
         "Example with separator ,",
@@ -26,6 +29,9 @@ public final class Constants {
         "Example with , and \" and \nnewline",
     };
 
+    /**
+     * Data to read CSV.
+     */
     static final String DATA = "Simple field,"
         + "\"Example with separator ,\","
         + "\"Example with delimiter \"\"\","

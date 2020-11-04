@@ -19,6 +19,9 @@ package de.siegmar.fastcsv.reader;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Interface for a header name based CSV-row.
+ */
 public interface NamedCsvRow extends CsvRow {
 
     /**

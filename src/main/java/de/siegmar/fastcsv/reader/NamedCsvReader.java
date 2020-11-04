@@ -27,6 +27,14 @@ import java.util.Spliterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Header name based Csv reader implementation.
+ *
+ * Obtain via:
+ * <pre>{@code
+ * CsvReader.builder().build(...).withHeader()
+ * }</pre>
+ */
 public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private final CsvReader csvReader;
@@ -43,6 +51,12 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         namedCsvIterator = new CsvRowIterator();
     }
 
+    /**
+     * Returns the header columns. Can be called at any time. Reads data from data source if not
+     * done yet.
+     *
+     * @return the header columns
+     */
     public List<String> getHeader() {
         if (!isInitialized) {
             initialize();
@@ -84,11 +98,21 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         return namedCsvIterator;
     }
 
+    /**
+     * Constructs and returns a new {@link CsvRowSpliterator}.
+     *
+     * @return a new {@link CsvRowSpliterator} instance
+     */
     @Override
     public Spliterator<NamedCsvRow> spliterator() {
         return new CsvRowSpliterator<>(iterator());
     }
 
+    /**
+     * Creates a new sequential {@code Stream} from this instance.
+     *
+     * @return a new sequential {@code Stream}.
+     */
     public Stream<NamedCsvRow> stream() {
         return StreamSupport.stream(spliterator(), false);
     }

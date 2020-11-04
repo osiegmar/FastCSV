@@ -16,6 +16,9 @@
 
 package de.siegmar.fastcsv.writer;
 
+/**
+ * The strategies that can be used to quote values when writing CSV data.
+ */
 public enum QuoteStrategy {
 
     /**

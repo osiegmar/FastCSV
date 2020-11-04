@@ -9,7 +9,7 @@
     <property name="cacheFile" value="${config_loc}/../../build/checkstyle-cachefile"/>
 
     <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
-    <!--<module name="JavadocPackage"/>-->
+    <module name="JavadocPackage"/>
 
     <!-- Checks for Misc - http://checkstyle.sf.net/config_misc.html -->
     <module name="NewlineAtEndOfFile">
@@ -192,17 +192,25 @@
         <!--<module name="CustomImportOrder"/>-->
 
         <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
-        <!--<module name="JavadocType"/>-->
-        <!--<module name="JavadocMethod"/>-->
-        <!--<module name="JavadocVariable"/>-->
-        <module name="JavadocStyle"/>
-        <!--<module name="WriteTag"/>-->
-        <!--<module name="NonEmptyAtclauseDescription"/>-->
-        <!--<module name="JavadocTagContinuationIndentation"/>-->
-        <!--<module name="SummaryJavadoc"/>-->
-        <!--<module name="AtclauseOrder"/>-->
+        <module name="AtclauseOrder"/>
+        <module name="InvalidJavadocPosition"/>
+        <module name="JavadocBlockTagLocation"/>
+        <module name="JavadocContentLocation"/>
+        <module name="JavadocMethod"/>
         <!--<module name="JavadocParagraph"/>-->
-        <!--<module name="SingleLineJavadoc"/>-->
+        <module name="JavadocStyle"/>
+        <module name="JavadocTagContinuationIndentation"/>
+        <module name="JavadocType"/>
+        <module name="JavadocVariable">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="MissingJavadocMethod"/>
+        <module name="MissingJavadocType"/>
+        <module name="NonEmptyAtclauseDescription"/>
+        <!--<module name="RequireEmptyLineBeforeBlockTagGroup"/>-->
+        <module name="SingleLineJavadoc"/>
+        <module name="SummaryJavadoc"/>
+        <!--<module name="WriteTag"/>-->
 
         <!-- Checks for Metrics - http://checkstyle.sf.net/config_metrics.html -->
         <module name="BooleanExpressionComplexity"/>

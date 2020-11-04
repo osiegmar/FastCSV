@@ -56,6 +56,8 @@ public final class CsvWriterBuilder {
     }
 
     /**
+     * Sets the character that is used to separate columns (default: ',' - comma).
+     *
      * @param fieldSeparator the field separator character.
      * @return This updated object, so that additional method calls can be chained together.
      */
@@ -65,7 +67,9 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * @param quoteCharacter the character for enclosing fields (default: '"' - double quotes).
+     * Sets the character that is used to quote values (default: '"' - double quotes).
+     *
+     * @param quoteCharacter the character for enclosing fields.
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
@@ -74,9 +78,10 @@ public final class CsvWriterBuilder {
     }
 
     /**
-     * @param quoteStrategy the strategy when fields should be enclosed using the
-     *                      {@link #quoteCharacter}
-     *                      (default: {@link QuoteStrategy#REQUIRED}).
+     * Sets the strategy that defines when quoting has to be performed
+     * (default: {@link QuoteStrategy#REQUIRED}).
+     *
+     * @param quoteStrategy the strategy when fields should be enclosed using the.
      * @return This updated object, so that additional method calls can be chained together.
      */
     public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
@@ -85,6 +90,8 @@ public final class CsvWriterBuilder {
     }
 
     /**
+     * Sets the delimiter that is used to separate lines (default: {@link LineDelimiter#CRLF}).
+     *
      * @param lineDelimiter the line delimiter to be used.
      * @return This updated object, so that additional method calls can be chained together.
      */

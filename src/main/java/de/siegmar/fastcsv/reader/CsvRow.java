@@ -18,6 +18,9 @@ package de.siegmar.fastcsv.reader;
 
 import java.util.List;
 
+/**
+ * Interface for a index based CSV-row.
+ */
 public interface CsvRow {
 
     /**

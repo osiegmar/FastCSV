@@ -41,6 +41,12 @@ public enum LineDelimiter {
      */
     PLATFORM;
 
+    /**
+     * Build an enum based on the given string.
+     *
+     * @param str the string to convert to an enum.
+     * @return the enum representation of the given string.
+     */
     public static LineDelimiter of(final String str) {
         if ("\r\n".equals(str)) {
             return CRLF;
