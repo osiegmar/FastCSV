@@ -85,8 +85,10 @@ final class RowReader {
         int lBegin = buffer.begin;
         int lStatus = status;
         char lLastChar = lastChar;
+        boolean moreDataNeeded = true;
 
-        try {
+        OUTER :
+        {
             do {
                 final char c = lBuf[lPos++];
 
@@ -108,20 +110,22 @@ final class RowReader {
                         if (lLastChar != CR) {
                             publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1,
                                 lStatus, quoteCharacter);
-                            lStatus = STATUS_RESET;
+                            status = STATUS_RESET;
                             lBegin = lPos;
-                            lLastChar = c;
-                            return false;
+                            lastChar = c;
+                            moreDataNeeded = false;
+                            break OUTER;
                         }
 
                         lBegin = lPos;
                     } else if (c == CR) {
                         publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
                             quoteCharacter);
-                        lStatus = STATUS_RESET;
+                        status = STATUS_RESET;
                         lBegin = lPos;
-                        lLastChar = c;
-                        return false;
+                        lastChar = c;
+                        moreDataNeeded = false;
+                        break OUTER;
                     } else if (c == quoteCharacter && (lStatus & STATUS_DATA_COLUMN) == 0) {
                         // quote and not in data-only mode
                         lStatus |= STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
@@ -132,14 +136,15 @@ final class RowReader {
 
                 lLastChar = c;
             } while (lPos < lLen);
-        } finally {
-            buffer.pos = lPos;
-            buffer.begin = lBegin;
+
             status = lStatus;
             lastChar = lLastChar;
         }
 
-        return true;
+        buffer.pos = lPos;
+        buffer.begin = lBegin;
+
+        return moreDataNeeded;
     }
 
     private static void publishColumn(final RowHandler rowHandler, final char[] lBuf,
