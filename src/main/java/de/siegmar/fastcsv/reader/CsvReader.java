@@ -20,7 +20,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.stream.Stream;
@@ -123,7 +122,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
                 }
             }
 
-            return new CsvRowImpl(startingLineNo, Arrays.asList(currentFields));
+            return new CsvRowImpl(startingLineNo, currentFields);
         }
 
         return null;

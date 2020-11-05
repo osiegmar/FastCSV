@@ -16,8 +16,7 @@
 
 package de.siegmar.fastcsv.reader;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import java.util.StringJoiner;
 
 /**
@@ -30,9 +29,9 @@ final class CsvRowImpl implements CsvRow {
      */
     private final long originalLineNumber;
 
-    private final List<String> fields;
+    private final String[] fields;
 
-    CsvRowImpl(final long originalLineNumber, final List<String> fields) {
+    CsvRowImpl(final long originalLineNumber, final String[] fields) {
         this.originalLineNumber = originalLineNumber;
         this.fields = fields;
     }
@@ -44,24 +43,24 @@ final class CsvRowImpl implements CsvRow {
 
     @Override
     public String getField(final int index) {
-        return fields.get(index);
+        return fields[index];
     }
 
     @Override
-    public List<String> getFields() {
-        return Collections.unmodifiableList(fields);
+    public String[] getFields() {
+        return fields.clone();
     }
 
     @Override
     public int getFieldCount() {
-        return fields.size();
+        return fields.length;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", CsvRowImpl.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
-            .add("fields=" + fields)
+            .add("fields=" + Arrays.toString(fields))
             .toString();
     }
 

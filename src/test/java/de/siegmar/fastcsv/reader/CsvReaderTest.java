@@ -16,14 +16,13 @@
 
 package de.siegmar.fastcsv.reader;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.StringReader;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -55,7 +54,11 @@ public class CsvReaderTest {
 
     @Test
     public void simple() {
-        assertEquals(Collections.singletonList("foo"), readSingleRow("foo").getFields());
+        assertArrayEquals(asArray("foo"), readSingleRow("foo").getFields());
+    }
+
+    private static String[] asArray(final String... items) {
+        return items;
     }
 
     // skipped rows
@@ -74,12 +77,12 @@ public class CsvReaderTest {
         CsvRow row = it.next();
         assertEquals(1, row.getFieldCount());
         assertEquals(1, row.getOriginalLineNumber());
-        assertEquals(Collections.singletonList(""), row.getFields());
+        assertArrayEquals(asArray(""), row.getFields());
 
         row = it.next();
         assertEquals(1, row.getFieldCount());
         assertEquals(2, row.getOriginalLineNumber());
-        assertEquals(Collections.singletonList(""), row.getFields());
+        assertArrayEquals(asArray(""), row.getFields());
 
         assertFalse(it.hasNext());
     }
@@ -93,11 +96,11 @@ public class CsvReaderTest {
 
         CsvRow row = it.next();
         assertEquals(3, row.getOriginalLineNumber());
-        assertEquals(Collections.singletonList("foo"), row.getFields());
+        assertArrayEquals(asArray("foo"), row.getFields());
 
         row = it.next();
         assertEquals(5, row.getOriginalLineNumber());
-        assertEquals(Collections.singletonList("bar"), row.getFields());
+        assertArrayEquals(asArray("bar"), row.getFields());
     }
 
     // different field count
@@ -169,7 +172,7 @@ public class CsvReaderTest {
 
     @Test
     public void invalidQuotes() {
-        assertEquals(Arrays.asList(
+        assertArrayEquals(asArray(
             "bbb\"a\"",
             " ccc",
             "ddd\"a",
@@ -183,22 +186,22 @@ public class CsvReaderTest {
 
     @Test
     public void textBeforeQuotes() {
-        assertEquals(Arrays.asList("a\"b\"", "c"), readSingleRow("a\"b\",c").getFields());
+        assertArrayEquals(asArray("a\"b\"", "c"), readSingleRow("a\"b\",c").getFields());
     }
 
     @Test
     public void textAfterQuotes() {
-        assertEquals(Arrays.asList("ab", "c"), readSingleRow("\"a\"b,c").getFields());
+        assertArrayEquals(asArray("ab", "c"), readSingleRow("\"a\"b,c").getFields());
     }
 
     @Test
     public void spaceBeforeQuotes() {
-        assertEquals(Arrays.asList(" \"a\"", "b"), readSingleRow(" \"a\",b").getFields());
+        assertArrayEquals(asArray(" \"a\"", "b"), readSingleRow(" \"a\",b").getFields());
     }
 
     @Test
     public void spaceAfterQuotes() {
-        assertEquals(Arrays.asList("a ", "b"), readSingleRow("\"a\" ,b").getFields());
+        assertArrayEquals(asArray("a ", "b"), readSingleRow("\"a\" ,b").getFields());
     }
 
     @Test
@@ -250,23 +253,23 @@ public class CsvReaderTest {
         ).iterator();
 
         CsvRow row = it.next();
-        assertEquals(Collections.singletonList("line 1"), row.getFields());
+        assertArrayEquals(asArray("line 1"), row.getFields());
         assertEquals(1, row.getOriginalLineNumber());
 
         row = it.next();
-        assertEquals(Collections.singletonList("line 2"), row.getFields());
+        assertArrayEquals(asArray("line 2"), row.getFields());
         assertEquals(2, row.getOriginalLineNumber());
 
         row = it.next();
-        assertEquals(Collections.singletonList("line 3"), row.getFields());
+        assertArrayEquals(asArray("line 3"), row.getFields());
         assertEquals(3, row.getOriginalLineNumber());
 
         row = it.next();
-        assertEquals(Collections.singletonList("line 4\rwith\r\nand\n"), row.getFields());
+        assertArrayEquals(asArray("line 4\rwith\r\nand\n"), row.getFields());
         assertEquals(4, row.getOriginalLineNumber());
 
         row = it.next();
-        assertEquals(Collections.singletonList("line 8"), row.getFields());
+        assertArrayEquals(asArray("line 8"), row.getFields());
         assertEquals(8, row.getOriginalLineNumber());
 
         assertFalse(it.hasNext());

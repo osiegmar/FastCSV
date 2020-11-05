@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.stream.Stream;
@@ -41,7 +40,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     private final Iterator<CsvRow> csvIterator;
     private final Iterator<NamedCsvRow> namedCsvIterator;
 
-    private List<String> header;
+    private String[] header;
     private Map<String, Integer> headerMap;
     private boolean isInitialized;
 
@@ -57,26 +56,25 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      *
      * @return the header columns
      */
-    public List<String> getHeader() {
+    public String[] getHeader() {
         if (!isInitialized) {
             initialize();
         }
-        return header;
+        return header.clone();
     }
 
     private void initialize() {
         if (!csvIterator.hasNext()) {
-            header = Collections.emptyList();
+            header = new String[0];
             headerMap = Collections.emptyMap();
         } else {
             final CsvRow firstRow = csvIterator.next();
 
-            header = Collections.unmodifiableList(firstRow.getFields());
-            final Map<String, Integer> map = new LinkedHashMap<>(header.size());
+            header = firstRow.getFields();
+            final Map<String, Integer> map = new LinkedHashMap<>(header.length);
 
-            int i = 0;
-            for (Iterator<String> iterator = header.iterator(); iterator.hasNext(); i++) {
-                final String field = iterator.next();
+            for (int i = 0; i < header.length; i++) {
+                final String field = header[i];
                 final Integer put = map.put(field, i);
                 if (put != null) {
                     throw new IllegalStateException("Duplicate header field '" + field + "' found");

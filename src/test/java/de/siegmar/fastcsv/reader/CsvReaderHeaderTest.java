@@ -16,13 +16,12 @@
 
 package de.siegmar.fastcsv.reader;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -47,10 +46,14 @@ public class CsvReaderHeaderTest {
     @Test
     public void empty() {
         final NamedCsvReader parse = parse("");
-        assertEquals(Collections.emptyList(), parse.getHeader());
+        assertArrayEquals(new String[0], parse.getHeader());
         final Iterator<NamedCsvRow> it = parse.iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    private static String[] asArray(final String... items) {
+        return items;
     }
 
     @Test
@@ -63,7 +66,7 @@ public class CsvReaderHeaderTest {
     @Test
     public void onlyHeader() {
         final NamedCsvReader csv = parse("foo,bar\n");
-        assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader());
         assertFalse(csv.iterator().hasNext());
         assertThrows(NoSuchElementException.class, () -> csv.iterator().next());
     }
@@ -75,14 +78,14 @@ public class CsvReaderHeaderTest {
 
     @Test
     public void getHeader() {
-        assertEquals(Collections.singletonList("foo"), parse("foo\nbar").getHeader());
-        assertEquals(Arrays.asList("foo", "bar"), parse("foo,bar\n1,2").getHeader());
+        assertArrayEquals(asArray("foo"), parse("foo\nbar").getHeader());
+        assertArrayEquals(asArray("foo", "bar"), parse("foo,bar\n1,2").getHeader());
     }
 
     @Test
     public void getHeaderEmptyRows() {
         final NamedCsvReader csv = parse("foo,bar");
-        assertEquals(Arrays.asList("foo", "bar"), csv.getHeader());
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader());
         final Iterator<NamedCsvRow> it = csv.iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
@@ -90,7 +93,7 @@ public class CsvReaderHeaderTest {
 
     @Test
     public void getHeaderWithoutNextRowCall() {
-        assertEquals(Collections.singletonList("foo"), parse("foo\n").getHeader());
+        assertArrayEquals(asArray("foo"), parse("foo\n").getHeader());
     }
 
     // Request field by name, but column name doesn't exist

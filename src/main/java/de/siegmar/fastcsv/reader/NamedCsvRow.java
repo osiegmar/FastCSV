@@ -28,7 +28,7 @@ public interface NamedCsvRow extends CsvRow {
      * Gets a field value by its name.
      *
      * @param name field name
-     * @return field value
+     * @return field value, never {@code null}
      * @throws java.util.NoSuchElementException if this row has no such field
      * @see #findField(String)
      */

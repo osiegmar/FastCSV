@@ -16,6 +16,7 @@
 
 package de.siegmar.fastcsv.reader;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -25,7 +26,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
@@ -38,8 +38,12 @@ public class CsvReaderExampleTest {
             .build(new StringReader("foo,bar"))
             .iterator();
 
-        assertEquals(Arrays.asList("foo", "bar"), csv.next().getFields());
+        assertArrayEquals(asArray("foo", "bar"), csv.next().getFields());
         assertFalse(csv.hasNext());
+    }
+
+    private static String[] asArray(final String... items) {
+        return items;
     }
 
     @Test
@@ -52,7 +56,7 @@ public class CsvReaderExampleTest {
             .build(new StringReader("foo;bar"))
             .iterator();
 
-        assertEquals(Arrays.asList("foo", "bar"), csv.next().getFields());
+        assertArrayEquals(asArray("foo", "bar"), csv.next().getFields());
         assertFalse(csv.hasNext());
     }
 
@@ -85,7 +89,7 @@ public class CsvReaderExampleTest {
 
         try (CsvReader csvReader = CsvReader.builder().build(path, charset)) {
             for (CsvRow row : csvReader) {
-                assertEquals(Arrays.asList("foo", "bar"), row.getFields());
+                assertArrayEquals(asArray("foo", "bar"), row.getFields());
             }
         }
     }

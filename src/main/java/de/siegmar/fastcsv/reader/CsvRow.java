@@ -16,8 +16,6 @@
 
 package de.siegmar.fastcsv.reader;
 
-import java.util.List;
-
 /**
  * Interface for a index based CSV-row.
  */
@@ -36,17 +34,17 @@ public interface CsvRow {
      * Gets a field value by its index (starting with 0).
      *
      * @param index index of the field to return
-     * @return field value
+     * @return field value, never {@code null}
      * @throws IndexOutOfBoundsException if index is out of range
      */
     String getField(int index);
 
     /**
-     * Gets all fields of this row as an unmodifiable List.
+     * Gets all fields of this row.
      *
-     * @return all fields of this row
+     * @return all fields of this row, never {@code null}
      */
-    List<String> getFields();
+    String[] getFields();
 
     /**
      * Gets the number of fields of this row.
