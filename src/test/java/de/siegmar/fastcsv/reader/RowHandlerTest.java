@@ -25,8 +25,8 @@ public class RowHandlerTest {
     @Test
     public void test() {
         final RowHandler rh = new RowHandler(1);
-        rh.add("foo".toCharArray(), 0, 3);
-        rh.add("bar".toCharArray(), 0, 3);
+        rh.add("foo");
+        rh.add("bar");
 
         assertArrayEquals(new String[]{"foo", "bar"}, rh.end());
     }

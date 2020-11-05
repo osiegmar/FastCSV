@@ -60,8 +60,8 @@ final class RowReader {
                 if (buffer.fetchData()) {
                     // reached end of stream
                     if (buffer.begin < buffer.pos) {
-                        publishColumn(rowHandler, buffer.buf, buffer.begin,
-                            buffer.pos - buffer.begin, status, quoteCharacter);
+                        rowHandler.add(materialize(buffer.buf, buffer.begin,
+                            buffer.pos - buffer.begin, status, quoteCharacter));
                     }
                     return true;
                 }
@@ -102,14 +102,14 @@ final class RowReader {
                 } else {
                     // we're not in quotes
                     if (c == fieldSeparator) {
-                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            quoteCharacter);
+                        rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            quoteCharacter));
                         lStatus = STATUS_RESET;
                         lBegin = lPos;
                     } else if (c == LF) {
                         if (lLastChar != CR) {
-                            publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1,
-                                lStatus, quoteCharacter);
+                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
+                                lStatus, quoteCharacter));
                             status = STATUS_RESET;
                             lBegin = lPos;
                             lastChar = c;
@@ -119,8 +119,8 @@ final class RowReader {
 
                         lBegin = lPos;
                     } else if (c == CR) {
-                        publishColumn(rowHandler, lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            quoteCharacter);
+                        rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            quoteCharacter));
                         status = STATUS_RESET;
                         lBegin = lPos;
                         lastChar = c;
@@ -147,18 +147,18 @@ final class RowReader {
         return moreDataNeeded;
     }
 
-    private static void publishColumn(final RowHandler rowHandler, final char[] lBuf,
+    private static String materialize(final char[] lBuf,
                                       final int lBegin, final int lPos, final int lStatus,
                                       final char quoteCharacter) {
         if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
             // column without quotes
-            rowHandler.add(lBuf, lBegin, lPos);
-        } else {
-            // column with quotes
-            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
-                quoteCharacter);
-            rowHandler.add(lBuf, lBegin + 1, lPos - 1 - shift);
+            return new String(lBuf, lBegin, lPos);
         }
+
+        // column with quotes
+        final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
+            quoteCharacter);
+        return new String(lBuf, lBegin + 1, lPos - 1 - shift);
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,

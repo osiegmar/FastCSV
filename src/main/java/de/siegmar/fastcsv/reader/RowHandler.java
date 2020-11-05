@@ -16,8 +16,6 @@
 
 package de.siegmar.fastcsv.reader;
 
-import java.util.Arrays;
-
 final class RowHandler {
 
     private int len;
@@ -30,20 +28,23 @@ final class RowHandler {
         row = new String[len];
     }
 
-    void add(final char[] value, final int offset, final int count) {
+    void add(final String value) {
         if (idx == len) {
             extendCapacity();
         }
-        row[idx++] = new String(value, offset, count);
+        row[idx++] = value;
     }
 
     private void extendCapacity() {
         len *= 2;
-        row = Arrays.copyOf(row, len);
+        final String[] newRow = new String[len];
+        System.arraycopy(row, 0, newRow, 0, idx);
+        row = newRow;
     }
 
     String[] end() {
-        final String[] ret = Arrays.copyOf(row, idx);
+        final String[] ret = new String[idx];
+        System.arraycopy(row, 0, ret, 0, idx);
         idx = 0;
         return ret;
     }
