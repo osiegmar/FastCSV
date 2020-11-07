@@ -12,10 +12,7 @@ group = "de.siegmar"
 version = "2.0.0-SNAPSHOT"
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
-
+    sourceCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
     withSourcesJar()
 }
