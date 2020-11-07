@@ -86,8 +86,7 @@ final class RowReader {
         int lStatus = status;
         boolean moreDataNeeded = true;
 
-        OUTER :
-        {
+        OUTER: {
             mode_check: do {
                 if ((lStatus & STATUS_QUOTED_MODE) == 0) {
                     while (lPos < lLen) {
