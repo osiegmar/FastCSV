@@ -27,22 +27,22 @@ final class RowReader {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
+    private static final int LAST_CHAR_WAS_CR = 8;
     private static final int STATUS_QUOTED_MODE = 4;
     private static final int STATUS_QUOTED_COLUMN = 2;
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
     private final Buffer buffer;
-    private final char fieldSeparator;
-    private final char quoteCharacter;
+    private final char fsep;
+    private final char qChar;
 
-    private char lastChar;
     private int status;
 
     RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter) {
         buffer = new Buffer(reader);
-        this.fieldSeparator = fieldSeparator;
-        this.quoteCharacter = quoteCharacter;
+        this.fsep = fieldSeparator;
+        this.qChar = quoteCharacter;
     }
 
     /**
@@ -61,7 +61,7 @@ final class RowReader {
                     // reached end of stream
                     if (buffer.begin < buffer.pos) {
                         rowHandler.add(materialize(buffer.buf, buffer.begin,
-                            buffer.pos - buffer.begin, status, quoteCharacter));
+                            buffer.pos - buffer.begin, status, qChar));
                     }
                     return true;
                 }
@@ -84,61 +84,98 @@ final class RowReader {
         int lPos = buffer.pos;
         int lBegin = buffer.begin;
         int lStatus = status;
-        char lLastChar = lastChar;
         boolean moreDataNeeded = true;
 
         OUTER :
         {
-            do {
-                final char c = lBuf[lPos++];
+            mode_check: do {
+                if ((lStatus & STATUS_QUOTED_MODE) == 0) {
+                    while (lPos < lLen) {
+                        // we're not in quotes
+                        final char c = lBuf[lPos++];
 
-                if ((lStatus & STATUS_QUOTED_MODE) != 0) {
-                    // we're in quotes
-                    if (c == quoteCharacter) {
-                        lStatus &= ~STATUS_QUOTED_MODE;
-                    } else if (c == CR || c == LF && lLastChar != CR) {
-                        rowHandler.incLines();
-                    }
-                } else {
-                    // we're not in quotes
-                    if (c == fieldSeparator) {
-                        rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            quoteCharacter));
-                        lStatus = STATUS_RESET;
-                        lBegin = lPos;
-                    } else if (c == LF) {
-                        if (lLastChar != CR) {
-                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
-                                lStatus, quoteCharacter));
-                            status = STATUS_RESET;
+                        if (c == fsep) {
+                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                                qChar));
+                            lStatus = STATUS_RESET;
                             lBegin = lPos;
-                            lastChar = c;
+                        } else if (c == CR) {
+                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                                qChar));
+                            status = LAST_CHAR_WAS_CR;
+                            lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
-                        }
+                        } else if (c == LF) {
+                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
+                                rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
+                                    lStatus, qChar));
+                                status = STATUS_RESET;
+                                lBegin = lPos;
+                                moreDataNeeded = false;
+                                break OUTER;
+                            }
 
-                        lBegin = lPos;
-                    } else if (c == CR) {
-                        rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                            quoteCharacter));
-                        status = STATUS_RESET;
-                        lBegin = lPos;
-                        lastChar = c;
-                        moreDataNeeded = false;
-                        break OUTER;
-                    } else if (c == quoteCharacter && (lStatus & STATUS_DATA_COLUMN) == 0) {
-                        // quote and not in data-only mode
-                        lStatus |= STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
-                    } else if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
-                        lStatus |= STATUS_DATA_COLUMN;
+                            lStatus = STATUS_RESET;
+                            lBegin = lPos;
+                        } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
+                            // quote and not in data-only mode
+                            lStatus = STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
+                            continue mode_check;
+                        } else {
+                            if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
+                                // normal unquoted data
+                                lStatus = STATUS_DATA_COLUMN;
+
+                                // fast forward
+                                while (lPos < lLen) {
+                                    final char lookAhead = lBuf[lPos++];
+                                    if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
+                                        if (lBuf[--lPos - 1] == CR) {
+                                            lStatus |= LAST_CHAR_WAS_CR;
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else {
+                                // field data after closing quote
+                            }
+                        }
+                    }
+                } else {
+                    while (lPos < lLen) {
+                        // we're in quotes
+                        final char c = lBuf[lPos++];
+
+                        if (c == qChar) {
+                            lStatus &= ~STATUS_QUOTED_MODE;
+                            continue mode_check;
+                        } else if (c == CR) {
+                            lStatus |= LAST_CHAR_WAS_CR;
+                            rowHandler.incLines();
+                        } else if (c == LF) {
+                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
+                                rowHandler.incLines();
+                            } else {
+                                lStatus &= ~LAST_CHAR_WAS_CR;
+                            }
+                        } else {
+                            // fast forward
+                            while (lPos < lLen) {
+                                final char lookAhead = lBuf[lPos++];
+                                if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
+                                    if (lBuf[--lPos - 1] == CR) {
+                                        lStatus |= LAST_CHAR_WAS_CR;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-
-                lLastChar = c;
             } while (lPos < lLen);
 
             status = lStatus;
-            lastChar = lLastChar;
         }
 
         buffer.pos = lPos;
