@@ -130,9 +130,7 @@ final class RowReader {
                                 while (lPos < lLen) {
                                     final char lookAhead = lBuf[lPos++];
                                     if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
-                                        if (lBuf[--lPos - 1] == CR) {
-                                            lStatus |= LAST_CHAR_WAS_CR;
-                                        }
+                                        lPos--;
                                         break;
                                     }
                                 }
@@ -163,9 +161,7 @@ final class RowReader {
                             while (lPos < lLen) {
                                 final char lookAhead = lBuf[lPos++];
                                 if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
-                                    if (lBuf[--lPos - 1] == CR) {
-                                        lStatus |= LAST_CHAR_WAS_CR;
-                                    }
+                                    lPos--;
                                     break;
                                 }
                             }
