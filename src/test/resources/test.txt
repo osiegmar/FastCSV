@@ -1,0 +1,57 @@
+# SPACE = ␣ // CR = ← // LF = ↵ // NL = ␤
+# Format: SOURCE EXPECTED (EXPECTED can be omitted if same es SOURCE)
+
+# Simple columns / Single Row
+D
+D,D
+,D
+#D,     TODO BROKEN?
+
+# Spaces
+␣
+␣,␣
+,␣
+#␣,     TODO BROKEN?
+␣D
+␣D␣,␣D␣
+
+# Newlines with Linefeed (Unix)
+A↵B                     A␤B
+D↵                      D
+↵D                      D
+
+# Newlines with Carriage-Return (Legacy Mac)
+A←B                     A␤B
+D←                      D
+←D                      D
+
+# Newlines with Linefeed and Carriage-Return (Windows)
+A←↵B                    A␤B
+D←↵                     D
+←↵D                     D
+
+# Quotation
+"␣D␣"                   ␣D␣
+"D"                     D
+"D",D                   D,D
+D,"D"                   D,D
+
+# Escape Quotation
+"""D"                   "D
+"D"""                   D"
+"A""B"                  A"B
+
+# Multiline
+"A↵B"                   A↵B
+"A←B"                   A←B
+"A←↵B"                  A←↵B
+
+
+### NON RFC CONFORMING DATA ###
+
+#"D"␣                    D␣     TODO
+#␣"D"                    ␣D     TODO
+#␣"D"␣                   ␣D␣    TODO
+"D"z                    Dz
+#z"D"                    zD     TODO
+#z"D"z                   zDz    TODO
