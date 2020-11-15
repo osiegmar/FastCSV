@@ -5,15 +5,19 @@
 D
 D,D
 ,D
-#D,     TODO BROKEN?
 
 # Spaces
 ␣
 ␣,␣
 ,␣
-#␣,     TODO BROKEN?
 ␣D
 ␣D␣,␣D␣
+
+# Trailing field separator
+D,
+A,↵B                    A,␤B
+␣,
+␣,↵D                    ␣,␤D
 
 # Newlines with Linefeed (Unix)
 A↵B                     A␤B
@@ -46,12 +50,15 @@ D,"D"                   D,D
 "A←B"                   A←B
 "A←↵B"                  A←↵B
 
+# Different column count
+A↵B,C                   A␤B,C
+A,B↵C                   A,B␤C
 
 ### NON RFC CONFORMING DATA ###
 
-#"D"␣                    D␣     TODO
-#␣"D"                    ␣D     TODO
-#␣"D"␣                   ␣D␣    TODO
+"D"␣                    D␣
+␣"D"
+␣"D"␣
 "D"z                    Dz
-#z"D"                    zD     TODO
-#z"D"z                   zDz    TODO
+z"D"
+z"D"z

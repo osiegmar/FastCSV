@@ -27,7 +27,8 @@ final class RowReader {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
-    private static final int LAST_CHAR_WAS_CR = 8;
+    private static final int LAST_CHAR_WAS_CR = 16;
+    private static final int STATUS_NEW_FIELD = 8;
     private static final int STATUS_QUOTED_MODE = 4;
     private static final int STATUS_QUOTED_COLUMN = 2;
     private static final int STATUS_DATA_COLUMN = 1;
@@ -62,6 +63,8 @@ final class RowReader {
                     if (buffer.begin < buffer.pos) {
                         rowHandler.add(materialize(buffer.buf, buffer.begin,
                             buffer.pos - buffer.begin, status, qChar));
+                    } else if ((status & STATUS_NEW_FIELD) != 0) {
+                        rowHandler.add("");
                     }
                     return true;
                 }
@@ -96,7 +99,7 @@ final class RowReader {
                         if (c == fsep) {
                             rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
-                            lStatus = STATUS_RESET;
+                            lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
                         } else if (c == CR) {
                             rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
