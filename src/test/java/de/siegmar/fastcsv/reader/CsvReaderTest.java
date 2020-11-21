@@ -64,7 +64,7 @@ public class CsvReaderTest {
 
     @Test
     public void bom() {
-        final byte[] bom8 = new byte[]{ (byte)0xEF, (byte)0xBB, (byte)0xBF, 'a', ',', 'b'};
+        final byte[] bom8 = new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 'a', ',', 'b'};
 
         // Expecting trouble when reading BOM
         final Reader standardReader = new InputStreamReader(
@@ -208,11 +208,13 @@ public class CsvReaderTest {
         Arrays.fill(buf, (byte) 'a');
         buf[buf.length - 1] = (byte) ',';
 
-        crb.build(new InputStreamReader(new ByteArrayInputStream(buf))).iterator().next();
+        crb.build(new InputStreamReader(new ByteArrayInputStream(buf), StandardCharsets.UTF_8))
+            .iterator().next();
 
         buf[buf.length - 1] = (byte) 'a';
         final IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            crb.build(new InputStreamReader(new ByteArrayInputStream(buf))).iterator().next());
+            crb.build(new InputStreamReader(new ByteArrayInputStream(buf), StandardCharsets.UTF_8))
+                .iterator().next());
         assertEquals("Maximum buffer size 8388608 is not enough to read data",
             exception.getMessage());
     }
