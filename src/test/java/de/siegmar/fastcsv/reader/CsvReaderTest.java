@@ -21,13 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.input.BOMInputStream;
 import org.junit.jupiter.api.Test;
 
 public class CsvReaderTest {
@@ -59,6 +64,23 @@ public class CsvReaderTest {
 
     private static String[] asArray(final String... items) {
         return items;
+    }
+
+    @Test
+    public void bom() {
+        final byte[] bom8 = new byte[]{ (byte)0xEF, (byte)0xBB, (byte)0xBF, 'a', ',', 'b'};
+
+        // Expecting trouble when reading BOM
+        final Reader standardReader = new InputStreamReader(
+            new ByteArrayInputStream(bom8), StandardCharsets.UTF_8);
+        assertArrayEquals(asArray("\uFEFFa", "b"),
+            crb.build(standardReader).iterator().next().getFields());
+
+        // Reading BOM requires external support (e.g. org.apache.commons.io.input.BOMInputStream)
+        final Reader bomReader = new InputStreamReader(new BOMInputStream(
+            new ByteArrayInputStream(bom8)), StandardCharsets.UTF_8);
+        assertArrayEquals(asArray("a", "b"),
+            crb.build(bomReader).iterator().next().getFields());
     }
 
     // skipped rows
