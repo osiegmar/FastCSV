@@ -24,25 +24,27 @@ import org.apache.commons.lang3.StringUtils;
 
 final class CharacterConv {
 
-    private static final String[] STANDARD = {" ", "\r", "\n"};
-    private static final String[] CONV = {"␣", "←", "↵"};
+    private static final String[] STANDARD = {" ", "\r", "\n" };
+    private static final String[] CONV = {"␣", "␍", "␊" };
+    private static final char FIELD_SEPARATOR = '↷';
+    private static final char LINE_SEPARATOR = '⏎';
 
     private CharacterConv() {
     }
 
-    public static String print(final List<CsvRow> data) {
+    public static String print(final List<String[]> data) {
         final StringBuilder sb = new StringBuilder();
-        for (Iterator<CsvRow> iter = data.iterator(); iter.hasNext();) {
-            final CsvRow datum = iter.next();
-            final Iterator<String> iterator = Arrays.stream(datum.getFields()).iterator();
+        for (Iterator<String[]> iter = data.iterator(); iter.hasNext();) {
+            final String[] datum = iter.next();
+            final Iterator<String> iterator = Arrays.stream(datum).iterator();
             while (iterator.hasNext()) {
                 sb.append(print(iterator.next()));
                 if (iterator.hasNext()) {
-                    sb.append(',');
+                    sb.append(FIELD_SEPARATOR);
                 }
             }
             if (iter.hasNext()) {
-                sb.append('␤');
+                sb.append(LINE_SEPARATOR);
             }
         }
         return sb.toString();

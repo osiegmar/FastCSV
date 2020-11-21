@@ -1,47 +1,53 @@
-# SPACE = ␣ // CR = ← // LF = ↵ // NL = ␤
-# Format: SOURCE EXPECTED (EXPECTED can be omitted if same es SOURCE)
+# Format: INPUT EXPECTED [FLAGS]
+# Format of INPUT: SPACE = ␣ // CR = ␍ // LF = ␊
+# Format of EXPECTED: New row = ⏎ // Separated columns = ↷
 
 # Simple columns / Single Row
-D
-D,D
-,D
+D                       D
+D,D                     D↷D
+,D                      ↷D
 
 # Spaces
-␣
-␣,␣
-,␣
-␣D
-␣D␣,␣D␣
+␣                       ␣
+␣,␣                     ␣↷␣
+,␣                      ↷␣
+␣D                      ␣D
+␣D␣,␣D␣                 ␣D␣↷␣D␣
 
 # Trailing field separator
-D,
-A,↵B                    A,␤B
-␣,
-␣,↵D                    ␣,␤D
+D,                      D↷
+A,␊B                    A↷⏎B
+␣,                      ␣↷
+␣,␊D                    ␣↷⏎D
 
 # Newlines with Linefeed (Unix)
-A↵B                     A␤B
-D↵                      D
-↵D                      ␤D
-↵D                      D           [skipEmptyLines]
+A␊B                     A⏎B
+D␊                      D
+␊D                      ⏎D
+␊D                      D           [skipEmptyLines]
 
 # Newlines with Carriage-Return (Legacy Mac)
-A←B                     A␤B
-D←                      D
-←D                      ␤D
-←D                      D           [skipEmptyLines]
+A␍B                     A⏎B
+D␍                      D
+␍D                      ⏎D
+␍D                      D           [skipEmptyLines]
 
 # Newlines with Linefeed and Carriage-Return (Windows)
-A←↵B                    A␤B
-D←↵                     D
-←↵D                     ␤D
-←↵D                     D           [skipEmptyLines]
+A␍␊B                    A⏎B
+D␍␊                     D
+␍␊D                     ⏎D
+␍␊D                     D           [skipEmptyLines]
 
 # Quotation
 "␣D␣"                   ␣D␣
 "D"                     D
-"D",D                   D,D
-D,"D"                   D,D
+"D",D                   D↷D
+D,"D"                   D↷D
+
+# Open Quotation
+A,"B                    A↷B
+A,B"                    A↷B"
+"A,B                    A,B
 
 # Escape Quotation
 """D"                   "D
@@ -49,19 +55,22 @@ D,"D"                   D,D
 "A""B"                  A"B
 
 # Multiline
-"A↵B"                   A↵B
-"A←B"                   A←B
-"A←↵B"                  A←↵B
+"A␊B"                   A␊B
+"A␍B"                   A␍B
+"A␍␊B"                  A␍␊B
 
 # Different column count
-A↵B,C                   A␤B,C
-A,B↵C                   A,B␤C
+A␊B,C                   A⏎B↷C
+A,B␊C                   A↷B⏎C
 
 ### NON RFC CONFORMING DATA ###
 
 "D"␣                    D␣
-␣"D"
-␣"D"␣
+"A,B"␣                  A,B␣
+␣"D"                    ␣"D"
+␣"D"␣                   ␣"D"␣
 "D"z                    Dz
-z"D"
-z"D"z
+"A,B"z                  A,Bz
+z"D"                    z"D"
+z"A,B"                  z"A↷B"
+z"D"z                   z"D"z

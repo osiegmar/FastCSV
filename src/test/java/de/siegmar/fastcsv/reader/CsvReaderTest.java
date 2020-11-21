@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -55,11 +56,6 @@ public class CsvReaderTest {
         final Iterator<CsvRow> it = parse("").iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
-    }
-
-    @Test
-    public void simple() {
-        assertArrayEquals(asArray("foo"), readSingleRow("foo").getFields());
     }
 
     private static String[] asArray(final String... items) {
@@ -161,107 +157,6 @@ public class CsvReaderTest {
         assertThrows(IndexOutOfBoundsException.class, () -> csvRow.getField(1));
     }
 
-    // enclosure escaping
-
-    @Test
-    public void escapedQuote() {
-        assertEquals("bar \"is\" ok",
-            readSingleRow("foo,\"bar \"\"is\"\" ok\"").getField(1));
-    }
-
-    @Test
-    public void handlesEmptyQuotedFieldsAtEndOfRow() {
-        assertEquals("", readSingleRow("foo,\"\"").getField(1));
-    }
-
-    @Test
-    public void dataAfterNewlineAfterEnclosure() {
-        List<CsvRow> csv = readAll("\"foo\"\nbar");
-        assertEquals(2, csv.size());
-        assertEquals("foo", csv.get(0).getField(0));
-        assertEquals("bar", csv.get(1).getField(0));
-
-        csv = readAll("\"foo\"\rbar");
-        assertEquals(2, csv.size());
-        assertEquals("foo", csv.get(0).getField(0));
-        assertEquals("bar", csv.get(1).getField(0));
-
-        csv = readAll("\"foo\"\r\nbar");
-        assertEquals(2, csv.size());
-        assertEquals("foo", csv.get(0).getField(0));
-        assertEquals("bar", csv.get(1).getField(0));
-    }
-
-    @Test
-    public void invalidQuotes() {
-        assertArrayEquals(asArray(
-            "bbb\"a\"",
-            " ccc",
-            "ddd\"a",
-            "b\"eee",
-            "fff",
-            "ggg\"a\"\"b",
-            ",a, b"
-            ),
-            readSingleRow("bbb\"a\", ccc,ddd\"a,b\"eee,fff,ggg\"a\"\"b,\",a, b").getFields());
-    }
-
-    @Test
-    public void textBeforeQuotes() {
-        assertArrayEquals(asArray("a\"b\"", "c"), readSingleRow("a\"b\",c").getFields());
-    }
-
-    @Test
-    public void textAfterQuotes() {
-        assertArrayEquals(asArray("ab", "c"), readSingleRow("\"a\"b,c").getFields());
-    }
-
-    @Test
-    public void spaceBeforeQuotes() {
-        assertArrayEquals(asArray(" \"a\"", "b"), readSingleRow(" \"a\",b").getFields());
-    }
-
-    @Test
-    public void spaceAfterQuotes() {
-        assertArrayEquals(asArray("a ", "b"), readSingleRow("\"a\" ,b").getFields());
-    }
-
-    @Test
-    public void openingQuotes() {
-        assertEquals("aaa", readSingleRow("\"aaa").getField(0));
-    }
-
-    @Test
-    public void closingQuotes() {
-        assertEquals("aaa\"", readSingleRow("aaa\"").getField(0));
-    }
-
-    // line breaks
-
-    @Test
-    public void lineFeed() {
-        final Iterator<CsvRow> it = parse("foo\nbar").iterator();
-        assertEquals("foo", it.next().getField(0));
-        assertEquals("bar", it.next().getField(0));
-        assertFalse(it.hasNext());
-    }
-
-    @Test
-    public void carriageReturn() {
-        final Iterator<CsvRow> it = parse("foo\rbar").iterator();
-        assertEquals("foo", it.next().getField(0));
-        assertEquals("bar", it.next().getField(0));
-        assertFalse(it.hasNext());
-    }
-
-    @Test
-    public void carriageReturnLineFeed() {
-        final Iterator<CsvRow> it = parse("foo\r\nbar").iterator();
-        assertEquals("foo", it.next().getField(0));
-        assertEquals("bar", it.next().getField(0));
-        assertFalse(it.hasNext());
-    }
-
     // line numbering
 
     @Test
@@ -303,6 +198,23 @@ public class CsvReaderTest {
     public void toStringWithoutHeader() {
         assertEquals("CsvRowImpl[originalLineNumber=1, fields=[fieldA, fieldB]]",
             readSingleRow("fieldA,fieldB\n").toString());
+    }
+
+    // buffer exceed
+
+    @Test
+    public void bufferExceed() {
+        final byte[] buf = new byte[8 * 1024 * 1024];
+        Arrays.fill(buf, (byte) 'a');
+        buf[buf.length - 1] = (byte) ',';
+
+        crb.build(new InputStreamReader(new ByteArrayInputStream(buf))).iterator().next();
+
+        buf[buf.length - 1] = (byte) 'a';
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+            crb.build(new InputStreamReader(new ByteArrayInputStream(buf))).iterator().next());
+        assertEquals("Maximum buffer size 8388608 is not enough to read data",
+            exception.getMessage());
     }
 
     // test helpers
