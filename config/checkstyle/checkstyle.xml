@@ -58,13 +58,6 @@
 
     <module name="SuppressWarningsFilter"/>
 
-    <!-- Checks for Header - http://checkstyle.sf.net/config_header.html -->
-    <module name="Header">
-        <property name="headerFile" value="${config_loc}/java.header"/>
-        <property name="fileExtensions" value="java"/>
-        <property name="ignoreLines" value="2"/>
-    </module>
-
     <module name="LineLength">
         <property name="max" value="100"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>

@@ -4,7 +4,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
 
 FastCSV is a ultra fast and simple [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
-library for Java, licensed under the Apache License, Version 2.0.
+library for Java.
 
 ## Benchmark
 
@@ -101,7 +101,6 @@ CsvWriter.builder()
 For more example see
 [CsvWriterExampleTest.java](src/test/java/de/siegmar/fastcsv/writer/CsvWriterExampleTest.java)
 
-
 ## Contribution
 
 - Fork
@@ -109,19 +108,3 @@ For more example see
 - Add test(s)
 - Commit
 - Send me a pull request
-
-## Copyright
-
-Copyright 2020 Oliver Siegmar
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
