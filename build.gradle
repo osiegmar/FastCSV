@@ -56,7 +56,6 @@ jacocoTestCoverageVerification {
 check.dependsOn jacocoTestCoverageVerification
 
 jmh {
-    include = ['read']
     warmupIterations = 2
     iterations = 5
     benchmarkMode = ['thrpt']
