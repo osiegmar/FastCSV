@@ -11,7 +11,8 @@ final class RowReader {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
-    private static final int LAST_CHAR_WAS_CR = 16;
+    private static final int LAST_CHAR_WAS_CR = 32;
+    private static final int STATUS_COMMENTED_ROW = 16;
     private static final int STATUS_NEW_FIELD = 8;
     private static final int STATUS_QUOTED_MODE = 4;
     private static final int STATUS_QUOTED_COLUMN = 2;
@@ -21,13 +22,18 @@ final class RowReader {
     private final Buffer buffer;
     private final char fsep;
     private final char qChar;
+    private final CommentStrategy cStrat;
+    private final char cChar;
 
     private int status;
 
-    RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter) {
+    RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter) {
         buffer = new Buffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
+        this.cStrat = commentStrategy;
+        this.cChar = commentCharacter;
     }
 
     /**
@@ -44,7 +50,7 @@ final class RowReader {
                 // cursor reached current EOD -- need to fetch
                 if (buffer.fetchData()) {
                     // reached end of stream
-                    if (buffer.begin < buffer.pos) {
+                    if (buffer.begin < buffer.pos || rowHandler.isCommentMode()) {
                         rowHandler.add(materialize(buffer.buf, buffer.begin,
                             buffer.pos - buffer.begin, status, qChar));
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
@@ -103,6 +109,27 @@ final class RowReader {
                             }
                         }
                     }
+                } else if ((lStatus & STATUS_COMMENTED_ROW) != 0) {
+                    // commented line
+                    while (lPos < lLen) {
+                        final char lookAhead = lBuf[lPos++];
+
+                        if (lookAhead == CR) {
+                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                                qChar));
+                            status = LAST_CHAR_WAS_CR;
+                            lBegin = lPos;
+                            moreDataNeeded = false;
+                            break OUTER;
+                        } else if (lookAhead == LF) {
+                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                                qChar));
+                            status = STATUS_RESET;
+                            lBegin = lPos;
+                            moreDataNeeded = false;
+                            break OUTER;
+                        }
+                    }
                 } else {
                     // we're not in quotes
                     while (lPos < lLen) {
@@ -132,6 +159,12 @@ final class RowReader {
 
                             lStatus = STATUS_RESET;
                             lBegin = lPos;
+                        } else if (cStrat != CommentStrategy.NONE && c == cChar
+                                   && lBegin == lPos - 1) {
+                            lBegin = lPos;
+                            lStatus = STATUS_COMMENTED_ROW;
+                            rowHandler.enableCommentMode();
+                            continue mode_check;
                         } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
                             // quote and not in data-only mode
                             lStatus = STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;

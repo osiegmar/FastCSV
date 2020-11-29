@@ -12,11 +12,17 @@ final class CharacterConv {
     private static final String[] CONV = {"␣", "␍", "␊" };
     private static final char FIELD_SEPARATOR = '↷';
     private static final char LINE_SEPARATOR = '⏎';
+    private static final String EMPTY_STRING = "◯";
+    private static final String EMPTY_LIST = "∅";
 
     private CharacterConv() {
     }
 
     public static String print(final List<String[]> data) {
+        if (data.isEmpty()) {
+            return EMPTY_LIST;
+        }
+
         final StringBuilder sb = new StringBuilder();
         for (Iterator<String[]> iter = data.iterator(); iter.hasNext();) {
             final String[] datum = iter.next();
@@ -35,7 +41,7 @@ final class CharacterConv {
     }
 
     public static String print(final String str) {
-        return StringUtils.replaceEach(str, STANDARD, CONV);
+        return str.isEmpty() ? EMPTY_STRING : StringUtils.replaceEach(str, STANDARD, CONV);
     }
 
     public static String parse(final String str) {

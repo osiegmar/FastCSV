@@ -14,10 +14,12 @@ final class CsvRowImpl implements CsvRow {
     private final long originalLineNumber;
 
     private final String[] fields;
+    private final boolean comment;
 
-    CsvRowImpl(final long originalLineNumber, final String[] fields) {
+    CsvRowImpl(final long originalLineNumber, final String[] fields, final boolean comment) {
         this.originalLineNumber = originalLineNumber;
         this.fields = fields;
+        this.comment = comment;
     }
 
     @Override
@@ -38,6 +40,11 @@ final class CsvRowImpl implements CsvRow {
     @Override
     public int getFieldCount() {
         return fields.length;
+    }
+
+    @Override
+    public boolean isComment() {
+        return comment;
     }
 
     @Override

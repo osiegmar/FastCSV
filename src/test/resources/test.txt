@@ -1,41 +1,41 @@
 # Format: INPUT EXPECTED [FLAGS]
 # Format of INPUT: SPACE = ␣ // CR = ␍ // LF = ␊
-# Format of EXPECTED: New row = ⏎ // Separated columns = ↷
+# Format of EXPECTED: New row = ⏎ // Separated columns = ↷ // Empty field = ◯ // Empty list = ∅
 
 # Simple columns / Single Row
 D                       D
 D,D                     D↷D
-,D                      ↷D
+,D                      ◯↷D
 
 # Spaces
 ␣                       ␣
 ␣,␣                     ␣↷␣
-,␣                      ↷␣
+,␣                      ◯↷␣
 ␣D                      ␣D
 ␣D␣,␣D␣                 ␣D␣↷␣D␣
 
 # Trailing field separator
-D,                      D↷
-A,␊B                    A↷⏎B
-␣,                      ␣↷
-␣,␊D                    ␣↷⏎D
+D,                      D↷◯
+A,␊B                    A↷◯⏎B
+␣,                      ␣↷◯
+␣,␊D                    ␣↷◯⏎D
 
 # Newlines with Linefeed (Unix)
 A␊B                     A⏎B
 D␊                      D
-␊D                      ⏎D
+␊D                      ◯⏎D
 ␊D                      D           [skipEmptyLines]
 
 # Newlines with Carriage-Return (Legacy Mac)
 A␍B                     A⏎B
 D␍                      D
-␍D                      ⏎D
+␍D                      ◯⏎D
 ␍D                      D           [skipEmptyLines]
 
 # Newlines with Linefeed and Carriage-Return (Windows)
 A␍␊B                    A⏎B
 D␍␊                     D
-␍␊D                     ⏎D
+␍␊D                     ◯⏎D
 ␍␊D                     D           [skipEmptyLines]
 
 # Quotation
@@ -62,6 +62,31 @@ A,B"                    A↷B"
 # Different column count
 A␊B,C                   A⏎B↷C
 A,B␊C                   A↷B⏎C
+
+# Comments
+A␊;B,C␊D                A⏎;B↷C⏎D
+
+A␊;B,C␊D                A⏎B,C⏎D     [readComments]
+A␍;B,C␍D                A⏎B,C⏎D     [readComments]
+A␍␊;B,C␍␊D              A⏎B,C⏎D     [readComments]
+;A␊;B␊C                 A⏎B⏎C       [readComments]
+;A␊␣;B␊C                A⏎␣;B⏎C     [readComments]
+;                       ◯           [readComments]
+;␊;                     ◯⏎◯         [readComments]
+;A␊;                    A⏎◯         [readComments]
+;␊;A                    ◯⏎A         [readComments]
+;␊;␍␊;                  ◯⏎◯⏎◯       [readComments]
+
+A␊;B,C␊D                A⏎D         [skipComments]
+A␍;B,C␍D                A⏎D         [skipComments]
+A␍␊;B,C␍␊D              A⏎D         [skipComments]
+;A␊;B␊C                 C           [skipComments]
+;A␊␣;B␊C                ␣;B⏎C       [skipComments]
+;                       ∅           [skipComments]
+;␊;                     ∅           [skipComments]
+;A␊;                    ∅           [skipComments]
+;␊;A                    ∅           [skipComments]
+;␊;␍␊;                  ∅           [skipComments]
 
 ### NON RFC CONFORMING DATA ###
 

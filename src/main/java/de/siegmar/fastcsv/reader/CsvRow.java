@@ -37,4 +37,11 @@ public interface CsvRow {
      */
     int getFieldCount();
 
+    /**
+     * Provides the information if the row is a commented row.
+     *
+     * @return {@code true} if the row is a commented row
+     */
+    boolean isComment();
+
 }

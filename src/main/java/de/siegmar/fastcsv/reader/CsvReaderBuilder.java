@@ -24,6 +24,9 @@ public final class CsvReaderBuilder {
      */
     private char quoteCharacter = '"';
 
+    private CommentStrategy commentStrategy = CommentStrategy.NONE;
+    private char commentCharacter = '#';
+
     /**
      * Skip empty rows? (default: true).
      */
@@ -53,6 +56,31 @@ public final class CsvReaderBuilder {
      */
     public CsvReaderBuilder quoteCharacter(final char quoteCharacter) {
         this.quoteCharacter = quoteCharacter;
+        return this;
+    }
+
+    /**
+     * Sets the strategy that defines how (and if) commented lines should be handled
+     * (default: {@link CommentStrategy#NONE} as comments are not defined in RFC 4180).
+     *
+     * @param commentStrategy the strategy for handling comments.
+     * @return This updated object, so that additional method calls can be chained together.
+     * @see #commentCharacter(char)
+     */
+    public CsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
+        this.commentStrategy = commentStrategy;
+        return this;
+    }
+
+    /**
+     * Sets the {@code commentCharacter} used to comment lines.
+     *
+     * @param commentCharacter the character used to comment lines (default: '#' - hash)
+     * @return This updated object, so that additional method calls can be chained together.
+     * @see #commentStrategy(CommentStrategy)
+     */
+    public CsvReaderBuilder commentCharacter(final char commentCharacter) {
+        this.commentCharacter = commentCharacter;
         return this;
     }
 
@@ -91,8 +119,8 @@ public final class CsvReaderBuilder {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(charset, "charset must not be null");
 
-        return new CsvReader(newPathReader(path, charset),
-            fieldSeparator, quoteCharacter, skipEmptyRows, errorOnDifferentFieldCount);
+        return new CsvReader(newPathReader(path, charset), fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter, skipEmptyRows, errorOnDifferentFieldCount);
     }
 
     /**
@@ -107,7 +135,8 @@ public final class CsvReaderBuilder {
      */
     public CsvReader build(final Reader reader) {
         return new CsvReader(Objects.requireNonNull(reader, "reader must not be null"),
-            fieldSeparator, quoteCharacter, skipEmptyRows, errorOnDifferentFieldCount);
+            fieldSeparator, quoteCharacter, commentStrategy, commentCharacter, skipEmptyRows,
+            errorOnDifferentFieldCount);
     }
 
     private static Reader newPathReader(final Path path, final Charset charset) throws IOException {

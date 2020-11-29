@@ -145,13 +145,16 @@ public class CsvReaderTest {
 
     @Test
     public void lineNumbering() {
-        final Iterator<CsvRow> it = parse(
+        final Iterator<CsvRow> it = crb
+            .commentStrategy(CommentStrategy.SKIP)
+            .build(new StringReader(
             "line 1\n"
                 + "line 2\r"
                 + "line 3\r\n"
                 + "\"line 4\rwith\r\nand\n\"\n"
-                + "line 8"
-        ).iterator();
+                + "#line 8\n"
+                + "line 9"
+        )).iterator();
 
         CsvRow row = it.next();
         assertArrayEquals(asArray("line 1"), row.getFields());
@@ -170,8 +173,8 @@ public class CsvReaderTest {
         assertEquals(4, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("line 8"), row.getFields());
-        assertEquals(8, row.getOriginalLineNumber());
+        assertArrayEquals(asArray("line 9"), row.getFields());
+        assertEquals(9, row.getOriginalLineNumber());
 
         assertFalse(it.hasNext());
     }

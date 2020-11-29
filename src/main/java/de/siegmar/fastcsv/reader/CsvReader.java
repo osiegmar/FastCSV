@@ -20,6 +20,7 @@ import java.util.stream.StreamSupport;
 public class CsvReader implements Iterable<CsvRow>, Closeable {
 
     private final RowReader rowReader;
+    private final CommentStrategy commentStrategy;
     private final boolean skipEmptyRows;
     private final boolean errorOnDifferentFieldCount;
     private final CloseableIterator<CsvRow> csvRowIterator = new CsvRowIterator();
@@ -31,10 +32,13 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
     private boolean finished;
 
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
 
         this.reader = reader;
-        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter);
+        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter);
+        this.commentStrategy = commentStrategy;
         this.skipEmptyRows = skipEmptyRows;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
     }
@@ -76,12 +80,14 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         return StreamSupport.stream(spliterator(), false);
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CsvRow fetchRow() throws IOException {
         while (!finished) {
             final long startingLineNo = lineNo + 1;
             finished = rowReader.fetchAndRead(rowHandler);
-            final String[] currentFields = rowHandler.end();
+            final boolean isCommentRow = rowHandler.isCommentMode();
             lineNo += rowHandler.getLines();
+            final String[] currentFields = rowHandler.end();
 
             final int fieldCount = currentFields.length;
 
@@ -95,8 +101,13 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
                 continue;
             }
 
-            // check the field count consistency on every row
-            if (errorOnDifferentFieldCount) {
+            if (isCommentRow) {
+                // skip commented rows
+                if (commentStrategy == CommentStrategy.SKIP) {
+                    continue;
+                }
+            } else if (errorOnDifferentFieldCount) {
+                // check the field count consistency on every row
                 if (firstLineFieldCount == -1) {
                     firstLineFieldCount = fieldCount;
                 } else if (fieldCount != firstLineFieldCount) {
@@ -106,7 +117,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
                 }
             }
 
-            return new CsvRowImpl(startingLineNo, currentFields);
+            return new CsvRowImpl(startingLineNo, currentFields, isCommentRow);
         }
 
         return null;

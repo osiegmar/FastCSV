@@ -28,7 +28,11 @@ public class GenericDataTest {
     @MethodSource("dataProvider")
     public void dataTest(final TestData data) {
         final String expected = print(data.getExpected());
-        final String actual = print(readAll(parse(data.getInput()), data.isSkipEmptyLines()));
+        final CommentStrategy commentStrategy = data.isReadComments()
+            ? CommentStrategy.READ
+            : data.isSkipComments() ? CommentStrategy.SKIP : CommentStrategy.NONE;
+        final String actual = print(readAll(parse(data.getInput()), data.isSkipEmptyLines(),
+            commentStrategy));
         assertEquals(expected, actual, () -> String.format("Error in line: '%s'", data));
     }
 
@@ -61,9 +65,12 @@ public class GenericDataTest {
             GenericDataTest.class.getResourceAsStream("/test.txt"), StandardCharsets.UTF_8));
     }
 
-    public static List<String[]> readAll(final String data, final boolean skipEmptyLines) {
+    public static List<String[]> readAll(final String data, final boolean skipEmptyLines,
+                                         final CommentStrategy commentStrategy) {
         return CsvReader.builder()
             .skipEmptyRows(skipEmptyLines)
+            .commentCharacter(';')
+            .commentStrategy(commentStrategy)
             .build(new StringReader(data))
             .stream()
             .map(CsvRow::getFields)
@@ -76,6 +83,8 @@ public class GenericDataTest {
         private final String input;
         private final String expected;
         private final boolean skipEmptyLines;
+        private final boolean readComments;
+        private final boolean skipComments;
 
         TestData(final int lineNo, final String line, final String input, final String expected,
                  final String flags) {
@@ -84,6 +93,8 @@ public class GenericDataTest {
             this.input = input;
             this.expected = expected;
             skipEmptyLines = "skipEmptyLines".equals(flags);
+            readComments = "readComments".equals(flags);
+            skipComments = "skipComments".equals(flags);
         }
 
         public int getLineNo() {
@@ -106,6 +117,14 @@ public class GenericDataTest {
             return skipEmptyLines;
         }
 
+        public boolean isReadComments() {
+            return readComments;
+        }
+
+        public boolean isSkipComments() {
+            return skipComments;
+        }
+
         @Override
         public String toString() {
             return new StringJoiner(", ", TestData.class.getSimpleName() + "[", "]")
@@ -114,6 +133,8 @@ public class GenericDataTest {
                 .add("input='" + input + "'")
                 .add("expected='" + expected + "'")
                 .add("skipEmptyLines=" + skipEmptyLines)
+                .add("readComments=" + readComments)
+                .add("skipComments=" + skipComments)
                 .toString();
         }
     }

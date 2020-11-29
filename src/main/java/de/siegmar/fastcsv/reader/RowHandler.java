@@ -6,6 +6,7 @@ final class RowHandler {
     private String[] row;
     private int idx;
     private int lines = 1;
+    private boolean commentMode;
 
     RowHandler(final int len) {
         this.len = len;
@@ -30,7 +31,17 @@ final class RowHandler {
         final String[] ret = new String[idx];
         System.arraycopy(row, 0, ret, 0, idx);
         idx = 0;
+        lines = 1;
+        commentMode = false;
         return ret;
+    }
+
+    public void enableCommentMode() {
+        commentMode = true;
+    }
+
+    public boolean isCommentMode() {
+        return commentMode;
     }
 
     long getLines() {
@@ -38,7 +49,7 @@ final class RowHandler {
     }
 
     public void incLines() {
-        this.lines++;
+        lines++;
     }
 
 }

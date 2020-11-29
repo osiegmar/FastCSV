@@ -53,6 +53,11 @@ final class NamedCsvRowImpl implements NamedCsvRow {
     }
 
     @Override
+    public boolean isComment() {
+        return row.isComment();
+    }
+
+    @Override
     public Map<String, String> getFieldMap() {
         final Map<String, String> fieldMap = new LinkedHashMap<>(headerMap.size());
         headerMap.forEach((name, idx) ->
