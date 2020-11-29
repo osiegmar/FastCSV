@@ -21,24 +21,21 @@ final class CachingWriter {
     }
 
     public void write(final char c) throws IOException {
-        buf[pos++] = c;
-        if (pos >= BUFFER_SIZE) {
+        if (pos == BUFFER_SIZE) {
             flushBuffer();
         }
+        buf[pos++] = c;
     }
 
     @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-    public void write(final String str, int off, int len) throws IOException {
-        do {
-            final int copyLen = Math.min(BUFFER_SIZE - pos, len);
-            str.getChars(off, off + copyLen, buf, pos);
-            pos += copyLen;
-            off += copyLen;
-            len -= copyLen;
-            if (pos >= BUFFER_SIZE) {
-                flushBuffer();
-            }
-        } while (len > 0);
+    public void write(final String str, final int off, final int len) throws IOException {
+        if (pos + len >= BUFFER_SIZE) {
+            flushBuffer();
+            writer.write(str, off, len);
+        } else {
+            str.getChars(off, off + len, buf, pos);
+            pos += len;
+        }
     }
 
     public void flushBuffer() throws IOException {
