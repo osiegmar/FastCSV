@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced TestNG with JUnit 5
 - Changed license from Apache 2.0 to MIT
 
+### Removed
+- CsvContainer concept – use Stream.collect() as a replacement
+
 ## [1.0.4] - 2020-11-29
 ### Fixed
 - Fix null returning CsvContainer when only a header is present [\#38](https://github.com/osiegmar/FastCSV/issues/38)
