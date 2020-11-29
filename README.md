@@ -27,6 +27,8 @@ Benchmark from the
 - Support for field separator character in value (using the text delimiter)
 - Support for reading and writing in an iterative or all at once way
 - Support for skipping empty rows and preserving the original line number (useful for error messages)
+- Support for commented lines
+- Support for multiple quote strategies to differentiate between empty and null
 
 ## Requirements
 
@@ -58,6 +60,8 @@ Custom settings
 CsvReader.builder()
     .fieldSeparator(';')
     .quoteCharacter('"')
+    .commentStrategy(CommentStrategy.SKIP)
+    .commentCharacter('#')
     .skipEmptyRows(true)
     .errorOnDifferentFieldCount(false);
 ```

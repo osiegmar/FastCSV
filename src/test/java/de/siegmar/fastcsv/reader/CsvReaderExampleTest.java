@@ -35,6 +35,8 @@ public class CsvReaderExampleTest {
         final Iterator<CsvRow> csv = CsvReader.builder()
             .fieldSeparator(';')
             .quoteCharacter('"')
+            .commentStrategy(CommentStrategy.NONE)
+            .commentCharacter('#')
             .skipEmptyRows(true)
             .errorOnDifferentFieldCount(true)
             .build(new StringReader("foo;bar"))

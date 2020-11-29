@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support for commented lines
+- Support for multiple quoting strategies [\#39](https://github.com/osiegmar/FastCSV/issues/39)
 
 ### Changed
 - Completely re-engineered the API for better usability
