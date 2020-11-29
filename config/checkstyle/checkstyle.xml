@@ -9,7 +9,7 @@
     <property name="cacheFile" value="${config_loc}/../../build/checkstyle-cachefile"/>
 
     <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
-    <module name="JavadocPackage"/>
+    <!--<module name="JavadocPackage"/>-->
 
     <!-- Checks for Misc - http://checkstyle.sf.net/config_misc.html -->
     <module name="NewlineAtEndOfFile">

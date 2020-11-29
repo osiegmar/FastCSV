@@ -17,8 +17,8 @@
     <suppress files="CsvReaderBuilder.java" checks="HiddenField"/>
     <suppress files="CsvWriterBuilder.java" checks="HiddenField"/>
 
-    <suppress files=".*Test.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod|JavadocPackage)"/>
-    <suppress files="CharacterConv.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod|JavadocPackage)"/>
+    <suppress files=".*Test.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
+    <suppress files="CharacterConv.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
 
     <suppress files=".*Benchmark.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
 
