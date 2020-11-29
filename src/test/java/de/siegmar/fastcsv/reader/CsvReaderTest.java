@@ -6,16 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.input.BOMInputStream;
 import org.junit.jupiter.api.Test;
@@ -204,6 +207,30 @@ public class CsvReaderTest {
                 .iterator().next());
         assertEquals("Maximum buffer size 8388608 is not enough to read data",
             exception.getMessage());
+    }
+
+    // API
+
+    @Test
+    public void closeApi() throws IOException {
+        List<CsvRow> rows;
+
+        try (CsvReader reader = parse("foo,bar")) {
+            rows = reader.stream().collect(Collectors.toList());
+        }
+        assertEquals(1, rows.size());
+
+        rows = new ArrayList<>();
+        try (CloseableIterator<CsvRow> it = parse("foo,bar").iterator()) {
+            it.forEachRemaining(rows::add);
+        }
+        assertEquals(1, rows.size());
+
+        rows = new ArrayList<>();
+        try (Stream<CsvRow> stream = parse("foo,bar").stream()) {
+            stream.forEach(rows::add);
+        }
+        assertEquals(1, rows.size());
     }
 
     // test helpers

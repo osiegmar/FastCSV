@@ -77,7 +77,14 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
      * @return a new sequential {@code Stream}.
      */
     public Stream<CsvRow> stream() {
-        return StreamSupport.stream(spliterator(), false);
+        return StreamSupport.stream(spliterator(), false)
+            .onClose(() -> {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
