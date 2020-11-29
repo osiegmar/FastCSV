@@ -101,8 +101,8 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
                     firstLineFieldCount = fieldCount;
                 } else if (fieldCount != firstLineFieldCount) {
                     throw new IOException(
-                        String.format("Line %d has %d fields, but first line has %d fields",
-                            lineNo, fieldCount, firstLineFieldCount));
+                        String.format("Row %d has %d fields, but first row had %d fields",
+                            startingLineNo, fieldCount, firstLineFieldCount));
                 }
             }
 

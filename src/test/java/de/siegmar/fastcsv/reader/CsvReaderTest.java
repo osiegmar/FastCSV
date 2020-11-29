@@ -126,10 +126,10 @@ public class CsvReaderTest {
         crb.errorOnDifferentFieldCount(true);
 
         final UncheckedIOException e = assertThrows(UncheckedIOException.class,
-            () -> readAll("foo\nbar,baz"));
+            () -> readAll("foo\nbar,\"baz\nbax\""));
 
-        assertEquals("java.io.IOException: Line 2 has 2 fields, "
-            + "but first line has 1 fields", e.getMessage());
+        assertEquals("java.io.IOException: Row 2 has 2 fields, "
+            + "but first row had 1 fields", e.getMessage());
     }
 
     // field by index
