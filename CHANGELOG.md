@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix null returning CsvContainer when only a header is present [\#38](https://github.com/osiegmar/FastCSV/issues/38)
 
+### Changed
+- Remove unnecessary temporary objects in CsvAppender [\#8](https://github.com/osiegmar/FastCSV/issues/8)
+
 ## [1.0.3] - 2018-10-06
 ### Fixed
 - Fix dropping empty quoted fields [\#19](https://github.com/osiegmar/FastCSV/issues/19)
