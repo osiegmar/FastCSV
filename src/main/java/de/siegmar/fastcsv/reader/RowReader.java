@@ -75,9 +75,37 @@ final class RowReader {
 
         OUTER: {
             mode_check: do {
-                if ((lStatus & STATUS_QUOTED_MODE) == 0) {
+                if ((lStatus & STATUS_QUOTED_MODE) != 0) {
+                    // we're in quotes
                     while (lPos < lLen) {
-                        // we're not in quotes
+                        final char c = lBuf[lPos++];
+
+                        if (c == qChar) {
+                            lStatus &= ~STATUS_QUOTED_MODE;
+                            continue mode_check;
+                        } else if (c == CR) {
+                            lStatus |= LAST_CHAR_WAS_CR;
+                            rowHandler.incLines();
+                        } else if (c == LF) {
+                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
+                                rowHandler.incLines();
+                            } else {
+                                lStatus &= ~LAST_CHAR_WAS_CR;
+                            }
+                        } else {
+                            // fast forward
+                            while (lPos < lLen) {
+                                final char lookAhead = lBuf[lPos++];
+                                if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
+                                    lPos--;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // we're not in quotes
+                    while (lPos < lLen) {
                         final char c = lBuf[lPos++];
 
                         if (c == fsep) {
@@ -123,34 +151,6 @@ final class RowReader {
                                 }
                             } else {
                                 // field data after closing quote
-                            }
-                        }
-                    }
-                } else {
-                    while (lPos < lLen) {
-                        // we're in quotes
-                        final char c = lBuf[lPos++];
-
-                        if (c == qChar) {
-                            lStatus &= ~STATUS_QUOTED_MODE;
-                            continue mode_check;
-                        } else if (c == CR) {
-                            lStatus |= LAST_CHAR_WAS_CR;
-                            rowHandler.incLines();
-                        } else if (c == LF) {
-                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
-                                rowHandler.incLines();
-                            } else {
-                                lStatus &= ~LAST_CHAR_WAS_CR;
-                            }
-                        } else {
-                            // fast forward
-                            while (lPos < lLen) {
-                                final char lookAhead = lBuf[lPos++];
-                                if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
-                                    lPos--;
-                                    break;
-                                }
                             }
                         }
                     }
