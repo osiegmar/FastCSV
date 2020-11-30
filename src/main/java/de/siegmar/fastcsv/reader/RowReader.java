@@ -11,7 +11,7 @@ final class RowReader {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
-    private static final int LAST_CHAR_WAS_CR = 32;
+    private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_ROW = 16;
     private static final int STATUS_NEW_FIELD = 8;
     private static final int STATUS_QUOTED_MODE = 4;
@@ -90,13 +90,13 @@ final class RowReader {
                             lStatus &= ~STATUS_QUOTED_MODE;
                             continue mode_check;
                         } else if (c == CR) {
-                            lStatus |= LAST_CHAR_WAS_CR;
+                            lStatus |= STATUS_LAST_CHAR_WAS_CR;
                             rowHandler.incLines();
                         } else if (c == LF) {
-                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
+                            if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
                                 rowHandler.incLines();
                             } else {
-                                lStatus &= ~LAST_CHAR_WAS_CR;
+                                lStatus &= ~STATUS_LAST_CHAR_WAS_CR;
                             }
                         } else {
                             // fast forward
@@ -117,7 +117,7 @@ final class RowReader {
                         if (lookAhead == CR) {
                             rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
-                            status = LAST_CHAR_WAS_CR;
+                            status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
@@ -143,12 +143,12 @@ final class RowReader {
                         } else if (c == CR) {
                             rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
-                            status = LAST_CHAR_WAS_CR;
+                            status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (c == LF) {
-                            if ((lStatus & LAST_CHAR_WAS_CR) == 0) {
+                            if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
                                 rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
                                     lStatus, qChar));
                                 status = STATUS_RESET;

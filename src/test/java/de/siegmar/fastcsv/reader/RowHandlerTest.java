@@ -12,7 +12,7 @@ public class RowHandlerTest {
         rh.add("foo");
         rh.add("bar");
 
-        assertArrayEquals(new String[]{"foo", "bar"}, rh.end());
+        assertArrayEquals(new String[]{"foo", "bar"}, rh.endAndReset());
     }
 
 }

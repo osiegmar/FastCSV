@@ -94,7 +94,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
             finished = rowReader.fetchAndRead(rowHandler);
             final boolean isCommentRow = rowHandler.isCommentMode();
             lineNo += rowHandler.getLines();
-            final String[] currentFields = rowHandler.end();
+            final String[] currentFields = rowHandler.endAndReset();
 
             final int fieldCount = currentFields.length;
 

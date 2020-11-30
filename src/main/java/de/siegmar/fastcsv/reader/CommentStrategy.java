@@ -6,7 +6,7 @@ package de.siegmar.fastcsv.reader;
 public enum CommentStrategy {
 
     /**
-     * Don't detect comments.
+     * Don't detect comments - handle everything as regular cell content.
      */
     NONE,
 
@@ -17,6 +17,7 @@ public enum CommentStrategy {
 
     /**
      * Detect and return the commented lines (entire line as one field).
+     * The comment character itself will be stripped.
      */
     READ
 

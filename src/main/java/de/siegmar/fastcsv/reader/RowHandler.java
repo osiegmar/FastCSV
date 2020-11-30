@@ -27,7 +27,7 @@ final class RowHandler {
         row = newRow;
     }
 
-    String[] end() {
+    String[] endAndReset() {
         final String[] ret = new String[idx];
         System.arraycopy(row, 0, ret, 0, idx);
         idx = 0;
