@@ -2,8 +2,8 @@ package de.siegmar.fastcsv.reader;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Spliterator;
@@ -21,8 +21,8 @@ import java.util.stream.StreamSupport;
 public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private final CsvReader csvReader;
-    private final Iterator<CsvRow> csvIterator;
-    private final Iterator<NamedCsvRow> namedCsvIterator;
+    private final CloseableIterator<CsvRow> csvIterator;
+    private final CloseableIterator<NamedCsvRow> namedCsvIterator;
 
     private String[] header;
     private Map<String, Integer> headerMap;
@@ -72,7 +72,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     }
 
     @Override
-    public Iterator<NamedCsvRow> iterator() {
+    public CloseableIterator<NamedCsvRow> iterator() {
         if (!isInitialized) {
             initialize();
         }
@@ -96,7 +96,13 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      * @return a new sequential {@code Stream}.
      */
     public Stream<NamedCsvRow> stream() {
-        return StreamSupport.stream(spliterator(), false);
+        return StreamSupport.stream(spliterator(), false).onClose(() -> {
+            try {
+                csvReader.close();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
     }
 
     @Override
@@ -104,7 +110,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         csvReader.close();
     }
 
-    private class CsvRowIterator implements Iterator<NamedCsvRow> {
+    private class CsvRowIterator implements CloseableIterator<NamedCsvRow> {
 
         @Override
         public boolean hasNext() {
@@ -114,6 +120,11 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         @Override
         public NamedCsvRow next() {
             return new NamedCsvRowImpl(csvIterator.next(), headerMap);
+        }
+
+        @Override
+        public void close() throws IOException {
+            csvIterator.close();
         }
 
     }

@@ -3,7 +3,9 @@ package de.siegmar.fastcsv.reader;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,11 +14,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -182,6 +187,25 @@ public class CsvReaderTest {
         assertFalse(it.hasNext());
     }
 
+    // comment
+
+    @Test
+    public void comment() {
+        final Iterator<CsvRow> it = crb
+            .commentStrategy(CommentStrategy.READ)
+            .build(new StringReader("#comment \"1\"\na,b,c")).iterator();
+
+        CsvRow row = it.next();
+        assertTrue(row.isComment());
+        assertEquals(1, row.getOriginalLineNumber());
+        assertArrayEquals(asArray("comment \"1\""), row.getFields());
+
+        row = it.next();
+        assertFalse(row.isComment());
+        assertEquals(2, row.getOriginalLineNumber());
+        assertArrayEquals(asArray("a", "b", "c"), row.getFields());
+    }
+
     // to string
 
     @Test
@@ -213,24 +237,46 @@ public class CsvReaderTest {
 
     @Test
     public void closeApi() throws IOException {
-        List<CsvRow> rows;
+        final Consumer<CsvRow> consumer = csvRow -> { };
 
-        try (CsvReader reader = parse("foo,bar")) {
-            rows = reader.stream().collect(Collectors.toList());
-        }
-        assertEquals(1, rows.size());
+        final Supplier<CloseStatusReader> supp =
+            () -> new CloseStatusReader(new StringReader("foo,bar"));
 
-        rows = new ArrayList<>();
-        try (CloseableIterator<CsvRow> it = parse("foo,bar").iterator()) {
-            it.forEachRemaining(rows::add);
+        CloseStatusReader csr = supp.get();
+        try (CsvReader reader = crb.build(csr)) {
+            reader.stream().forEach(consumer);
         }
-        assertEquals(1, rows.size());
+        assertTrue(csr.isClosed());
 
-        rows = new ArrayList<>();
-        try (Stream<CsvRow> stream = parse("foo,bar").stream()) {
-            stream.forEach(rows::add);
+        csr = supp.get();
+        try (CloseableIterator<CsvRow> it = crb.build(csr).iterator()) {
+            it.forEachRemaining(consumer);
         }
-        assertEquals(1, rows.size());
+        assertTrue(csr.isClosed());
+
+        csr = supp.get();
+        try (Stream<CsvRow> stream = crb.build(csr).stream()) {
+            stream.forEach(consumer);
+        }
+        assertTrue(csr.isClosed());
+    }
+
+    @Test
+    public void spliterator() {
+        final Spliterator<CsvRow> spliterator =
+            crb.build(new StringReader("a,b,c\n1,2,3")).spliterator();
+
+        assertNull(spliterator.trySplit());
+        assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
+
+        final AtomicInteger rows = new AtomicInteger();
+        final AtomicInteger rows2 = new AtomicInteger();
+        while (spliterator.tryAdvance(row -> rows.incrementAndGet())) {
+            rows2.incrementAndGet();
+        }
+
+        assertEquals(2, rows.get());
+        assertEquals(2, rows2.get());
     }
 
     // test helpers

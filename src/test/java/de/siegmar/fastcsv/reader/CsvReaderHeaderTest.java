@@ -4,13 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -117,6 +122,34 @@ public class CsvReaderHeaderTest {
 
         assertEquals("{headerA=, headerB=fieldB2, headerC=fieldC2}",
             it.next().getFieldMap().toString());
+    }
+
+    // API
+
+    @Test
+    public void closeApi() throws IOException {
+        final Consumer<NamedCsvRow> consumer = csvRow -> { };
+
+        final Supplier<CloseStatusReader> supp =
+            () -> new CloseStatusReader(new StringReader("h1,h2\nfoo,bar"));
+
+        CloseStatusReader csr = supp.get();
+        try (NamedCsvReader reader = crb.build(csr).withHeader()) {
+            reader.stream().forEach(consumer);
+        }
+        assertTrue(csr.isClosed());
+
+        csr = supp.get();
+        try (CloseableIterator<NamedCsvRow> it = crb.build(csr).withHeader().iterator()) {
+            it.forEachRemaining(consumer);
+        }
+        assertTrue(csr.isClosed());
+
+        csr = supp.get();
+        try (Stream<NamedCsvRow> stream = crb.build(csr).withHeader().stream()) {
+            stream.forEach(consumer);
+        }
+        assertTrue(csr.isClosed());
     }
 
     // test helpers
