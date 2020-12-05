@@ -15,7 +15,7 @@ import java.util.Objects;
  * }
  * }</pre>
  */
-public class CsvWriter implements Closeable {
+public final class CsvWriter implements Closeable {
 
     private static final char CR = '\r';
     private static final char LF = '\n';

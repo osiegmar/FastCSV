@@ -104,7 +104,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         csvReader.close();
     }
 
-    private final class CsvRowIterator implements Iterator<NamedCsvRow> {
+    private class CsvRowIterator implements Iterator<NamedCsvRow> {
 
         @Override
         public boolean hasNext() {

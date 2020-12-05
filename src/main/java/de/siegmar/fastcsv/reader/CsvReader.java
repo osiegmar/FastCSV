@@ -17,7 +17,7 @@ import java.util.stream.StreamSupport;
  * CsvReader.builder().build(...)
  * }</pre>
  */
-public class CsvReader implements Iterable<CsvRow>, Closeable {
+public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
     private final RowReader rowReader;
     private final CommentStrategy commentStrategy;
@@ -135,7 +135,7 @@ public class CsvReader implements Iterable<CsvRow>, Closeable {
         reader.close();
     }
 
-    private final class CsvRowIterator implements CloseableIterator<CsvRow> {
+    private class CsvRowIterator implements CloseableIterator<CsvRow> {
 
         private CsvRow fetchedRow;
         private boolean fetched;
