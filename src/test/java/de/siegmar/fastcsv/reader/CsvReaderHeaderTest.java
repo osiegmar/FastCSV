@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class CsvReaderHeaderTest {
@@ -63,6 +64,18 @@ public class CsvReaderHeaderTest {
     @Test
     public void getFieldByName() {
         assertEquals("bar", readSingleRow("foo\nbar").getField("foo"));
+    }
+
+    @Test
+    public void getFieldByIndex() {
+        assertEquals("bar", readSingleRow("foo\nbar").getField(0));
+    }
+
+    @Test
+    public void getFields() {
+        final NamedCsvRow namedCsvRow = readSingleRow("h1,h2\na,b");
+        assertEquals(2, namedCsvRow.getFieldCount());
+        assertArrayEquals(asArray("a", "b"), namedCsvRow.getFields());
     }
 
     @Test
@@ -122,6 +135,45 @@ public class CsvReaderHeaderTest {
 
         assertEquals("{headerA=, headerB=fieldB2, headerC=fieldC2}",
             it.next().getFieldMap().toString());
+    }
+
+    // line numbering
+
+    @Test
+    public void lineNumbering() {
+        final Iterator<NamedCsvRow> it = crb
+            .commentStrategy(CommentStrategy.SKIP)
+            .build(new StringReader(
+                "h1,h2\n"
+                    + "a,line 1\n"
+                    + "b,line 2\r"
+                    + "c,line 3\r\n"
+                    + "d,\"line 4\rwith\r\nand\n\"\n"
+                    + "#line 8\n"
+                    + "e,line 9"
+            )).withHeader().iterator();
+
+        CsvRow row = it.next();
+        assertArrayEquals(asArray("a", "line 1"), row.getFields());
+        assertEquals(2, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertArrayEquals(asArray("b", "line 2"), row.getFields());
+        assertEquals(3, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertArrayEquals(asArray("c", "line 3"), row.getFields());
+        assertEquals(4, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertArrayEquals(asArray("d", "line 4\rwith\r\nand\n"), row.getFields());
+        assertEquals(5, row.getOriginalLineNumber());
+
+        row = it.next();
+        assertArrayEquals(asArray("e", "line 9"), row.getFields());
+        assertEquals(10, row.getOriginalLineNumber());
+
+        assertFalse(it.hasNext());
     }
 
     // API
