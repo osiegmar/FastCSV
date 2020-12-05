@@ -15,25 +15,9 @@ import java.util.Objects;
  */
 public final class CsvWriterBuilder {
 
-    /**
-     * Field separator character (default: ',' - comma).
-     */
     private char fieldSeparator = ',';
-
-    /**
-     * The character for enclosing fields (default: '"' - double quotes).
-     */
     private char quoteCharacter = '"';
-
-    /**
-     * The strategy when fields should be enclosed by the {@link #quoteCharacter}
-     * (default: {@link QuoteStrategy#REQUIRED}).
-     */
     private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
-
-    /**
-     * The line delimiter to be used (default: {@link LineDelimiter#CRLF}).
-     */
     private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
 
     CsvWriterBuilder() {

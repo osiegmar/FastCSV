@@ -14,27 +14,11 @@ import java.util.Objects;
  */
 public final class CsvReaderBuilder {
 
-    /**
-     * Field separator character (default: ',' - comma).
-     */
     private char fieldSeparator = ',';
-
-    /**
-     * The character used to enclose fields (default: '"' - double quotes).
-     */
     private char quoteCharacter = '"';
-
     private CommentStrategy commentStrategy = CommentStrategy.NONE;
     private char commentCharacter = '#';
-
-    /**
-     * Skip empty rows? (default: true).
-     */
     private boolean skipEmptyRows = true;
-
-    /**
-     * Throw an exception if CSV data contains different field count? (default: false).
-     */
     private boolean errorOnDifferentFieldCount;
 
     /**
