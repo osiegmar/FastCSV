@@ -279,6 +279,17 @@ public class CsvReaderTest {
         assertEquals(2, rows2.get());
     }
 
+    // Coverage
+
+    @Test
+    public void closeException() {
+        final CsvReader csvReader = crb.build(new UncloseableReader(new StringReader("foo")));
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
+            () -> csvReader.stream().close());
+
+        assertEquals("java.io.IOException: Cannot close", e.getMessage());
+    }
+
     // test helpers
 
     private CsvReader parse(final String data) {

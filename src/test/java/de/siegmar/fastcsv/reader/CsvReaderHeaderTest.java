@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -267,6 +268,18 @@ public class CsvReaderHeaderTest {
         assertEquals(2, row.getFieldCount());
         assertArrayEquals(asArray("fieldA", "fieldB"), row.getFields());
         assertEquals(2, row.getFieldMap().size());
+    }
+
+    // Coverage
+
+    @Test
+    public void closeException() {
+        final NamedCsvReader csvReader =
+            crb.build(new UncloseableReader(new StringReader("foo"))).withHeader();
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
+            () -> csvReader.stream().close());
+
+        assertEquals("java.io.IOException: Cannot close", e.getMessage());
     }
 
     // test helpers
