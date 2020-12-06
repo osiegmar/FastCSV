@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/osiegmar/FastCSV.svg?branch=version2-rewrite)](https://travis-ci.org/osiegmar/FastCSV)
 [![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/version2-rewrite/graph/badge.svg?token=WIWkv7HUyk)](https://app.codecov.io/gh/osiegmar/FastCSV/branch/version2-rewrite)
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
+[![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv.svg)](https://search.maven.org/search?q=g:%22de.siegmar%22%20AND%20a:%22fastcsv%22)
 
-FastCSV is an ultra fast and dependency free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
+FastCSV is an ultra fast and dependency-free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
 library for Java.
 
 ## Benchmark
