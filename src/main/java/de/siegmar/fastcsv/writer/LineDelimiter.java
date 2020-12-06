@@ -8,22 +8,28 @@ public enum LineDelimiter {
     /**
      * Line Feed - (UNIX).
      */
-    LF,
+    LF("\n"),
 
     /**
      * Carriage Return - (Mac classic).
      */
-    CR,
+    CR("\r"),
 
     /**
      * Carriage Return and Line Feed (Windows).
      */
-    CRLF,
+    CRLF("\r\n"),
 
     /**
      * Use current platform default ({@link System#lineSeparator()}.
      */
-    PLATFORM;
+    PLATFORM(System.lineSeparator());
+
+    private final String str;
+
+    LineDelimiter(final String str) {
+        this.str = str;
+    }
 
     /**
      * Build an enum based on the given string.
@@ -44,21 +50,9 @@ public enum LineDelimiter {
         throw new IllegalArgumentException("Unknown line delimiter: " + str);
     }
 
-    @SuppressWarnings("checkstyle:returncount")
     @Override
     public String toString() {
-        switch (this) {
-            case CRLF:
-                return "\r\n";
-            case LF:
-                return "\n";
-            case CR:
-                return "\r";
-            case PLATFORM:
-                return System.lineSeparator();
-            default:
-                throw new IllegalStateException();
-        }
+        return str;
     }
 
 }
