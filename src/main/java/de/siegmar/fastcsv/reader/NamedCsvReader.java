@@ -31,7 +31,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     NamedCsvReader(final CsvReader csvReader) {
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
-        namedCsvIterator = new CsvRowIterator();
+        namedCsvIterator = new NamedCsvRowIterator();
     }
 
     /**
@@ -98,7 +98,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     public Stream<NamedCsvRow> stream() {
         return StreamSupport.stream(spliterator(), false).onClose(() -> {
             try {
-                csvReader.close();
+                close();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -110,7 +110,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         csvReader.close();
     }
 
-    private class CsvRowIterator implements CloseableIterator<NamedCsvRow> {
+    private class NamedCsvRowIterator implements CloseableIterator<NamedCsvRow> {
 
         @Override
         public boolean hasNext() {
