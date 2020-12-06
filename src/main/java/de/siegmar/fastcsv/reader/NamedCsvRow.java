@@ -35,4 +35,18 @@ public interface NamedCsvRow extends CsvRow {
      */
     Map<String, String> getFieldMap();
 
+    /**
+     * Provides the information if the row is a header row.
+     *
+     * @return {@code true} if the row is a header row
+     */
+    boolean isHeader();
+
+    /**
+     * Provides the information if the row is a data row.
+     *
+     * @return {@code true} if the row is a data row
+     */
+    boolean isData();
+
 }

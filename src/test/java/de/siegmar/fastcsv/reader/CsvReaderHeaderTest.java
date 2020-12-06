@@ -61,6 +61,16 @@ public class CsvReaderHeaderTest {
     }
 
     @Test
+    public void onlyHeaderIterator() {
+        final NamedCsvReader csv = parse("foo,bar\n");
+        final NamedCsvRow row = csv.iterator().next();
+        assertTrue(row.isHeader());
+        assertFalse(row.isComment());
+        assertFalse(row.isData());
+        assertArrayEquals(asArray("foo", "bar"), row.getFields());
+    }
+
+    @Test
     public void getFieldByName() {
         assertEquals("bar", readSingleRow("foo\nbar").getField("foo"));
     }
@@ -201,6 +211,62 @@ public class CsvReaderHeaderTest {
             stream.forEach(consumer);
         }
         assertTrue(csr.isClosed());
+    }
+
+    @Test
+    public void noComments() {
+        final Iterator<NamedCsvRow> it = parse("# comment 1\nfieldA,fieldB")
+            .iterator();
+
+        assertEquals("fieldA", it.next().getField("# comment 1"));
+    }
+
+    @Test
+    public void skipComments() {
+        crb.commentStrategy(CommentStrategy.SKIP);
+        final Iterator<NamedCsvRow> it = parse(
+            "# comment 1\n"
+                + "headerA,headerB\n"
+                + "# comment 2\n"
+                + "fieldA,fieldB\n")
+            .iterator();
+
+        assertEquals("fieldB", it.next().getField("headerB"));
+    }
+
+    @Test
+    public void readComments() {
+        crb.commentStrategy(CommentStrategy.READ);
+        final Iterator<NamedCsvRow> it = parse(
+            "# comment 1\n"
+                + "headerA,headerB\n"
+                + "# comment 2\n"
+                + "fieldA,fieldB\n")
+            .iterator();
+
+        NamedCsvRow row = it.next();
+        assertTrue(row.isComment());
+        assertFalse(row.isHeader());
+        assertFalse(row.isData());
+        assertEquals(1, row.getFieldCount());
+        assertEquals(" comment 1", row.getField(0));
+        assertEquals(0, row.getFieldMap().size());
+
+        row = it.next();
+        assertTrue(row.isComment());
+        assertFalse(row.isHeader());
+        assertFalse(row.isData());
+        assertEquals(1, row.getFieldCount());
+        assertEquals(" comment 2", row.getField(0));
+        assertEquals(2, row.getFieldMap().size());
+
+        row = it.next();
+        assertFalse(row.isComment());
+        assertFalse(row.isHeader());
+        assertTrue(row.isData());
+        assertEquals(2, row.getFieldCount());
+        assertArrayEquals(asArray("fieldA", "fieldB"), row.getFields());
+        assertEquals(2, row.getFieldMap().size());
     }
 
     // test helpers

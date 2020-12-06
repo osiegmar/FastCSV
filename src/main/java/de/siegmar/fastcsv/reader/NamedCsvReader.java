@@ -21,17 +21,15 @@ import java.util.stream.StreamSupport;
 public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private final CsvReader csvReader;
-    private final CloseableIterator<CsvRow> csvIterator;
     private final CloseableIterator<NamedCsvRow> namedCsvIterator;
 
-    private String[] header;
-    private Map<String, Integer> headerMap;
-    private boolean isInitialized;
+    private String[] header = new String[0];
+    private Map<String, Integer> headerMap = Collections.emptyMap();
+    private boolean headerInitialized;
 
     NamedCsvReader(final CsvReader csvReader) {
         this.csvReader = csvReader;
-        csvIterator = csvReader.iterator();
-        namedCsvIterator = new NamedCsvRowIterator();
+        namedCsvIterator = new NamedCsvRowIterator(csvReader.iterator());
     }
 
     /**
@@ -41,42 +39,30 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      * @return the header columns
      */
     public String[] getHeader() {
-        if (!isInitialized) {
-            initialize();
+        while (namedCsvIterator.hasNext() && header.length == 0) {
+            namedCsvIterator.next();
         }
         return header.clone();
     }
 
-    private void initialize() {
-        if (!csvIterator.hasNext()) {
-            header = new String[0];
-            headerMap = Collections.emptyMap();
-        } else {
-            final CsvRow firstRow = csvIterator.next();
+    private void initializeHeader(final CsvRow row) {
+        header = row.getFields();
+        final Map<String, Integer> map = new LinkedHashMap<>(header.length);
 
-            header = firstRow.getFields();
-            final Map<String, Integer> map = new LinkedHashMap<>(header.length);
-
-            for (int i = 0; i < header.length; i++) {
-                final String field = header[i];
-                final Integer put = map.put(field, i);
-                if (put != null) {
-                    throw new IllegalStateException("Duplicate header field '" + field + "' found");
-                }
+        for (int i = 0; i < header.length; i++) {
+            final String field = header[i];
+            final Integer put = map.put(field, i);
+            if (put != null) {
+                throw new IllegalStateException("Duplicate header field '" + field + "' found");
             }
-
-            headerMap = Collections.unmodifiableMap(map);
         }
 
-        isInitialized = true;
+        headerMap = Collections.unmodifiableMap(map);
+        headerInitialized = true;
     }
 
     @Override
     public CloseableIterator<NamedCsvRow> iterator() {
-        if (!isInitialized) {
-            initialize();
-        }
-
         return namedCsvIterator;
     }
 
@@ -87,7 +73,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      */
     @Override
     public Spliterator<NamedCsvRow> spliterator() {
-        return new CsvRowSpliterator<>(iterator());
+        return new CsvRowSpliterator<>(namedCsvIterator);
     }
 
     /**
@@ -112,6 +98,12 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     private class NamedCsvRowIterator implements CloseableIterator<NamedCsvRow> {
 
+        private final CloseableIterator<CsvRow> csvIterator;
+
+        NamedCsvRowIterator(final CloseableIterator<CsvRow> csvIterator) {
+            this.csvIterator = csvIterator;
+        }
+
         @Override
         public boolean hasNext() {
             return csvIterator.hasNext();
@@ -119,7 +111,21 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
         @Override
         public NamedCsvRow next() {
-            return new NamedCsvRowImpl(csvIterator.next(), headerMap);
+            CsvRow row = csvIterator.next();
+
+            if (row.isComment()) {
+                return new NamedCsvRowImpl(row);
+            }
+
+            if (!headerInitialized) {
+                initializeHeader(row);
+                if (!csvIterator.hasNext()) {
+                    return new NamedCsvRowImpl(row);
+                }
+                row = csvIterator.next();
+            }
+
+            return new NamedCsvRowImpl(row, headerMap);
         }
 
         @Override

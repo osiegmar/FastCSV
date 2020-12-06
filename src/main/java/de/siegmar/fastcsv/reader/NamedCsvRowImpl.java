@@ -12,6 +12,11 @@ final class NamedCsvRowImpl implements NamedCsvRow {
     private final CsvRow row;
     private final Map<String, Integer> headerMap;
 
+    NamedCsvRowImpl(final CsvRow row) {
+        this.row = row;
+        this.headerMap = Collections.emptyMap();
+    }
+
     NamedCsvRowImpl(final CsvRow row, final Map<String, Integer> headerMap) {
         this.row = row;
         this.headerMap = headerMap;
@@ -55,6 +60,16 @@ final class NamedCsvRowImpl implements NamedCsvRow {
     @Override
     public boolean isComment() {
         return row.isComment();
+    }
+
+    @Override
+    public boolean isHeader() {
+        return !isComment() && headerMap.isEmpty();
+    }
+
+    @Override
+    public boolean isData() {
+        return !isHeader() && !isComment();
     }
 
     @Override
