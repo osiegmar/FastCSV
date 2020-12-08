@@ -111,7 +111,8 @@ public class CsvReaderHeaderTest {
     // Request field by name, but column name doesn't exist
     @Test
     public void getNonExistingFieldByName() {
-        assertEquals(Optional.empty(), readSingleRow("foo\nfaz").findField("bar"));
+        assertEquals(Optional.empty(), readSingleRow("h1,h2\nd1,d2").findField("h3"));
+        assertEquals(Optional.empty(), readSingleRow("h1,h2\nd1").findField("h2"));
     }
 
     @Test
