@@ -74,51 +74,47 @@ jmh {
     operationsPerInvocation = 1
 }
 
-if (hasProperty('ossrhUsername')) {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = 'fastcsv'
-                from components.java
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'fastcsv'
+            from components.java
 
-                pom {
-                    name = 'FastCSV'
-                    description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
+            pom {
+                name = 'FastCSV'
+                description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
+                url = 'https://github.com/osiegmar/FastCSV'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                scm {
                     url = 'https://github.com/osiegmar/FastCSV'
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = 'https://opensource.org/licenses/MIT'
-                        }
-                    }
-                    scm {
-                        url = 'https://github.com/osiegmar/FastCSV'
-                        connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
-                    }
-                    developers {
-                        developer {
-                            id = 'osiegmar'
-                            name = 'Oliver Siegmar'
-                            email = 'oliver@siegmar.de'
-                        }
+                    connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
+                }
+                developers {
+                    developer {
+                        id = 'osiegmar'
+                        name = 'Oliver Siegmar'
+                        email = 'oliver@siegmar.de'
                     }
                 }
-            }
-        }
-        repositories {
-            maven {
-                credentials {
-                    username "$ossrhUsername"
-                    password "$ossrhPassword"
-                }
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             }
         }
     }
+    repositories {
+        maven {
+            name = 'ossrh'
+            credentials(PasswordCredentials)
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
 
-    signing {
-        sign publishing.publications.mavenJava
-    }
+signing {
+    sign publishing.publications.mavenJava
 }
