@@ -41,6 +41,11 @@ test {
     finalizedBy jacocoTestReport
 }
 
+// Bundled version 4.1.1 does not support Java 11 builds
+spotbugs {
+    toolVersion = '4.1.3'
+}
+
 jacocoTestReport {
     reports {
         xml.enabled true
