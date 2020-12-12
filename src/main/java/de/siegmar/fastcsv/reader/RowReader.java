@@ -159,13 +159,12 @@ final class RowReader {
 
                             lStatus = STATUS_RESET;
                             lBegin = lPos;
-                        } else if (cStrat != CommentStrategy.NONE && c == cChar
-                                   && lBegin == lPos - 1) {
+                        } else if (cStrat != CommentStrategy.NONE && c == cChar) {
                             lBegin = lPos;
                             lStatus = STATUS_COMMENTED_ROW;
                             rowHandler.enableCommentMode();
                             continue mode_check;
-                        } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
+                        } else if (c == qChar) {
                             // quote and not in data-only mode
                             lStatus = STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
                             continue mode_check;
