@@ -58,7 +58,9 @@ public class CsvWriterExampleTest {
         final Charset charset = StandardCharsets.UTF_8;
 
         try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
-            csv.writeLine("header1", "header2").writeLine("value1", "value2");
+            csv
+                .writeField("header1").writeField("header2").endLine()
+                .writeLine("value1", "value2");
         }
 
         assertEquals("header1,header2\r\nvalue1,value2\r\n",
