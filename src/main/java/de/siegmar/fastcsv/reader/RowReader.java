@@ -159,7 +159,8 @@ final class RowReader {
 
                             lStatus = STATUS_RESET;
                             lBegin = lPos;
-                        } else if (cStrat != CommentStrategy.NONE && c == cChar) {
+                        } else if (cStrat != CommentStrategy.NONE && c == cChar
+                            && (lStatus == STATUS_RESET || lStatus == STATUS_LAST_CHAR_WAS_CR)) {
                             lBegin = lPos;
                             lStatus = STATUS_COMMENTED_ROW;
                             rowHandler.enableCommentMode();

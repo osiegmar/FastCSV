@@ -199,7 +199,7 @@ public class CsvReaderTest {
     public void comment() {
         final Iterator<CsvRow> it = crb
             .commentStrategy(CommentStrategy.READ)
-            .build(new StringReader("#comment \"1\"\na,b,c")).iterator();
+            .build(new StringReader("#comment \"1\"\na,#b,c")).iterator();
 
         CsvRow row = it.next();
         assertTrue(row.isComment());
@@ -209,7 +209,7 @@ public class CsvReaderTest {
         row = it.next();
         assertFalse(row.isComment());
         assertEquals(2, row.getOriginalLineNumber());
-        assertArrayEquals(asArray("a", "b", "c"), row.getFields());
+        assertArrayEquals(asArray("a", "#b", "c"), row.getFields());
     }
 
     // to string
