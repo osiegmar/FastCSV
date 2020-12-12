@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-public class CsvReaderHeaderTest {
+public class NamedCsvReaderTest {
 
     private final CsvReaderBuilder crb = CsvReader.builder();
 
