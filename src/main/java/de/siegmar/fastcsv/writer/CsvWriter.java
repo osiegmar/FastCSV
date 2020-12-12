@@ -15,6 +15,7 @@ import java.util.Objects;
  * }
  * }</pre>
  */
+@SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
 public final class CsvWriter implements Closeable {
 
     private static final char CR = '\r';

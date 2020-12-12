@@ -13,6 +13,7 @@ import java.util.Objects;
  * This builder is used to create configured instances of {@link CsvWriter}. The default
  * configuration of this class complies with RFC 4180.
  */
+@SuppressWarnings("checkstyle:HiddenField")
 public final class CsvWriterBuilder {
 
     private char fieldSeparator = ',';

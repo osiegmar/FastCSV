@@ -12,6 +12,7 @@ import java.util.Objects;
  * This builder is used to create configured instances of {@link CsvReader}. The default
  * configuration of this class complies with RFC 4180.
  */
+@SuppressWarnings("checkstyle:HiddenField")
 public final class CsvReaderBuilder {
 
     private char fieldSeparator = ',';

@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.input.BOMInputStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
@@ -34,19 +36,17 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvReaderBuilder;
 import de.siegmar.fastcsv.reader.CsvRow;
 
+@SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CsvReaderTest {
 
     private final CsvReaderBuilder crb = CsvReader.builder();
 
     // null / empty input
 
-    @Test
-    public void nullInput() {
-        assertThrows(NullPointerException.class, () -> parse(findBugsSafeNullInput()));
-    }
-
-    private static String findBugsSafeNullInput() {
-        return null;
+    @ParameterizedTest
+    @NullSource
+    public void nullInput(final String text) {
+        assertThrows(NullPointerException.class, () -> parse(text));
     }
 
     @Test

@@ -2,24 +2,7 @@
 <!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
 
-    <!-- sacrifice some coding styles for the sake of performance -->
-
-    <suppress files="RowReader.java" checks="CyclomaticComplexity"/>
-    <suppress files="RowReader.java" checks="InnerAssignment"/>
-    <suppress files="RowReader.java" checks="JavaNCSS"/>
-    <suppress files="RowReader.java" checks="NestedIfDepth"/>
-    <suppress files="RowReader.java" checks="ExecutableStatementCount"/>
-
-    <suppress files="CsvWriter.java" checks="CyclomaticComplexity"/>
-    <suppress files="CsvWriter.java" checks="NPathComplexity"/>
-    <suppress files="CsvWriter.java" checks="InnerAssignment"/>
-
-    <suppress files="CsvReaderBuilder.java" checks="HiddenField"/>
-    <suppress files="CsvWriterBuilder.java" checks="HiddenField"/>
-
     <suppress files=".*Test.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
-    <suppress files="CharacterConv.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
-
     <suppress files=".*Benchmark.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
 
 </suppressions>

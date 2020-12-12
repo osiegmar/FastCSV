@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -72,10 +73,10 @@ public class CsvReaderExampleTest {
     }
 
     @Test
-    public void path() throws IOException {
+    public void path(@TempDir final Path tempDir) throws IOException {
         final Charset charset = StandardCharsets.UTF_8;
 
-        final Path path = Files.createTempFile("fastcsv", ".csv");
+        final Path path = tempDir.resolve("fastcsv.csv");
         Files.write(path, "foo,bar\n".getBytes(charset));
 
         try (CsvReader csvReader = CsvReader.builder().build(path, charset)) {

@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
@@ -32,13 +34,10 @@ public class NamedCsvReaderTest {
 
     private final CsvReaderBuilder crb = CsvReader.builder();
 
-    @Test
-    public void nullInput() {
-        assertThrows(NullPointerException.class, () -> parse(findBugsSafeNullInput()));
-    }
-
-    private static String findBugsSafeNullInput() {
-        return null;
+    @ParameterizedTest
+    @NullSource
+    public void nullInput(final String text) {
+        assertThrows(NullPointerException.class, () -> parse(text));
     }
 
     @Test

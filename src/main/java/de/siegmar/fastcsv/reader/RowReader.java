@@ -3,9 +3,13 @@ package de.siegmar.fastcsv.reader;
 import java.io.IOException;
 import java.io.Reader;
 
-/*
- * This class contains ugly, performance optimized code - be warned!
- */
+@SuppressWarnings({
+    "checkstyle:CyclomaticComplexity",
+    "checkstyle:ExecutableStatementCount",
+    "checkstyle:InnerAssignment",
+    "checkstyle:JavaNCSS",
+    "checkstyle:NestedIfDepth"
+})
 final class RowReader {
 
     private static final char LF = '\n';
@@ -306,3 +310,6 @@ final class RowReader {
     }
 
 }
+/*
+ * This class contains ugly, performance optimized code - be warned!
+ */

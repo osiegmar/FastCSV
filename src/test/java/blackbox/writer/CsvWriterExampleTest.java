@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
@@ -53,8 +54,8 @@ public class CsvWriterExampleTest {
     }
 
     @Test
-    public void path() throws IOException {
-        final Path path = Files.createTempFile("fastcsv", ".csv");
+    public void path(@TempDir final Path tempDir) throws IOException {
+        final Path path = tempDir.resolve("fastcsv.csv");
         final Charset charset = StandardCharsets.UTF_8;
 
         try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
