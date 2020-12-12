@@ -1,4 +1,4 @@
-package de.siegmar.fastcsv.reader;
+package blackbox.reader;
 
 import java.util.Arrays;
 import java.util.Iterator;

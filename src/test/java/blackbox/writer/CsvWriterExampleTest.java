@@ -1,4 +1,4 @@
-package de.siegmar.fastcsv.writer;
+package blackbox.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,6 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+
+import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.LineDelimiter;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 
 public class CsvWriterExampleTest {
 

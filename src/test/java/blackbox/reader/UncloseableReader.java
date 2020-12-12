@@ -1,4 +1,4 @@
-package de.siegmar.fastcsv.reader;
+package blackbox.reader;
 
 import java.io.IOException;
 import java.io.Reader;

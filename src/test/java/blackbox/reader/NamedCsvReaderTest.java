@@ -1,4 +1,4 @@
-package de.siegmar.fastcsv.reader;
+package blackbox.reader;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,6 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+
+import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvReaderBuilder;
+import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.NamedCsvReader;
+import de.siegmar.fastcsv.reader.NamedCsvRow;
 
 public class NamedCsvReaderTest {
 

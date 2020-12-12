@@ -1,19 +1,20 @@
-package de.siegmar.fastcsv.reader;
+package blackbox.reader;
 
-import static de.siegmar.fastcsv.reader.CharacterConv.parse;
-import static de.siegmar.fastcsv.reader.CharacterConv.print;
+import static blackbox.reader.CharacterConv.parse;
+import static blackbox.reader.CharacterConv.print;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRow;
 
 public class GenericDataTest {
 
@@ -31,11 +32,6 @@ public class GenericDataTest {
 
     static List<DataProvider.TestData> dataProvider() throws IOException {
         return DataProvider.loadTestData("/test.txt");
-    }
-
-    private static BufferedReader resource() {
-        return new BufferedReader(new InputStreamReader(
-            GenericDataTest.class.getResourceAsStream("/test.txt"), StandardCharsets.UTF_8));
     }
 
     public static List<String[]> readAll(final String data, final boolean skipEmptyLines,

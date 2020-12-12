@@ -1,4 +1,4 @@
-package de.siegmar.fastcsv.writer;
+package blackbox.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.CsvWriterBuilder;
+import de.siegmar.fastcsv.writer.LineDelimiter;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 
 public class CsvWriterTest {
 
