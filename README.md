@@ -49,10 +49,10 @@ CsvReader.builder().build("foo1,bar1\r\nfoo2,bar2")
     .forEach(System.out::println);
 ```
 
-Stream based reading of CSV data with a header
+Iterative reading of some CSV data with a header
 
 ```java
-NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2").stream()
+NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
     .forEach(row -> row.getField("header 2"));
 ```
 
