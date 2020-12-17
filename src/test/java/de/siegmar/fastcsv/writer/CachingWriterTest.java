@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class CachingWriterTest {
 
     private final StringWriter sw = new StringWriter();
-    private final CachingWriter cw = new CachingWriter(sw);
+    private final CsvWriter.CachingWriter cw = new CsvWriter.CachingWriter(sw);
 
     @Test
     public void appendSingle() throws IOException {

@@ -3,6 +3,9 @@ package de.siegmar.fastcsv.reader;
 import java.io.IOException;
 import java.io.Reader;
 
+/*
+ * This class contains ugly, performance optimized code - be warned!
+ */
 @SuppressWarnings({
     "checkstyle:CyclomaticComplexity",
     "checkstyle:ExecutableStatementCount",
@@ -310,6 +313,3 @@ final class RowReader {
     }
 
 }
-/*
- * This class contains ugly, performance optimized code - be warned!
- */

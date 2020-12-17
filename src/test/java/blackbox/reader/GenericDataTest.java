@@ -5,7 +5,6 @@ import static blackbox.reader.CharacterConv.print;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class GenericDataTest {
             .skipEmptyRows(skipEmptyLines)
             .commentCharacter(';')
             .commentStrategy(commentStrategy)
-            .build(new StringReader(data))
+            .build(data)
             .stream()
             .map(CsvRow::getFields)
             .collect(Collectors.toList());

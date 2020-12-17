@@ -4,12 +4,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 final class CharacterConv {
 
-    private static final String[] STANDARD = {" ", "\r", "\n" };
-    private static final String[] CONV = {"␣", "␍", "␊" };
+    private static final String[] STANDARD = {" ", "\r", "\n"};
+    private static final String[] CONV = {"␣", "␍", "␊"};
     private static final char FIELD_SEPARATOR = '↷';
     private static final char LINE_SEPARATOR = '⏎';
     private static final String EMPTY_STRING = "◯";
@@ -41,11 +39,20 @@ final class CharacterConv {
     }
 
     public static String print(final String str) {
-        return str.isEmpty() ? EMPTY_STRING : StringUtils.replaceEach(str, STANDARD, CONV);
+        return str.isEmpty() ? EMPTY_STRING : replaceEach(str, STANDARD, CONV);
+    }
+
+    private static String replaceEach(final String text, final String[] searchList,
+                                      final String[] replacementList) {
+        String ret = text;
+        for (int i = 0; i < searchList.length; i++) {
+            ret = ret.replace(searchList[i], replacementList[i]);
+        }
+        return ret;
     }
 
     public static String parse(final String str) {
-        return StringUtils.replaceEach(str, CONV, STANDARD);
+        return replaceEach(str, CONV, STANDARD);
     }
 
 }

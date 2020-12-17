@@ -1,5 +1,6 @@
 package blackbox.reader;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,10 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -25,56 +24,32 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.input.BOMInputStream;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 
+import blackbox.Util;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvReaderBuilder;
 import de.siegmar.fastcsv.reader.CsvRow;
 
 @SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public class CsvReaderTest {
 
-    private final CsvReaderBuilder crb = CsvReader.builder();
-
-    // null / empty input
-
-    @ParameterizedTest
-    @NullSource
-    public void nullInput(final String text) {
-        assertThrows(NullPointerException.class, () -> parse(text));
-    }
+    private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
     @Test
     public void empty() {
-        final Iterator<CsvRow> it = parse("").iterator();
+        final Iterator<CsvRow> it = crb.build("").iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
     }
 
-    private static String[] asArray(final String... items) {
-        return items;
-    }
+    // toString()
 
     @Test
-    public void bom() {
-        final byte[] bom8 = new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 'a', ',', 'b'};
-
-        // Expecting trouble when reading BOM
-        final Reader standardReader = new InputStreamReader(
-            new ByteArrayInputStream(bom8), StandardCharsets.UTF_8);
-        assertArrayEquals(asArray("\uFEFFa", "b"),
-            crb.build(standardReader).iterator().next().getFields());
-
-        // Reading BOM requires external support (e.g. org.apache.commons.io.input.BOMInputStream)
-        final Reader bomReader = new InputStreamReader(new BOMInputStream(
-            new ByteArrayInputStream(bom8)), StandardCharsets.UTF_8);
-        assertArrayEquals(asArray("a", "b"),
-            crb.build(bomReader).iterator().next().getFields());
+    public void readerToString() {
+        assertEquals("CsvReader[commentStrategy=NONE, skipEmptyRows=true, "
+            + "errorOnDifferentFieldCount=false]", crb.build("").toString());
     }
 
     // skipped rows
@@ -82,23 +57,31 @@ public class CsvReaderTest {
     @Test
     public void singleRowNoSkipEmpty() {
         crb.skipEmptyRows(false);
-        assertFalse(parse("").iterator().hasNext());
+        assertFalse(crb.build("").iterator().hasNext());
     }
 
     @Test
     public void multipleRowsNoSkipEmpty() {
         crb.skipEmptyRows(false);
-        final Iterator<CsvRow> it = parse("\n\n").iterator();
+        final Iterator<CsvRow> it = crb.build("\n\na").iterator();
 
         CsvRow row = it.next();
+        assertTrue(row.isEmpty());
         assertEquals(1, row.getFieldCount());
         assertEquals(1, row.getOriginalLineNumber());
-        assertArrayEquals(asArray(""), row.getFields());
+        assertArrayEquals(Util.asArray(""), row.getFields());
 
         row = it.next();
+        assertTrue(row.isEmpty());
         assertEquals(1, row.getFieldCount());
         assertEquals(2, row.getOriginalLineNumber());
-        assertArrayEquals(asArray(""), row.getFields());
+        assertArrayEquals(Util.asArray(""), row.getFields());
+
+        row = it.next();
+        assertFalse(row.isEmpty());
+        assertEquals(1, row.getFieldCount());
+        assertEquals(3, row.getOriginalLineNumber());
+        assertArrayEquals(Util.asArray("a"), row.getFields());
 
         assertFalse(it.hasNext());
     }
@@ -112,11 +95,11 @@ public class CsvReaderTest {
 
         CsvRow row = it.next();
         assertEquals(3, row.getOriginalLineNumber());
-        assertArrayEquals(asArray("foo"), row.getFields());
+        assertArrayEquals(Util.asArray("foo"), row.getFields());
 
         row = it.next();
         assertEquals(5, row.getOriginalLineNumber());
-        assertArrayEquals(asArray("bar"), row.getFields());
+        assertArrayEquals(Util.asArray("bar"), row.getFields());
     }
 
     // different field count
@@ -151,8 +134,12 @@ public class CsvReaderTest {
     @Test
     @SuppressWarnings("CheckReturnValue")
     public void getNonExistingFieldByIndex() {
-        final CsvRow csvRow = readSingleRow("foo");
-        assertThrows(IndexOutOfBoundsException.class, () -> csvRow.getField(1));
+        assertThrows(IndexOutOfBoundsException.class, () ->
+            spotbugs(readSingleRow("foo").getField(1)));
+    }
+
+    private void spotbugs(final String foo) {
+        // Prevent RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT
     }
 
     // line numbering
@@ -161,33 +148,33 @@ public class CsvReaderTest {
     public void lineNumbering() {
         final Iterator<CsvRow> it = crb
             .commentStrategy(CommentStrategy.SKIP)
-            .build(new StringReader(
-            "line 1\n"
-                + "line 2\r"
-                + "line 3\r\n"
-                + "\"line 4\rwith\r\nand\n\"\n"
-                + "#line 8\n"
-                + "line 9"
-        )).iterator();
+            .build(
+                "line 1\n"
+                    + "line 2\r"
+                    + "line 3\r\n"
+                    + "\"line 4\rwith\r\nand\n\"\n"
+                    + "#line 8\n"
+                    + "line 9"
+            ).iterator();
 
         CsvRow row = it.next();
-        assertArrayEquals(asArray("line 1"), row.getFields());
+        assertArrayEquals(Util.asArray("line 1"), row.getFields());
         assertEquals(1, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("line 2"), row.getFields());
+        assertArrayEquals(Util.asArray("line 2"), row.getFields());
         assertEquals(2, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("line 3"), row.getFields());
+        assertArrayEquals(Util.asArray("line 3"), row.getFields());
         assertEquals(3, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("line 4\rwith\r\nand\n"), row.getFields());
+        assertArrayEquals(Util.asArray("line 4\rwith\r\nand\n"), row.getFields());
         assertEquals(4, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("line 9"), row.getFields());
+        assertArrayEquals(Util.asArray("line 9"), row.getFields());
         assertEquals(9, row.getOriginalLineNumber());
 
         assertFalse(it.hasNext());
@@ -199,24 +186,24 @@ public class CsvReaderTest {
     public void comment() {
         final Iterator<CsvRow> it = crb
             .commentStrategy(CommentStrategy.READ)
-            .build(new StringReader("#comment \"1\"\na,#b,c")).iterator();
+            .build("#comment \"1\"\na,#b,c").iterator();
 
         CsvRow row = it.next();
         assertTrue(row.isComment());
         assertEquals(1, row.getOriginalLineNumber());
-        assertArrayEquals(asArray("comment \"1\""), row.getFields());
+        assertArrayEquals(Util.asArray("comment \"1\""), row.getFields());
 
         row = it.next();
         assertFalse(row.isComment());
         assertEquals(2, row.getOriginalLineNumber());
-        assertArrayEquals(asArray("a", "#b", "c"), row.getFields());
+        assertArrayEquals(Util.asArray("a", "#b", "c"), row.getFields());
     }
 
     // to string
 
     @Test
     public void toStringWithoutHeader() {
-        assertEquals("CsvRowImpl[originalLineNumber=1, fields=[fieldA, fieldB]]",
+        assertEquals("CsvRow[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]",
             readSingleRow("fieldA,fieldB\n").toString());
     }
 
@@ -228,12 +215,12 @@ public class CsvReaderTest {
         Arrays.fill(buf, (byte) 'a');
         buf[buf.length - 1] = (byte) ',';
 
-        crb.build(new InputStreamReader(new ByteArrayInputStream(buf), StandardCharsets.UTF_8))
+        crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
             .iterator().next();
 
         buf[buf.length - 1] = (byte) 'a';
         final IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-            crb.build(new InputStreamReader(new ByteArrayInputStream(buf), StandardCharsets.UTF_8))
+            crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
                 .iterator().next());
         assertEquals("Maximum buffer size 8388608 is not enough to read data",
             exception.getMessage());
@@ -270,7 +257,7 @@ public class CsvReaderTest {
     @Test
     public void spliterator() {
         final Spliterator<CsvRow> spliterator =
-            crb.build(new StringReader("a,b,c\n1,2,3")).spliterator();
+            crb.build("a,b,c\n1,2,3").spliterator();
 
         assertNull(spliterator.trySplit());
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
@@ -298,10 +285,6 @@ public class CsvReaderTest {
 
     // test helpers
 
-    private CsvReader parse(final String data) {
-        return crb.build(new StringReader(data));
-    }
-
     private CsvRow readSingleRow(final String data) {
         final List<CsvRow> lists = readAll(data);
         assertEquals(1, lists.size());
@@ -309,7 +292,7 @@ public class CsvReaderTest {
     }
 
     private List<CsvRow> readAll(final String data) {
-        return parse(data)
+        return crb.build(data)
             .stream()
             .collect(Collectors.toList());
     }

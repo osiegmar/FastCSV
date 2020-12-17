@@ -5,8 +5,12 @@
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
 [![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv.svg)](https://search.maven.org/search?q=g:%22de.siegmar%22%20AND%20a:%22fastcsv%22)
 
-FastCSV is an ultra fast and dependency-free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
+FastCSV is an ultra-fast and dependency-free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
 library for Java.
+
+Actively developed and maintained since 2015 its primary intended use cases are:
+- big data applications to read and write data on a massive scale
+- small data applications with the need for a lightweight library
 
 ## Benchmark
 
@@ -29,7 +33,7 @@ Benchmark from the
 - Support for field separator character in value (using the text delimiter)
 - Support for reading and writing in an iterative or all at once way
 - Support for skipping empty rows and preserving the original line number (useful for error messages)
-- Support for commented lines
+- Support for commented lines (skipping & reading)
 - Support for multiple quote strategies to differentiate between empty and null
 
 ## Requirements
@@ -41,16 +45,20 @@ Benchmark from the
 Iterative reading of some CSV data from a string
 
 ```java
-CsvReader.builder().build(new StringReader("foo1,bar1\r\nfoo2,bar2"))
+CsvReader.builder().build("foo1,bar1\r\nfoo2,bar2")
     .forEach(System.out::println);
+```
+
+Stream based reading of CSV data with a header
+
+```java
+NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2").stream()
+    .forEach(row -> row.getField("header 2"));
 ```
 
 Iterative reading of a CSV file
 
 ```java
-Path path = Paths.get("foo.csv");
-Charset charset = StandardCharsets.UTF_8;
-
 try (CsvReader csv = CsvReader.builder().build(path, charset)) {
     csv.forEach(System.out::println);
 }
@@ -69,7 +77,7 @@ CsvReader.builder()
 ```
 
 For more example see
-[CsvReaderExampleTest.java](src/test/java/de/siegmar/fastcsv/reader/CsvReaderExampleTest.java)
+[CsvReaderExampleTest.java](src/test/java/example/CsvReaderExampleTest.java)
 
 ## CsvWriter Examples
 
@@ -84,9 +92,6 @@ CsvWriter.builder().build(new PrintWriter(System.out, true))
 Iterative writing of a CSV file
 
 ```java
-Path path = Files.createTempFile("fastcsv", ".csv");
-Charset charset = StandardCharsets.UTF_8;
-
 try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
     csv
         .writeLine("header1", "header2")
@@ -105,7 +110,7 @@ CsvWriter.builder()
 ```
 
 For more example see
-[CsvWriterExampleTest.java](src/test/java/de/siegmar/fastcsv/writer/CsvWriterExampleTest.java)
+[CsvWriterExampleTest.java](src/test/java/example/CsvWriterExampleTest.java)
 
 ## Contribution
 

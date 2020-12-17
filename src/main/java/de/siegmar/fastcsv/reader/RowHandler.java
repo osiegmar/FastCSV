@@ -2,6 +2,8 @@ package de.siegmar.fastcsv.reader;
 
 final class RowHandler {
 
+    private static final String[] EMPTY = new String[0];
+
     private int len;
     private String[] row;
     private int idx;
@@ -28,9 +30,14 @@ final class RowHandler {
     }
 
     String[] endAndReset() {
-        final String[] ret = new String[idx];
-        System.arraycopy(row, 0, ret, 0, idx);
-        idx = 0;
+        final String[] ret;
+        if (idx == 0) {
+            ret = EMPTY;
+        } else {
+            ret = new String[idx];
+            System.arraycopy(row, 0, ret, 0, idx);
+            idx = 0;
+        }
         lines = 1;
         commentMode = false;
         return ret;

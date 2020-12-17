@@ -1,4 +1,4 @@
-package blackbox.writer;
+package example;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

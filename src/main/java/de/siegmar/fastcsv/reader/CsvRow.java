@@ -1,18 +1,39 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.Arrays;
+import java.util.StringJoiner;
+
 /**
- * Interface for a index based CSV-row.
+ * Index based CSV-row.
  */
-public interface CsvRow {
+public final class CsvRow {
+
+    private static final String[] EMPTY = new String[]{""};
+
+    private final long originalLineNumber;
+    private final String[] fields;
+    private final boolean comment;
+
+    CsvRow(final long originalLineNumber) {
+        this(originalLineNumber, EMPTY, false);
+    }
+
+    CsvRow(final long originalLineNumber, final String[] fields, final boolean comment) {
+        this.originalLineNumber = originalLineNumber;
+        this.fields = fields;
+        this.comment = comment;
+    }
 
     /**
      * Returns the original line number (starting with 1). On multi-line rows this is the starting
      * line number.
-     * Empty lines could be skipped via {@link CsvReaderBuilder#skipEmptyRows(boolean)}.
+     * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyRows(boolean)}.
      *
      * @return the original line number
      */
-    long getOriginalLineNumber();
+    public long getOriginalLineNumber() {
+        return originalLineNumber;
+    }
 
     /**
      * Gets a field value by its index (starting with 0).
@@ -21,27 +42,56 @@ public interface CsvRow {
      * @return field value, never {@code null}
      * @throws IndexOutOfBoundsException if index is out of range
      */
-    String getField(int index);
+    public String getField(final int index) {
+        return fields[index];
+    }
 
     /**
      * Gets all fields of this row.
      *
      * @return all fields of this row, never {@code null}
      */
-    String[] getFields();
+    public String[] getFields() {
+        return fields.clone();
+    }
 
     /**
      * Gets the number of fields of this row.
      *
      * @return the number of fields of this row
+     * @see CsvReader.CsvReaderBuilder#errorOnDifferentFieldCount(boolean)
      */
-    int getFieldCount();
+    public int getFieldCount() {
+        return fields.length;
+    }
 
     /**
      * Provides the information if the row is a commented row.
      *
      * @return {@code true} if the row is a commented row
+     * @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
      */
-    boolean isComment();
+    public boolean isComment() {
+        return comment;
+    }
+
+    /**
+     * Provides the information if the row is an empty row.
+     *
+     * @return {@code true} if the row is an empty row
+     * @see CsvReader.CsvReaderBuilder#skipEmptyRows(boolean)
+     */
+    public boolean isEmpty() {
+        return fields == EMPTY;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CsvRow.class.getSimpleName() + "[", "]")
+            .add("originalLineNumber=" + originalLineNumber)
+            .add("fields=" + Arrays.toString(fields))
+            .add("comment=" + comment)
+            .toString();
+    }
 
 }

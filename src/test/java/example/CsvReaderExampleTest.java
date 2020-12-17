@@ -1,11 +1,10 @@
-package blackbox.reader;
+package example;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
 public class CsvReaderExampleTest {
@@ -25,7 +25,7 @@ public class CsvReaderExampleTest {
     @Test
     public void simple() {
         final Iterator<CsvRow> csv = CsvReader.builder()
-            .build(new StringReader("foo,bar"))
+            .build("foo,bar")
             .iterator();
 
         assertArrayEquals(asArray("foo", "bar"), csv.next().getFields());
@@ -45,7 +45,7 @@ public class CsvReaderExampleTest {
             .commentCharacter('#')
             .skipEmptyRows(true)
             .errorOnDifferentFieldCount(true)
-            .build(new StringReader("foo;bar"))
+            .build("foo;bar")
             .iterator();
 
         assertArrayEquals(asArray("foo", "bar"), csv.next().getFields());
@@ -54,18 +54,17 @@ public class CsvReaderExampleTest {
 
     @Test
     public void header() {
-        final Iterator<NamedCsvRow> csv = CsvReader.builder()
-            .build(new StringReader("header1,header2\nvalue1,value2"))
-            .withHeader()
-            .iterator();
+        final Iterator<NamedCsvRow> csv = NamedCsvReader.builder()
+            .build("header1,header2\nvalue1,value2").iterator();
 
-        assertEquals("value2", csv.next().getField("header2"));
+        final NamedCsvRow row = csv.next();
+        assertEquals("value2", row.getField("header2"));
     }
 
     @Test
     public void stream() {
         final long streamCount = CsvReader.builder()
-            .build(new StringReader("foo\nbar"))
+            .build("foo\nbar")
             .stream()
             .count();
 

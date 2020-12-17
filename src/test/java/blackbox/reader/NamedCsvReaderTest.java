@@ -1,8 +1,10 @@
 package blackbox.reader;
 
+import static blackbox.Util.asArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,44 +15,39 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
-import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvReaderBuilder;
-import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
 public class NamedCsvReaderTest {
 
-    private final CsvReaderBuilder crb = CsvReader.builder();
-
-    @ParameterizedTest
-    @NullSource
-    public void nullInput(final String text) {
-        assertThrows(NullPointerException.class, () -> parse(text));
-    }
+    private final NamedCsvReader.NamedCsvReaderBuilder crb = NamedCsvReader.builder();
 
     @Test
     public void empty() {
         final NamedCsvReader parse = parse("");
-        assertArrayEquals(new String[0], parse.getHeader());
+        assertArrayEquals(new String[0], parse.getHeader().toArray());
         final Iterator<NamedCsvRow> it = parse.iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
     }
 
-    private static String[] asArray(final String... items) {
-        return items;
+    // toString()
+
+    @Test
+    public void readerToString() {
+        assertEquals("NamedCsvReader[header=null, csvReader=CsvReader["
+                + "commentStrategy=NONE, skipEmptyRows=true, errorOnDifferentFieldCount=true]]",
+            crb.build("h1\nd1").toString());
     }
 
     @Test
@@ -63,7 +60,7 @@ public class NamedCsvReaderTest {
     @Test
     public void onlyHeader() {
         final NamedCsvReader csv = parse("foo,bar\n");
-        assertArrayEquals(asArray("foo", "bar"), csv.getHeader());
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader().toArray());
         assertFalse(csv.iterator().hasNext());
         assertThrows(NoSuchElementException.class, () -> csv.iterator().next());
     }
@@ -71,87 +68,79 @@ public class NamedCsvReaderTest {
     @Test
     public void onlyHeaderIterator() {
         final NamedCsvReader csv = parse("foo,bar\n");
-        final NamedCsvRow row = csv.iterator().next();
-        assertTrue(row.isHeader());
-        assertFalse(row.isComment());
-        assertFalse(row.isData());
-        assertArrayEquals(asArray("foo", "bar"), row.getFields());
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader().toArray());
+        assertFalse(csv.iterator().hasNext());
     }
 
     @Test
     public void getFieldByName() {
-        assertEquals("bar", readSingleRow("foo\nbar").getField("foo"));
-    }
-
-    @Test
-    public void getFieldByIndex() {
-        assertEquals("bar", readSingleRow("foo\nbar").getField(0));
-    }
-
-    @Test
-    public void getFields() {
-        final NamedCsvRow namedCsvRow = readSingleRow("h1,h2\na,b");
-        assertEquals(2, namedCsvRow.getFieldCount());
-        assertArrayEquals(asArray("a", "b"), namedCsvRow.getFields());
+        assertEquals("bar", parse("foo\nbar").iterator().next().getField("foo"));
     }
 
     @Test
     public void getHeader() {
-        assertArrayEquals(asArray("foo"), parse("foo\nbar").getHeader());
-        assertArrayEquals(asArray("foo", "bar"), parse("foo,bar\n1,2").getHeader());
+        assertArrayEquals(asArray("foo"), parse("foo\nbar").getHeader().toArray());
+
+        final NamedCsvReader reader = parse("foo,bar\n1,2");
+        assertArrayEquals(asArray("foo", "bar"), reader.getHeader().toArray());
+
+        // second call
+        assertArrayEquals(asArray("foo", "bar"), reader.getHeader().toArray());
     }
 
     @Test
     public void getHeaderEmptyRows() {
         final NamedCsvReader csv = parse("foo,bar");
-        assertArrayEquals(asArray("foo", "bar"), csv.getHeader());
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader().toArray());
         final Iterator<NamedCsvRow> it = csv.iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
     }
 
     @Test
+    public void getHeaderAfterSkippedRow() {
+        final NamedCsvReader csv = parse("\nfoo,bar");
+        assertArrayEquals(asArray("foo", "bar"), csv.getHeader().toArray());
+        final Iterator<NamedCsvRow> it = csv.iterator();
+        assertFalse(it.hasNext());
+    }
+
+    @Test
     public void getHeaderWithoutNextRowCall() {
-        assertArrayEquals(asArray("foo"), parse("foo\n").getHeader());
+        assertArrayEquals(asArray("foo"), parse("foo\n").getHeader().toArray());
     }
 
     // Request field by name, but column name doesn't exist
     @Test
     public void getNonExistingFieldByName() {
-        assertEquals(Optional.empty(), readSingleRow("h1,h2\nd1,d2").findField("h3"));
-        assertEquals(Optional.empty(), readSingleRow("h1,h2\nd1").findField("h2"));
+        assertEquals(Optional.empty(), parse("h1,h2\nd1,d2").iterator().next().findField("h3"));
     }
 
     @Test
     public void findNonExistingFieldByName() {
         final NoSuchElementException e = assertThrows(NoSuchElementException.class, () ->
-            readSingleRow("foo\nfaz").getField("bar"));
+            parse("foo\nfaz").iterator().next().getField("bar"));
         assertEquals("No element with name 'bar' found. Valid names are: [foo]",
             e.getMessage());
     }
 
     @Test
     public void toStringWithHeader() {
-        final NamedCsvRow csvRow = readSingleRow("headerA,headerB,headerC\nfieldA,fieldB\n");
-        assertEquals("NamedCsvRowImpl[headerMap={headerA=0, headerB=1, headerC=2}, "
-                + "row=CsvRowImpl[originalLineNumber=2, fields=[fieldA, fieldB]]]",
-            csvRow.toString());
+        final Iterator<NamedCsvRow> csvRow =
+            parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").iterator();
 
-        assertEquals("{headerA=fieldA, headerB=fieldB, headerC=null}",
-            csvRow.getFieldMap().toString());
+        assertEquals("NamedCsvRow[originalLineNumber=2, "
+                + "fieldMap={headerA=fieldA, headerB=fieldB, headerC=fieldC}]",
+            csvRow.next().toString());
     }
 
     @Test
     public void fieldMap() {
         final Iterator<NamedCsvRow> it = parse("headerA,headerB,headerC\n"
-            + "fieldA,fieldB\n"
-            + ",fieldB2,fieldC2,fieldD2\n")
+            + "fieldA,fieldB,fieldC\n")
             .iterator();
 
-        assertEquals("{headerA=fieldA, headerB=fieldB, headerC=null}",
-            it.next().getFieldMap().toString());
-
-        assertEquals("{headerA=, headerB=fieldB2, headerC=fieldC2}",
+        assertEquals("{headerA=fieldA, headerB=fieldB, headerC=fieldC}",
             it.next().getFieldMap().toString());
     }
 
@@ -160,36 +149,34 @@ public class NamedCsvReaderTest {
     @Test
     public void lineNumbering() {
         final Iterator<NamedCsvRow> it = crb
-            .commentStrategy(CommentStrategy.SKIP)
-            .build(new StringReader(
+            .build(
                 "h1,h2\n"
-                    + "a,line 1\n"
-                    + "b,line 2\r"
-                    + "c,line 3\r\n"
-                    + "d,\"line 4\rwith\r\nand\n\"\n"
-                    + "#line 8\n"
+                    + "a,line 2\n"
+                    + "b,line 3\r"
+                    + "c,line 4\r\n"
+                    + "d,\"line 5\rwith\r\nand\n\"\n"
                     + "e,line 9"
-            )).withHeader().iterator();
+            ).iterator();
 
-        CsvRow row = it.next();
-        assertArrayEquals(asArray("a", "line 1"), row.getFields());
+        NamedCsvRow row = it.next();
+        assertEquals("a", row.getField("h1"));
         assertEquals(2, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("b", "line 2"), row.getFields());
+        assertEquals("b", row.getField("h1"));
         assertEquals(3, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("c", "line 3"), row.getFields());
+        assertEquals("c", row.getField("h1"));
         assertEquals(4, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("d", "line 4\rwith\r\nand\n"), row.getFields());
+        assertEquals("d", row.getField("h1"));
         assertEquals(5, row.getOriginalLineNumber());
 
         row = it.next();
-        assertArrayEquals(asArray("e", "line 9"), row.getFields());
-        assertEquals(10, row.getOriginalLineNumber());
+        assertEquals("e", row.getField("h1"));
+        assertEquals(9, row.getOriginalLineNumber());
 
         assertFalse(it.hasNext());
     }
@@ -204,19 +191,20 @@ public class NamedCsvReaderTest {
             () -> new CloseStatusReader(new StringReader("h1,h2\nfoo,bar"));
 
         CloseStatusReader csr = supp.get();
-        try (NamedCsvReader reader = crb.build(csr).withHeader()) {
+
+        try (NamedCsvReader reader = crb.build(csr)) {
             reader.stream().forEach(consumer);
         }
         assertTrue(csr.isClosed());
 
         csr = supp.get();
-        try (CloseableIterator<NamedCsvRow> it = crb.build(csr).withHeader().iterator()) {
+        try (CloseableIterator<NamedCsvRow> it = crb.build(csr).iterator()) {
             it.forEachRemaining(consumer);
         }
         assertTrue(csr.isClosed());
 
         csr = supp.get();
-        try (Stream<NamedCsvRow> stream = crb.build(csr).withHeader().stream()) {
+        try (Stream<NamedCsvRow> stream = crb.build(csr).stream()) {
             stream.forEach(consumer);
         }
         assertTrue(csr.isClosed());
@@ -224,66 +212,34 @@ public class NamedCsvReaderTest {
 
     @Test
     public void noComments() {
-        final Iterator<NamedCsvRow> it = parse("# comment 1\nfieldA,fieldB")
-            .iterator();
-
-        assertEquals("fieldA", it.next().getField("# comment 1"));
+        final List<NamedCsvRow> data = readAll("# comment 1\nfieldA");
+        assertEquals("fieldA", data.iterator().next().getField("# comment 1"));
     }
 
     @Test
-    public void skipComments() {
-        crb.commentStrategy(CommentStrategy.SKIP);
-        final Iterator<NamedCsvRow> it = parse(
-            "# comment 1\n"
-                + "headerA,headerB\n"
-                + "# comment 2\n"
-                + "fieldA,fieldB\n")
-            .iterator();
+    public void spliterator() {
+        final Spliterator<NamedCsvRow> spliterator =
+            crb.build("a,b,c\n1,2,3\n4,5,6").spliterator();
 
-        assertEquals("fieldB", it.next().getField("headerB"));
-    }
+        assertNull(spliterator.trySplit());
+        assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
 
-    @Test
-    public void readComments() {
-        crb.commentStrategy(CommentStrategy.READ);
-        final Iterator<NamedCsvRow> it = parse(
-            "# comment 1\n"
-                + "headerA,headerB\n"
-                + "# comment 2\n"
-                + "fieldA,fieldB\n")
-            .iterator();
+        final AtomicInteger rows = new AtomicInteger();
+        final AtomicInteger rows2 = new AtomicInteger();
+        while (spliterator.tryAdvance(row -> rows.incrementAndGet())) {
+            rows2.incrementAndGet();
+        }
 
-        NamedCsvRow row = it.next();
-        assertTrue(row.isComment());
-        assertFalse(row.isHeader());
-        assertFalse(row.isData());
-        assertEquals(1, row.getFieldCount());
-        assertEquals(" comment 1", row.getField(0));
-        assertEquals(0, row.getFieldMap().size());
-
-        row = it.next();
-        assertTrue(row.isComment());
-        assertFalse(row.isHeader());
-        assertFalse(row.isData());
-        assertEquals(1, row.getFieldCount());
-        assertEquals(" comment 2", row.getField(0));
-        assertEquals(2, row.getFieldMap().size());
-
-        row = it.next();
-        assertFalse(row.isComment());
-        assertFalse(row.isHeader());
-        assertTrue(row.isData());
-        assertEquals(2, row.getFieldCount());
-        assertArrayEquals(asArray("fieldA", "fieldB"), row.getFields());
-        assertEquals(2, row.getFieldMap().size());
+        assertEquals(2, rows.get());
+        assertEquals(2, rows2.get());
     }
 
     // Coverage
 
     @Test
     public void closeException() {
-        final NamedCsvReader csvReader =
-            crb.build(new UncloseableReader(new StringReader("foo"))).withHeader();
+        final NamedCsvReader csvReader = crb
+            .build(new UncloseableReader(new StringReader("foo")));
         final UncheckedIOException e = assertThrows(UncheckedIOException.class,
             () -> csvReader.stream().close());
 
@@ -293,19 +249,11 @@ public class NamedCsvReaderTest {
     // test helpers
 
     private NamedCsvReader parse(final String data) {
-        return crb.build(new StringReader(data)).withHeader();
-    }
-
-    private NamedCsvRow readSingleRow(final String data) {
-        final List<NamedCsvRow> lists = readAll(data);
-        assertEquals(1, lists.size());
-        return lists.get(0);
+        return crb.build(data);
     }
 
     private List<NamedCsvRow> readAll(final String data) {
-        return parse(data)
-            .stream()
-            .collect(Collectors.toList());
+        return parse(data).stream().collect(Collectors.toList());
     }
 
 }
