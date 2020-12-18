@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -43,22 +42,14 @@ public final class NamedCsvRow {
      * @param name field name
      * @return field value, never {@code null}
      * @throws NoSuchElementException if this row has no such field
-     * @see #findField(String)
      */
     public String getField(final String name) {
-        return findField(name).orElseThrow(() ->
-            new NoSuchElementException("No element with name '" + name + "' found. "
-                + "Valid names are: " + fieldMap.keySet()));
-    }
-
-    /**
-     * Finds a field value by its name.
-     *
-     * @param name field name
-     * @return field value, {@link Optional#empty()} if this row has no such field
-     */
-    public Optional<String> findField(final String name) {
-        return Optional.ofNullable(fieldMap.get(name));
+        final String val = fieldMap.get(name);
+        if (val == null) {
+            throw new NoSuchElementException("No element with name '" + name + "' found. "
+                + "Valid names are: " + fieldMap.keySet());
+        }
+        return val;
     }
 
     /**

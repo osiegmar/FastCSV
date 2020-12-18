@@ -14,7 +14,6 @@ import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -108,12 +107,6 @@ public class NamedCsvReaderTest {
     @Test
     public void getHeaderWithoutNextRowCall() {
         assertArrayEquals(asArray("foo"), parse("foo\n").getHeader().toArray());
-    }
-
-    // Request field by name, but column name doesn't exist
-    @Test
-    public void getNonExistingFieldByName() {
-        assertEquals(Optional.empty(), parse("h1,h2\nd1,d2").iterator().next().findField("h3"));
     }
 
     @Test
