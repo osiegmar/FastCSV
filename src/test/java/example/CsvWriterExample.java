@@ -3,7 +3,6 @@ package example;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,13 +58,12 @@ public class CsvWriterExample {
     }
 
     private static void transformData() throws IOException {
-        System.out.println("Transformed CSV:");
-
-        final String data = "firstname,lastname,age\njohn,smith,30";
+        final String in = "firstname,lastname,age\njohn,smith,30";
+        final StringWriter out = new StringWriter();
 
         try (
-            final NamedCsvReader reader = NamedCsvReader.builder().build(data);
-            final CsvWriter writer = CsvWriter.builder().build(new PrintWriter(System.out))
+            NamedCsvReader reader = NamedCsvReader.builder().build(in);
+            CsvWriter writer = CsvWriter.builder().build(out)
         ) {
             // transform firstname,lastname,age => name,age
             writer.writeRow("name", "age");
@@ -76,6 +74,9 @@ public class CsvWriterExample {
                 );
             }
         }
+
+        System.out.println("Transformed CSV:");
+        System.out.println(out);
     }
 
 }
