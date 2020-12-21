@@ -103,7 +103,7 @@ public class CsvWriterTest {
     public void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file, UTF_8)) {
-            csv.writeField("value1").writeLine("value2");
+            csv.writeField("value1").writeRow("value2");
         }
 
         assertEquals("value1,value2\r\n",
@@ -114,7 +114,7 @@ public class CsvWriterTest {
     public void path(@TempDir final File tempDir) throws IOException {
         final File file = new File(tempDir, "fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file, false, UTF_8)) {
-            csv.writeField("value1").writeLine("value2");
+            csv.writeField("value1").writeRow("value2");
         }
 
         assertEquals("value1,value2\r\n",
@@ -124,14 +124,14 @@ public class CsvWriterTest {
     private String write(final String... cols) throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = crw.build(sw);
-        to.writeLine(cols);
+        to.writeRow(cols);
         return sw.toString();
     }
 
     private String write(final List<String> cols) throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = crw.build(sw);
-        to.writeLine(cols);
+        to.writeRow(cols);
         return sw.toString();
     }
 

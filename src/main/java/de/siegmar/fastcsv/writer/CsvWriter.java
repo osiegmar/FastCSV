@@ -18,7 +18,7 @@ import java.util.Objects;
  * Example use:
  * <pre>{@code
  * try (CsvWriter csv = CsvWriter.builder().build(path, StandardCharsets.UTF_8)) {
- *     csv.writeLine("Hello", "world");
+ *     csv.writeRow("Hello", "world");
  * }
  * }</pre>
  */
@@ -161,11 +161,11 @@ public final class CsvWriter implements Closeable {
      * @return This CsvWriter.
      * @throws IOException if a write error occurs
      */
-    public CsvWriter writeLine(final Iterable<String> values) throws IOException {
+    public CsvWriter writeRow(final Iterable<String> values) throws IOException {
         for (final String value : values) {
             writeInternal(value);
         }
-        endLine();
+        endRow();
         return this;
     }
 
@@ -177,11 +177,11 @@ public final class CsvWriter implements Closeable {
      * @return This CsvWriter.
      * @throws IOException if a write error occurs
      */
-    public CsvWriter writeLine(final String... values) throws IOException {
+    public CsvWriter writeRow(final String... values) throws IOException {
         for (final String value : values) {
             writeInternal(value);
         }
-        endLine();
+        endRow();
         return this;
     }
 
@@ -191,7 +191,7 @@ public final class CsvWriter implements Closeable {
      * @return This CsvWriter.
      * @throws IOException if a write error occurs
      */
-    public CsvWriter endLine() throws IOException {
+    public CsvWriter endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
         if (earlyFlush) {

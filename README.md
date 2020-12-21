@@ -85,8 +85,8 @@ Iterative writing of some data to a writer
 
 ```java
 CsvWriter.builder().build(new PrintWriter(System.out, true))
-    .writeLine("header1", "header2")
-    .writeLine("value1", "value2");
+    .writeRow("header1", "header2")
+    .writeRow("value1", "value2");
 ```
 
 Iterative writing of a CSV file
@@ -94,8 +94,8 @@ Iterative writing of a CSV file
 ```java
 try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
     csv
-        .writeLine("header1", "header2")
-        .writeLine("value1", "value2");
+        .writeRow("header1", "header2")
+        .writeRow("value1", "value2");
 }
 ```
 

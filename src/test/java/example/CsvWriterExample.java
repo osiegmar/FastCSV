@@ -21,7 +21,7 @@ public class CsvWriterExample {
 
     private static void simple() throws IOException {
         final StringWriter sw = new StringWriter();
-        CsvWriter.builder().build(sw).writeLine("value1", "value2");
+        CsvWriter.builder().build(sw).writeRow("value1", "value2");
         System.out.print("Simple CSV: " + sw);
     }
 
@@ -34,8 +34,8 @@ public class CsvWriterExample {
             .quoteStrategy(QuoteStrategy.ALWAYS)
             .lineDelimiter(LineDelimiter.LF)
             .build(sw)
-            .writeField("header1").writeField("header2").endLine()
-            .writeLine("value1", "value2");
+            .writeField("header1").writeField("header2").endRow()
+            .writeRow("value1", "value2");
 
         System.out.println("Advanced CSV:");
         System.out.println(sw);
@@ -46,8 +46,8 @@ public class CsvWriterExample {
 
         try (CsvWriter csv = CsvWriter.builder().build(path, UTF_8)) {
             csv
-                .writeField("header1").writeField("header2").endLine()
-                .writeLine("value1", "value2");
+                .writeField("header1").writeField("header2").endRow()
+                .writeRow("value1", "value2");
         }
 
         Files.lines(path)

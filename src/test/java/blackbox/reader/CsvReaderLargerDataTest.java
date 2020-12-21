@@ -48,7 +48,7 @@ public class CsvReaderLargerDataTest {
         final StringWriter sw = new StringWriter();
         final CsvWriter writer = CsvWriter.builder().build(sw);
         for (int i = 0; i < 1000; i++) {
-            writer.writeLine(TEXTS);
+            writer.writeRow(TEXTS);
         }
         return sw.toString();
     }

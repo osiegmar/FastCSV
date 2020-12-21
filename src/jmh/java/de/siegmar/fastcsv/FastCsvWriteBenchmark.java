@@ -16,7 +16,7 @@ public class FastCsvWriteBenchmark {
 
     @Benchmark
     public void write(final WriteState state) throws IOException {
-        state.writer.writeLine(Constants.ROW);
+        state.writer.writeRow(Constants.ROW);
     }
 
     @State(Scope.Benchmark)
