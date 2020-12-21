@@ -103,6 +103,9 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 
     /**
      * Creates a new sequential {@code Stream} from this instance.
+     * <p>
+     * A close handler is registered by this method in order to close the underlying resources.
+     * Don't forget to close the returned stream when you're done.
      *
      * @return a new sequential {@code Stream}.
      */
@@ -155,7 +158,11 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     }
 
     /**
-     * This builder is used to create configured instances of {@link NamedCsvReader}.
+     * This builder is used to create configured instances of {@link NamedCsvReader}. The default
+     * configuration of this class complies with RFC 4180.
+     * <p>
+     * The line delimiter (line-feed, carriage-return or the combination of both) is detected
+     * automatically and thus not configurable.
      */
     @SuppressWarnings("checkstyle:HiddenField")
     public static final class NamedCsvReaderBuilder {
@@ -218,9 +225,10 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
          * Constructs a new {@link NamedCsvReader} for the specified arguments.
          *
          * @param path    the file to read data from.
-         * @param charset the character set to use - must not be {@code null}.
-         * @return a new NamedCsvReader - never {@code null}.
+         * @param charset the character set to use.
+         * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if path or charset is {@code null}
          */
         public NamedCsvReader build(final Path path, final Charset charset) throws IOException {
             return new NamedCsvReader(csvReaderBuilder().build(path, charset));
@@ -230,9 +238,10 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
          * Constructs a new {@link NamedCsvReader} for the specified arguments.
          *
          * @param file    the file to read data from.
-         * @param charset the character set to use - must not be {@code null}.
-         * @return a new NamedCsvReader - never {@code null}.
+         * @param charset the character set to use.
+         * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if file or charset is {@code null}
          */
         public NamedCsvReader build(final File file, final Charset charset) throws IOException {
             return new NamedCsvReader(csvReaderBuilder().build(file, charset));
@@ -242,11 +251,13 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
          * Constructs a new {@link NamedCsvReader} for the specified arguments.
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
-         * implementation such as {@link java.io.BufferedReader}.
-         * Performance may be even likely better if you do not.
+         * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
+         * better if you do not. Use {@link #build(Path, Charset)} or {@link #build(File, Charset)}
+         * for optimal performance.
          *
          * @param reader the data source to read from.
          * @return a new NamedCsvReader - never {@code null}.
+         * @throws NullPointerException if reader is {@code null}
          */
         public NamedCsvReader build(final Reader reader) {
             return new NamedCsvReader(csvReaderBuilder().build(reader));

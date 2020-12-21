@@ -33,13 +33,13 @@ public final class CsvWriter implements Closeable {
     private final char quoteCharacter;
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
-    private final boolean earlyFlush;
+    private final boolean syncWriter;
 
     private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
-              final boolean earlyFlush) {
+              final boolean syncWriter) {
 
         if (fieldSeparator == CR || fieldSeparator == LF) {
             throw new IllegalArgumentException("fieldSeparator must not be a newline char");
@@ -58,7 +58,7 @@ public final class CsvWriter implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
-        this.earlyFlush = earlyFlush;
+        this.syncWriter = syncWriter;
     }
 
     /**
@@ -191,7 +191,7 @@ public final class CsvWriter implements Closeable {
     private CsvWriter endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
-        if (earlyFlush) {
+        if (syncWriter) {
             writer.flushBuffer();
         }
         return this;
@@ -264,9 +264,14 @@ public final class CsvWriter implements Closeable {
 
         /**
          * Constructs a {@link CsvWriter} for the specified Writer.
+         * <p>
+         * This library uses built-in buffering, so you do not need to pass in a buffered Writer
+         * implementation such as {@link java.io.BufferedWriter}. Performance may be even likely
+         * better if you do not. Use {@link #build(Path, Charset, OpenOption...)} or
+         * {@link #build(File, boolean, Charset)} for optimal performance.
          *
          * @param writer the Writer to use for writing CSV data.
-         * @return a new CsvWriter instance
+         * @return a new CsvWriter instance - never {@code null}.
          * @throws NullPointerException if writer is {@code null}
          */
         public CsvWriter build(final Writer writer) {
@@ -282,7 +287,7 @@ public final class CsvWriter implements Closeable {
          * @param charset     the character set to be used for writing data to the file.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
-         * @return a new CsvWriter instance
+         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
          * @throws IOException          if a write error occurs
          * @throws NullPointerException if path or charset is {@code null}
          */
@@ -304,7 +309,7 @@ public final class CsvWriter implements Closeable {
          * @param append      if {@code true}, then data will be appended to the file rather than
          *                    the beginning (file overwrite).
          * @param charset     the character set to be used for writing data to the file.
-         * @return a new CsvWriter instance
+         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
          * @throws IOException          if a write error occurs
          * @throws NullPointerException if file or charset is {@code null}
          */
@@ -318,9 +323,9 @@ public final class CsvWriter implements Closeable {
                 false);
         }
 
-        private CsvWriter newWriter(final Writer writer, final boolean earlyFlush) {
+        private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
             return new CsvWriter(writer, fieldSeparator, quoteCharacter, quoteStrategy,
-                lineDelimiter, earlyFlush);
+                lineDelimiter, syncWriter);
         }
 
     }
