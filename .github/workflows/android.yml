@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Run Gradle command
-        uses: Raul6469/android-gradle-action@2.0.0
-        with:
-          script: test
+    - name: Run Test on android sdk
+      uses: Raul6469/android-gradle-action@2.0.0
+      with:
+        script: test
