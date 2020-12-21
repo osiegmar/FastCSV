@@ -3,10 +3,13 @@ package example;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import de.siegmar.fastcsv.reader.NamedCsvReader;
+import de.siegmar.fastcsv.reader.NamedCsvRow;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
@@ -17,6 +20,7 @@ public class CsvWriterExample {
         simple();
         advancedConfiguration();
         path();
+        transformData();
     }
 
     private static void simple() throws IOException {
@@ -52,6 +56,26 @@ public class CsvWriterExample {
 
         Files.lines(path)
             .forEach(line -> System.out.println("Line from path: " + line));
+    }
+
+    private static void transformData() throws IOException {
+        System.out.println("Transformed CSV:");
+
+        final String data = "firstname,lastname,age\njohn,smith,30";
+
+        try (
+            final NamedCsvReader reader = NamedCsvReader.builder().build(data);
+            final CsvWriter writer = CsvWriter.builder().build(new PrintWriter(System.out))
+        ) {
+            // transform firstname,lastname,age => name,age
+            writer.writeRow("name", "age");
+            for (final NamedCsvRow csvRow : reader) {
+                writer.writeRow(
+                    csvRow.getField("firstname") + " " + csvRow.getField("lastname"),
+                    csvRow.getField("age")
+                );
+            }
+        }
     }
 
 }
