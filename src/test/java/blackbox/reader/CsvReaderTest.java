@@ -67,9 +67,9 @@ public class CsvReaderTest {
 
     private static Stream<Arguments> provideBuilderForMisconfiguration() {
         return Stream.of(
-            Arguments.of(CsvReader.builder().fieldSeparator(',').quoteCharacter(',')),
-            Arguments.of(CsvReader.builder().fieldSeparator(',').commentCharacter(',')),
-            Arguments.of(CsvReader.builder().quoteCharacter(',').commentCharacter(','))
+            Arguments.of(CsvReader.builder().quoteCharacter(',')),
+            Arguments.of(CsvReader.builder().commentCharacter(',')),
+            Arguments.of(CsvReader.builder().quoteCharacter('#').commentCharacter('#'))
         );
     }
 
