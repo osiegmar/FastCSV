@@ -76,7 +76,13 @@ public class CsvWriterTest {
         final List<String> cols = new ArrayList<>();
         cols.add("foo");
         cols.add("bar");
-        assertEquals("foo,bar\n", write(cols));
+
+        final StringWriter sw = new StringWriter();
+        crw.build(sw)
+            .writeRow(cols)
+            .writeRow(cols);
+
+        assertEquals("foo,bar\nfoo,bar\n", sw.toString());
     }
 
     @Test
@@ -118,8 +124,8 @@ public class CsvWriterTest {
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter appender = crw.build(sw);
-        appender.writeRow("foo", "bar");
-        assertEquals("foo,bar\n", sw.toString());
+        appender.writeRow("foo", "bar").writeRow("foo2", "bar2");
+        assertEquals("foo,bar\nfoo2,bar2\n", sw.toString());
     }
 
     @Test
@@ -145,13 +151,6 @@ public class CsvWriterTest {
     }
 
     private String write(final String... cols) throws IOException {
-        final StringWriter sw = new StringWriter();
-        final CsvWriter to = crw.build(sw);
-        to.writeRow(cols);
-        return sw.toString();
-    }
-
-    private String write(final List<String> cols) throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = crw.build(sw);
         to.writeRow(cols);

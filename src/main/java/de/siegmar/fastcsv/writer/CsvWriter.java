@@ -182,19 +182,12 @@ public final class CsvWriter implements Closeable {
         return this;
     }
 
-    /**
-     * Appends new line character(s) to the current line.
-     *
-     * @return This CsvWriter.
-     * @throws IOException if a write error occurs
-     */
-    private CsvWriter endRow() throws IOException {
+    private void endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
         if (syncWriter) {
             writer.flushBuffer();
         }
-        return this;
     }
 
     @Override
