@@ -11,12 +11,10 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.StringJoiner;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -92,7 +90,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
     @Override
     public Spliterator<CsvRow> spliterator() {
-        return new CsvRowSpliterator(csvRowIterator);
+        return new CsvRowSpliterator<>(csvRowIterator);
     }
 
     /**
@@ -383,48 +381,6 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
                 .add("skipEmptyRows=" + skipEmptyRows)
                 .add("errorOnDifferentFieldCount=" + errorOnDifferentFieldCount)
                 .toString();
-        }
-
-    }
-
-    static final class CsvRowSpliterator implements Spliterator<CsvRow> {
-
-        private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
-
-        private final Iterator<CsvRow> iterator;
-
-        CsvRowSpliterator(final Iterator<CsvRow> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean tryAdvance(final Consumer<? super CsvRow> action) {
-            if (!iterator.hasNext()) {
-                return false;
-            }
-
-            action.accept(iterator.next());
-            return true;
-        }
-
-        @Override
-        public void forEachRemaining(final Consumer<? super CsvRow> action) {
-            iterator.forEachRemaining(action);
-        }
-
-        @Override
-        public Spliterator<CsvRow> trySplit() {
-            return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return Long.MAX_VALUE;
-        }
-
-        @Override
-        public int characteristics() {
-            return CHARACTERISTICS;
         }
 
     }

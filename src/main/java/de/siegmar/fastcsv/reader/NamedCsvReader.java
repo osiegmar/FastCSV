@@ -8,12 +8,10 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.StringJoiner;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -91,14 +89,9 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         return namedCsvIterator;
     }
 
-    /**
-     * Constructs and returns a new {@link CsvReader.CsvRowSpliterator}.
-     *
-     * @return a new {@link CsvReader.CsvRowSpliterator} instance
-     */
     @Override
     public Spliterator<NamedCsvRow> spliterator() {
-        return new NamedCsvRowSpliterator(iterator());
+        return new CsvRowSpliterator<>(iterator());
     }
 
     /**
@@ -290,48 +283,6 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipComments=" + skipComments)
                 .toString();
-        }
-
-    }
-
-    private static final class NamedCsvRowSpliterator implements Spliterator<NamedCsvRow> {
-
-        private static final int CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
-
-        private final Iterator<NamedCsvRow> iterator;
-
-        NamedCsvRowSpliterator(final Iterator<NamedCsvRow> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean tryAdvance(final Consumer<? super NamedCsvRow> action) {
-            if (!iterator.hasNext()) {
-                return false;
-            }
-
-            action.accept(iterator.next());
-            return true;
-        }
-
-        @Override
-        public void forEachRemaining(final Consumer<? super NamedCsvRow> action) {
-            iterator.forEachRemaining(action);
-        }
-
-        @Override
-        public Spliterator<NamedCsvRow> trySplit() {
-            return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return Long.MAX_VALUE;
-        }
-
-        @Override
-        public int characteristics() {
-            return CHARACTERISTICS;
         }
 
     }
