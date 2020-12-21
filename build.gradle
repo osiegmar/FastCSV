@@ -6,6 +6,7 @@ plugins {
     id 'jacoco'
     id 'com.github.spotbugs' version '4.5.0'
     id 'me.champeau.gradle.jmh' version '0.5.1'
+    id 'info.solidsoft.pitest' version '1.5.2'
 }
 
 group = "de.siegmar"
@@ -25,6 +26,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    pitest 'org.pitest:pitest-junit5-plugin:0.12'
 }
 
 tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
@@ -37,6 +39,12 @@ tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+}
+
+pitest {
+    testPlugin = 'junit5'
+    targetClasses=['blackbox.*','de.siegmar.*']
+    timestampedReports = false
 }
 
 // Bundled version 4.1.1 does not support Java 11 builds
