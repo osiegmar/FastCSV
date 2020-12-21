@@ -1,0 +1,19 @@
+name: build
+
+on:
+  push:
+    branches: [ master, version2-rewrite ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Gradle command
+        uses: Raul6469/android-gradle-action@2.0.0
+        with:
+          script: test
