@@ -57,22 +57,6 @@ public final class CsvWriter implements Closeable {
         return new CsvWriterBuilder();
     }
 
-    /**
-     * Appends a field to the current row. Automatically adds field separator and quotes as
-     * required.
-     *
-     * @param value the field to append (can be {@code null})
-     * @return This CsvWriter.
-     * @throws IOException if a write error occurs
-     */
-    public CsvWriter writeField(final String value) throws IOException {
-        writeInternal(value);
-        if (earlyFlush) {
-            writer.flushBuffer();
-        }
-        return this;
-    }
-
     private void writeInternal(final String value) throws IOException {
         if (!isNewline) {
             writer.write(fieldSeparator);
@@ -191,7 +175,7 @@ public final class CsvWriter implements Closeable {
      * @return This CsvWriter.
      * @throws IOException if a write error occurs
      */
-    public CsvWriter endRow() throws IOException {
+    private CsvWriter endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
         if (earlyFlush) {

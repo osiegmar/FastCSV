@@ -95,15 +95,15 @@ public class CsvWriterTest {
     public void appending() throws IOException {
         final StringWriter sw = new StringWriter();
         final CsvWriter appender = crw.build(sw);
-        appender.writeField("foo").writeField("bar");
-        assertEquals("foo,bar", sw.toString());
+        appender.writeRow("foo", "bar");
+        assertEquals("foo,bar\n", sw.toString());
     }
 
     @Test
     public void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file, UTF_8)) {
-            csv.writeField("value1").writeRow("value2");
+            csv.writeRow("value1", "value2");
         }
 
         assertEquals("value1,value2\r\n",
@@ -114,7 +114,7 @@ public class CsvWriterTest {
     public void path(@TempDir final File tempDir) throws IOException {
         final File file = new File(tempDir, "fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file, false, UTF_8)) {
-            csv.writeField("value1").writeRow("value2");
+            csv.writeRow("value1", "value2");
         }
 
         assertEquals("value1,value2\r\n",

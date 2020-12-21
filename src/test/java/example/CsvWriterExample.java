@@ -38,7 +38,7 @@ public class CsvWriterExample {
             .quoteStrategy(QuoteStrategy.ALWAYS)
             .lineDelimiter(LineDelimiter.LF)
             .build(sw)
-            .writeField("header1").writeField("header2").endRow()
+            .writeRow("header1", "header2")
             .writeRow("value1", "value2");
 
         System.out.println("Advanced CSV:");
@@ -50,7 +50,7 @@ public class CsvWriterExample {
 
         try (CsvWriter csv = CsvWriter.builder().build(path, UTF_8)) {
             csv
-                .writeField("header1").writeField("header2").endRow()
+                .writeRow("header1", "header2")
                 .writeRow("value1", "value2");
         }
 
