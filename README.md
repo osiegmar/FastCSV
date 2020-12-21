@@ -111,11 +111,3 @@ CsvWriter.builder()
 
 For more example see
 [CsvWriterExample.java](src/test/java/example/CsvWriterExample.java)
-
-## Contribution
-
-- Fork
-- Code
-- Add test(s)
-- Commit
-- Send me a pull request
