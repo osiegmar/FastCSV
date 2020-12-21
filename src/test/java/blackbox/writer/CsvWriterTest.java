@@ -2,6 +2,8 @@ package blackbox.writer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +15,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
@@ -22,6 +26,25 @@ public class CsvWriterTest {
 
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()
         .lineDelimiter(LineDelimiter.LF);
+
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    public void configBuilder(final char c) {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            CsvWriter.builder().fieldSeparator(c).build(new StringWriter()));
+        assertEquals("fieldSeparator must not be a newline char", e.getMessage());
+
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () ->
+            CsvWriter.builder().quoteCharacter(c).build(new StringWriter()));
+        assertEquals("quoteCharacter must not be a newline char", e2.getMessage());
+    }
+
+    @Test
+    public void configWriter() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            crw.fieldSeparator(',').quoteCharacter(',').build(new StringWriter()));
+        assertTrue(e.getMessage().contains("Control characters must differ"));
+    }
 
     @Test
     public void nullQuote() throws IOException {

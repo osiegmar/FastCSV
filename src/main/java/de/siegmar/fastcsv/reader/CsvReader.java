@@ -34,6 +34,9 @@ import java.util.stream.StreamSupport;
  */
 public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
+    private static final char CR = '\r';
+    private static final char LF = '\n';
+
     private final RowReader rowReader;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyRows;
@@ -49,6 +52,22 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
+
+        if (fieldSeparator == CR || fieldSeparator == LF) {
+            throw new IllegalArgumentException("fieldSeparator must not be a newline char");
+        }
+        if (quoteCharacter == CR || quoteCharacter == LF) {
+            throw new IllegalArgumentException("quoteCharacter must not be a newline char");
+        }
+        if (commentCharacter == CR || commentCharacter == LF) {
+            throw new IllegalArgumentException("commentCharacter must not be a newline char");
+        }
+        if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
+            || quoteCharacter == commentCharacter) {
+            throw new IllegalArgumentException(String.format("Control characters must differ"
+                    + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+                fieldSeparator, quoteCharacter, commentCharacter));
+        }
 
         this.reader = reader;
         rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy,

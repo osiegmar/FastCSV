@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import blackbox.Util;
 import de.siegmar.fastcsv.reader.CloseableIterator;
@@ -36,6 +40,38 @@ import de.siegmar.fastcsv.reader.CsvRow;
 public class CsvReaderTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
+
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    public void configBuilder(final char c) {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            CsvReader.builder().fieldSeparator(c).build("foo"));
+        assertEquals("fieldSeparator must not be a newline char", e.getMessage());
+
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () ->
+            CsvReader.builder().quoteCharacter(c).build("foo"));
+        assertEquals("quoteCharacter must not be a newline char", e2.getMessage());
+
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () ->
+            CsvReader.builder().commentCharacter(c).build("foo"));
+        assertEquals("commentCharacter must not be a newline char", e3.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideBuilderForMisconfiguration")
+    public void configReader(final CsvReader.CsvReaderBuilder builder) {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+            builder.build("foo"));
+        assertTrue(e.getMessage().contains("Control characters must differ"));
+    }
+
+    private static Stream<Arguments> provideBuilderForMisconfiguration() {
+        return Stream.of(
+            Arguments.of(CsvReader.builder().fieldSeparator(',').quoteCharacter(',')),
+            Arguments.of(CsvReader.builder().fieldSeparator(',').commentCharacter(',')),
+            Arguments.of(CsvReader.builder().quoteCharacter(',').commentCharacter(','))
+        );
+    }
 
     @Test
     public void empty() {

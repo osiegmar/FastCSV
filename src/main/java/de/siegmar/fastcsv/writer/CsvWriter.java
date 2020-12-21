@@ -40,6 +40,19 @@ public final class CsvWriter implements Closeable {
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
               final boolean earlyFlush) {
+
+        if (fieldSeparator == CR || fieldSeparator == LF) {
+            throw new IllegalArgumentException("fieldSeparator must not be a newline char");
+        }
+        if (quoteCharacter == CR || quoteCharacter == LF) {
+            throw new IllegalArgumentException("quoteCharacter must not be a newline char");
+        }
+        if (fieldSeparator == quoteCharacter) {
+            throw new IllegalArgumentException(String.format("Control characters must differ"
+                    + " (fieldSeparator=%s, quoteCharacter=%s)",
+                fieldSeparator, quoteCharacter));
+        }
+
         this.writer = new CachingWriter(writer);
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
