@@ -2,6 +2,7 @@ package blackbox.writer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -148,6 +149,18 @@ public class CsvWriterTest {
 
         assertEquals("value1,value2\r\n",
             new String(Files.readAllBytes(file.toPath()), UTF_8));
+    }
+
+    @Test
+    public void chained() {
+        final CsvWriter writer = CsvWriter.builder()
+            .fieldSeparator(',')
+            .quoteCharacter('"')
+            .quoteStrategy(QuoteStrategy.REQUIRED)
+            .lineDelimiter(LineDelimiter.CRLF)
+            .build(new StringWriter());
+
+        assertNotNull(writer);
     }
 
     private String write(final String... cols) throws IOException {

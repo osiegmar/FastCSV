@@ -3,6 +3,7 @@ package blackbox.reader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -106,6 +107,20 @@ public class CsvReaderBuilderTest {
         }
 
         assertEquals(EXPECTED, Arrays.toString(list.get(0).getFields()));
+    }
+
+    @Test
+    public void chained() {
+        final CsvReader reader = CsvReader.builder()
+            .fieldSeparator(',')
+            .quoteCharacter('"')
+            .commentStrategy(CommentStrategy.NONE)
+            .commentCharacter('#')
+            .skipEmptyRows(true)
+            .errorOnDifferentFieldCount(false)
+            .build("foo");
+
+        assertNotNull(reader);
     }
 
 }

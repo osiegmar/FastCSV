@@ -297,6 +297,8 @@ public class CsvReaderTest {
 
         assertNull(spliterator.trySplit());
         assertEquals(Long.MAX_VALUE, spliterator.estimateSize());
+        assertEquals(Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL
+            | Spliterator.IMMUTABLE, spliterator.characteristics());
 
         final AtomicInteger rows = new AtomicInteger();
         final AtomicInteger rows2 = new AtomicInteger();
@@ -306,6 +308,11 @@ public class CsvReaderTest {
 
         assertEquals(2, rows.get());
         assertEquals(2, rows2.get());
+    }
+
+    @Test
+    public void parallelDistinct() {
+        assertEquals(2, crb.build("foo\nfoo").stream().parallel().distinct().count());
     }
 
     // Coverage

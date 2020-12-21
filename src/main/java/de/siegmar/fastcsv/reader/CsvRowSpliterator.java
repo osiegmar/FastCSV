@@ -42,4 +42,5 @@ final class CsvRowSpliterator<T> implements Spliterator<T> {
     public int characteristics() {
         return CHARACTERISTICS;
     }
+
 }

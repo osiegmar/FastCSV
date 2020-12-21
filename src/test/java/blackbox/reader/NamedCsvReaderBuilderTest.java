@@ -2,6 +2,7 @@ package blackbox.reader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -101,6 +102,18 @@ public class NamedCsvReaderBuilderTest {
         }
 
         assertEquals(EXPECTED, list.get(0).getFieldMap().toString());
+    }
+
+    @Test
+    public void chained() {
+        final NamedCsvReader reader = NamedCsvReader.builder()
+            .fieldSeparator(',')
+            .quoteCharacter('"')
+            .commentCharacter('#')
+            .skipComments(false)
+            .build("foo");
+
+        assertNotNull(reader);
     }
 
 }
