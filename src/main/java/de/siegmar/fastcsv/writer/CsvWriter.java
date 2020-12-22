@@ -258,9 +258,11 @@ public final class CsvWriter implements Closeable {
         /**
          * Constructs a {@link CsvWriter} for the specified Writer.
          * <p>
-         * This library uses built-in buffering, so you do not need to pass in a buffered Writer
-         * implementation such as {@link java.io.BufferedWriter}. Performance may be even likely
-         * better if you do not. Use {@link #build(Path, Charset, OpenOption...)} or
+         * This library uses built-in buffering but writes its internal buffer to the given
+         * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
+         * {@link CsvWriter#writeRow(Iterable)} call. Therefore you probably want to pass in a
+         * {@link java.io.BufferedWriter} to retain good performance.
+         * Use {@link #build(Path, Charset, OpenOption...)} or
          * {@link #build(File, boolean, Charset)} for optimal performance.
          *
          * @param writer the Writer to use for writing CSV data.
