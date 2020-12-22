@@ -112,3 +112,8 @@ CsvWriter.builder()
 
 For more example see
 [CsvWriterExample.java](src/test/java/example/CsvWriterExample.java)
+
+## Migrating from version 1.x
+
+Please see [MIGRATING.md](MIGRATING.md) for an overview of the main functionality of 1.x
+and how to migrate them to version 2.
