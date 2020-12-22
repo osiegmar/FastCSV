@@ -309,6 +309,33 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
+         * <p>
+         * This library uses built-in buffering, so you do not need to pass in a buffered Reader
+         * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
+         * better if you do not. Use {@link #build(Path, Charset)} or {@link #build(File, Charset)}
+         * for optimal performance.
+         *
+         * @param reader the data source to read from.
+         * @return a new CsvReader - never {@code null}.
+         * @throws NullPointerException if reader is {@code null}
+         */
+        public CsvReader build(final Reader reader) {
+            return newReader(Objects.requireNonNull(reader, "reader must not be null"));
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified arguments.
+         *
+         * @param data    the data to read.
+         * @return a new CsvReader - never {@code null}.
+         */
+        public CsvReader build(final String data) {
+            return newReader(
+                new StringReader(Objects.requireNonNull(data, "data must not be null")));
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified arguments.
          *
          * @param path    the file to read data from.
          * @param charset the character set to use.
@@ -337,33 +364,6 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             Objects.requireNonNull(charset, "charset must not be null");
 
             return newReader(new InputStreamReader(new FileInputStream(file), charset));
-        }
-
-        /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
-         * <p>
-         * This library uses built-in buffering, so you do not need to pass in a buffered Reader
-         * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
-         * better if you do not. Use {@link #build(Path, Charset)} or {@link #build(File, Charset)}
-         * for optimal performance.
-         *
-         * @param reader the data source to read from.
-         * @return a new CsvReader - never {@code null}.
-         * @throws NullPointerException if reader is {@code null}
-         */
-        public CsvReader build(final Reader reader) {
-            return newReader(Objects.requireNonNull(reader, "reader must not be null"));
-        }
-
-        /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
-         *
-         * @param data    the data to read.
-         * @return a new CsvReader - never {@code null}.
-         */
-        public CsvReader build(final String data) {
-            return newReader(
-                new StringReader(Objects.requireNonNull(data, "data must not be null")));
         }
 
         private CsvReader newReader(final Reader reader) {
