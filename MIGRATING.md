@@ -5,7 +5,7 @@ and how these can be migrated to version 2 easily.
 
 ## Reader
 
-### Configuration
+### Configuring the reader
 
 Old way:
 ```java
@@ -88,7 +88,7 @@ try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
 
 ## Writer
 
-### Configuration
+### Configuring the writer
 
 Old way:
 ```java
