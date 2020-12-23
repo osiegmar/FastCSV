@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -233,10 +232,10 @@ public class NamedCsvReaderTest {
     public void closeException() {
         final NamedCsvReader csvReader = crb
             .build(new UncloseableReader(new StringReader("foo")));
-        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
+        final IOException e = assertThrows(IOException.class,
             () -> csvReader.stream().close());
 
-        assertEquals("java.io.IOException: Cannot close", e.getMessage());
+        assertEquals("Cannot close", e.getMessage());
     }
 
     // test helpers

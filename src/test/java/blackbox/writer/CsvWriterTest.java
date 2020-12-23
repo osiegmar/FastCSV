@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,14 +49,14 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void nullQuote() throws IOException {
+    public void nullQuote() {
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,,bar\n", write("foo", "", "bar"));
         assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
     }
 
     @Test
-    public void emptyQuote() throws IOException {
+    public void emptyQuote() {
         crw.quoteStrategy(QuoteStrategy.EMPTY);
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,\"\",bar\n", write("foo", "", "bar"));
@@ -63,17 +64,17 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void oneLineSingleValue() throws IOException {
+    public void oneLineSingleValue() {
         assertEquals("foo\n", write("foo"));
     }
 
     @Test
-    public void oneLineTwoValues() throws IOException {
+    public void oneLineTwoValues() {
         assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void oneLineTwoValuesAsList() throws IOException {
+    public void oneLineTwoValuesAsList() {
         final List<String> cols = new ArrayList<>();
         cols.add("foo");
         cols.add("bar");
@@ -87,42 +88,42 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void twoLinesTwoValues() throws IOException {
+    public void twoLinesTwoValues() {
         assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void delimitText() throws IOException {
+    public void delimitText() {
         assertEquals("a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
-    public void alwaysQuoteText() throws IOException {
+    public void alwaysQuoteText() {
         crw.quoteStrategy(QuoteStrategy.ALWAYS);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
-    public void fieldSeparator() throws IOException {
+    public void fieldSeparator() {
         crw.fieldSeparator(';');
         assertEquals("foo;bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void quoteCharacter() throws IOException {
+    public void quoteCharacter() {
         crw.quoteCharacter('\'');
         assertEquals("'foo,bar'\n", write("foo,bar"));
     }
 
     @Test
-    public void escapeQuotes() throws IOException {
+    public void escapeQuotes() {
         assertEquals("foo,\"\"\"bar\"\"\"\n", write("foo", "\"bar\""));
     }
 
     @Test
-    public void appending() throws IOException {
+    public void appending() {
         final StringWriter sw = new StringWriter();
         final CsvWriter appender = crw.build(sw);
         appender.writeRow("foo", "bar").writeRow("foo2", "bar2");
@@ -163,7 +164,19 @@ public class CsvWriterTest {
         assertNotNull(writer);
     }
 
-    private String write(final String... cols) throws IOException {
+    @Test
+    public void streaming() {
+        final Stream<String[]> stream = Stream.of(
+            new String[]{"header1", "header2"},
+            new String[]{"value1", "value2"}
+        );
+        final StringWriter sw = new StringWriter();
+        final CsvWriter csvWriter = CsvWriter.builder().build(sw);
+        stream.forEach(csvWriter::writeRow);
+        assertEquals("header1,header2\r\nvalue1,value2\r\n", sw.toString());
+    }
+
+    private String write(final String... cols) {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = crw.build(sw);
         to.writeRow(cols);

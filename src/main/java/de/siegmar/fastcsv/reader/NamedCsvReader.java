@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -14,6 +13,8 @@ import java.util.Spliterator;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import de.siegmar.fastcsv.util.Unchecker;
 
 /**
  * Header name based Csv reader implementation.
@@ -107,7 +108,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
             try {
                 close();
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                Unchecker.uncheck(e);
             }
         });
     }
