@@ -78,7 +78,7 @@ CsvReader.builder()
 ```
 
 For more example see
-[CsvReaderExample.java](src/test/java/example/CsvReaderExample.java)
+[CsvReaderExample.java](src/example/java/example/CsvReaderExample.java)
 
 ## CsvWriter Examples
 
@@ -111,7 +111,7 @@ CsvWriter.builder()
 ```
 
 For more example see
-[CsvWriterExample.java](src/test/java/example/CsvWriterExample.java)
+[CsvWriterExample.java](src/example/java/example/CsvWriterExample.java)
 
 ## Migrating from version 1.x
 
