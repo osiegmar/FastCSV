@@ -340,7 +340,7 @@ public final class CsvWriter implements Closeable {
             this.writer = writer;
         }
 
-        public void write(final char c) {
+        void write(final char c) {
             if (pos == BUFFER_SIZE) {
                 flushBuffer();
             }
@@ -348,7 +348,7 @@ public final class CsvWriter implements Closeable {
         }
 
         @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-        public void write(final String str, final int off, final int len) {
+        void write(final String str, final int off, final int len) {
             if (pos + len >= BUFFER_SIZE) {
                 try {
                     internalFlushBuffer();
@@ -362,7 +362,7 @@ public final class CsvWriter implements Closeable {
             }
         }
 
-        public void flushBuffer() {
+        private void flushBuffer() {
             try {
                 internalFlushBuffer();
             } catch (final IOException e) {
@@ -375,7 +375,7 @@ public final class CsvWriter implements Closeable {
             pos = 0;
         }
 
-        public void close() {
+        private void close() {
             try {
                 internalFlushBuffer();
                 writer.close();
