@@ -375,7 +375,7 @@ public final class CsvWriter implements Closeable {
             pos = 0;
         }
 
-        private void close() {
+        void close() {
             try {
                 internalFlushBuffer();
                 writer.close();

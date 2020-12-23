@@ -2,7 +2,6 @@ package de.siegmar.fastcsv.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ public class CachingWriterTest {
     private final CsvWriter.CachingWriter cw = new CsvWriter.CachingWriter(sw);
 
     @Test
-    public void appendSingle() throws IOException {
+    public void appendSingle() {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -27,7 +26,7 @@ public class CachingWriterTest {
     }
 
     @Test
-    public void appendArray() throws IOException {
+    public void appendArray() {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -40,7 +39,7 @@ public class CachingWriterTest {
     }
 
     @Test
-    public void appendLarge() throws IOException {
+    public void appendLarge() {
         final String sb = buildLargeData();
         cw.write(sb, 0, sb.length());
 
