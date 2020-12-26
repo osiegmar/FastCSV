@@ -1,7 +1,3 @@
-# Java
-*.class
-*.log
-
 # Gradle
 .gradle/
 build/
