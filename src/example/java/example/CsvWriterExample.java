@@ -22,13 +22,13 @@ public class CsvWriterExample {
         transformData();
     }
 
-    private static void simple() throws IOException {
+    private static void simple() {
         final StringWriter sw = new StringWriter();
         CsvWriter.builder().build(sw).writeRow("value1", "value2");
         System.out.print("Simple CSV: " + sw);
     }
 
-    private static void advancedConfiguration() throws IOException {
+    private static void advancedConfiguration() {
         final StringWriter sw = new StringWriter();
 
         CsvWriter.builder()
