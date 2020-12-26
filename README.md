@@ -41,6 +41,10 @@ Benchmark from the
 
 - Java 8
 
+> :bulb: Android is not Java and is not officially supported.
+> Although some basic checks are included in the continuous integration pipeline in order to
+> verify that the library *should* work with Android 8.0 (API level 26).
+
 ## CsvReader Examples
 
 Iterative reading of some CSV data from a string

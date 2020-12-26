@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
+    }
+}
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -87,6 +93,19 @@ jmh {
     benchmarkMode = ['thrpt']
     fork = 2
     operationsPerInvocation = 1
+}
+
+task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
+    injars project.jar.archivePath
+    libraryjars files(String.format("%s/platforms/android-%s/android.jar",
+        System.getenv("ANDROID_HOME"), System.getenv("API_LEVEL")))
+    libraryjars files(configurations.compile)
+    // Don't really try to do anything, we just want this tool for it's bytecode lint
+    dontshrink
+    dontobfuscate
+    dontoptimize
+    // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda / Jack
+    dontwarn 'java.lang.invoke.LambdaMetafactory'
 }
 
 publishing {
