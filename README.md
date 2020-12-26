@@ -144,16 +144,6 @@ csvWriter.setAlwaysDelimitText(true);
 ```
 
 
-Contribution
-------------
-
-- Fork
-- Code
-- Add test(s)
-- Commit
-- Send me a pull request
-
-
 Copyright
 ---------
 
