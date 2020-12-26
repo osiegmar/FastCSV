@@ -1,7 +1,7 @@
 FastCSV
 =======
 
-[![Build Status](https://travis-ci.org/osiegmar/FastCSV.svg?branch=master)](https://travis-ci.org/osiegmar/FastCSV)
+![build](https://github.com/osiegmar/FastCSV/workflows/build/badge.svg?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.siegmar/fastcsv)
 
 FastCSV is a ultra fast and simple [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
