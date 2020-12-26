@@ -77,7 +77,7 @@ CsvContainer csv = new CsvReader().read(file, UTF_8);
 ```
 
 New way:
-The container concept has been removed, but you can 
+The container concept has been removed, but you can
 easily build something similar using the Java Stream API.
 ```java
 List<CsvRow> data;
