@@ -30,16 +30,16 @@ final class RowHandler {
     }
 
     String[] endAndReset() {
-        final String[] ret;
-        if (idx == 0) {
-            ret = EMPTY;
-        } else {
-            ret = new String[idx];
-            System.arraycopy(row, 0, ret, 0, idx);
-            idx = 0;
-        }
         lines = 1;
         commentMode = false;
+
+        if (idx == 0) {
+            return EMPTY;
+        }
+
+        final String[] ret = new String[idx];
+        System.arraycopy(row, 0, ret, 0, idx);
+        idx = 0;
         return ret;
     }
 
