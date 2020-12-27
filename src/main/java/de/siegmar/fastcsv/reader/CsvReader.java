@@ -41,7 +41,6 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
     private final Reader reader;
     private final RowHandler rowHandler = new RowHandler(32);
-    private long lineNo;
     private int firstLineFieldCount = -1;
     private boolean finished;
 
@@ -116,45 +115,38 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
     })
     private CsvRow fetchRow() throws IOException {
         while (!finished) {
-            final long startingLineNo = lineNo + 1;
             finished = rowReader.fetchAndRead(rowHandler);
-            final boolean isCommentRow = rowHandler.isCommentMode();
-            lineNo += rowHandler.getLines();
-            final String[] currentFields = rowHandler.endAndReset();
-
-            final int fieldCount = currentFields.length;
+            final CsvRow csvRow = rowHandler.buildAndReset();
 
             // reached end of data in a new line?
-            if (fieldCount == 0) {
+            if (csvRow == null) {
                 break;
             }
 
             // skip commented rows
-            if (isCommentRow && commentStrategy == CommentStrategy.SKIP) {
+            if (commentStrategy == CommentStrategy.SKIP && csvRow.isComment()) {
                 continue;
             }
 
             // skip empty rows
-            if (fieldCount == 1 && currentFields[0].isEmpty()) {
+            if (csvRow.isEmpty()) {
                 if (skipEmptyRows) {
                     continue;
-                } else {
-                    return new CsvRow(startingLineNo);
                 }
-            }
+            } else if (errorOnDifferentFieldCount) {
+                final int fieldCount = csvRow.getFieldCount();
 
-            if (errorOnDifferentFieldCount) {
                 // check the field count consistency on every row
                 if (firstLineFieldCount == -1) {
                     firstLineFieldCount = fieldCount;
                 } else if (fieldCount != firstLineFieldCount) {
                     throw new MalformedCsvException(
                         String.format("Row %d has %d fields, but first row had %d fields",
-                            startingLineNo, fieldCount, firstLineFieldCount));
+                            csvRow.getOriginalLineNumber(), fieldCount, firstLineFieldCount));
                 }
             }
 
-            return new CsvRow(startingLineNo, currentFields, isCommentRow);
+            return csvRow;
         }
 
         return null;

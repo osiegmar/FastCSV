@@ -15,11 +15,12 @@ public final class CsvRow {
     private final String[] fields;
     private final boolean comment;
 
-    CsvRow(final long originalLineNumber) {
-        this(originalLineNumber, EMPTY, false);
+    CsvRow(final long originalLineNumber, final boolean comment) {
+        this(originalLineNumber, EMPTY, comment);
     }
 
-    CsvRow(final long originalLineNumber, final String[] fields, final boolean comment) {
+    CsvRow(final long originalLineNumber, final String[] fields,
+           final boolean comment) {
         this.originalLineNumber = originalLineNumber;
         this.fields = fields;
         this.comment = comment;

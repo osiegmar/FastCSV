@@ -2,13 +2,12 @@ package de.siegmar.fastcsv.reader;
 
 final class RowHandler {
 
-    private static final String[] EMPTY = new String[0];
-
     private int len;
     private String[] row;
     private int idx;
     private int lines = 1;
     private boolean commentMode;
+    private long originalLineNumber = 1;
 
     RowHandler(final int len) {
         this.len = len;
@@ -29,18 +28,23 @@ final class RowHandler {
         row = newRow;
     }
 
-    String[] endAndReset() {
+    CsvRow buildAndReset() {
+        final CsvRow csvRow = idx > 0 ? build() : null;
+        idx = 0;
+        originalLineNumber += lines;
         lines = 1;
         commentMode = false;
+        return csvRow;
+    }
 
-        if (idx == 0) {
-            return EMPTY;
+    private CsvRow build() {
+        if (idx > 1 || !row[0].isEmpty()) {
+            final String[] ret = new String[idx];
+            System.arraycopy(row, 0, ret, 0, idx);
+            return new CsvRow(originalLineNumber, ret, commentMode);
         }
 
-        final String[] ret = new String[idx];
-        System.arraycopy(row, 0, ret, 0, idx);
-        idx = 0;
-        return ret;
+        return new CsvRow(originalLineNumber, commentMode);
     }
 
     public void enableCommentMode() {
@@ -49,10 +53,6 @@ final class RowHandler {
 
     public boolean isCommentMode() {
         return commentMode;
-    }
-
-    long getLines() {
-        return lines;
     }
 
     public void incLines() {
