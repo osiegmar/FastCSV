@@ -2,6 +2,7 @@ package blackbox.reader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -68,7 +69,7 @@ public class CsvReaderTest {
         assertTrue(e.getMessage().contains("Control characters must differ"));
     }
 
-    private static Stream<Arguments> provideBuilderForMisconfiguration() {
+    static Stream<Arguments> provideBuilderForMisconfiguration() {
         return Stream.of(
             Arguments.of(CsvReader.builder().quoteCharacter(',')),
             Arguments.of(CsvReader.builder().commentCharacter(',')),
@@ -147,14 +148,14 @@ public class CsvReaderTest {
     public void differentFieldCountSuccess() {
         crb.errorOnDifferentFieldCount(true);
 
-        readAll("foo\nbar");
-        readAll("foo\nbar\n");
+        assertDoesNotThrow(() -> readAll("foo\nbar"));
+        assertDoesNotThrow(() -> readAll("foo\nbar\n"));
 
-        readAll("foo,bar\nfaz,baz");
-        readAll("foo,bar\nfaz,baz\n");
+        assertDoesNotThrow(() -> readAll("foo,bar\nfaz,baz"));
+        assertDoesNotThrow(() -> readAll("foo,bar\nfaz,baz\n"));
 
-        readAll("foo,bar\n,baz");
-        readAll(",bar\nfaz,baz");
+        assertDoesNotThrow(() -> readAll("foo,bar\n,baz"));
+        assertDoesNotThrow(() -> readAll(",bar\nfaz,baz"));
     }
 
     @Test
@@ -177,6 +178,7 @@ public class CsvReaderTest {
             spotbugs(readSingleRow("foo").getField(1)));
     }
 
+    @SuppressWarnings("PMD.UnusedFormalParameter")
     private void spotbugs(final String foo) {
         // Prevent RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT
     }

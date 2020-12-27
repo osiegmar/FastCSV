@@ -42,6 +42,7 @@ final class CharacterConv {
         return str.isEmpty() ? EMPTY_STRING : replaceEach(str, STANDARD, CONV);
     }
 
+    @SuppressWarnings("PMD.UseVarargs")
     private static String replaceEach(final String text, final String[] searchList,
                                       final String[] replacementList) {
         String ret = text;

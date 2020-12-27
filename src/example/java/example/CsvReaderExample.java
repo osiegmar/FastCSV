@@ -17,6 +17,7 @@ import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public class CsvReaderExample {
 
     public static void main(final String[] args) {

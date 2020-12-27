@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 /**
  * Index based CSV-row.
  */
+@SuppressWarnings("PMD.ArrayIsStoredDirectly")
 public final class CsvRow {
 
     private static final String[] EMPTY = new String[]{""};

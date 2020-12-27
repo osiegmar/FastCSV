@@ -13,6 +13,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public class CsvWriterExample {
 
     public static void main(final String[] args) throws IOException {

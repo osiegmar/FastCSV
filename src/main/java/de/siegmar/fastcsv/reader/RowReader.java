@@ -11,7 +11,8 @@ import java.io.Reader;
     "checkstyle:ExecutableStatementCount",
     "checkstyle:InnerAssignment",
     "checkstyle:JavaNCSS",
-    "checkstyle:NestedIfDepth"
+    "checkstyle:NestedIfDepth",
+    "PMD.UnusedAssignment"
 })
 final class RowReader {
 

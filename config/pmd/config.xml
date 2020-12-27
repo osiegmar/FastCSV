@@ -8,10 +8,14 @@
         My custom rules
     </description>
 
-    <rule ref="category/java/performance.xml" />
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+    </rule>
     <rule ref="category/java/errorprone.xml">
         <exclude name="BeanMembersShouldSerialize"/>
         <exclude name="DataflowAnomalyAnalysis"/>
     </rule>
+    <rule ref="category/java/performance.xml" />
 
 </ruleset>

@@ -125,7 +125,11 @@ public final class CsvWriter implements Closeable {
         }
     }
 
-    @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
+    @SuppressWarnings({
+        "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment",
+        "PMD.AvoidReassigningParameters"
+    })
     private void writeEscaped(final String value, final int length, int nextDelimPos) {
         int startPos = 0;
         do {
