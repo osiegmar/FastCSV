@@ -104,7 +104,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             .onClose(() -> {
                 try {
                     close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 }
             });
@@ -203,7 +203,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         private void fetch() {
             try {
                 fetchedRow = fetchRow();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
             fetched = true;

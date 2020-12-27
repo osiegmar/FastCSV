@@ -359,7 +359,7 @@ public final class CsvWriter implements Closeable {
             try {
                 internalFlushBuffer();
                 writer.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         }

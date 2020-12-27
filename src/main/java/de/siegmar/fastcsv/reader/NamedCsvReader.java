@@ -105,7 +105,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         return StreamSupport.stream(spliterator(), false).onClose(() -> {
             try {
                 close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
         });

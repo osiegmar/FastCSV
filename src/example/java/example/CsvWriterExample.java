@@ -58,7 +58,7 @@ public class CsvWriterExample {
 
             Files.lines(path)
                 .forEach(line -> System.out.println("Line from path: " + line));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -79,7 +79,7 @@ public class CsvWriterExample {
                     csvRow.getField("age")
                 );
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 

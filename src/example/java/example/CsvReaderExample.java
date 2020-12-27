@@ -96,7 +96,7 @@ public class CsvReaderExample {
             try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
                 csvReader.forEach(System.out::println);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }

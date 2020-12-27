@@ -114,7 +114,10 @@
         <module name="EmptyStatement"/>
         <module name="EqualsAvoidNull"/>
         <module name="EqualsHashCode"/>
-        <module name="FinalLocalVariable"/>
+        <module name="FinalLocalVariable">
+            <property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
+            <property name="validateEnhancedForLoopVariable" value="true"/>
+        </module>
         <module name="HiddenField">
             <property name="ignoreConstructorParameter" value="true"/>
             <property name="ignoreSetter" value="true"/>
