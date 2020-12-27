@@ -58,11 +58,11 @@ public class CsvWriterExample {
     }
 
     private static void transformData() throws IOException {
-        final String in = "firstname,lastname,age\njohn,smith,30";
         final StringWriter out = new StringWriter();
 
         try (
-            NamedCsvReader reader = NamedCsvReader.builder().build(in);
+            NamedCsvReader reader = NamedCsvReader.builder().build(
+                "firstname,lastname,age\njohn,smith,30");
             CsvWriter writer = CsvWriter.builder().build(out)
         ) {
             // transform firstname,lastname,age => name,age

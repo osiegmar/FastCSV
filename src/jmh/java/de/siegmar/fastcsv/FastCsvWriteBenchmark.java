@@ -15,7 +15,7 @@ import de.siegmar.fastcsv.writer.LineDelimiter;
 public class FastCsvWriteBenchmark {
 
     @Benchmark
-    public void write(final WriteState state) throws IOException {
+    public void write(final WriteState state) {
         state.writer.writeRow(Constants.ROW);
     }
 

@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
+@SuppressWarnings("PMD.CloseResource")
 public class NamedCsvReaderBuilderTest {
 
     private static final String DATA = "header1,header2\nfoo,bar\n";

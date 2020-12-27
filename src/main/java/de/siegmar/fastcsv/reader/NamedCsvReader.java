@@ -157,7 +157,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      * The line delimiter (line-feed, carriage-return or the combination of both) is detected
      * automatically and thus not configurable.
      */
-    @SuppressWarnings("checkstyle:HiddenField")
+    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class NamedCsvReaderBuilder {
 
         private char fieldSeparator = ',';

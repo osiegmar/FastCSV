@@ -18,7 +18,7 @@ final class DataProvider {
     private DataProvider() {
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand"})
     static List<TestData> loadTestData(final String name) throws IOException {
         final List<TestData> data = new ArrayList<>();
         try (BufferedReader r = resource(name)) {

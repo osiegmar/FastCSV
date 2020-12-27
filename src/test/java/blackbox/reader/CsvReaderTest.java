@@ -35,7 +35,11 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 
-@SuppressWarnings("checkstyle:ClassFanOutComplexity")
+@SuppressWarnings({
+    "checkstyle:ClassFanOutComplexity",
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.CloseResource"
+})
 public class CsvReaderTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();

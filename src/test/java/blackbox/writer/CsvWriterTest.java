@@ -23,6 +23,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 public class CsvWriterTest {
 
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()

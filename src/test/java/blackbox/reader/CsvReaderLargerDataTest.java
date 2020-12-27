@@ -2,7 +2,6 @@ package blackbox.reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
+@SuppressWarnings("PMD.CloseResource")
 public class CsvReaderLargerDataTest {
 
     private static final String[] TEXTS = {
@@ -28,7 +28,7 @@ public class CsvReaderLargerDataTest {
     };
 
     @Test
-    public void largerData() throws IOException {
+    public void largerData() {
         final CsvReader reader = CsvReader.builder().build(createSampleCSV());
         int i = 0;
         for (final CsvRow row : reader) {
@@ -44,7 +44,7 @@ public class CsvReaderLargerDataTest {
         assertEquals(1000, i);
     }
 
-    private String createSampleCSV() throws IOException {
+    private String createSampleCSV() {
         final StringWriter sw = new StringWriter();
         final CsvWriter writer = CsvWriter.builder().build(sw);
         for (int i = 0; i < 1000; i++) {

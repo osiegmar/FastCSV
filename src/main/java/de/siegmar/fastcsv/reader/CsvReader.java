@@ -111,7 +111,10 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             });
     }
 
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    @SuppressWarnings({
+        "checkstyle:CyclomaticComplexity",
+        "PMD.AvoidBranchingStatementAsLastInLoop"
+    })
     private CsvRow fetchRow() throws IOException {
         while (!finished) {
             final long startingLineNo = lineNo + 1;
@@ -221,7 +224,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
      * The line delimiter (line-feed, carriage-return or the combination of both) is detected
      * automatically and thus not configurable.
      */
-    @SuppressWarnings("checkstyle:HiddenField")
+    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvReaderBuilder {
 
         private char fieldSeparator = ',';

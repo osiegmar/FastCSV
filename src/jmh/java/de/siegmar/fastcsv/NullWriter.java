@@ -13,7 +13,7 @@ public class NullWriter extends Writer {
     private static final int BUFFER_SIZE = 8192;
 
     private final Blackhole bh;
-    private char[] buf = new char[BUFFER_SIZE];
+    private final char[] buf = new char[BUFFER_SIZE];
     private int pos;
 
     NullWriter(final Blackhole bh) {
@@ -38,7 +38,6 @@ public class NullWriter extends Writer {
     @Override
     public void close() {
         flush();
-        buf = null;
     }
 
 }

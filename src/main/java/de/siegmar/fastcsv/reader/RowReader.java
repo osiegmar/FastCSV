@@ -77,6 +77,7 @@ final class RowReader {
      * @param rowHandler the rowHandler to handle the fetched data
      * @return {@code true}, if more data is needed to complete current row
      */
+    @SuppressWarnings("PMD.EmptyIfStmt")
     boolean consume(final RowHandler rowHandler) {
         final char[] lBuf = buffer.buf;
         final int lLen = buffer.len;

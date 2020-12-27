@@ -25,6 +25,7 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 
+@SuppressWarnings("PMD.CloseResource")
 public class CsvReaderBuilderTest {
 
     private static final String DATA = "foo,bar\n";

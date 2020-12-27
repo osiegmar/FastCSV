@@ -26,6 +26,7 @@ import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 public class NamedCsvReaderTest {
 
     private final NamedCsvReader.NamedCsvReaderBuilder crb = NamedCsvReader.builder();
