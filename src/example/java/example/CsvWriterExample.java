@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,10 +17,10 @@ import de.siegmar.fastcsv.writer.QuoteStrategy;
 @SuppressWarnings("PMD.SystemPrintln")
 public class CsvWriterExample {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         simple();
         advancedConfiguration();
-        path();
+        file();
         transformData();
     }
 
@@ -45,20 +46,24 @@ public class CsvWriterExample {
         System.out.println(sw);
     }
 
-    private static void path() throws IOException {
-        final Path path = Files.createTempFile("fastcsv", ".csv");
+    private static void file() {
+        try {
+            final Path path = Files.createTempFile("fastcsv", ".csv");
 
-        try (CsvWriter csv = CsvWriter.builder().build(path, UTF_8)) {
-            csv
-                .writeRow("header1", "header2")
-                .writeRow("value1", "value2");
+            try (CsvWriter csv = CsvWriter.builder().build(path, UTF_8)) {
+                csv
+                    .writeRow("header1", "header2")
+                    .writeRow("value1", "value2");
+            }
+
+            Files.lines(path)
+                .forEach(line -> System.out.println("Line from path: " + line));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-
-        Files.lines(path)
-            .forEach(line -> System.out.println("Line from path: " + line));
     }
 
-    private static void transformData() throws IOException {
+    private static void transformData() {
         final StringWriter out = new StringWriter();
 
         try (
@@ -74,6 +79,8 @@ public class CsvWriterExample {
                     csvRow.getField("age")
                 );
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
 
         System.out.println("Transformed CSV:");
