@@ -36,6 +36,7 @@ import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.MalformedCsvException;
 
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
@@ -163,11 +164,10 @@ public class CsvReaderTest {
     public void differentFieldCountFail() {
         crb.errorOnDifferentFieldCount(true);
 
-        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
+        final MalformedCsvException e = assertThrows(MalformedCsvException.class,
             () -> readAll("foo\nbar,\"baz\nbax\""));
 
-        assertEquals("java.io.IOException: Row 2 has 2 fields, "
-            + "but first row had 1 fields", e.getMessage());
+        assertEquals("Row 2 has 2 fields, but first row had 1 fields", e.getMessage());
     }
 
     // field by index
@@ -330,6 +330,14 @@ public class CsvReaderTest {
             () -> csvReader.stream().close());
 
         assertEquals("java.io.IOException: Cannot close", e.getMessage());
+    }
+
+    @Test
+    public void unreadable() {
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
+            crb.build(new UnreadableReader()).iterator().next());
+
+        assertEquals("java.io.IOException: Cannot read", e.getMessage());
     }
 
     // test helpers

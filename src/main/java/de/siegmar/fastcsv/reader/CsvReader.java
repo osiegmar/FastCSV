@@ -148,7 +148,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
                 if (firstLineFieldCount == -1) {
                     firstLineFieldCount = fieldCount;
                 } else if (fieldCount != firstLineFieldCount) {
-                    throw new IOException(
+                    throw new MalformedCsvException(
                         String.format("Row %d has %d fields, but first row had %d fields",
                             startingLineNo, fieldCount, firstLineFieldCount));
                 }
