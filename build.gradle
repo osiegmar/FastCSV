@@ -71,7 +71,7 @@ spotbugs {
 pmd {
     consoleOutput = true
     ruleSets = []
-    ruleSetFiles(file("config/pmd/config.xml"))
+    ruleSetFiles = files("config/pmd/config.xml")
 }
 
 jacocoTestReport {
