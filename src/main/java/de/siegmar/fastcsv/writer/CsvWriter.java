@@ -261,7 +261,8 @@ public final class CsvWriter implements Closeable {
          * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
          * {@link CsvWriter#writeRow(Iterable)} call. Therefore you probably want to pass in a
          * {@link java.io.BufferedWriter} to retain good performance.
-         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance.
+         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
+         * files.
          *
          * @param writer the Writer to use for writing CSV data.
          * @return a new CsvWriter instance - never {@code null}.

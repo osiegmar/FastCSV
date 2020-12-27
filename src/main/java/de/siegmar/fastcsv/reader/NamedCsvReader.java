@@ -231,7 +231,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
          * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
-         * better if you do not. Use {@link #build(Path, Charset)} for optimal performance.
+         * better if you do not. Use {@link #build(Path, Charset)} for optimal performance when
+         * reading files.
          *
          * @param reader the data source to read from.
          * @return a new NamedCsvReader - never {@code null}.
