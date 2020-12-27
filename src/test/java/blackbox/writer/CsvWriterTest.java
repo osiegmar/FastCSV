@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -139,17 +138,6 @@ public class CsvWriterTest {
 
         assertEquals("value1,value2\r\n",
             new String(Files.readAllBytes(file), UTF_8));
-    }
-
-    @Test
-    public void path(@TempDir final File tempDir) throws IOException {
-        final File file = new File(tempDir, "fastcsv.csv");
-        try (CsvWriter csv = CsvWriter.builder().build(file, false, UTF_8)) {
-            csv.writeRow("value1", "value2");
-        }
-
-        assertEquals("value1,value2\r\n",
-            new String(Files.readAllBytes(file.toPath()), UTF_8));
     }
 
     @Test

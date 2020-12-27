@@ -1,8 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -313,8 +311,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
          * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
-         * better if you do not. Use {@link #build(Path, Charset)} or {@link #build(File, Charset)}
-         * for optimal performance.
+         * better if you do not. Use {@link #build(Path, Charset)} for optimal performance.
          *
          * @param reader the data source to read from.
          * @return a new CsvReader - never {@code null}.
@@ -349,22 +346,6 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             Objects.requireNonNull(charset, "charset must not be null");
 
             return newReader(new InputStreamReader(Files.newInputStream(path), charset));
-        }
-
-        /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
-         *
-         * @param file    the file to read data from.
-         * @param charset the character set to use.
-         * @return a new CsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
-         * @throws NullPointerException if file or charset is {@code null}
-         */
-        public CsvReader build(final File file, final Charset charset) throws IOException {
-            Objects.requireNonNull(file, "file must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            return newReader(new InputStreamReader(new FileInputStream(file), charset));
         }
 
         private CsvReader newReader(final Reader reader) {

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,19 +81,6 @@ public class NamedCsvReaderBuilderTest {
     public void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
-
-        final List<NamedCsvRow> list;
-        try (Stream<NamedCsvRow> stream = crb.build(file, UTF_8).stream()) {
-            list = stream.collect(Collectors.toList());
-        }
-
-        assertEquals(EXPECTED, list.get(0).getFieldMap().toString());
-    }
-
-    @Test
-    public void file(@TempDir final File tempDir) throws IOException {
-        final File file = new File(tempDir, "fastcsv.csv");
-        Files.write(file.toPath(), DATA.getBytes(UTF_8));
 
         final List<NamedCsvRow> list;
         try (Stream<NamedCsvRow> stream = crb.build(file, UTF_8).stream()) {

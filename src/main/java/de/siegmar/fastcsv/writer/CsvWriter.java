@@ -1,8 +1,6 @@
 package de.siegmar.fastcsv.writer;
 
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -260,8 +258,7 @@ public final class CsvWriter implements Closeable {
          * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
          * {@link CsvWriter#writeRow(Iterable)} call. Therefore you probably want to pass in a
          * {@link java.io.BufferedWriter} to retain good performance.
-         * Use {@link #build(Path, Charset, OpenOption...)} or
-         * {@link #build(File, boolean, Charset)} for optimal performance.
+         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance.
          *
          * @param writer the Writer to use for writing CSV data.
          * @return a new CsvWriter instance - never {@code null}.
@@ -293,27 +290,6 @@ public final class CsvWriter implements Closeable {
 
             return newWriter(new OutputStreamWriter(Files.newOutputStream(path, openOptions),
                 charset), false);
-        }
-
-        /**
-         * Constructs a {@link CsvWriter} for the specified File.
-         *
-         * @param file        the path to write data to.
-         * @param append      if {@code true}, then data will be appended to the file rather than
-         *                    the beginning (file overwrite).
-         * @param charset     the character set to be used for writing data to the file.
-         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
-         * @throws IOException          if a write error occurs
-         * @throws NullPointerException if file or charset is {@code null}
-         */
-        public CsvWriter build(final File file, final boolean append, final Charset charset)
-            throws IOException {
-
-            Objects.requireNonNull(file, "file must not be null");
-            Objects.requireNonNull(charset, "charset must not be null");
-
-            return newWriter(new OutputStreamWriter(new FileOutputStream(file, append), charset),
-                false);
         }
 
         private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {

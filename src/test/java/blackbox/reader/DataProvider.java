@@ -18,6 +18,7 @@ final class DataProvider {
     private DataProvider() {
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     static List<TestData> loadTestData(final String name) throws IOException {
         final List<TestData> data = new ArrayList<>();
         try (BufferedReader r = resource(name)) {
@@ -25,7 +26,7 @@ final class DataProvider {
             int lineNo = 0;
             while ((line = r.readLine()) != null) {
                 lineNo++;
-                if (line.isEmpty() || line.startsWith("#")) {
+                if (line.isEmpty() || line.charAt(0) == '#') {
                     continue;
                 }
 
