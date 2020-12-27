@@ -288,7 +288,8 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         }
 
         /**
-         * Defines if an error should be thrown if lines do contain a different number of columns.
+         * Defines if an {@link MalformedCsvException} should be thrown if lines do contain a
+         * different number of columns.
          *
          * @param errorOnDifferentFieldCount if an exception should be thrown, if CSV data contains
          *                                   different field count (default: {@code false}).
