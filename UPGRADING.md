@@ -152,7 +152,7 @@ try (CsvWriter csvWriter = CsvWriter.builder().build(writer)) {
 }
 ```
 
-> :warning: But be aware of a change in the semantic in FastCSV.
+> :warning: Be aware of a change in the semantic in FastCSV.
 > In version 2.x you probably want to pass in a `java.io.BufferedWriter` for proper
 > performance. The opposite was recommended in version 1.x.
 > Check the Javadoc for further information.
