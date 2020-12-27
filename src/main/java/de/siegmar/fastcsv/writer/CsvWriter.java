@@ -69,7 +69,7 @@ public final class CsvWriter implements Closeable {
         return new CsvWriterBuilder();
     }
 
-    private void writeInternal(final String value) {
+    private void writeInternal(final String value) throws IOException {
         if (!isNewline) {
             writer.write(fieldSeparator);
         } else {
@@ -129,7 +129,9 @@ public final class CsvWriter implements Closeable {
         "checkstyle:ParameterAssignment",
         "PMD.AvoidReassigningParameters"
     })
-    private void writeEscaped(final String value, final int length, int nextDelimPos) {
+    private void writeEscaped(final String value, final int length, int nextDelimPos)
+        throws IOException {
+
         int startPos = 0;
         do {
             final int len = nextDelimPos - startPos + 1;
@@ -157,13 +159,18 @@ public final class CsvWriter implements Closeable {
      * @param values the fields to append ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
      * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
      */
     public CsvWriter writeRow(final Iterable<String> values) {
-        for (final String value : values) {
-            writeInternal(value);
+        try {
+            for (final String value : values) {
+                writeInternal(value);
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
-        endRow();
-        return this;
     }
 
     /**
@@ -172,16 +179,21 @@ public final class CsvWriter implements Closeable {
      * @param values the fields to append ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
      * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
      */
     public CsvWriter writeRow(final String... values) {
-        for (final String value : values) {
-            writeInternal(value);
+        try {
+            for (final String value : values) {
+                writeInternal(value);
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
-        endRow();
-        return this;
     }
 
-    private void endRow() {
+    private void endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         isNewline = true;
         if (syncWriter) {
@@ -320,7 +332,7 @@ public final class CsvWriter implements Closeable {
             this.writer = writer;
         }
 
-        void write(final char c) {
+        void write(final char c) throws IOException {
             if (pos == BUFFER_SIZE) {
                 flushBuffer();
             }
@@ -328,40 +340,24 @@ public final class CsvWriter implements Closeable {
         }
 
         @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-        void write(final String str, final int off, final int len) {
+        void write(final String str, final int off, final int len) throws IOException {
             if (pos + len >= BUFFER_SIZE) {
-                try {
-                    internalFlushBuffer();
-                    writer.write(str, off, len);
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                }
+                flushBuffer();
+                writer.write(str, off, len);
             } else {
                 str.getChars(off, off + len, buf, pos);
                 pos += len;
             }
         }
 
-        private void flushBuffer() {
-            try {
-                internalFlushBuffer();
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        private void internalFlushBuffer() throws IOException {
+        private void flushBuffer() throws IOException {
             writer.write(buf, 0, pos);
             pos = 0;
         }
 
-        void close() {
-            try {
-                internalFlushBuffer();
-                writer.close();
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
+        void close() throws IOException {
+            flushBuffer();
+            writer.close();
         }
 
     }
