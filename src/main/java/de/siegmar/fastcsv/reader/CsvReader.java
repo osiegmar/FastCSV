@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,8 +15,6 @@ import java.util.Spliterator;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import de.siegmar.fastcsv.util.Unchecker;
 
 /**
  * This is the main class for reading CSV data.
@@ -106,7 +105,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
                 try {
                     close();
                 } catch (IOException e) {
-                    Unchecker.uncheck(e);
+                    throw new UncheckedIOException(e);
                 }
             });
     }
@@ -205,7 +204,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             try {
                 fetchedRow = fetchRow();
             } catch (IOException e) {
-                Unchecker.uncheck(e);
+                throw new UncheckedIOException(e);
             }
             fetched = true;
         }

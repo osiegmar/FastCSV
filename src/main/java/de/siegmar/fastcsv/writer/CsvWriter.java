@@ -3,14 +3,13 @@ package de.siegmar.fastcsv.writer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.Objects;
-
-import de.siegmar.fastcsv.util.Unchecker;
 
 /**
  * This is the main class for writing CSV data.
@@ -334,7 +333,7 @@ public final class CsvWriter implements Closeable {
                     internalFlushBuffer();
                     writer.write(str, off, len);
                 } catch (final IOException e) {
-                    Unchecker.uncheck(e);
+                    throw new UncheckedIOException(e);
                 }
             } else {
                 str.getChars(off, off + len, buf, pos);
@@ -346,7 +345,7 @@ public final class CsvWriter implements Closeable {
             try {
                 internalFlushBuffer();
             } catch (final IOException e) {
-                Unchecker.uncheck(e);
+                throw new UncheckedIOException(e);
             }
         }
 
@@ -359,8 +358,8 @@ public final class CsvWriter implements Closeable {
             try {
                 internalFlushBuffer();
                 writer.close();
-            } catch (final IOException e) {
-                Unchecker.uncheck(e);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
         }
 

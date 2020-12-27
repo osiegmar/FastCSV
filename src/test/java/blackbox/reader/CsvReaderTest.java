@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -162,10 +163,10 @@ public class CsvReaderTest {
     public void differentFieldCountFail() {
         crb.errorOnDifferentFieldCount(true);
 
-        final IOException e = assertThrows(IOException.class,
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
             () -> readAll("foo\nbar,\"baz\nbax\""));
 
-        assertEquals("Row 2 has 2 fields, "
+        assertEquals("java.io.IOException: Row 2 has 2 fields, "
             + "but first row had 1 fields", e.getMessage());
     }
 
@@ -325,10 +326,10 @@ public class CsvReaderTest {
     @Test
     public void closeException() {
         final CsvReader csvReader = crb.build(new UncloseableReader(new StringReader("foo")));
-        final IOException e = assertThrows(IOException.class,
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class,
             () -> csvReader.stream().close());
 
-        assertEquals("Cannot close", e.getMessage());
+        assertEquals("java.io.IOException: Cannot close", e.getMessage());
     }
 
     // test helpers
