@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
 public final class CsvRow {
 
-    private static final String[] EMPTY = new String[]{""};
+    private static final String[] EMPTY = {""};
 
     private final long originalLineNumber;
     private final String[] fields;
