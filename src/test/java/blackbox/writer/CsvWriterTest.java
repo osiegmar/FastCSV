@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -163,6 +165,22 @@ public class CsvWriterTest {
         final CsvWriter csvWriter = CsvWriter.builder().build(sw);
         stream.forEach(csvWriter::writeRow);
         assertEquals("header1,header2\r\nvalue1,value2\r\n", sw.toString());
+    }
+
+    @Test
+    public void unwritableArray() {
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
+            crw.build(new UnwritableWriter()).writeRow("foo"));
+
+        assertEquals("java.io.IOException: Cannot write", e.getMessage());
+    }
+
+    @Test
+    public void unwritableIterable() {
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
+            crw.build(new UnwritableWriter()).writeRow(Collections.singletonList("foo")));
+
+        assertEquals("java.io.IOException: Cannot write", e.getMessage());
     }
 
     private String write(final String... cols) {
