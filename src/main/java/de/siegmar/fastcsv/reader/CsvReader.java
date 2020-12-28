@@ -40,9 +40,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
     private final CloseableIterator<CsvRow> csvRowIterator = new CsvRowIterator();
 
     private final Reader reader;
-    private final RowHandler rowHandler = new RowHandler(32);
     private int firstLineFieldCount = -1;
-    private boolean finished;
 
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
@@ -110,19 +108,12 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
     }
 
     @SuppressWarnings({
-        "checkstyle:CyclomaticComplexity",
-        "PMD.AvoidBranchingStatementAsLastInLoop"
+        "PMD.AvoidBranchingStatementAsLastInLoop",
+        "PMD.AssignmentInOperand"
     })
     private CsvRow fetchRow() throws IOException {
-        while (!finished) {
-            finished = rowReader.fetchAndRead(rowHandler);
-            final CsvRow csvRow = rowHandler.buildAndReset();
-
-            // reached end of data in a new line?
-            if (csvRow == null) {
-                break;
-            }
-
+        CsvRow csvRow;
+        while ((csvRow = rowReader.fetchAndRead()) != null) {
             // skip commented rows
             if (commentStrategy == CommentStrategy.SKIP && csvRow.isComment()) {
                 continue;
@@ -146,10 +137,10 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
                 }
             }
 
-            return csvRow;
+            break;
         }
 
-        return null;
+        return csvRow;
     }
 
     @Override

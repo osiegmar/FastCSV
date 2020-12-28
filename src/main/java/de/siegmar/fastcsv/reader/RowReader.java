@@ -27,6 +27,7 @@ final class RowReader {
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
+    private final RowHandler rowHandler = new RowHandler(32);
     private final Buffer buffer;
     private final char fsep;
     private final char qChar;
@@ -34,6 +35,7 @@ final class RowReader {
     private final char cChar;
 
     private int status;
+    private boolean finished;
 
     RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter) {
@@ -44,15 +46,11 @@ final class RowReader {
         this.cChar = commentCharacter;
     }
 
-    /**
-     * Reads and parses data (one logical row that might span multiple lines) from reader into
-     * {@link RowHandler}.
-     *
-     * @param rowHandler the rowHandler to handle the fetched data
-     * @return {@code true} if end of stream reached
-     * @throws IOException if a read error occurs
-     */
-    boolean fetchAndRead(final RowHandler rowHandler) throws IOException {
+    CsvRow fetchAndRead() throws IOException {
+        if (finished) {
+            return null;
+        }
+
         do {
             if (buffer.len == buffer.pos) {
                 // cursor reached current EOD -- need to fetch
@@ -64,25 +62,18 @@ final class RowReader {
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
                         rowHandler.add("");
                     }
-                    return true;
+
+                    finished = true;
+                    break;
                 }
             }
-        } while (consume(rowHandler));
+        } while (consume(rowHandler, buffer.buf, buffer.len));
 
-        return false;
+        return rowHandler.buildAndReset();
     }
 
-    /**
-     * Parses data from the current buffer into {@link RowHandler}.
-     *
-     * @param rowHandler the rowHandler to handle the fetched data
-     * @return {@code true}, if more data is needed to complete current row
-     */
     @SuppressWarnings("PMD.EmptyIfStmt")
-    boolean consume(final RowHandler rowHandler) {
-        final char[] lBuf = buffer.buf;
-        final int lLen = buffer.len;
-
+    boolean consume(final RowHandler rh, final char[] lBuf, final int lLen) {
         int lPos = buffer.pos;
         int lBegin = buffer.begin;
         int lStatus = status;
@@ -100,10 +91,10 @@ final class RowReader {
                             continue mode_check;
                         } else if (c == CR) {
                             lStatus |= STATUS_LAST_CHAR_WAS_CR;
-                            rowHandler.incLines();
+                            rh.incLines();
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
-                                rowHandler.incLines();
+                                rh.incLines();
                             } else {
                                 lStatus &= ~STATUS_LAST_CHAR_WAS_CR;
                             }
@@ -124,14 +115,14 @@ final class RowReader {
                         final char lookAhead = lBuf[lPos++];
 
                         if (lookAhead == CR) {
-                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (lookAhead == LF) {
-                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
                             status = STATUS_RESET;
                             lBegin = lPos;
@@ -145,12 +136,12 @@ final class RowReader {
                         final char c = lBuf[lPos++];
 
                         if (c == fsep) {
-                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
                             lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
                         } else if (c == CR) {
-                            rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
+                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
                                 qChar));
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
@@ -158,7 +149,7 @@ final class RowReader {
                             break OUTER;
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
-                                rowHandler.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
+                                rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
                                     lStatus, qChar));
                                 status = STATUS_RESET;
                                 lBegin = lPos;
@@ -172,7 +163,7 @@ final class RowReader {
                             && (lStatus == STATUS_RESET || lStatus == STATUS_LAST_CHAR_WAS_CR)) {
                             lBegin = lPos;
                             lStatus = STATUS_COMMENTED_ROW;
-                            rowHandler.enableCommentMode();
+                            rh.enableCommentMode();
                             continue mode_check;
                         } else if (c == qChar) {
                             // quote and not in data-only mode
