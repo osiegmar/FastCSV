@@ -22,19 +22,36 @@ Benchmark from the
 
 ## Features
 
-- RFC 4180 compliant CSV reader and writer
+### API
+
 - Ultra fast
 - Small footprint
 - Zero runtime dependencies
+- Null-free
+
+### CSV specific
+
+- RFC 4180 compliant – including:
+  - Newline and field separator characters in fields
+  - Quote escaping
 - Configurable field separator
-- Configurable quoting
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
+- Unicode support
+
+### Reader specific
+
+- Support reading of some non-compliant (real world) data
+- Preserving line break character(s) within fields
+- Preserving the original line number (even with skipped and multi line records) –
+  helpful for error messages
+- Auto detection of line delimiters (can also be mixed)
+- Configurable data validation
 - Support for (optional) header lines (get field based on column name)
-- Support for multiple line values (using the text delimiter)
-- Support for field separator character in value (using the text delimiter)
-- Support for reading and writing in an iterative or all at once way
-- Support for skipping empty rows and preserving the original line number (useful for error messages)
-- Support for commented lines (skipping & reading)
+- Support for skipping empty rows
+- Support for commented lines (skipping & reading) and configurable comment character
+
+### Writer specific
+
 - Support for multiple quote strategies to differentiate between empty and null
 
 ## Requirements
