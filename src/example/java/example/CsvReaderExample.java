@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,7 +32,7 @@ public class CsvReaderExample {
     private static void simple() {
         System.out.print("For-Each loop: ");
         for (final CsvRow csvRow : CsvReader.builder().build("foo,bar")) {
-            System.out.println(Arrays.toString(csvRow.getFields()));
+            System.out.println(csvRow.getFields());
         }
     }
 
@@ -54,7 +53,7 @@ public class CsvReaderExample {
             .build("foo,bar\nfoo2,bar2").iterator(); iterator.hasNext();) {
 
             final CsvRow csvRow = iterator.next();
-            System.out.print(Arrays.toString(csvRow.getFields()));
+            System.out.print(csvRow.getFields());
             if (iterator.hasNext()) {
                 System.out.print(" || ");
             } else {
@@ -82,7 +81,7 @@ public class CsvReaderExample {
             .errorOnDifferentFieldCount(false)
             .build(data)
             .stream()
-            .map(csvRow -> Arrays.toString(csvRow.getFields()))
+            .map(csvRow -> csvRow.getFields().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

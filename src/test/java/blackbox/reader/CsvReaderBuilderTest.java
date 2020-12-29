@@ -1,7 +1,6 @@
 package blackbox.reader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 
-import blackbox.Util;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
@@ -29,7 +28,7 @@ import de.siegmar.fastcsv.reader.CsvRow;
 public class CsvReaderBuilderTest {
 
     private static final String DATA = "foo,bar\n";
-    private static final String EXPECTED = "[foo, bar]";
+    private static final List<String> EXPECTED = Arrays.asList("foo", "bar");
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
@@ -43,22 +42,22 @@ public class CsvReaderBuilderTest {
     public void fieldSeparator() {
         final Iterator<CsvRow> it = crb.fieldSeparator(';')
             .build("foo,bar;baz").iterator();
-        assertArrayEquals(Util.asArray("foo,bar", "baz"), it.next().getFields());
+        assertEquals(Arrays.asList("foo,bar", "baz"), it.next().getFields());
     }
 
     @Test
     public void quoteCharacter() {
         final Iterator<CsvRow> it = crb.quoteCharacter('_')
             .build("_foo \", __ bar_,foo \" bar").iterator();
-        assertArrayEquals(Util.asArray("foo \", _ bar", "foo \" bar"), it.next().getFields());
+        assertEquals(Arrays.asList("foo \", _ bar", "foo \" bar"), it.next().getFields());
     }
 
     @Test
     public void commentSkip() {
         final Iterator<CsvRow> it = crb.commentCharacter(';').commentStrategy(CommentStrategy.SKIP)
             .build("#foo\n;bar\nbaz").iterator();
-        assertArrayEquals(Util.asArray("#foo"), it.next().getFields());
-        assertArrayEquals(Util.asArray("baz"), it.next().getFields());
+        assertEquals(Collections.singletonList("#foo"), it.next().getFields());
+        assertEquals(Collections.singletonList("baz"), it.next().getFields());
     }
 
     @Test
@@ -73,14 +72,14 @@ public class CsvReaderBuilderTest {
         final List<CsvRow> list = crb
             .build(DATA).stream()
             .collect(Collectors.toList());
-        assertEquals(EXPECTED, Arrays.toString(list.get(0).getFields()));
+        assertEquals(EXPECTED, list.get(0).getFields());
     }
 
     @Test
     public void string() {
         final List<CsvRow> list = crb.build(DATA).stream()
             .collect(Collectors.toList());
-        assertEquals(EXPECTED, Arrays.toString(list.get(0).getFields()));
+        assertEquals(EXPECTED, list.get(0).getFields());
     }
 
     @Test
@@ -93,7 +92,7 @@ public class CsvReaderBuilderTest {
             list = stream.collect(Collectors.toList());
         }
 
-        assertEquals(EXPECTED, Arrays.toString(list.get(0).getFields()));
+        assertEquals(EXPECTED, list.get(0).getFields());
     }
 
     @Test

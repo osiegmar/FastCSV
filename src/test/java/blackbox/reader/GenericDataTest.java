@@ -33,8 +33,8 @@ public class GenericDataTest {
         return DataProvider.loadTestData("/test.txt");
     }
 
-    public static List<String[]> readAll(final String data, final boolean skipEmptyLines,
-                                         final CommentStrategy commentStrategy) {
+    public static List<List<String>> readAll(final String data, final boolean skipEmptyLines,
+                                             final CommentStrategy commentStrategy) {
         return CsvReader.builder()
             .skipEmptyRows(skipEmptyLines)
             .commentCharacter(';')

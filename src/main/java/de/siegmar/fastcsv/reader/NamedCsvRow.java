@@ -59,7 +59,7 @@ public final class NamedCsvRow {
      *
      * @return an unmodifiable map of header names and field values of this row
      */
-    public Map<String, String> getFieldMap() {
+    public Map<String, String> getFields() {
         return Collections.unmodifiableMap(fieldMap);
     }
 

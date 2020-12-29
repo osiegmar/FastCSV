@@ -1,6 +1,8 @@
 package de.siegmar.fastcsv.reader;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.StringJoiner;
 
 /**
@@ -49,12 +51,12 @@ public final class CsvRow {
     }
 
     /**
-     * Gets all fields of this row.
+     * Gets all fields of this row as an unmodifiable list.
      *
      * @return all fields of this row, never {@code null}
      */
-    public String[] getFields() {
-        return fields.clone();
+    public List<String> getFields() {
+        return Collections.unmodifiableList(Arrays.asList(fields));
     }
 
     /**

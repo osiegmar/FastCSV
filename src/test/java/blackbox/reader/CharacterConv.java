@@ -1,6 +1,5 @@
 package blackbox.reader;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,15 +15,15 @@ final class CharacterConv {
     private CharacterConv() {
     }
 
-    public static String print(final List<String[]> data) {
+    public static String print(final List<List<String>> data) {
         if (data.isEmpty()) {
             return EMPTY_LIST;
         }
 
         final StringBuilder sb = new StringBuilder();
-        for (Iterator<String[]> iter = data.iterator(); iter.hasNext();) {
-            final String[] datum = iter.next();
-            final Iterator<String> iterator = Arrays.stream(datum).iterator();
+        for (Iterator<List<String>> iter = data.iterator(); iter.hasNext();) {
+            final List<String> datum = iter.next();
+            final Iterator<String> iterator = datum.iterator();
             while (iterator.hasNext()) {
                 sb.append(print(iterator.next()));
                 if (iterator.hasNext()) {

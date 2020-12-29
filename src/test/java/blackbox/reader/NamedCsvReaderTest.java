@@ -135,7 +135,7 @@ public class NamedCsvReaderTest {
             .iterator();
 
         assertEquals("{headerA=fieldA, headerB=fieldB, headerC=fieldC}",
-            it.next().getFieldMap().toString());
+            it.next().getFields().toString());
     }
 
     // line numbering
