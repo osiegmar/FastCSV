@@ -261,10 +261,10 @@ public class CsvReaderTest {
             .iterator().next();
 
         buf[buf.length - 1] = (byte) 'a';
-        final IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+        final UncheckedIOException exception = assertThrows(UncheckedIOException.class, () ->
             crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
                 .iterator().next());
-        assertEquals("Maximum buffer size 8388608 is not enough to read data",
+        assertEquals("java.io.IOException: Maximum buffer size 8388608 is not enough to read data",
             exception.getMessage());
     }
 

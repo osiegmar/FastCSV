@@ -292,10 +292,12 @@ final class RowReader {
             return false;
         }
 
-        private static char[] extendAndRelocate(final char[] buf, final int begin) {
+        private static char[] extendAndRelocate(final char[] buf, final int begin)
+            throws IOException {
+
             final int newBufferSize = buf.length * 2;
             if (newBufferSize > MAX_BUFFER_SIZE) {
-                throw new IllegalStateException("Maximum buffer size "
+                throw new IOException("Maximum buffer size "
                     + MAX_BUFFER_SIZE + " is not enough to read data");
             }
             final char[] newBuf = new char[newBufferSize];
