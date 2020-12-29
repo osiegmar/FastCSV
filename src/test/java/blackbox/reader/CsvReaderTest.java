@@ -86,6 +86,13 @@ public class CsvReaderTest {
         assertThrows(NoSuchElementException.class, it::next);
     }
 
+    @Test
+    public void immutableResponse() {
+        final CsvRow foo = crb.build("foo").iterator().next();
+        foo.getFields()[0] = "bar";
+        assertEquals("foo", foo.getFields()[0]);
+    }
+
     // toString()
 
     @Test
