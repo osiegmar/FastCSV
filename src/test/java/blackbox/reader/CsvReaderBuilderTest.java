@@ -69,7 +69,7 @@ public class CsvReaderBuilderTest {
     }
 
     @Test
-    public void reader() throws IOException {
+    public void reader() {
         final List<CsvRow> list = crb
             .build(DATA).stream()
             .collect(Collectors.toList());
@@ -77,7 +77,7 @@ public class CsvReaderBuilderTest {
     }
 
     @Test
-    public void string() throws IOException {
+    public void string() {
         final List<CsvRow> list = crb.build(DATA).stream()
             .collect(Collectors.toList());
         assertEquals(EXPECTED, Arrays.toString(list.get(0).getFields()));
