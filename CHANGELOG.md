@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support for commented lines [\#31](https://github.com/osiegmar/FastCSV/issues/31)
+- Support for multiple quoting strategies [\#39](https://github.com/osiegmar/FastCSV/issues/39)
+
+### Changed
+- Completely re-engineered the API for better usability
+- Improved performance
+- Make use of Java 8 features (like Streams and Optionals)
+- Replaced TestNG with JUnit 5
+- Changed license from Apache 2.0 to MIT
+
+### Removed
+- CsvContainer concept – use `Stream.collect()` as a replacement
+- `java.io.File` API – use `java.nio.file.Path` instead
+
 ## [1.0.4] - 2020-11-29
 ### Fixed
 - Fix null returning CsvContainer when only a header is present [\#38](https://github.com/osiegmar/FastCSV/issues/38)
@@ -30,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v1.0.4...HEAD
 [1.0.4]: https://github.com/osiegmar/FastCSV/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/osiegmar/FastCSV/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/osiegmar/FastCSV/compare/v1.0.1...v1.0.2

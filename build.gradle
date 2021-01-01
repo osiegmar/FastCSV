@@ -1,97 +1,161 @@
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'checkstyle'
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
+buildscript {
+    dependencies {
+        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'checkstyle'
+    id 'pmd'
+    id 'jacoco'
+    id 'com.github.spotbugs' version '4.5.0'
+    id 'me.champeau.gradle.jmh' version '0.5.1'
+    id 'info.solidsoft.pitest' version '1.5.2'
+}
 
 group = "de.siegmar"
-archivesBaseName = "fastcsv"
-version = "1.0.4"
+version = "2.0.0-SNAPSHOT"
 
-sourceCompatibility = 1.7
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
 
 repositories {
-    jcenter()
+    mavenCentral()
+}
+
+sourceSets {
+    example
 }
 
 dependencies {
-    testCompile 'org.testng:testng:6.8.21'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    exampleImplementation sourceSets.main.output
+
+    pitest 'org.pitest:pitest-junit5-plugin:0.12'
+}
+
+tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
+    it.reports {
+        html.enabled = true
+        xml.enabled = false
+    }
 }
 
 test {
-    useTestNG()
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    classifier = 'sources'
+pitest {
+    testPlugin = 'junit5'
+    targetClasses=['blackbox.*','de.siegmar.*']
+    timestampedReports = false
 }
 
-task javadocJar(type: Jar) {
-    from javadoc
-    classifier = 'javadoc'
+// Bundled version 4.1.1 does not support Java 11 builds
+spotbugs {
+    toolVersion = '4.1.3'
 }
 
-checkstyle {
-    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-    configProperties = [samedir: "${rootDir}/config/checkstyle", project_loc: "${rootDir}"]
+pmd {
+    consoleOutput = true
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/config.xml")
 }
 
-tasks.withType(FindBugs) {
+jacocoTestReport {
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml.enabled true
     }
 }
 
-if (hasProperty('ossrhUsername')) {
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = jar.baseName
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 1.0
+            }
+        }
+    }
+}
 
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
+check.dependsOn jacocoTestCoverageVerification
 
-                pom {
-                    name = 'FastCSV'
-                    description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
+jmh {
+    warmupIterations = 2
+    iterations = 5
+    benchmarkMode = ['thrpt']
+    fork = 2
+    operationsPerInvocation = 1
+}
+
+task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
+    injars project.jar.archivePath
+    libraryjars files(String.format("%s/platforms/android-%s/android.jar",
+        System.getenv("ANDROID_HOME"), System.getenv("API_LEVEL")))
+    libraryjars files(configurations.compile)
+    // Don't really try to do anything, we just want this tool for it's bytecode lint
+    dontshrink
+    dontobfuscate
+    dontoptimize
+    // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda / Jack
+    dontwarn 'java.lang.invoke.LambdaMetafactory'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'fastcsv'
+            from components.java
+
+            pom {
+                name = 'FastCSV'
+                description = 'Ultra fast and simple RFC 4180 compliant CSV library.'
+                url = 'https://github.com/osiegmar/FastCSV'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                scm {
                     url = 'https://github.com/osiegmar/FastCSV'
-                    licenses {
-                        license {
-                            name = 'Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    scm {
-                        url = 'https://github.com/osiegmar/FastCSV'
-                        connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
-                    }
-                    developers {
-                        developer {
-                            id = 'osiegmar'
-                            name = 'Oliver Siegmar'
-                            email = 'oliver@siegmar.de'
-                        }
+                    connection = 'scm:git:https://github.com/osiegmar/FastCSV.git'
+                }
+                developers {
+                    developer {
+                        id = 'osiegmar'
+                        name = 'Oliver Siegmar'
+                        email = 'oliver@siegmar.de'
                     }
                 }
-            }
-        }
-        repositories {
-            maven {
-                credentials {
-                    username "$ossrhUsername"
-                    password "$ossrhPassword"
-                }
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             }
         }
     }
+    repositories {
+        maven {
+            name = 'ossrh'
+            credentials(PasswordCredentials)
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
 
-    signing {
-        sign publishing.publications.mavenJava
-    }
+signing {
+    sign publishing.publications.mavenJava
 }

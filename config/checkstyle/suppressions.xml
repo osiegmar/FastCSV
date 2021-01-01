@@ -1,21 +1,11 @@
 <?xml version="1.0"?>
-<!DOCTYPE suppressions PUBLIC "-//Puppy Crawl//DTD Suppressions 1.0//EN" "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
 
-    <!-- sacrifice some coding styles for the sake of performance -->
+    <suppress files=".*Test.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
+    <suppress files=".*Benchmark.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
+    <suppress files=".*Example.java" checks="(MissingJavadocType|MissingJavadocMethod|UncommentedMain|HideUtilityClassConstructor|RegexpMultiline)"/>
 
-    <suppress files="CsvParser.java" checks="CyclomaticComplexity"/>
-
-    <suppress files="RowReader.java" checks="CyclomaticComplexity"/>
-    <suppress files="RowReader.java" checks="InnerAssignment"/>
-    <suppress files="RowReader.java" checks="JavaNCSS"/>
-    <suppress files="RowReader.java" checks="NestedIfDepth"/>
-    <suppress files="RowReader.java" checks="ExecutableStatementCount"/>
-
-    <suppress files="CsvAppender.java" checks="CyclomaticComplexity"/>
-    <suppress files="CsvAppender.java" checks="NPathComplexity"/>
-    <suppress files="CsvAppender.java" checks="InnerAssignment"/>
-
-    <suppress files=".*Test.java" checks="MagicNumber"/>
+    <suppress files="Util.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
 
 </suppressions>

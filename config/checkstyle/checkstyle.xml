@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
 
+    <!-- Checker configuration - https://checkstyle.org/config.html#Checker -->
+    <property name="cacheFile" value="${config_loc}/../../build/checkstyle-cachefile"/>
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
-    <!--<property name="fileExtensions" value="java, properties, xml"/>-->
 
-    <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
+    <!-- Checks for Javadoc - https://checkstyle.sourceforge.io/config_javadoc.html -->
     <!--<module name="JavadocPackage"/>-->
 
-    <!-- Checks for Misc - http://checkstyle.sf.net/config_misc.html -->
+    <!-- Checks for Misc - https://checkstyle.sourceforge.io/config_misc.html -->
     <module name="NewlineAtEndOfFile">
         <property name="lineSeparator" value="lf"/>
     </module>
 
-    <!-- Checks for Misc - http://checkstyle.sf.net/config_misc.html -->
+    <!-- Checks for Misc - https://checkstyle.sourceforge.io/config_misc.html -->
     <module name="Translation"/>
     <module name="UniqueProperties"/>
 
-    <!-- Checks for Size Violations - http://checkstyle.sf.net/config_sizes.html -->
+    <!-- Checks for Size Violations - https://checkstyle.sourceforge.io/config_sizes.html -->
     <module name="FileLength"/>
 
-    <!-- Checks for Whitespaces - http://checkstyle.sf.net/config_whitespace.html -->
+    <!-- Checks for Whitespaces - https://checkstyle.sourceforge.io/config_whitespace.html -->
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
 
-
     <!-- Custom Checks -->
-    <!-- Checks for Regexps - http://checkstyle.sf.net/config_regexp.html -->
+    <!-- Checks for Regexps - https://checkstyle.sourceforge.io/config_regexp.html -->
 
     <module name="RegexpSingleline">
         <property name="format" value="\s$"/>
@@ -51,24 +51,29 @@
     </module>
 
     <module name="SuppressionFilter">
-        <property name="file" value="${samedir}/suppressions.xml"/>
+        <property name="file" value="${config_loc}/suppressions.xml"/>
     </module>
 
     <module name="SuppressWarningsFilter"/>
 
-    <!-- Checks for Header - http://checkstyle.sf.net/config_header.html -->
+    <!-- Checks for Header - https://checkstyle.sourceforge.io/config_header.html -->
+    <!--
     <module name="Header">
-        <property name="headerFile" value="${samedir}/java.header"/>
+        <property name="headerFile" value="${config_loc}/java.header"/>
         <property name="fileExtensions" value="java"/>
-        <property name="ignoreLines" value="2"/>
+    </module>
+    -->
+
+    <module name="LineLength">
+        <property name="max" value="100"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
 
     <module name="TreeWalker">
 
-        <property name="cacheFile" value="${project_loc}/build/checkstyle-cachefile"/>
         <property name="tabWidth" value="4"/>
 
-        <!-- Checks for Annotations - See http://checkstyle.sf.net/config_annotation.html -->
+        <!-- Checks for Annotations - See https://checkstyle.org/config_annotation.html -->
         <module name="AnnotationUseStyle"/>
         <module name="MissingDeprecated"/>
         <module name="MissingOverride"/>
@@ -77,27 +82,27 @@
         <module name="SuppressWarningsHolder"/>
         <!--<module name="AnnotationLocation"/>-->
 
-        <!-- Checks for Blocks - See http://checkstyle.sf.net/config_blocks.html -->
+        <!-- Checks for Blocks - See https://checkstyle.sourceforge.io/config_blocks.html -->
         <module name="EmptyBlock">
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
         </module>
-        <!--<module name="EmptyCatchBlock">-->
-            <!--<property name="exceptionVariableName" value="expected"/>-->
-        <!--</module>-->
-        <module name="LeftCurly">
-            <property name="maxLineLength" value="100"/>
+        <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="expected"/>
         </module>
+        <module name="LeftCurly"/>
         <module name="NeedBraces"/>
         <module name="RightCurly"/>
         <module name="RightCurly">
             <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
         </module>
         <module name="AvoidNestedBlocks"/>
 
-        <!-- Checks for Class Design - http://checkstyle.sf.net/config_design.html -->
-        <module name="VisibilityModifier"/>
+        <!-- Checks for Class Design - https://checkstyle.sourceforge.io/config_design.html -->
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
         <module name="FinalClass"/>
         <module name="InterfaceIsType"/>
         <module name="HideUtilityClassConstructor"/>
@@ -109,13 +114,16 @@
         <module name="InnerTypeLast"/>
         <module name="OneTopLevelClass"/>
 
-        <!-- Checks for Coding - http://checkstyle.sf.net/config_coding.html -->
+        <!-- Checks for Coding - https://checkstyle.sourceforge.io/config_coding.html -->
         <module name="ArrayTrailingComma"/>
         <module name="CovariantEquals"/>
         <module name="EmptyStatement"/>
         <module name="EqualsAvoidNull"/>
         <module name="EqualsHashCode"/>
-        <module name="FinalLocalVariable"/>
+        <module name="FinalLocalVariable">
+            <property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
+            <property name="validateEnhancedForLoopVariable" value="true"/>
+        </module>
         <module name="HiddenField">
             <property name="ignoreConstructorParameter" value="true"/>
             <property name="ignoreSetter" value="true"/>
@@ -162,7 +170,7 @@
         <module name="DefaultComesLast"/>
         <!--<module name="MissingCtor"/>-->
         <module name="FallThrough"/>
-<!--         <module name="MultipleStringLiterals"/> -->
+        <!--<module name="MultipleStringLiterals"/>-->
         <module name="MultipleVariableDeclarations"/>
         <!--<module name="RequireThis"/>-->
         <module name="UnnecessaryParentheses"/>
@@ -171,52 +179,67 @@
         <module name="OverloadMethodsDeclarationOrder"/>
 
 
-        <!-- Checks for Imports - http://checkstyle.sf.net/config_imports.html -->
+        <!-- Checks for Imports - https://checkstyle.sourceforge.io/config_imports.html -->
         <module name="AvoidStarImport"/>
         <!--<module name="AvoidStaticImport"/>-->
         <module name="IllegalImport"/>
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="ImportOrder">
-            <property name="groups" value="/^javax?\./,org,com"/>
+            <property name="groups" value="/^java\./,javax,org,com"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="top"/>
         </module>
-        <!--<module name="ImportControl">-->
-            <!--<property name="file" value="${samedir}/import-control.xml"/>-->
-        <!--</module>-->
+        <!--
+        <module name="ImportControl">
+            <property name="file" value="${config_loc}/import-control.xml"/>
+        </module>
+        -->
         <!--<module name="CustomImportOrder"/>-->
 
-        <!-- Checks for Javadoc - http://checkstyle.sf.net/config_javadoc.html -->
-        <!--<module name="JavadocType"/>-->
-        <!--<module name="JavadocMethod"/>-->
-        <!--<module name="JavadocVariable"/>-->
-        <module name="JavadocStyle"/>
-        <!--<module name="WriteTag"/>-->
-        <!--<module name="NonEmptyAtclauseDescription"/>-->
-        <!--<module name="JavadocTagContinuationIndentation"/>-->
-        <!--<module name="SummaryJavadoc"/>-->
-        <!--<module name="AtclauseOrder"/>-->
+        <!-- Checks for Javadoc - https://checkstyle.sourceforge.io/config_javadoc.html -->
+        <module name="AtclauseOrder"/>
+        <module name="InvalidJavadocPosition"/>
+        <module name="JavadocBlockTagLocation"/>
+        <module name="JavadocContentLocation"/>
+        <module name="JavadocMethod"/>
         <!--<module name="JavadocParagraph"/>-->
-        <!--<module name="SingleLineJavadoc"/>-->
+        <module name="JavadocStyle"/>
+        <module name="JavadocTagContinuationIndentation"/>
+        <module name="JavadocType"/>
+        <module name="JavadocVariable">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="MissingJavadocMethod"/>
+        <module name="MissingJavadocType"/>
+        <module name="NonEmptyAtclauseDescription"/>
+        <!--<module name="RequireEmptyLineBeforeBlockTagGroup"/>-->
+        <module name="SingleLineJavadoc"/>
+        <module name="SummaryJavadoc"/>
+        <!--<module name="WriteTag"/>-->
 
-        <!-- Checks for Metrics - http://checkstyle.sf.net/config_metrics.html -->
+        <!-- Checks for Metrics - https://checkstyle.sourceforge.io/config_metrics.html -->
         <module name="BooleanExpressionComplexity"/>
-        <module name="ClassDataAbstractionCoupling"/>
+        <module name="ClassDataAbstractionCoupling">
+            <property name="excludeClassesRegexps" value="^.*Exception$"/>
+        </module>
         <module name="ClassFanOutComplexity"/>
         <module name="CyclomaticComplexity"/>
         <module name="NPathComplexity"/>
         <module name="JavaNCSS"/>
 
-        <!-- Checks for Misc - http://checkstyle.sf.net/config_misc.html -->
+        <!-- Checks for Misc - https://checkstyle.sourceforge.io/config_misc.html -->
         <module name="TodoComment">
             <property name="format" value="(TODO)|(FIXME)"/>
+            <property name="severity" value="warning"/>
         </module>
         <module name="UncommentedMain"/>
         <module name="UpperEll"/>
         <module name="ArrayTypeStyle"/>
-        <module name="FinalParameters"/>
+        <module name="FinalParameters">
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, LITERAL_CATCH, FOR_EACH_CLAUSE"/>
+        </module>
         <module name="DescendantToken"/>
         <module name="Indentation">
         </module>
@@ -228,20 +251,20 @@
             <property name="allowNonPrintableEscapes" value="true"/>
         </module>
 
-        <!-- Checks for Modifiers - http://checkstyle.sf.net/config_modifier.html -->
+        <!-- Checks for Modifiers - https://checkstyle.sourceforge.io/config_modifier.html -->
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
 
-        <!-- Checks for Naming Conventions - http://checkstyle.sf.net/config_naming.html -->
+        <!-- Checks for Naming Conventions - https://checkstyle.sourceforge.io/config_naming.html -->
         <module name="AbstractClassName"/>
         <module name="ClassTypeParameterName">
-        	<property name="format" value="^[A-Z][A-Z]?$"/>
+            <property name="format" value="^[A-Z][A-Z]?$"/>
         </module>
         <module name="MethodTypeParameterName">
-        	<property name="format" value="^[A-Z][A-Z]?$"/>
+            <property name="format" value="^[A-Z][A-Z]?$"/>
         </module>
         <module name="InterfaceTypeParameterName">
-        	<property name="format" value="^[A-Z][A-Z]?$"/>
+            <property name="format" value="^[A-Z][A-Z]?$"/>
         </module>
         <module name="ConstantName"/>
         <module name="LocalFinalVariableName"/>
@@ -253,19 +276,17 @@
         <module name="StaticVariableName"/>
         <module name="TypeName"/>
 
-        <!-- Checks for Size Violations - http://checkstyle.sf.net/config_sizes.html -->
-        <module name="ExecutableStatementCount"/>
-        <module name="LineLength">
-            <property name="max" value="100"/>
-            <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
-        </module>
-        <module name="MethodLength"/>
+        <!-- Checks for Size Violations - https://checkstyle.sourceforge.io/config_sizes.html -->
         <module name="AnonInnerLength"/>
-        <module name="ParameterNumber"/>
-        <module name="OuterTypeNumber"/>
+        <module name="ExecutableStatementCount"/>
+        <!--<module name="LambdaBodyLength"/>-->
         <module name="MethodCount"/>
+        <module name="MethodLength"/>
+        <module name="OuterTypeNumber"/>
+        <module name="ParameterNumber"/>
+        <!--<module name="RecordComponentNumber"/>-->
 
-        <!-- Checks for Whitespaces - http://checkstyle.sf.net/config_whitespace.html -->
+        <!-- Checks for Whitespaces - https://checkstyle.sourceforge.io/config_whitespace.html -->
         <module name="GenericWhitespace"/>
         <module name="EmptyForInitializerPad"/>
         <module name="EmptyForIteratorPad"/>
@@ -280,6 +301,7 @@
         <module name="NoLineWrap"/>
         <module name="EmptyLineSeparator">
             <property name="allowNoEmptyLineBetweenFields" value="true"/>
+            <property name="allowMultipleEmptyLines" value="false"/>
         </module>
         <module name="SeparatorWrap">
             <property name="tokens" value="DOT"/>

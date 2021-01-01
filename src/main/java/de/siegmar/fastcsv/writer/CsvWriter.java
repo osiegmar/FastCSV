@@ -1,191 +1,365 @@
-/*
- * Copyright 2015 Oliver Siegmar
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package de.siegmar.fastcsv.writer;
 
-import java.io.File;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
  * This is the main class for writing CSV data.
- *
- * @author Oliver Siegmar
+ * <p>
+ * Example use:
+ * <pre>{@code
+ * try (CsvWriter csv = CsvWriter.builder().build(path, StandardCharsets.UTF_8)) {
+ *     csv.writeRow("Hello", "world");
+ * }
+ * }</pre>
  */
-public final class CsvWriter {
+@SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
+public final class CsvWriter implements Closeable {
 
-    /**
-     * Field separator character (default: ',' - comma).
-     */
-    private char fieldSeparator = ',';
+    private static final char CR = '\r';
+    private static final char LF = '\n';
 
-    /**
-     * Text delimiter character (default: '"' - double quotes).
-     */
-    private char textDelimiter = '"';
+    private final CachingWriter writer;
+    private final char fieldSeparator;
+    private final char quoteCharacter;
+    private final QuoteStrategy quoteStrategy;
+    private final String lineDelimiter;
+    private final boolean syncWriter;
 
-    /**
-     * Should fields always delimited using the {@link #textDelimiter}? (default: false).
-     */
-    private boolean alwaysDelimitText;
+    private boolean isNewline = true;
 
-    /**
-     * The line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
-     */
-    private char[] lineDelimiter = System.lineSeparator().toCharArray();
+    CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
+              final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
+              final boolean syncWriter) {
 
-    /**
-     * Sets the field separator character (default: ',' - comma).
-     */
-    public void setFieldSeparator(final char fieldSeparator) {
+        if (fieldSeparator == CR || fieldSeparator == LF) {
+            throw new IllegalArgumentException("fieldSeparator must not be a newline char");
+        }
+        if (quoteCharacter == CR || quoteCharacter == LF) {
+            throw new IllegalArgumentException("quoteCharacter must not be a newline char");
+        }
+        if (fieldSeparator == quoteCharacter) {
+            throw new IllegalArgumentException(String.format("Control characters must differ"
+                    + " (fieldSeparator=%s, quoteCharacter=%s)",
+                fieldSeparator, quoteCharacter));
+        }
+
+        this.writer = new CachingWriter(writer);
         this.fieldSeparator = fieldSeparator;
+        this.quoteCharacter = quoteCharacter;
+        this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
+        this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
+        this.syncWriter = syncWriter;
     }
 
     /**
-     * Sets the text delimiter character (default: '"' - double quotes).
+     * Creates a {@link CsvWriterBuilder} instance used to configure and create instances of
+     * this class.
+     * @return CsvWriterBuilder instance with default settings.
      */
-    public void setTextDelimiter(final char textDelimiter) {
-        this.textDelimiter = textDelimiter;
+    public static CsvWriterBuilder builder() {
+        return new CsvWriterBuilder();
     }
 
-    /**
-     * Sets if fields should always delimited using the {@link #textDelimiter} (default: false).
-     */
-    public void setAlwaysDelimitText(final boolean alwaysDelimitText) {
-        this.alwaysDelimitText = alwaysDelimitText;
+    private void writeInternal(final String value) throws IOException {
+        if (!isNewline) {
+            writer.write(fieldSeparator);
+        } else {
+            isNewline = false;
+        }
+
+        if (value == null) {
+            if (quoteStrategy == QuoteStrategy.ALWAYS) {
+                writer.write(quoteCharacter);
+                writer.write(quoteCharacter);
+            }
+            return;
+        }
+
+        if (value.isEmpty()) {
+            if (quoteStrategy == QuoteStrategy.ALWAYS
+                || quoteStrategy == QuoteStrategy.EMPTY) {
+                writer.write(quoteCharacter);
+                writer.write(quoteCharacter);
+            }
+            return;
+        }
+
+        final int length = value.length();
+        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS;
+        int nextDelimPos = -1;
+
+        for (int i = 0; i < length; i++) {
+            final char c = value.charAt(i);
+            if (c == quoteCharacter) {
+                needsQuotes = true;
+                nextDelimPos = i;
+                break;
+            }
+            if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR)) {
+                needsQuotes = true;
+            }
+        }
+
+        if (needsQuotes) {
+            writer.write(quoteCharacter);
+        }
+
+        if (nextDelimPos > -1) {
+            writeEscaped(value, length, nextDelimPos);
+        } else {
+            writer.write(value, 0, length);
+        }
+
+        if (needsQuotes) {
+            writer.write(quoteCharacter);
+        }
     }
 
-    /**
-     * Sets the line delimiter character(s) to be used (default: {@link System#lineSeparator()}).
-     */
-    public void setLineDelimiter(final char[] lineDelimiter) {
-        this.lineDelimiter = lineDelimiter.clone();
-    }
-
-    /**
-     * Writes all specified data to the file.
-     *
-     * @param file where the data should be written to.
-     * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if file, charset or data is null
-     */
-    public void write(final File file, final Charset charset, final Collection<String[]> data)
+    @SuppressWarnings({
+        "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment",
+        "PMD.AvoidReassigningParameters"
+    })
+    private void writeEscaped(final String value, final int length, int nextDelimPos)
         throws IOException {
 
-        write(
-            Objects.requireNonNull(file, "file must not be null").toPath(),
-            Objects.requireNonNull(charset, "charset must not be null"),
-            data
-        );
-    }
+        int startPos = 0;
+        do {
+            final int len = nextDelimPos - startPos + 1;
+            writer.write(value, startPos, len);
+            writer.write(quoteCharacter);
+            startPos += len;
 
-    /**
-     * Writes all specified data to the path.
-     *
-     * @param path where the data should be written to.
-     * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if path, charset or data is null
-     */
-    public void write(final Path path, final Charset charset, final Collection<String[]> data)
-        throws IOException {
+            nextDelimPos = -1;
+            for (int i = startPos; i < length; i++) {
+                if (value.charAt(i) == quoteCharacter) {
+                    nextDelimPos = i;
+                    break;
+                }
+            }
+        } while (nextDelimPos > -1);
 
-        Objects.requireNonNull(path, "path must not be null");
-        Objects.requireNonNull(charset, "charset must not be null");
-        try (final Writer writer = newWriter(path, charset)) {
-            write(writer, data);
+        if (length > startPos) {
+            writer.write(value, startPos, length - startPos);
         }
     }
 
     /**
-     * Writes all specified data to the writer.
+     * Appends a complete line - one or more fields and new line character(s) at the end.
      *
-     * @param writer where the data should be written to.
-     * @param data lines/columns to be written.
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if writer or data is null
+     * @param values the fields to append ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
+     * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
      */
-    public void write(final Writer writer, final Collection<String[]> data) throws IOException {
-        Objects.requireNonNull(data, "data must not be null");
-        final CsvAppender appender = append(writer);
-        for (final String[] values : data) {
-            appender.appendLine(values);
+    public CsvWriter writeRow(final Iterable<String> values) {
+        try {
+            for (final String value : values) {
+                writeInternal(value);
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
-        appender.flush();
     }
 
     /**
-     * Constructs a {@link CsvAppender} for the specified File.
+     * Appends a complete line - one or more fields and new line character(s) at the end.
      *
-     * @param file the file to write data to.
-     * @param charset the character set to be used for writing data to the file.
-     * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if file or charset is null
+     * @param values the fields to append ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
+     * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
      */
-    public CsvAppender append(final File file, final Charset charset) throws IOException {
-        return append(
-            Objects.requireNonNull(file, "file must not be null").toPath(),
-            Objects.requireNonNull(charset, "charset must not be null")
-        );
+    public CsvWriter writeRow(final String... values) {
+        try {
+            for (final String value : values) {
+                writeInternal(value);
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void endRow() throws IOException {
+        writer.write(lineDelimiter, 0, lineDelimiter.length());
+        isNewline = true;
+        if (syncWriter) {
+            writer.flushBuffer();
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        writer.close();
     }
 
     /**
-     * Constructs a {@link CsvAppender} for the specified Path.
-     *
-     * @param path the Path (file) to write data to.
-     * @param charset the character set to be used for writing data to the file.
-     * @return a new CsvAppender instance
-     * @throws IOException if a write error occurs
-     * @throws NullPointerException if path or charset is null
+     * This builder is used to create configured instances of {@link CsvWriter}. The default
+     * configuration of this class complies with RFC 4180.
      */
-    public CsvAppender append(final Path path, final Charset charset) throws IOException {
-        return append(newWriter(
-            Objects.requireNonNull(path, "path must not be null"),
-            Objects.requireNonNull(charset, "charset must not be null")
-        ));
+    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
+    public static final class CsvWriterBuilder {
+
+        private char fieldSeparator = ',';
+        private char quoteCharacter = '"';
+        private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
+        private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
+
+        CsvWriterBuilder() {
+        }
+
+        /**
+         * Sets the character that is used to separate columns (default: ',' - comma).
+         *
+         * @param fieldSeparator the field separator character.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
+            this.fieldSeparator = fieldSeparator;
+            return this;
+        }
+
+        /**
+         * Sets the character that is used to quote values (default: '"' - double quotes).
+         *
+         * @param quoteCharacter the character for enclosing fields.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
+            this.quoteCharacter = quoteCharacter;
+            return this;
+        }
+
+        /**
+         * Sets the strategy that defines when quoting has to be performed
+         * (default: {@link QuoteStrategy#REQUIRED}).
+         *
+         * @param quoteStrategy the strategy when fields should be enclosed using the.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
+            this.quoteStrategy = quoteStrategy;
+            return this;
+        }
+
+        /**
+         * Sets the delimiter that is used to separate lines (default: {@link LineDelimiter#CRLF}).
+         *
+         * @param lineDelimiter the line delimiter to be used.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
+            this.lineDelimiter = lineDelimiter;
+            return this;
+        }
+
+        /**
+         * Constructs a {@link CsvWriter} for the specified Writer.
+         * <p>
+         * This library uses built-in buffering but writes its internal buffer to the given
+         * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
+         * {@link CsvWriter#writeRow(Iterable)} call. Therefore you probably want to pass in a
+         * {@link java.io.BufferedWriter} to retain good performance.
+         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
+         * files.
+         *
+         * @param writer the Writer to use for writing CSV data.
+         * @return a new CsvWriter instance - never {@code null}.
+         * @throws NullPointerException if writer is {@code null}
+         */
+        public CsvWriter build(final Writer writer) {
+            Objects.requireNonNull(writer, "writer must not be null");
+
+            return newWriter(writer, true);
+        }
+
+        /**
+         * Constructs a {@link CsvWriter} for the specified Path.
+         *
+         * @param path        the path to write data to.
+         * @param charset     the character set to be used for writing data to the file.
+         * @param openOptions options specifying how the file is opened.
+         *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
+         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
+         * @throws IOException          if a write error occurs
+         * @throws NullPointerException if path or charset is {@code null}
+         */
+        public CsvWriter build(final Path path, final Charset charset,
+                               final OpenOption... openOptions)
+            throws IOException {
+
+            Objects.requireNonNull(path, "path must not be null");
+            Objects.requireNonNull(charset, "charset must not be null");
+
+            return newWriter(new OutputStreamWriter(Files.newOutputStream(path, openOptions),
+                charset), false);
+        }
+
+        private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
+            return new CsvWriter(writer, fieldSeparator, quoteCharacter, quoteStrategy,
+                lineDelimiter, syncWriter);
+        }
+
     }
 
     /**
-     * Constructs a {@link CsvAppender} for the specified Writer.
-     *
-     * This library uses built-in buffering, so you do not need to pass in a buffered Writer
-     * implementation such as {@link java.io.BufferedWriter}.
-     * Performance may be even likely better if you do not.
-     *
-     * @param writer the Writer to use for writing CSV data.
-     * @return a new CsvAppender instance
-     * @throws NullPointerException if writer is null
+     * Unsynchronized and thus high performance replacement for BufferedWriter.
+     * <p>
+     * This class is intended for internal use only.
      */
-    public CsvAppender append(final Writer writer) {
-        return new CsvAppender(Objects.requireNonNull(writer, "writer must not be null"),
-            fieldSeparator, textDelimiter, alwaysDelimitText, lineDelimiter);
-    }
+    static final class CachingWriter {
 
-    private static Writer newWriter(final Path path, final Charset charset) throws IOException {
-        return new OutputStreamWriter(Files.newOutputStream(path, StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING), charset);
+        private static final int BUFFER_SIZE = 8192;
+
+        private final Writer writer;
+        private final char[] buf = new char[BUFFER_SIZE];
+        private int pos;
+
+        CachingWriter(final Writer writer) {
+            this.writer = writer;
+        }
+
+        void write(final char c) throws IOException {
+            if (pos == BUFFER_SIZE) {
+                flushBuffer();
+            }
+            buf[pos++] = c;
+        }
+
+        @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
+        void write(final String str, final int off, final int len) throws IOException {
+            if (pos + len >= BUFFER_SIZE) {
+                flushBuffer();
+                writer.write(str, off, len);
+            } else {
+                str.getChars(off, off + len, buf, pos);
+                pos += len;
+            }
+        }
+
+        private void flushBuffer() throws IOException {
+            writer.write(buf, 0, pos);
+            pos = 0;
+        }
+
+        void close() throws IOException {
+            flushBuffer();
+            writer.close();
+        }
+
     }
 
 }
