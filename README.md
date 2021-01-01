@@ -15,8 +15,9 @@ Actively developed and maintained since 2015 its primary intended use cases are:
 
 ## Benchmark
 
-Benchmark from the
-[Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project:
+A selected benchmark from the
+[Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project.
+Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 
 ![Benchmark](benchmark.png "Benchmark")
 
