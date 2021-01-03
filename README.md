@@ -42,6 +42,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 ### Reader specific
 
 - Support reading of some non-compliant (real world) data
+  ([see comparison with other libraries](https://github.com/osiegmar/JavaCsvComparison))
 - Preserving line break character(s) within fields
 - Preserving the original line number (even with skipped and multi line records) –
   helpful for error messages
