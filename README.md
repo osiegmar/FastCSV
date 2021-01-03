@@ -6,6 +6,8 @@
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
 [![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv.svg)](https://search.maven.org/search?q=g:%22de.siegmar%22%20AND%20a:%22fastcsv%22)
 
+> :rocket: FastCSV 2.0 upgrade has landed with major improvements on performance and usability!
+
 FastCSV is an ultra-fast and dependency-free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
 library for Java.
 
