@@ -45,7 +45,7 @@ dependencies {
     pitest 'org.pitest:pitest-junit5-plugin:0.12'
 }
 
-tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
+tasks.matching { task -> task.name.startsWith('spotbugs') }.forEach {
     it.reports {
         html.enabled = true
         xml.enabled = false
@@ -59,7 +59,7 @@ test {
 
 pitest {
     testPlugin = 'junit5'
-    targetClasses=['blackbox.*','de.siegmar.*']
+    targetClasses = ['blackbox.*', 'de.siegmar.*']
     timestampedReports = false
 }
 
@@ -105,7 +105,7 @@ jmh {
 task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
     injars project.jar.archivePath
     libraryjars files(String.format("%s/platforms/android-%s/android.jar",
-        System.getenv("ANDROID_HOME"), System.getenv("API_LEVEL")))
+            System.getenv("ANDROID_HOME"), System.getenv("API_LEVEL")))
     libraryjars files(configurations.compile)
     // Don't really try to do anything, we just want this tool for it's bytecode lint
     dontshrink
