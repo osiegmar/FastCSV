@@ -168,6 +168,16 @@ public class CsvWriterTest {
     }
 
     @Test
+    public void mixedWriterUsage() {
+        final StringWriter stringWriter = new StringWriter();
+        final CsvWriter csvWriter = CsvWriter.builder().build(stringWriter);
+        csvWriter.writeRow("foo", "bar");
+        stringWriter.write("# my comment\r\n");
+        csvWriter.writeRow("1", "2");
+        assertEquals("foo,bar\r\n# my comment\r\n1,2\r\n", stringWriter.toString());
+    }
+
+    @Test
     public void unwritableArray() {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crw.build(new UnwritableWriter()).writeRow("foo"));
