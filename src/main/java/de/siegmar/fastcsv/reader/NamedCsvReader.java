@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -19,7 +20,7 @@ import java.util.stream.StreamSupport;
  * <p>
  * Example use:
  * <pre>{@code
- * try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path, charset)) {
+ * try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path)) {
  *     for (NamedCsvRow row : csvReader) {
  *         ...
  *     }
@@ -211,6 +212,18 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         public NamedCsvReaderBuilder skipComments(final boolean skipComments) {
             this.skipComments = skipComments;
             return this;
+        }
+
+        /**
+         * Constructs a new {@link NamedCsvReader} for the specified path using UTF-8 as the character set.
+         *
+         * @param path    the file to read data from.
+         * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
+         * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if path or charset is {@code null}
+         */
+        public NamedCsvReader build(final Path path) throws IOException {
+            return build(path, StandardCharsets.UTF_8);
         }
 
         /**
