@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ import java.util.Objects;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvWriter csv = CsvWriter.builder().build(path, StandardCharsets.UTF_8)) {
+ * try (CsvWriter csv = CsvWriter.builder().build(path)) {
  *     csv.writeRow("Hello", "world");
  * }
  * }</pre>
@@ -282,6 +283,21 @@ public final class CsvWriter implements Closeable {
             Objects.requireNonNull(writer, "writer must not be null");
 
             return newWriter(writer, true);
+        }
+
+        /**
+         * Constructs a {@link CsvWriter} for the specified path, openOptions using UTF-8 as the character set..
+         *
+         * @param path        the path to write data to.
+         * @param openOptions options specifying how the file is opened.
+         *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
+         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
+         * @throws IOException          if a write error occurs
+         * @throws NullPointerException if path or charset is {@code null}
+         */
+        public CsvWriter build(final Path path, final OpenOption... openOptions)
+            throws IOException {
+            return build(path, StandardCharsets.UTF_8, openOptions);
         }
 
         /**

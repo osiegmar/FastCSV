@@ -34,12 +34,12 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 
 ### CSV specific
 
-- RFC 4180 compliant – including:
+- RFC 4180-bis compliant – including:
   - Newline and field separator characters in fields
   - Quote escaping
+  - Unicode support
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
-- Unicode support
 
 ### Reader specific
 
@@ -85,7 +85,7 @@ NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
 Iterative reading of a CSV file
 
 ```java
-try (CsvReader csv = CsvReader.builder().build(path, charset)) {
+try (CsvReader csv = CsvReader.builder().build(path)) {
     csv.forEach(System.out::println);
 }
 ```
@@ -118,7 +118,7 @@ CsvWriter.builder().build(new PrintWriter(System.out, true))
 Iterative writing of a CSV file
 
 ```java
-try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
+try (CsvWriter csv = CsvWriter.builder().build(path)) {
     csv
         .writeRow("header1", "header2")
         .writeRow("value1", "value2");

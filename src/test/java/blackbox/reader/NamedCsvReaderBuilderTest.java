@@ -84,7 +84,7 @@ public class NamedCsvReaderBuilderTest {
         Files.write(file, DATA.getBytes(UTF_8));
 
         final List<NamedCsvRow> list;
-        try (Stream<NamedCsvRow> stream = crb.build(file, UTF_8).stream()) {
+        try (Stream<NamedCsvRow> stream = crb.build(file).stream()) {
             list = stream.collect(Collectors.toList());
         }
 

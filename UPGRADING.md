@@ -39,7 +39,7 @@ try (CsvParser csvParser = new CsvReader().parse(file, UTF_8)) {
 
 New way:
 ```java
-try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
+try (CsvReader csvReader = CsvReader.builder().build(path)) {
     csvReader.forEach(row ->
         System.out.println("First column of line: " + row.getField(0))
     );
@@ -62,7 +62,7 @@ try (CsvParser csvParser = csvReader.parse(file, UTF_8)) {
 
 New way:
 ```java
-try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path, UTF_8)) {
+try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path)) {
     csvReader.forEach(row ->
         System.out.println("Column named firstname: " + row.getField("firstname"))
     );
@@ -81,7 +81,7 @@ The container concept has been removed, but you can
 easily build something similar using the Java Stream API.
 ```java
 List<CsvRow> data;
-try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
+try (CsvReader csvReader = CsvReader.builder().build(path)) {
     data = csvReader.stream().collect(Collectors.toList());
 }
 ```
@@ -116,7 +116,7 @@ CsvWriter.builder()
 
 Old way:
 ```java
-try (CsvAppender csvAppender = new CsvWriter().append(file, UTF_8)) {
+try (CsvAppender csvAppender = new CsvWriter().append(file)) {
     csvAppender.appendLine("header1", "header2");
     csvAppender.appendLine("value1", "value2");
 }
@@ -124,7 +124,7 @@ try (CsvAppender csvAppender = new CsvWriter().append(file, UTF_8)) {
 
 New way:
 ```java
-try (CsvWriter csvWriter = CsvWriter.builder().build(file, UTF_8)) {
+try (CsvWriter csvWriter = CsvWriter.builder().build(file)) {
     csvWriter
         .writeRow("header1", "header2")
         .writeRow("value1", "value2");
