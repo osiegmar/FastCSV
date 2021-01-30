@@ -135,7 +135,7 @@ public class CsvWriterTest {
     @Test
     public void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
-        try (CsvWriter csv = CsvWriter.builder().build(file, UTF_8)) {
+        try (CsvWriter csv = CsvWriter.builder().build(file)) {
             csv.writeRow("value1", "value2");
         }
 
