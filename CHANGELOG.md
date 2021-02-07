@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4180-bis] - 2021-??-??
 ### Added
 - Added builder methods for standard encoding (UTF-8)
+- Added comment support for writer
 
 ## [2.0.0] - 2021-01-01
 ### Added
