@@ -297,8 +297,9 @@ final class RowReader {
 
             final int newBufferSize = buf.length * 2;
             if (newBufferSize > MAX_BUFFER_SIZE) {
-                throw new IOException("Maximum buffer size "
-                    + MAX_BUFFER_SIZE + " is not enough to read data");
+                throw new IOException("Maximum buffer size " + MAX_BUFFER_SIZE + " is not enough "
+                    + "to read data of a single field. Typically, this happens if quotation "
+                    + "started but did not end within this buffer's maximum boundary.");
             }
             final char[] newBuf = new char[newBufferSize];
             System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
