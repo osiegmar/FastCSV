@@ -1,6 +1,5 @@
 package blackbox.reader;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,9 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
@@ -258,19 +256,41 @@ public class CsvReaderTest {
 
     @Test
     public void bufferExceed() {
-        final byte[] buf = new byte[8 * 1024 * 1024];
-        Arrays.fill(buf, (byte) 'a');
-        buf[buf.length - 1] = (byte) ',';
+        final char[] buf = new char[8 * 1024 * 1024];
+        Arrays.fill(buf, 'X');
+        buf[buf.length - 1] = ',';
 
-        crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
-            .iterator().next();
+        crb.build(new CharArrayReader(buf)).iterator().next();
 
-        buf[buf.length - 1] = (byte) 'a';
+        buf[buf.length - 1] = (byte) 'X';
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class, () ->
-            crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
-                .iterator().next());
-        assertEquals("java.io.IOException: Maximum buffer size 8388608 is not enough to read data",
-            exception.getMessage());
+            crb.build(new CharArrayReader(buf)).iterator().next());
+        assertEquals("IOException when reading first record", exception.getMessage());
+
+        assertEquals("Maximum buffer size 8388608 is not enough to read data of a single field. "
+                + "Typically, this happens if quotation started but did not end within this buffer's "
+                + "maximum boundary.",
+            exception.getCause().getMessage());
+    }
+
+    @Test
+    public void bufferExceedSubsequentRecord() {
+        final char[] buf = new char[8 * 1024 * 1024];
+        Arrays.fill(buf, 'X');
+        final String s = "a,b,c\n\"";
+        System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
+
+        final CloseableIterator<CsvRow> iterator = crb.build(new CharArrayReader(buf)).iterator();
+
+        iterator.next();
+
+        final UncheckedIOException exception = assertThrows(UncheckedIOException.class, iterator::next);
+        assertEquals("IOException when reading record that started in line 2", exception.getMessage());
+
+        assertEquals("Maximum buffer size 8388608 is not enough to read data of a single field. "
+                + "Typically, this happens if quotation started but did not end within this buffer's "
+                + "maximum boundary.",
+            exception.getCause().getMessage());
     }
 
     // API
@@ -342,7 +362,7 @@ public class CsvReaderTest {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crb.build(new UnreadableReader()).iterator().next());
 
-        assertEquals("java.io.IOException: Cannot read", e.getMessage());
+        assertEquals("IOException when reading first record", e.getMessage());
     }
 
     // test helpers
