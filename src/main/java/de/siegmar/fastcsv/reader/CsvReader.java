@@ -187,7 +187,12 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             try {
                 fetchedRow = fetchRow();
             } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                if (fetchedRow != null) {
+                    throw new UncheckedIOException("IOException when reading record that started in line "
+                        + (fetchedRow.getOriginalLineNumber() + 1), e);
+                } else {
+                    throw new UncheckedIOException("IOException when reading first record", e);
+                }
             }
             fetched = true;
         }
