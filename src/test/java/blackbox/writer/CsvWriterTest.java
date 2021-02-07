@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,10 @@ public class CsvWriterTest {
         final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () ->
             CsvWriter.builder().quoteCharacter(c).build(new StringWriter()));
         assertEquals("quoteCharacter must not be a newline char", e2.getMessage());
+
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () ->
+            CsvWriter.builder().commentCharacter(c).build(new StringWriter()));
+        assertEquals("commentCharacter must not be a newline char", e3.getMessage());
     }
 
     @Test
@@ -48,6 +53,14 @@ public class CsvWriterTest {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
             crw.fieldSeparator(',').quoteCharacter(',').build(new StringWriter()));
         assertTrue(e.getMessage().contains("Control characters must differ"));
+
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () ->
+            crw.fieldSeparator(',').commentCharacter(',').build(new StringWriter()));
+        assertTrue(e2.getMessage().contains("Control characters must differ"));
+
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () ->
+            crw.quoteCharacter(',').commentCharacter(',').build(new StringWriter()));
+        assertTrue(e3.getMessage().contains("Control characters must differ"));
     }
 
     @Test
@@ -81,12 +94,8 @@ public class CsvWriterTest {
         cols.add("foo");
         cols.add("bar");
 
-        final StringWriter sw = new StringWriter();
-        crw.build(sw)
-            .writeRow(cols)
-            .writeRow(cols);
-
-        assertEquals("foo,bar\nfoo,bar\n", sw.toString());
+        assertEquals("foo,bar\nfoo,bar\n",
+            write(w -> w.writeRow(cols).writeRow(cols)));
     }
 
     @Test
@@ -125,11 +134,44 @@ public class CsvWriterTest {
     }
 
     @Test
+    public void commentCharacter() {
+        assertEquals("\"#foo\",\"bar#\"\n", write("#foo", "bar#"));
+    }
+
+    @Test
+    public void commentCharacterDifferentChar() {
+        assertEquals(";foo,bar\n", write(";foo", "bar"));
+
+        crw.commentCharacter(';');
+        assertEquals("\";foo\",bar\n", write(";foo", "bar"));
+    }
+
+    @Test
+    public void writeComment() {
+        assertEquals("#this is a comment\n", write(w -> w.writeComment("this is a comment")));
+    }
+
+    @Test
+    public void writeCommentWithNewlines() {
+        assertEquals("#\n#line 2\n#line 3\n#line 4\n#\n",
+            write(w -> w.writeComment("\rline 2\nline 3\r\nline 4\n")));
+    }
+
+    @Test
+    public void writeEmptyComment() {
+        assertEquals("#\n#\n", write(w -> w.writeComment("").writeComment(null)));
+    }
+
+    @Test
+    public void writeCommentDifferentChar() {
+        crw.commentCharacter(';');
+        assertEquals(";this is a comment\n", write(w -> w.writeComment("this is a comment")));
+    }
+
+    @Test
     public void appending() {
-        final StringWriter sw = new StringWriter();
-        final CsvWriter appender = crw.build(sw);
-        appender.writeRow("foo", "bar").writeRow("foo2", "bar2");
-        assertEquals("foo,bar\nfoo2,bar2\n", sw.toString());
+        assertEquals("foo,bar\nfoo2,bar2\n",
+            write(w -> w.writeRow("foo", "bar").writeRow("foo2", "bar2")));
     }
 
     @Test
@@ -191,12 +233,21 @@ public class CsvWriterTest {
             crw.build(new UnwritableWriter()).writeRow(Collections.singletonList("foo")));
 
         assertEquals("java.io.IOException: Cannot write", e.getMessage());
+
+        final UncheckedIOException e2 = assertThrows(UncheckedIOException.class, () ->
+            crw.build(new UnwritableWriter()).writeComment("foo"));
+
+        assertEquals("java.io.IOException: Cannot write", e2.getMessage());
     }
 
     private String write(final String... cols) {
+        return write(w -> w.writeRow(cols));
+    }
+
+    private String write(final Consumer<CsvWriter> c) {
         final StringWriter sw = new StringWriter();
         final CsvWriter to = crw.build(sw);
-        to.writeRow(cols);
+        c.accept(to);
         return sw.toString();
     }
 

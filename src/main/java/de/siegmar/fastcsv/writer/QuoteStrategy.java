@@ -6,21 +6,27 @@ package de.siegmar.fastcsv.writer;
 public enum QuoteStrategy {
 
     /**
-     * Delimits only text fields that requires it. Simple strings (not containing delimiters,
-     * field separators, new line or carriage return characters), empty strings and
-     * {@code null} fields will not be delimited.
+     * Enclose fields only with quotes if required. That is, if the field contains:
+     * <ul>
+     *     <li>field separator</li>
+     *     <li>quote character</li>
+     *     <li>comment character</li>
+     *     <li>newline character(s) (CR / LF / CRLF)</li>
+     * </ul>
+     *
+     * Empty strings and {@code null} fields will not be enclosed with quotes.
      */
     REQUIRED,
 
     /**
-     * In addition to fields that require delimiting also delimit empty text fields to
+     * In addition to fields that require quote enclosing also delimit empty text fields to
      * differentiate between empty and {@code null} fields.
      * This is required for PostgreSQL CSV imports for example.
      */
     EMPTY,
 
     /**
-     * Delimits any text field regardless of its content (even empty and {@code null} fields).
+     * Enclose any text field with quotes regardless of its content (even empty and {@code null} fields).
      */
     ALWAYS
 
