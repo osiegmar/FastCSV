@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2021-??-??
 ### Changed
 - Small code improvement for writing field separators
+- Improved error message when buffer exceeds (because of invalid CSV data) [\#52](https://github.com/osiegmar/FastCSV/issues/52)
 
 ## [2.0.0] - 2021-01-01
 ### Added
