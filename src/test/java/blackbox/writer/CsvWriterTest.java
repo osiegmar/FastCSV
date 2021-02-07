@@ -135,7 +135,8 @@ public class CsvWriterTest {
 
     @Test
     public void commentCharacter() {
-        assertEquals("\"#foo\",\"bar#\"\n", write("#foo", "bar#"));
+        assertEquals("\"#foo\",#bar\n", write("#foo", "#bar"));
+        assertEquals(" #foo,#bar\n", write(" #foo", "#bar"));
     }
 
     @Test

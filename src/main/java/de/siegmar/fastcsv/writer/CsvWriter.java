@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -84,7 +83,7 @@ public final class CsvWriter implements Closeable {
     }
 
     @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
-    private void writeInternal(final String value) throws IOException {
+    private void writeInternal(final String value, final boolean firstField) throws IOException {
         if (value == null) {
             if (quoteStrategy == QuoteStrategy.ALWAYS) {
                 writer.write(quoteCharacter);
@@ -113,7 +112,8 @@ public final class CsvWriter implements Closeable {
                 nextDelimPos = i;
                 break;
             }
-            if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR || c == commentCharacter)) {
+            if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR
+                || (firstField && i == 0 && c == commentCharacter))) {
                 needsQuotes = true;
             }
         }
@@ -173,11 +173,13 @@ public final class CsvWriter implements Closeable {
      */
     public CsvWriter writeRow(final Iterable<String> values) {
         try {
-            for (Iterator<String> iterator = values.iterator(); iterator.hasNext();) {
-                writeInternal(iterator.next());
-                if (iterator.hasNext()) {
+            int i = 0;
+            for (final String value : values) {
+                if (i > 0) {
                     writer.write(fieldSeparator);
                 }
+                writeInternal(value, i == 0);
+                i++;
             }
             endRow();
             return this;
@@ -201,7 +203,7 @@ public final class CsvWriter implements Closeable {
                 if (i > 0) {
                     writer.write(fieldSeparator);
                 }
-                writeInternal(values[i]);
+                writeInternal(values[i], i == 0);
             }
             endRow();
             return this;
