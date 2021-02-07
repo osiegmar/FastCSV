@@ -37,6 +37,7 @@ public class CsvWriterExample {
             .quoteStrategy(QuoteStrategy.ALWAYS)
             .lineDelimiter(LineDelimiter.LF)
             .build(sw)
+            .writeComment("File created by foo on 2021-02-07")
             .writeRow("header1", "header2")
             .writeRow("value1", "value2");
 

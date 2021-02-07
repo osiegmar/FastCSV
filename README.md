@@ -38,6 +38,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
   - Newline and field separator characters in fields
   - Quote escaping
   - Unicode support
+  - Comment support (writing, reading/skipping) with configurable comment character
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
 
@@ -52,7 +53,6 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 - Configurable data validation
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
-- Support for commented lines (skipping & reading) and configurable comment character
 
 ### Writer specific
 
