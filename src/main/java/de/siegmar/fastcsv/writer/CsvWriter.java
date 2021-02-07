@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -33,8 +34,6 @@ public final class CsvWriter implements Closeable {
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
     private final boolean syncWriter;
-
-    private boolean isNewline = true;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
@@ -70,12 +69,6 @@ public final class CsvWriter implements Closeable {
     }
 
     private void writeInternal(final String value) throws IOException {
-        if (!isNewline) {
-            writer.write(fieldSeparator);
-        } else {
-            isNewline = false;
-        }
-
         if (value == null) {
             if (quoteStrategy == QuoteStrategy.ALWAYS) {
                 writer.write(quoteCharacter);
@@ -163,8 +156,11 @@ public final class CsvWriter implements Closeable {
      */
     public CsvWriter writeRow(final Iterable<String> values) {
         try {
-            for (final String value : values) {
-                writeInternal(value);
+            for (Iterator<String> iterator = values.iterator(); iterator.hasNext();) {
+                writeInternal(iterator.next());
+                if (iterator.hasNext()) {
+                    writer.write(fieldSeparator);
+                }
             }
             endRow();
             return this;
@@ -183,8 +179,11 @@ public final class CsvWriter implements Closeable {
      */
     public CsvWriter writeRow(final String... values) {
         try {
-            for (final String value : values) {
-                writeInternal(value);
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
+                    writer.write(fieldSeparator);
+                }
+                writeInternal(values[i]);
             }
             endRow();
             return this;
@@ -195,7 +194,6 @@ public final class CsvWriter implements Closeable {
 
     private void endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
-        isNewline = true;
         if (syncWriter) {
             writer.flushBuffer();
         }
