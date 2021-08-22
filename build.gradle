@@ -110,12 +110,6 @@ task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
     dontwarn 'java.lang.invoke.LambdaMetafactory'
 }
 
-tasks.named('jar') {
-    manifest {
-        attributes('Automatic-Module-Name': 'de.siegmar.fastcsv')
-    }
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
