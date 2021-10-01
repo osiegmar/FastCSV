@@ -1,4 +1,4 @@
-# FastCSV
+![FastCSV](fastcsv.png)
 
 [![build](https://github.com/osiegmar/FastCSV/workflows/build/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions?query=branch%3Amaster)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://www.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=osiegmar/FastCSV&amp;utm_campaign=Badge_Grade)
