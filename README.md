@@ -53,6 +53,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
 - Support for commented lines (skipping & reading) and configurable comment character
+- Support for random access file operations
 
 ### Writer specific
 

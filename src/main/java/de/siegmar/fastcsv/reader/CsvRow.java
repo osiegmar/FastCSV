@@ -14,16 +14,18 @@ public final class CsvRow {
     private static final String[] EMPTY = {""};
 
     private final long originalLineNumber;
+    private final long startingOffset;
     private final String[] fields;
     private final boolean comment;
 
-    CsvRow(final long originalLineNumber, final boolean comment) {
-        this(originalLineNumber, EMPTY, comment);
+    CsvRow(final long originalLineNumber, final long startingOffset, final boolean comment) {
+        this(originalLineNumber, startingOffset, EMPTY, comment);
     }
 
-    CsvRow(final long originalLineNumber, final String[] fields,
+    CsvRow(final long originalLineNumber, final long startingOffset, final String[] fields,
            final boolean comment) {
         this.originalLineNumber = originalLineNumber;
+        this.startingOffset = startingOffset;
         this.fields = fields;
         this.comment = comment;
     }
@@ -32,11 +34,24 @@ public final class CsvRow {
      * Returns the original line number (starting with 1). On multi-line rows this is the starting
      * line number.
      * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyRows(boolean)}.
+     * <p>
+     * When calling {@link CsvReader#resetBuffer()} this value starts from 1 again.
      *
      * @return the original line number
      */
     public long getOriginalLineNumber() {
         return originalLineNumber;
+    }
+
+    /**
+     * Returns the starting offset (data position in the underlying reader) of this row.
+     * <p>
+     * When calling {@link CsvReader#resetBuffer()} this value starts from 0 again.
+     *
+     * @return this row starting offset.
+     */
+    public long getStartingOffset() {
+        return startingOffset;
     }
 
     /**
@@ -93,6 +108,7 @@ public final class CsvRow {
     public String toString() {
         return new StringJoiner(", ", CsvRow.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
+            .add("startingOffset=" + startingOffset)
             .add("fields=" + Arrays.toString(fields))
             .add("comment=" + comment)
             .toString();

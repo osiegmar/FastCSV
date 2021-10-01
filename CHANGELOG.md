@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Builder methods for standard encoding (UTF-8)
 - Comment support for writer
 - toString() method to CsvWriter and CsvWriterBuilder
+- Support for random access file operations
 
 ### Changed
 - Improved error message when buffer exceeds (because of invalid CSV data) [\#52](https://github.com/osiegmar/FastCSV/issues/52)

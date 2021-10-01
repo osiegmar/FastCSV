@@ -144,6 +144,15 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         return csvRow;
     }
 
+    /**
+     * Resets this library's internal buffer. This is only needed if modifications on the passed
+     * reader are performed outside where already read data should be discarded (like after
+     * calling {@link java.io.RandomAccessFile#seek(long)}).
+     */
+    public void resetBuffer() {
+        rowReader.resetBuffer();
+    }
+
     @Override
     public void close() throws IOException {
         reader.close();
