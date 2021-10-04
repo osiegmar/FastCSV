@@ -9,7 +9,7 @@ Please keep in mind that the objectives of this project needs to be kept:
 - No third party libraries
 - Small footprint
 
-If unsure, create an issue for further discussion before sending a pull request.
+If unsure, start a [discussion](https://github.com/osiegmar/FastCSV/discussions).
 
 ## Steps to take
 
