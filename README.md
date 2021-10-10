@@ -38,7 +38,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
   - Newline and field separator characters in fields
   - Quote escaping
 - Configurable field separator
-- Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
+- Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
 - Unicode support
 
 ### Reader specific
