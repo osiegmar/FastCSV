@@ -1,4 +1,4 @@
-# Migrating from 1.0.x to 2.x
+# Migrating from 1.0.x to 2.1
 
 This document shows the most commonly used features of FastCSV 1.x
 and how these can be migrated to version 2 easily.
