@@ -408,21 +408,6 @@ public final class CsvWriter implements Closeable {
          * Constructs a {@link CsvWriter} for the specified Path.
          *
          * @param path        the path to write data to.
-         * @param openOptions options specifying how the file is opened.
-         *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
-         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
-         * @throws IOException          if a write error occurs
-         * @throws NullPointerException if path or charset is {@code null}
-         */
-        public CsvWriter build(final Path path, final OpenOption... openOptions)
-            throws IOException {
-            return build(path, StandardCharsets.UTF_8, openOptions);
-        }
-
-        /**
-         * Constructs a {@link CsvWriter} for the specified Path.
-         *
-         * @param path        the path to write data to.
          * @param charset     the character set to be used for writing data to the file.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
