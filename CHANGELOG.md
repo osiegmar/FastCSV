@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added builder methods for standard encoding (UTF-8)
 - Added comment support for writer
+- Add toString() method to CsvWriter and CsvWriterBuilder
 
 ### Changed
 - Small code improvement for writing field separators
