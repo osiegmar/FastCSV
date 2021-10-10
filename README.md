@@ -34,13 +34,12 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 
 ### CSV specific
 
-- RFC 4180-bis compliant – including:
+- RFC 4180 compliant – including:
   - Newline and field separator characters in fields
   - Quote escaping
-  - Unicode support
-  - Comment support (writing, reading/skipping) with configurable comment character
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
+- Unicode support
 
 ### Reader specific
 
@@ -49,14 +48,16 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 - Preserving line break character(s) within fields
 - Preserving the original line number (even with skipped and multi line records) –
   helpful for error messages
-- Auto detection of line delimiters (can also be mixed)
+- Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
+- Support for commented lines (skipping & reading) and configurable comment character
 
 ### Writer specific
 
 - Support for multiple quote strategies to differentiate between empty and null
+- Support for writing comments with proper quotation if needed
 
 ## Requirements
 
