@@ -1,6 +1,6 @@
 <img src="fastcsv.png" width="400" height="50" alt="FastCSV">
 
-[![build](https://github.com/osiegmar/FastCSV/workflows/build/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions?query=branch%3Amaster)
+[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://www.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=osiegmar/FastCSV&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/master/graph/badge.svg?token=WIWkv7HUyk)](https://app.codecov.io/gh/osiegmar/FastCSV/branch/master)
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
@@ -38,7 +38,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
   - Newline and field separator characters in fields
   - Quote escaping
 - Configurable field separator
-- Support for line endings CRLF (Windows), CR (old Mac OS) and LF (Unix)
+- Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
 - Unicode support
 
 ### Reader specific
@@ -48,7 +48,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 - Preserving line break character(s) within fields
 - Preserving the original line number (even with skipped and multi line records) –
   helpful for error messages
-- Auto detection of line delimiters (can also be mixed)
+- Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
