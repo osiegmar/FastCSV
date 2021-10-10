@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 final class DataProvider {
 
     private static final Pattern LINE_PATTERN =
-        Pattern.compile("^(?<input>\\S+)(?:\\s+(?<expected>\\S+))(?:\\s+\\[(?<flags>\\w+)])?");
+        Pattern.compile("^(?<input>\\S+)\\s+(?<expected>\\S+)(?:\\s+\\[(?<flags>\\w+)])?");
 
     private DataProvider() {
     }
@@ -45,7 +46,7 @@ final class DataProvider {
 
     private static BufferedReader resource(final String name) {
         return new BufferedReader(new InputStreamReader(
-            DataProvider.class.getResourceAsStream(name), StandardCharsets.UTF_8));
+            Objects.requireNonNull(DataProvider.class.getResourceAsStream(name)), StandardCharsets.UTF_8));
     }
 
     public static class TestData {
