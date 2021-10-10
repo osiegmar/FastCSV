@@ -83,6 +83,56 @@ public final class CsvWriter implements Closeable {
         return new CsvWriterBuilder();
     }
 
+    /**
+     * Writes a complete line - one or more fields and new line character(s) at the end.
+     *
+     * @param values the fields to write ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY})).
+     * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
+     * @see #writeRow(String...)
+     */
+    public CsvWriter writeRow(final Iterable<String> values) {
+        try {
+            boolean firstField = true;
+            for (final String value : values) {
+                if (!firstField) {
+                    writer.write(fieldSeparator);
+                }
+                writeInternal(value, firstField);
+                firstField = false;
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Writes a complete line - one or more fields and new line character(s) at the end.
+     *
+     * @param values the fields to write ({@code null} values are handled as empty strings, if
+     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
+     * @return This CsvWriter.
+     * @throws UncheckedIOException if a write error occurs
+     * @see #writeRow(Iterable)
+     */
+    public CsvWriter writeRow(final String... values) {
+        try {
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
+                    writer.write(fieldSeparator);
+                }
+                writeInternal(values[i], i == 0);
+            }
+            endRow();
+            return this;
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
     private void writeInternal(final String value, final boolean firstField) throws IOException {
         if (value == null) {
@@ -160,56 +210,6 @@ public final class CsvWriter implements Closeable {
 
         if (length > startPos) {
             writer.write(value, startPos, length - startPos);
-        }
-    }
-
-    /**
-     * Writes a complete line - one or more fields and new line character(s) at the end.
-     *
-     * @param values the fields to write ({@code null} values are handled as empty strings, if
-     *               not configured otherwise ({@link QuoteStrategy#EMPTY})).
-     * @return This CsvWriter.
-     * @throws UncheckedIOException if a write error occurs
-     * @see #writeRow(String...)
-     */
-    public CsvWriter writeRow(final Iterable<String> values) {
-        try {
-            int i = 0;
-            for (final String value : values) {
-                if (i > 0) {
-                    writer.write(fieldSeparator);
-                }
-                writeInternal(value, i == 0);
-                i++;
-            }
-            endRow();
-            return this;
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /**
-     * Writes a complete line - one or more fields and new line character(s) at the end.
-     *
-     * @param values the fields to write ({@code null} values are handled as empty strings, if
-     *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
-     * @return This CsvWriter.
-     * @throws UncheckedIOException if a write error occurs
-     * @see #writeRow(Iterable)
-     */
-    public CsvWriter writeRow(final String... values) {
-        try {
-            for (int i = 0; i < values.length; i++) {
-                if (i > 0) {
-                    writer.write(fieldSeparator);
-                }
-                writeInternal(values[i], i == 0);
-            }
-            endRow();
-            return this;
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 
@@ -350,7 +350,7 @@ public final class CsvWriter implements Closeable {
          * Sets the strategy that defines when quoting has to be performed
          * (default: {@link QuoteStrategy#REQUIRED}).
          *
-         * @param quoteStrategy the strategy when fields should be enclosed using the.
+         * @param quoteStrategy the strategy when fields should be enclosed using the {@code quoteCharacter}.
          * @return This updated object, so that additional method calls can be chained together.
          */
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
@@ -374,7 +374,7 @@ public final class CsvWriter implements Closeable {
          * <p>
          * This library uses built-in buffering but writes its internal buffer to the given
          * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
-         * {@link CsvWriter#writeRow(Iterable)} call. Therefore you probably want to pass in a
+         * {@link CsvWriter#writeRow(Iterable)} call. Therefore, you probably want to pass in a
          * {@link java.io.BufferedWriter} to retain good performance.
          * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
          * files.
@@ -390,7 +390,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Constructs a {@link CsvWriter} for the specified path, openOptions using UTF-8 as the character set..
+         * Constructs a {@link CsvWriter} for the specified Path.
          *
          * @param path        the path to write data to.
          * @param openOptions options specifying how the file is opened.
