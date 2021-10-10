@@ -390,7 +390,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Constructs a {@link CsvWriter} for the specified path, openOptions using UTF-8 as the character set..
+         * Constructs a {@link CsvWriter} for the specified Path.
          *
          * @param path        the path to write data to.
          * @param openOptions options specifying how the file is opened.
