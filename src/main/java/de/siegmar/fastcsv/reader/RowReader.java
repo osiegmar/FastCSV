@@ -99,7 +99,7 @@ final class RowReader {
                                 lStatus &= ~STATUS_LAST_CHAR_WAS_CR;
                             }
                         } else {
-                            // fast forward
+                            // fast-forward
                             while (lPos < lLen) {
                                 final char lookAhead = lBuf[lPos++];
                                 if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
@@ -174,7 +174,7 @@ final class RowReader {
                                 // normal unquoted data
                                 lStatus = STATUS_DATA_COLUMN;
 
-                                // fast forward
+                                // fast-forward
                                 while (lPos < lLen) {
                                     final char lookAhead = lBuf[lPos++];
                                     if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
