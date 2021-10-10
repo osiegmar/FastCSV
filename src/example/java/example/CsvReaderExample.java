@@ -1,11 +1,10 @@
 package example;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -90,9 +89,9 @@ public class CsvReaderExample {
     private static void file() {
         try {
             final Path path = Files.createTempFile("fastcsv", ".csv");
-            Files.write(path, "foo,bar\n".getBytes(UTF_8));
+            Files.write(path, Collections.singletonList("foo,bar\n"));
 
-            try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
+            try (CsvReader csvReader = CsvReader.builder().build(path)) {
                 csvReader.forEach(System.out::println);
             }
         } catch (final IOException e) {

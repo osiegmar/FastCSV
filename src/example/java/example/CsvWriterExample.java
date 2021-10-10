@@ -1,7 +1,5 @@
 package example;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
@@ -39,6 +37,7 @@ public class CsvWriterExample {
             .quoteStrategy(QuoteStrategy.ALWAYS)
             .lineDelimiter(LineDelimiter.LF)
             .build(sw)
+            .writeComment("File created by foo on 2021-02-07")
             .writeRow("header1", "header2")
             .writeRow("value1", "value2");
 
@@ -50,7 +49,7 @@ public class CsvWriterExample {
         try {
             final Path path = Files.createTempFile("fastcsv", ".csv");
 
-            try (CsvWriter csv = CsvWriter.builder().build(path, UTF_8)) {
+            try (CsvWriter csv = CsvWriter.builder().build(path)) {
                 csv
                     .writeRow("header1", "header2")
                     .writeRow("value1", "value2");
