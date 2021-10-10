@@ -1,6 +1,6 @@
 ![FastCSV](fastcsv.png)
 
-[![build](https://github.com/osiegmar/FastCSV/workflows/build/badge.svg?branch=develop)](https://github.com/osiegmar/FastCSV/actions?query=branch%3Adevelop)
+[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://www.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=osiegmar/FastCSV&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/develop/graph/badge.svg?token=WIWkv7HUyk)](https://app.codecov.io/gh/osiegmar/FastCSV/branch/develop)
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
