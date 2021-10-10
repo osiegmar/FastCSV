@@ -57,6 +57,7 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 ### Writer specific
 
 - Support for multiple quote strategies to differentiate between empty and null
+- Support for writing comments with proper quotation if needed
 
 ## Requirements
 
