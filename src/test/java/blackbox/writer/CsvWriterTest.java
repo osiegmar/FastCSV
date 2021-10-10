@@ -241,6 +241,20 @@ public class CsvWriterTest {
         assertEquals("java.io.IOException: Cannot write", e2.getMessage());
     }
 
+    // toString()
+
+    @Test
+    public void builderToString() {
+        assertEquals("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", " +
+            "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n]", crw.toString());
+    }
+
+    @Test
+    public void writerToString() {
+        assertEquals("CsvWriter[fieldSeparator=,, quoteCharacter=\", commentCharacter=#, " +
+            "quoteStrategy=REQUIRED, lineDelimiter='\n']", crw.build(new StringWriter()).toString());
+    }
+
     private String write(final String... cols) {
         return write(w -> w.writeRow(cols));
     }

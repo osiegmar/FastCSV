@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * This is the main class for writing CSV data.
@@ -285,6 +286,17 @@ public final class CsvWriter implements Closeable {
         writer.close();
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CsvWriter.class.getSimpleName() + "[", "]")
+            .add("fieldSeparator=" + fieldSeparator)
+            .add("quoteCharacter=" + quoteCharacter)
+            .add("commentCharacter=" + commentCharacter)
+            .add("quoteStrategy=" + quoteStrategy)
+            .add("lineDelimiter='" + lineDelimiter + "'")
+            .toString();
+    }
+
     /**
      * This builder is used to create configured instances of {@link CsvWriter}. The default
      * configuration of this class complies with RFC 4180.
@@ -417,6 +429,17 @@ public final class CsvWriter implements Closeable {
         private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
             return new CsvWriter(writer, fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy,
                 lineDelimiter, syncWriter);
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", CsvWriterBuilder.class.getSimpleName() + "[", "]")
+                .add("fieldSeparator=" + fieldSeparator)
+                .add("quoteCharacter=" + quoteCharacter)
+                .add("commentCharacter=" + commentCharacter)
+                .add("quoteStrategy=" + quoteStrategy)
+                .add("lineDelimiter=" + lineDelimiter)
+                .toString();
         }
 
     }
