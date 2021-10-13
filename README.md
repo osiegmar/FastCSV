@@ -142,3 +142,14 @@ For more example see
 
 Please see [UPGRADING.md](UPGRADING.md) for an overview of the main functionality of 1.x
 and how to upgrade them to version 2.
+
+---
+
+## Sponsoring and partnerships
+
+![YourKit](https://www.yourkit.com/images/yklogo.png)
+
+YourKit was used to optimize the performance and footprint of FastCSV.
+YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
+<a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
+and <a href="https://www.yourkit.com/youmonitor/">YourKit YouMonitor</a>.
