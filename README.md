@@ -13,13 +13,15 @@ Actively developed and maintained since 2015 its primary intended use cases are:
 - big data applications to read and write data on a massive scale
 - small data applications with the need for a lightweight library
 
-## Benchmark
+## Benchmark & Compatibility
 
 A selected benchmark from the
-[Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project.
-Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
+[Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project:
 
 ![Benchmark](benchmark.png "Benchmark")
+
+While maintaining high performance, FastCSV is a strict RFC 4180 CSV writer but also able
+to read garbled CSV data (to some degree). See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for details.
 
 ## Features
 
@@ -42,7 +44,6 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 ### Reader specific
 
 - Support reading of some non-compliant (real world) data
-  ([see comparison with other libraries](https://github.com/osiegmar/JavaCsvComparison))
 - Preserving line break character(s) within fields
 - Preserving the original line number (even with skipped and multi line records) –
   helpful for error messages
