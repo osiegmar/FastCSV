@@ -58,9 +58,11 @@ final class RowReader {
                     // reached end of stream
                     if (buffer.begin < buffer.pos || rowHandler.isCommentMode()) {
                         rowHandler.add(materialize(buffer.buf, buffer.begin,
-                            buffer.pos - buffer.begin, status, qChar));
+                            buffer.pos - buffer.begin, status, qChar),
+                            buffer.relativeOffset + buffer.begin);
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
-                        rowHandler.add("");
+                        // data stream ended with a field separator
+                        rowHandler.add("", buffer.relativeOffset + buffer.begin);
                     }
 
                     finished = true;
@@ -99,7 +101,7 @@ final class RowReader {
                                 lStatus &= ~STATUS_LAST_CHAR_WAS_CR;
                             }
                         } else {
-                            // fast forward
+                            // fast-forward
                             while (lPos < lLen) {
                                 final char lookAhead = lBuf[lPos++];
                                 if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
@@ -116,14 +118,14 @@ final class RowReader {
 
                         if (lookAhead == CR) {
                             rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                                qChar), buffer.relativeOffset + lBegin);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (lookAhead == LF) {
                             rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                                qChar), buffer.relativeOffset + lBegin);
                             status = STATUS_RESET;
                             lBegin = lPos;
                             moreDataNeeded = false;
@@ -137,12 +139,12 @@ final class RowReader {
 
                         if (c == fsep) {
                             rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                                qChar), buffer.relativeOffset + lBegin);
                             lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
                         } else if (c == CR) {
                             rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                                qChar), buffer.relativeOffset + lBegin);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
@@ -150,7 +152,7 @@ final class RowReader {
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
                                 rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
-                                    lStatus, qChar));
+                                    lStatus, qChar), buffer.relativeOffset + lBegin);
                                 status = STATUS_RESET;
                                 lBegin = lPos;
                                 moreDataNeeded = false;
@@ -174,7 +176,7 @@ final class RowReader {
                                 // normal unquoted data
                                 lStatus = STATUS_DATA_COLUMN;
 
-                                // fast forward
+                                // fast-forward
                                 while (lPos < lLen) {
                                     final char lookAhead = lBuf[lPos++];
                                     if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
@@ -202,6 +204,7 @@ final class RowReader {
     private static String materialize(final char[] lBuf,
                                       final int lBegin, final int lPos, final int lStatus,
                                       final char quoteCharacter) {
+
         if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
             // column without quotes
             return new String(lBuf, lBegin, lPos);
@@ -238,6 +241,11 @@ final class RowReader {
         return shift;
     }
 
+    public void resetBuffer() {
+        buffer.reset();
+        rowHandler.reset();
+    }
+
     @SuppressWarnings("checkstyle:visibilitymodifier")
     private static class Buffer {
         private static final int READ_SIZE = 8192;
@@ -248,6 +256,7 @@ final class RowReader {
         int len;
         int begin;
         int pos;
+        long relativeOffset;
 
         private final Reader reader;
 
@@ -277,10 +286,12 @@ final class RowReader {
                         System.arraycopy(buf, begin, buf, 0, lenToCopy);
                     }
                     pos -= begin;
+                    relativeOffset += begin;
                     begin = 0;
                 }
             } else {
                 // all data was consumed -- nothing to relocate
+                relativeOffset += begin;
                 pos = begin = 0;
             }
 
@@ -297,12 +308,20 @@ final class RowReader {
 
             final int newBufferSize = buf.length * 2;
             if (newBufferSize > MAX_BUFFER_SIZE) {
-                throw new IOException("Maximum buffer size "
-                    + MAX_BUFFER_SIZE + " is not enough to read data");
+                throw new IOException("Maximum buffer size " + MAX_BUFFER_SIZE + " is not enough "
+                    + "to read data of a single field. Typically, this happens if quotation "
+                    + "started but did not end within this buffer's maximum boundary.");
             }
             final char[] newBuf = new char[newBufferSize];
             System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
             return newBuf;
+        }
+
+        public void reset() {
+            len = 0;
+            begin = 0;
+            pos = 0;
+            relativeOffset = 0;
         }
 
     }

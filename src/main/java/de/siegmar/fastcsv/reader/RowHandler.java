@@ -8,14 +8,17 @@ final class RowHandler {
     private int lines = 1;
     private boolean commentMode;
     private long originalLineNumber = 1;
+    private long firstFieldStartOffset;
 
     RowHandler(final int len) {
         this.len = len;
         row = new String[len];
     }
 
-    void add(final String value) {
-        if (idx == len) {
+    void add(final String value, final long startingOffset) {
+        if (idx == 0) {
+            firstFieldStartOffset = startingOffset;
+        } else if (idx == len) {
             extendCapacity();
         }
         row[idx++] = value;
@@ -41,10 +44,10 @@ final class RowHandler {
         if (idx > 1 || !row[0].isEmpty()) {
             final String[] ret = new String[idx];
             System.arraycopy(row, 0, ret, 0, idx);
-            return new CsvRow(originalLineNumber, ret, commentMode);
+            return new CsvRow(originalLineNumber, firstFieldStartOffset, ret, commentMode);
         }
 
-        return new CsvRow(originalLineNumber, commentMode);
+        return new CsvRow(originalLineNumber, firstFieldStartOffset, commentMode);
     }
 
     public void enableCommentMode() {
@@ -57,6 +60,10 @@ final class RowHandler {
 
     public void incLines() {
         lines++;
+    }
+
+    public void reset() {
+        originalLineNumber = 1;
     }
 
 }

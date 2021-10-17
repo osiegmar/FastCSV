@@ -4,7 +4,7 @@
 
     <suppress files=".*Test.java" checks="(MagicNumber|MissingJavadocType|MissingJavadocMethod)"/>
     <suppress files=".*Benchmark.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
-    <suppress files=".*Example.java" checks="(MissingJavadocType|MissingJavadocMethod|UncommentedMain|HideUtilityClassConstructor|RegexpMultiline)"/>
+    <suppress files=".*Example.java" checks="(MissingJavadocType|MissingJavadocMethod|UncommentedMain|HideUtilityClassConstructor|RegexpMultiline|MagicNumber)"/>
 
     <suppress files="Util.java" checks="(MissingJavadocType|MissingJavadocMethod)"/>
 

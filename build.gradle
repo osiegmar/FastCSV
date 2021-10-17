@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "2.0.0"
+version = "2.1.0-SNAPSHOT"
 
 java {
     toolchain {
@@ -107,6 +107,12 @@ task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
     dontoptimize
     // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda / Jack
     dontwarn 'java.lang.invoke.LambdaMetafactory'
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes('Automatic-Module-Name': 'de.siegmar.fastcsv')
+    }
 }
 
 publishing {

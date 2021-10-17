@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
@@ -21,7 +22,7 @@ import java.util.stream.StreamSupport;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvReader csvReader = CsvReader.builder().build(path, charset)) {
+ * try (CsvReader csvReader = CsvReader.builder().build(path)) {
  *     for (CsvRow row : csvReader) {
  *         ...
  *     }
@@ -143,6 +144,15 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         return csvRow;
     }
 
+    /**
+     * Resets this library's internal buffer. This is only needed if modifications on the passed
+     * reader are performed outside where already read data should be discarded (like after
+     * calling {@link java.io.RandomAccessFile#seek(long)}).
+     */
+    public void resetBuffer() {
+        rowReader.resetBuffer();
+    }
+
     @Override
     public void close() throws IOException {
         reader.close();
@@ -187,7 +197,12 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
             try {
                 fetchedRow = fetchRow();
             } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+                if (fetchedRow != null) {
+                    throw new UncheckedIOException("IOException when reading record that started in line "
+                        + (fetchedRow.getOriginalLineNumber() + 1), e);
+                } else {
+                    throw new UncheckedIOException("IOException when reading first record", e);
+                }
             }
             fetched = true;
         }
@@ -317,6 +332,18 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         public CsvReader build(final String data) {
             return newReader(
                 new StringReader(Objects.requireNonNull(data, "data must not be null")));
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified path using UTF-8 as the character set.
+         *
+         * @param path    the file to read data from.
+         * @return a new CsvReader - never {@code null}. Don't forget to close it!
+         * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if path or charset is {@code null}
+         */
+        public CsvReader build(final Path path) throws IOException {
+            return build(path, StandardCharsets.UTF_8);
         }
 
         /**

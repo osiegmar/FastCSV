@@ -2,21 +2,28 @@ package example;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
+import de.siegmar.fastcsv.writer.CsvWriter;
 
-@SuppressWarnings("PMD.SystemPrintln")
+@SuppressWarnings({"PMD.SystemPrintln", "PMD.AvoidFileStream"})
 public class CsvReaderExample {
 
     public static void main(final String[] args) {
@@ -27,6 +34,7 @@ public class CsvReaderExample {
         header();
         advancedConfiguration();
         file();
+        randomAccessFile();
     }
 
     private static void simple() {
@@ -90,10 +98,49 @@ public class CsvReaderExample {
     private static void file() {
         try {
             final Path path = Files.createTempFile("fastcsv", ".csv");
-            Files.write(path, "foo,bar\n".getBytes(UTF_8));
+            Files.write(path, Collections.singletonList("foo,bar\n"));
 
-            try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
+            try (CsvReader csvReader = CsvReader.builder().build(path)) {
                 csvReader.forEach(System.out::println);
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void randomAccessFile() {
+        try {
+            final Path path = Files.createTempFile("fastcsv", ".csv");
+            try (CsvWriter writer = CsvWriter.builder().build(path, UTF_8)) {
+                for (int row = 0; row < 100; row++) {
+                    writer.writeRow("row " + row, "foo", "bar");
+                }
+            }
+
+            // collect row offsets (could also be done in larger chunks)
+            final List<Long> offsets;
+            try (CsvReader csvReader = CsvReader.builder().build(path, UTF_8)) {
+                offsets = csvReader.stream()
+                    .map(CsvRow::getStartingOffset)
+                    .collect(Collectors.toList());
+            }
+
+            // random access read with offset seeking
+            try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
+                 FileInputStream fin = new FileInputStream(raf.getFD());
+                 InputStreamReader isr = new InputStreamReader(fin, UTF_8);
+                 CsvReader reader = CsvReader.builder().build(isr);
+                 CloseableIterator<CsvRow> iterator = reader.iterator()) {
+
+                // seek to file offset of row 10
+                raf.seek(offsets.get(10));
+                reader.resetBuffer();
+                System.out.println(iterator.next());
+
+                // seek to file offset of row 50
+                raf.seek(offsets.get(50));
+                reader.resetBuffer();
+                System.out.println(iterator.next());
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

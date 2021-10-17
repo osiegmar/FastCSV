@@ -8,11 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -39,6 +46,7 @@ import de.siegmar.fastcsv.reader.MalformedCsvException;
 
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
+    "checkstyle:ClassDataAbstractionCoupling",
     "PMD.AvoidDuplicateLiterals",
     "PMD.CloseResource"
 })
@@ -227,6 +235,59 @@ public class CsvReaderTest {
         assertFalse(it.hasNext());
     }
 
+    // data offset
+
+    @Test
+    public void startingOffset() {
+        // Create 100 columns (enough data to force re-fetching of data from the reader)
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 100; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("012345678");
+        }
+        sb.append('\n');
+
+        final Iterator<CsvRow> it = crb
+            .build(new InfiniteDataReader(sb.toString())).iterator();
+
+        for (int i = 0; i < 100; i++) {
+            final CsvRow row = it.next();
+            assertEquals(100, row.getFields().size());
+            assertEquals(i * 1000, row.getStartingOffset());
+        }
+    }
+
+    @Test
+    @SuppressWarnings("PMD.AvoidFileStream")
+    public void seekingOffset(@TempDir final Path tmpDir) throws IOException {
+        final Path testFile = tmpDir.resolve("test.csv");
+        Files.write(testFile, Arrays.asList("abc,def", "ghi,jkl"), StandardOpenOption.CREATE);
+
+        try (RandomAccessFile raf = new RandomAccessFile(testFile.toFile(), "r");
+             Reader fileReader = new InputStreamReader(new FileInputStream(raf.getFD()), UTF_8);
+             CsvReader csvReader = crb.build(fileReader)) {
+
+            final Iterator<CsvRow> it = csvReader.iterator();
+
+            raf.seek(4);
+
+            CsvRow row = it.next();
+            assertEquals(Collections.singletonList("def"), row.getFields());
+            assertEquals(1, row.getOriginalLineNumber());
+            assertEquals(0, row.getStartingOffset());
+
+            raf.seek(0);
+            csvReader.resetBuffer();
+
+            row = it.next();
+            assertEquals(Arrays.asList("abc", "def"), row.getFields());
+            assertEquals(1, row.getOriginalLineNumber());
+            assertEquals(0, row.getStartingOffset());
+        }
+    }
+
     // comment
 
     @Test
@@ -250,7 +311,8 @@ public class CsvReaderTest {
 
     @Test
     public void toStringWithoutHeader() {
-        assertEquals("CsvRow[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]",
+        assertEquals("CsvRow[originalLineNumber=1, startingOffset=0, "
+                + "fields=[fieldA, fieldB], comment=false]",
             readSingleRow("fieldA,fieldB\n").toString());
     }
 
@@ -258,19 +320,41 @@ public class CsvReaderTest {
 
     @Test
     public void bufferExceed() {
-        final byte[] buf = new byte[8 * 1024 * 1024];
-        Arrays.fill(buf, (byte) 'a');
-        buf[buf.length - 1] = (byte) ',';
+        final char[] buf = new char[8 * 1024 * 1024];
+        Arrays.fill(buf, 'X');
+        buf[buf.length - 1] = ',';
 
-        crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
-            .iterator().next();
+        crb.build(new CharArrayReader(buf)).iterator().next();
 
-        buf[buf.length - 1] = (byte) 'a';
+        buf[buf.length - 1] = (byte) 'X';
         final UncheckedIOException exception = assertThrows(UncheckedIOException.class, () ->
-            crb.build(new InputStreamReader(new ByteArrayInputStream(buf), UTF_8))
-                .iterator().next());
-        assertEquals("java.io.IOException: Maximum buffer size 8388608 is not enough to read data",
-            exception.getMessage());
+            crb.build(new CharArrayReader(buf)).iterator().next());
+        assertEquals("IOException when reading first record", exception.getMessage());
+
+        assertEquals("Maximum buffer size 8388608 is not enough to read data of a single field. "
+                + "Typically, this happens if quotation started but did not end within this buffer's "
+                + "maximum boundary.",
+            exception.getCause().getMessage());
+    }
+
+    @Test
+    public void bufferExceedSubsequentRecord() {
+        final char[] buf = new char[8 * 1024 * 1024];
+        Arrays.fill(buf, 'X');
+        final String s = "a,b,c\n\"";
+        System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
+
+        final CloseableIterator<CsvRow> iterator = crb.build(new CharArrayReader(buf)).iterator();
+
+        iterator.next();
+
+        final UncheckedIOException exception = assertThrows(UncheckedIOException.class, iterator::next);
+        assertEquals("IOException when reading record that started in line 2", exception.getMessage());
+
+        assertEquals("Maximum buffer size 8388608 is not enough to read data of a single field. "
+                + "Typically, this happens if quotation started but did not end within this buffer's "
+                + "maximum boundary.",
+            exception.getCause().getMessage());
     }
 
     // API
@@ -342,7 +426,7 @@ public class CsvReaderTest {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crb.build(new UnreadableReader()).iterator().next());
 
-        assertEquals("java.io.IOException: Cannot read", e.getMessage());
+        assertEquals("IOException when reading first record", e.getMessage());
     }
 
     // test helpers

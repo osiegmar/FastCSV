@@ -1,8 +1,8 @@
 <img src="fastcsv.png" width="400" height="50" alt="FastCSV">
 
-[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
+[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://www.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=osiegmar/FastCSV&amp;utm_campaign=Badge_Grade)
-[![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/master/graph/badge.svg?token=WIWkv7HUyk)](https://app.codecov.io/gh/osiegmar/FastCSV/branch/master)
+[![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/develop/graph/badge.svg?token=WIWkv7HUyk)](https://app.codecov.io/gh/osiegmar/FastCSV/branch/develop)
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
 [![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv.svg)](https://search.maven.org/artifact/de.siegmar/fastcsv)
 
@@ -53,10 +53,12 @@ Comparing to some other popular, dependency-free and small (< 100 KB) libraries.
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
 - Support for commented lines (skipping & reading) and configurable comment character
+- Support for random access file operations
 
 ### Writer specific
 
 - Support for multiple quote strategies to differentiate between empty and null
+- Support for writing comments with proper quotation if needed
 
 ## Requirements
 
@@ -85,7 +87,7 @@ NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
 Iterative reading of a CSV file
 
 ```java
-try (CsvReader csv = CsvReader.builder().build(path, charset)) {
+try (CsvReader csv = CsvReader.builder().build(path)) {
     csv.forEach(System.out::println);
 }
 ```
@@ -118,7 +120,7 @@ CsvWriter.builder().build(new PrintWriter(System.out, true))
 Iterative writing of a CSV file
 
 ```java
-try (CsvWriter csv = CsvWriter.builder().build(path, charset)) {
+try (CsvWriter csv = CsvWriter.builder().build(path)) {
     csv
         .writeRow("header1", "header2")
         .writeRow("value1", "value2");
