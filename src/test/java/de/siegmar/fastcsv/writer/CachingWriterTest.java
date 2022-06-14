@@ -4,16 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class CachingWriterTest {
 
-    private final StringWriter sw = new StringWriter();
-    private final CsvWriter.CachingWriter cw = new CsvWriter.CachingWriter(sw);
-
-    @Test
-    public void appendSingle() throws IOException {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void appendSingle(final Appendable sw, final CsvWriter.CachingWriter cw) throws IOException {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -26,8 +27,9 @@ public class CachingWriterTest {
         assertEquals(sb.toString(), sw.toString());
     }
 
-    @Test
-    public void appendArray() throws IOException {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void appendArray(final Appendable sw, final CsvWriter.CachingWriter cw) throws IOException {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -39,8 +41,9 @@ public class CachingWriterTest {
         assertEquals(sb.toString(), sw.toString());
     }
 
-    @Test
-    public void appendLarge() throws IOException {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void appendLarge(final Appendable sw, final CsvWriter.CachingWriter cw) throws IOException {
         final String sb = buildLargeData();
         cw.write(sb, 0, sb.length());
 
@@ -53,6 +56,17 @@ public class CachingWriterTest {
             sb.append("ab");
         }
         return sb.toString();
+    }
+
+    static Stream<?> provideArguments() {
+        final StringWriter stringWriter = new StringWriter();
+        final CsvWriter.CachingWriter cachingWriterWithStringWriter = new  CsvWriter.CachingWriter(stringWriter);
+
+        final StringBuilder stringBuilder = new StringBuilder();
+        final CsvWriter.CachingWriter cachingWriterWithStringBuilder = new  CsvWriter.CachingWriter(stringBuilder);
+        return Stream.of(
+                Arguments.of(stringWriter, cachingWriterWithStringWriter),
+                Arguments.of(stringBuilder, cachingWriterWithStringBuilder));
     }
 
 }

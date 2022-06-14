@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,7 +38,7 @@ public final class CsvWriter implements Closeable {
     private final String lineDelimiter;
     private final boolean syncWriter;
 
-    CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
+    CsvWriter(final Appendable appendable, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
               final boolean syncWriter) {
         if (fieldSeparator == CR || fieldSeparator == LF) {
@@ -55,7 +56,7 @@ public final class CsvWriter implements Closeable {
                 fieldSeparator, quoteCharacter, commentCharacter));
         }
 
-        this.writer = new CachingWriter(writer);
+        this.writer = new CachingWriter(appendable);
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
@@ -390,6 +391,27 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
+         * Constructs a {@link CsvWriter} for the specified Appendable.
+         * <p>
+         * This library uses built-in buffering but writes its internal buffer to the given
+         * {@code appendable} on every {@link CsvWriter#writeRow(String...)} or
+         * {@link CsvWriter#writeRow(Iterable)} call. Therefore, you probably want to pass in a
+         * {@link java.io.BufferedWriter} to retain good performance.
+         * For building an in-memory CSV document, a {@link java.lang.StringBuilder} can be used.
+         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
+         * files.
+         *
+         * @param appendable the Appendable to use for writing CSV data.
+         * @return a new CsvWriter instance - never {@code null}.
+         * @throws NullPointerException if writer is {@code null}
+         */
+        public CsvWriter build(final Appendable appendable) {
+            Objects.requireNonNull(appendable, "appendable must not be null");
+
+            return newWriter(appendable, true);
+        }
+
+        /**
          * Constructs a {@link CsvWriter} for the specified Path.
          *
          * @param path        the path to write data to.
@@ -426,7 +448,7 @@ public final class CsvWriter implements Closeable {
                 charset), false);
         }
 
-        private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
+        private CsvWriter newWriter(final Appendable writer, final boolean syncWriter) {
             return new CsvWriter(writer, fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy,
                 lineDelimiter, syncWriter);
         }
@@ -453,40 +475,41 @@ public final class CsvWriter implements Closeable {
 
         private static final int BUFFER_SIZE = 8192;
 
-        private final Writer writer;
-        private final char[] buf = new char[BUFFER_SIZE];
-        private int pos;
+        private final Appendable appendable;
+        private final CharBuffer buf = CharBuffer.allocate(BUFFER_SIZE);
 
-        CachingWriter(final Writer writer) {
-            this.writer = writer;
+        CachingWriter(final Appendable appendable) {
+            this.appendable = appendable;
         }
 
         void write(final char c) throws IOException {
-            if (pos == BUFFER_SIZE) {
+            if (buf.position() == BUFFER_SIZE) {
                 flushBuffer();
             }
-            buf[pos++] = c;
+            buf.put(c);
         }
 
         @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
         void write(final String str, final int off, final int len) throws IOException {
-            if (pos + len >= BUFFER_SIZE) {
+            if (len > buf.remaining()) {
                 flushBuffer();
-                writer.write(str, off, len);
+                appendable.append(str, off, off + len);
             } else {
-                str.getChars(off, off + len, buf, pos);
-                pos += len;
+                buf.put(str, off, off + len);
             }
         }
 
         private void flushBuffer() throws IOException {
-            writer.write(buf, 0, pos);
-            pos = 0;
+            buf.flip();
+            appendable.append(buf);
+            buf.clear();
         }
 
         void close() throws IOException {
             flushBuffer();
-            writer.close();
+            if (appendable instanceof Closeable) {
+                ((Closeable) appendable).close();
+            }
         }
 
     }
