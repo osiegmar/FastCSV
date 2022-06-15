@@ -46,6 +46,15 @@ final class RowReader {
         this.cChar = commentCharacter;
     }
 
+    RowReader(final String data, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter) {
+        buffer = new Buffer(data);
+        this.fsep = fieldSeparator;
+        this.qChar = quoteCharacter;
+        this.cStrat = commentStrategy;
+        this.cChar = commentCharacter;
+    }
+
     CsvRow fetchAndRead() throws IOException {
         if (finished) {
             return null;
@@ -244,7 +253,7 @@ final class RowReader {
         private static final int BUFFER_SIZE = READ_SIZE;
         private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
 
-        char[] buf = new char[BUFFER_SIZE];
+        char[] buf;
         int len;
         int begin;
         int pos;
@@ -253,6 +262,13 @@ final class RowReader {
 
         Buffer(final Reader reader) {
             this.reader = reader;
+            buf = new char[BUFFER_SIZE];
+        }
+
+        Buffer(final String data) {
+            reader = null;
+            buf = data.toCharArray();
+            len = data.length();
         }
 
         /**
@@ -262,6 +278,10 @@ final class RowReader {
          * @throws IOException if a read error occurs
          */
         private boolean fetchData() throws IOException {
+            if (reader == null) {
+                return true;
+            }
+
             if (begin < pos) {
                 // we have data that can be relocated
 

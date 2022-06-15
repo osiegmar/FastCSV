@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +46,34 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
               final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
 
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+
+        this.commentStrategy = commentStrategy;
+        this.skipEmptyRows = skipEmptyRows;
+        this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
+        this.reader = reader;
+
+        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
+            commentCharacter);
+    }
+
+    @SuppressWarnings("PMD.NullAssignment")
+    CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter,
+              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
+
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+
+        this.commentStrategy = commentStrategy;
+        this.skipEmptyRows = skipEmptyRows;
+        this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
+        this.reader = null;
+
+        rowReader = new RowReader(data, fieldSeparator, quoteCharacter, commentStrategy,
+            commentCharacter);
+    }
+
+    private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
         if (fieldSeparator == CR || fieldSeparator == LF) {
             throw new IllegalArgumentException("fieldSeparator must not be a newline char");
         }
@@ -62,13 +89,6 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
                     + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
                 fieldSeparator, quoteCharacter, commentCharacter));
         }
-
-        this.reader = reader;
-        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
-        this.commentStrategy = commentStrategy;
-        this.skipEmptyRows = skipEmptyRows;
-        this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
     }
 
     /**
@@ -146,7 +166,9 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
     @Override
     public void close() throws IOException {
-        reader.close();
+        if (reader != null) {
+            reader.close();
+        }
     }
 
     @Override
@@ -200,7 +222,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
         @Override
         public void close() throws IOException {
-            reader.close();
+            CsvReader.this.close();
         }
 
     }
@@ -303,8 +325,10 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
          * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
-         * better if you do not. Use {@link #build(Path, Charset)} for optimal performance when
-         * reading files.
+         * better if you do not.
+         * <p>
+         * Use {@link #build(Path, Charset)} for optimal performance when
+         * reading files and {@link #build(String)} when reading Strings.
          *
          * @param reader the data source to read from.
          * @return a new CsvReader - never {@code null}.
@@ -321,8 +345,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
          * @return a new CsvReader - never {@code null}.
          */
         public CsvReader build(final String data) {
-            return newReader(
-                new StringReader(Objects.requireNonNull(data, "data must not be null")));
+            return newReader(Objects.requireNonNull(data, "data must not be null"));
         }
 
         /**
@@ -355,6 +378,11 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
         private CsvReader newReader(final Reader reader) {
             return new CsvReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
+                commentCharacter, skipEmptyRows, errorOnDifferentFieldCount);
+        }
+
+        private CsvReader newReader(final String data) {
+            return new CsvReader(data, fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, skipEmptyRows, errorOnDifferentFieldCount);
         }
 

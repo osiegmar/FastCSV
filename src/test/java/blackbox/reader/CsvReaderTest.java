@@ -322,6 +322,11 @@ public class CsvReaderTest {
     }
 
     @Test
+    public void closeStringNoException() {
+        assertDoesNotThrow(() -> crb.build("foo").close());
+    }
+
+    @Test
     public void spliterator() {
         final Spliterator<CsvRow> spliterator =
             crb.build("a,b,c\n1,2,3").spliterator();
