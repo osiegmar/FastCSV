@@ -44,6 +44,10 @@ dependencies {
     pitest 'org.pitest:pitest-junit5-plugin:0.12'
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 tasks.matching { task -> task.name.startsWith('spotbugs') }.forEach {
     it.reports {
         html.enabled = true
