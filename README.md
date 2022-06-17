@@ -1,10 +1,10 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="fastcsv_dark.webp 2x">
-  <source media="(prefers-color-scheme: light)" srcset="fastcsv_light.webp 2x">
-  <img src="fastcsv_light.webp" width="400" height="50" alt="FastCSV">
-</picture>
-
-<br>
+<p>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="fastcsv_dark.webp 2x">
+    <source media="(prefers-color-scheme: light)" srcset="fastcsv_light.webp 2x">
+    <img src="fastcsv_light.webp" width="400" height="50" alt="FastCSV">
+  </picture>
+</p>
 
 [![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://www.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=osiegmar/FastCSV&amp;utm_campaign=Badge_Grade)
