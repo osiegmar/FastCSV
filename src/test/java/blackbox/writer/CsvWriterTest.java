@@ -241,12 +241,26 @@ public class CsvWriterTest {
         assertEquals("java.io.IOException: Cannot write", e2.getMessage());
     }
 
+    // buffer
+
+    @Test
+    public void invalidBuffer() {
+        assertThrows(IllegalArgumentException.class, () -> crw.bufferSize(-1));
+    }
+
+    @Test
+    public void disableBuffer() {
+        final StringWriter stringWriter = new StringWriter();
+        crw.bufferSize(0).build(stringWriter).writeRow("foo", "bar");
+        assertEquals("foo,bar\n", stringWriter.toString());
+    }
+
     // toString()
 
     @Test
     public void builderToString() {
         assertEquals("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
-            + "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n]", crw.toString());
+            + "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n, bufferSize=8192]", crw.toString());
     }
 
     @Test

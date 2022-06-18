@@ -1,16 +1,17 @@
 package de.siegmar.fastcsv.writer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-public class CachingWriterTest {
+public class FastBufferedWriterTest {
 
     private final StringWriter sw = new StringWriter();
-    private final CsvWriter.CachingWriter cw = new CsvWriter.CachingWriter(sw);
+    private final CsvWriter.FastBufferedWriter cw = new CsvWriter.FastBufferedWriter(sw, 8192);
 
     @Test
     public void appendSingle() throws IOException {
@@ -45,6 +46,11 @@ public class CachingWriterTest {
         cw.write(sb, 0, sb.length());
 
         assertEquals(sb, sw.toString());
+    }
+
+    @Test
+    public void unreachable() {
+        assertThrows(IllegalStateException.class, () -> cw.write(new char[0], 0, 0));
     }
 
     private String buildLargeData() {

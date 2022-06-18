@@ -28,6 +28,7 @@ public class FastCsvWriteBenchmark {
         public void setup(final Blackhole bh) {
             writer = CsvWriter.builder()
                 .lineDelimiter(LineDelimiter.LF)
+                .bufferSize(0)
                 .build(new NullWriter(bh));
         }
 

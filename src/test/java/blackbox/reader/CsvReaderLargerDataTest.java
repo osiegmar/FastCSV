@@ -2,6 +2,7 @@ package blackbox.reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class CsvReaderLargerDataTest {
 
     @Test
     public void largerData() {
-        final CsvReader reader = CsvReader.builder().build(createSampleCSV());
+        final CsvReader reader = CsvReader.builder().build(new StringReader(createSampleCSV()));
         int i = 0;
         for (final CsvRow row : reader) {
             assertEquals(6, row.getFieldCount());

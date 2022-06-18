@@ -29,7 +29,7 @@ public final class CsvWriter implements Closeable {
     private static final char CR = '\r';
     private static final char LF = '\n';
 
-    private final CachingWriter writer;
+    private final Writer writer;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final char commentCharacter;
@@ -55,7 +55,7 @@ public final class CsvWriter implements Closeable {
                 fieldSeparator, quoteCharacter, commentCharacter));
         }
 
-        this.writer = new CachingWriter(writer);
+        this.writer = writer;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
@@ -277,7 +277,7 @@ public final class CsvWriter implements Closeable {
     private void endRow() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         if (syncWriter) {
-            writer.flushBuffer();
+            writer.flush();
         }
     }
 
@@ -304,11 +304,14 @@ public final class CsvWriter implements Closeable {
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvWriterBuilder {
 
+        private static final int DEFAULT_BUFFER_SIZE = 8192;
+
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
         private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
+        private int bufferSize = DEFAULT_BUFFER_SIZE;
 
         CsvWriterBuilder() {
         }
@@ -370,6 +373,25 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
+         * Configures the size of the internal buffer.
+         * <p>
+         * The default buffer size of 8,192 bytes usually does not need to be altered. One use-case is if you
+         * need many instances of a CsvWriter and need to optimize for instantiation time and memory footprint.
+         * <p>
+         * A buffer size of 0 disables the buffer.
+         *
+         * @param bufferSize the buffer size to be used (must be &ge; 0).
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvWriterBuilder bufferSize(final int bufferSize) {
+            if (bufferSize < 0) {
+                throw new IllegalArgumentException("buffer size must be >= 0");
+            }
+            this.bufferSize = bufferSize;
+            return this;
+        }
+
+        /**
          * Constructs a {@link CsvWriter} for the specified Writer.
          * <p>
          * This library uses built-in buffering but writes its internal buffer to the given
@@ -427,8 +449,13 @@ public final class CsvWriter implements Closeable {
         }
 
         private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
+            if (bufferSize > 0) {
+                return new CsvWriter(new FastBufferedWriter(writer, bufferSize), fieldSeparator, quoteCharacter,
+                    commentCharacter, quoteStrategy, lineDelimiter, syncWriter);
+            }
+
             return new CsvWriter(writer, fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy,
-                lineDelimiter, syncWriter);
+                lineDelimiter, false);
         }
 
         @Override
@@ -439,6 +466,7 @@ public final class CsvWriter implements Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("quoteStrategy=" + quoteStrategy)
                 .add("lineDelimiter=" + lineDelimiter)
+                .add("bufferSize=" + bufferSize)
                 .toString();
         }
 
@@ -449,43 +477,55 @@ public final class CsvWriter implements Closeable {
      * <p>
      * This class is intended for internal use only.
      */
-    static final class CachingWriter {
-
-        private static final int BUFFER_SIZE = 8192;
+    static final class FastBufferedWriter extends Writer {
 
         private final Writer writer;
-        private final char[] buf = new char[BUFFER_SIZE];
+        private final char[] buf;
         private int pos;
 
-        CachingWriter(final Writer writer) {
+        FastBufferedWriter(final Writer writer, final int bufferSize) {
             this.writer = writer;
+            buf = new char[bufferSize];
         }
 
-        void write(final char c) throws IOException {
-            if (pos == BUFFER_SIZE) {
-                flushBuffer();
+        @Override
+        public void write(final int c) throws IOException {
+            if (pos == buf.length) {
+                flush();
             }
-            buf[pos++] = c;
+            buf[pos++] = (char) c;
         }
 
-        @SuppressWarnings({"checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
-        void write(final String str, final int off, final int len) throws IOException {
-            if (pos + len >= BUFFER_SIZE) {
-                flushBuffer();
-                writer.write(str, off, len);
-            } else {
-                str.getChars(off, off + len, buf, pos);
-                pos += len;
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) {
+            throw new IllegalStateException("Not implemented");
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            if (pos + len >= buf.length) {
+                flush();
+                if (len >= buf.length) {
+                    final char[] tmp = new char[len];
+                    str.getChars(off, off + len, tmp, 0);
+                    writer.write(tmp, 0, len);
+                    return;
+                }
             }
+
+            str.getChars(off, off + len, buf, pos);
+            pos += len;
         }
 
-        private void flushBuffer() throws IOException {
+        @Override
+        public void flush() throws IOException {
             writer.write(buf, 0, pos);
             pos = 0;
         }
 
-        void close() throws IOException {
-            flushBuffer();
+        @Override
+        public void close() throws IOException {
+            flush();
             writer.close();
         }
 
