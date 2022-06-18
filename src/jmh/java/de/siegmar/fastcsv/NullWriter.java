@@ -21,11 +21,28 @@ public class NullWriter extends Writer {
     }
 
     @Override
+    public void write(final int c) {
+        if (pos == buf.length) {
+            flush();
+        }
+        buf[pos++] = (char) c;
+    }
+
+    @Override
     public void write(final char[] cbuf, final int off, final int len) {
         if (len + pos > buf.length) {
             flush();
         }
         System.arraycopy(cbuf, off, buf, pos, len);
+        pos += len;
+    }
+
+    @Override
+    public void write(final String str, final int off, final int len) {
+        if (len + pos > buf.length) {
+            flush();
+        }
+        str.getChars(off, off + len, buf, pos);
         pos += len;
     }
 
