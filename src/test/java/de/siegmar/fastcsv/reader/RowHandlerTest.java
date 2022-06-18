@@ -10,13 +10,12 @@ public class RowHandlerTest {
     @Test
     public void test() {
         final RowHandler rh = new RowHandler(1);
-        rh.add("foo", 0);
-        rh.add("bar", 4);
+        rh.add("foo");
+        rh.add("bar");
         final CsvRow csvRow = rh.buildAndReset();
 
         assertNotNull(csvRow);
-        assertEquals(
-            "CsvRow[originalLineNumber=1, startingOffset=0, fields=[foo, bar], comment=false]",
+        assertEquals("CsvRow[originalLineNumber=1, fields=[foo, bar], comment=false]",
             csvRow.toString());
     }
 

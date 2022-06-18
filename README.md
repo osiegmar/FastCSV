@@ -58,7 +58,6 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 - Support for (optional) header lines (get field based on column name)
 - Support for skipping empty rows
 - Support for commented lines (skipping & reading) and configurable comment character
-- Support for random access file operations
 
 ### Writer specific
 
