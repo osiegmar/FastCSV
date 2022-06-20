@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "2.1.0"
+version = "2.2.0"
 
 java {
     toolchain {
@@ -153,8 +153,8 @@ publishing {
         maven {
             name = 'ossrh'
             credentials(PasswordCredentials)
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
             url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
         }
     }

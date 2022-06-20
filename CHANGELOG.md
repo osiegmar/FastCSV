@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2022-06-20
+### Added
+- Improved CsvReader performance for String input [\#63](https://github.com/osiegmar/FastCSV/issues/63)
+- Added configurable buffer size for CsvWriter [\#63](https://github.com/osiegmar/FastCSV/issues/63)
+
+### Removed
+- Erroneous random access file feature [\#59](https://github.com/osiegmar/FastCSV/issues/59)
+
 ## [2.1.0] - 2021-10-17
 ### Added
 - Builder methods for standard encoding (UTF-8)
@@ -57,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v2.1.0...develop
+[2.2.0]: https://github.com/osiegmar/FastCSV/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/osiegmar/FastCSV/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/osiegmar/FastCSV/compare/v1.0.4...v2.0.0
 [1.0.4]: https://github.com/osiegmar/FastCSV/compare/v1.0.3...v1.0.4
