@@ -1,7 +1,6 @@
 package example;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -18,7 +17,7 @@ import de.siegmar.fastcsv.reader.NamedCsvRow;
 @SuppressWarnings("PMD.SystemPrintln")
 public class CsvReaderExample {
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws IOException {
         simple();
         forEachLambda();
         stream();
@@ -86,16 +85,12 @@ public class CsvReaderExample {
         System.out.println("Parsed via advanced config: " + parsedData);
     }
 
-    private static void file() {
-        try {
-            final Path path = Files.createTempFile("fastcsv", ".csv");
-            Files.write(path, Collections.singletonList("foo,bar\n"));
+    private static void file() throws IOException {
+        final Path path = Files.createTempFile("fastcsv", ".csv");
+        Files.write(path, Collections.singletonList("foo,bar\n"));
 
-            try (CsvReader csvReader = CsvReader.builder().build(path)) {
-                csvReader.forEach(System.out::println);
-            }
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+        try (CsvReader csvReader = CsvReader.builder().build(path)) {
+            csvReader.forEach(System.out::println);
         }
     }
 
