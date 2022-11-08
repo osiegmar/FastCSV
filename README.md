@@ -1,8 +1,8 @@
 <p>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="fastcsv_dark.webp 2x">
-    <source media="(prefers-color-scheme: light)" srcset="fastcsv_light.webp 2x">
-    <img src="fastcsv_light.webp" width="400" height="50" alt="FastCSV">
+    <source media="(prefers-color-scheme: dark)" type="image/avif" srcset="fastcsv_dark.avif 2x">
+    <source media="(prefers-color-scheme: light)" type="image/avif" srcset="fastcsv_light.avif 2x">
+    <img src="fastcsv.jpg" width="400" height="50" alt="FastCSV">
   </picture>
 </p>
 
