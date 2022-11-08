@@ -252,6 +252,23 @@ public class CsvReaderTest {
             readSingleRow("fieldA,fieldB\n").toString());
     }
 
+    // refill buffer while parsing an unquoted field containing a quote character
+
+    @Test
+    public void refillBufferInDataWithQuote() {
+        final char[] extra = ",a\"b\"c,d,".toCharArray();
+
+        final char[] buf = new char[8192 + extra.length];
+        Arrays.fill(buf, 'X');
+        System.arraycopy(extra, 0, buf, 8190, extra.length);
+
+        final CsvRow row = crb.build(new CharArrayReader(buf)).iterator().next();
+        assertEquals(4, row.getFieldCount());
+        assertEquals("a\"b\"c", row.getField(1));
+        assertEquals("d", row.getField(2));
+        assertEquals("XX", row.getField(3));
+    }
+
     // buffer exceed
 
     @Test

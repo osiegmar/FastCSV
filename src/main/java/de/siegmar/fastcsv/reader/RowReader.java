@@ -174,7 +174,7 @@ final class RowReader {
                             lStatus = STATUS_COMMENTED_ROW;
                             rh.enableCommentMode();
                             continue mode_check;
-                        } else if (c == qChar) {
+                        } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
                             // quote and not in data-only mode
                             lStatus = STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
                             continue mode_check;
