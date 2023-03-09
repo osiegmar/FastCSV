@@ -164,6 +164,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
         private boolean skipComments;
+        private boolean ignoreInvalidQuoteChars = false;
 
         private NamedCsvReaderBuilder() {
         }
@@ -211,6 +212,17 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
          */
         public NamedCsvReaderBuilder skipComments(final boolean skipComments) {
             this.skipComments = skipComments;
+            return this;
+        }
+
+        /**
+         * Defines if invalid placed quote chars like "\"Contains \" in cell content\"" should be ignored.
+         *
+         * @param ignoreInvalidQuoteChars If true invalid placed quote chars will be ignored
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public NamedCsvReaderBuilder ignoreInvalidQuoteChars(final boolean ignoreInvalidQuoteChars) {
+            this.ignoreInvalidQuoteChars = ignoreInvalidQuoteChars;
             return this;
         }
 
@@ -272,7 +284,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
                 .quoteCharacter(quoteCharacter)
                 .commentCharacter(commentCharacter)
                 .commentStrategy(skipComments ? CommentStrategy.SKIP : CommentStrategy.NONE)
-                .errorOnDifferentFieldCount(true);
+                .errorOnDifferentFieldCount(true)
+                .ignoreInvalidQuoteChars(ignoreInvalidQuoteChars);
         }
 
         @Override

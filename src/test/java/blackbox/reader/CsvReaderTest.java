@@ -1,11 +1,15 @@
 package blackbox.reader;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.MalformedCsvException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -23,17 +27,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import de.siegmar.fastcsv.reader.CloseableIterator;
-import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
-import de.siegmar.fastcsv.reader.MalformedCsvException;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
@@ -171,6 +170,71 @@ public class CsvReaderTest {
             () -> readAll("foo\nbar,\"baz\nbax\""));
 
         assertEquals("Row 2 has 2 fields, but first row had 1 fields", e.getMessage());
+    }
+
+    @Test
+    public void ignoreInvalidQuoteChars() {
+        CsvReader reader = crb
+            .ignoreInvalidQuoteChars(true)
+            .build("\"de:14628:1148:1\",\"Ri. \"Am Windberg\"\",\"51,002455\"\n");
+
+        CsvRow row = reader.iterator().next();
+        assertEquals("Ri. \"Am Windberg\"", row.getField(1));
+
+        assertEquals("de:14628:1148:1", row.getField(0));
+        assertEquals("51,002455", row.getField(2));
+    }
+
+    @Test
+    public void ignoreInvalidQuoteChars_InvalidQuoteCharAtEndOfBuffer() {
+        // see Buffer.READ_SIZE (other option would be to make Buffer.READ_SIZE public readable)
+        final int bufferSize = 8192;
+        StringBuilder csvData = new StringBuilder()
+            .append('"'); // cell starts with a quote
+        for (int i = 1; i < bufferSize - 1; i++) { // fill buffer till bufferSize - 1 with any char
+            csvData.append('a');
+        }
+
+        csvData.append('"') // now append the invalid quote char at end of buffer
+            .append("Some more data") // append some more data
+            .append('"') // append the correct quote char
+            .append('\n'); // and end line / data set
+
+        CsvReader reader = crb
+            .ignoreInvalidQuoteChars(true)
+            .build(new StringReader(csvData.toString()));
+
+        CsvRow row = reader.iterator().next();
+        String cell = row.getField(0);
+        assertTrue(cell.length() > bufferSize);
+        assertTrue(cell.endsWith("aaaa\"Some more data"));
+    }
+
+    @Test
+    public void ignoreInvalidQuoteChars_ValidQuoteCharAtEndOfBuffer() {
+        // see Buffer.READ_SIZE (other option would be to make Buffer.READ_SIZE public readable)
+        final int bufferSize = 8192;
+        StringBuilder csvData = new StringBuilder()
+            .append('"'); // cell starts with a quote
+        for (int i = 1; i < bufferSize - 1; i++) { // fill buffer till bufferSize - 1 with any char
+            csvData.append('a');
+        }
+
+        csvData.append('"') // now append the valid quote char at end of buffer
+            .append(",\"Some more data in next cell\"") // append another cell
+            .append('\n'); // and end line / data set
+
+        CsvReader reader = crb
+            .ignoreInvalidQuoteChars(true)
+            .build(new StringReader(csvData.toString()));
+
+        CsvRow row = reader.iterator().next();
+
+        String cell = row.getField(0);
+        assertEquals(bufferSize - 2, cell.length());
+        assertTrue(cell.endsWith("aaaa"));
+
+        assertEquals("Some more data in next cell", row.getField(1));
     }
 
     // field by index

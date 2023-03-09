@@ -19,6 +19,7 @@ final class RowReader {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
+    private static final int STATUS_RECHECK_LAST_CHAR = 64;
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_ROW = 16;
     private static final int STATUS_NEW_FIELD = 8;
@@ -33,26 +34,29 @@ final class RowReader {
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
+    private final boolean ignoreInvalidQuoteChars;
 
     private int status;
     private boolean finished;
 
     RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter) {
+              final CommentStrategy commentStrategy, final char commentCharacter, final boolean ignoreInvalidQuoteChars) {
         buffer = new Buffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.ignoreInvalidQuoteChars = ignoreInvalidQuoteChars;
     }
 
     RowReader(final String data, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter) {
+              final CommentStrategy commentStrategy, final char commentCharacter, final boolean ignoreInvalidQuoteChars) {
         buffer = new Buffer(data);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.ignoreInvalidQuoteChars = ignoreInvalidQuoteChars;
     }
 
     CsvRow fetchAndRead() throws IOException {
@@ -93,10 +97,18 @@ final class RowReader {
                 if ((lStatus & STATUS_QUOTED_MODE) != 0) {
                     // we're in quotes
                     while (lPos < lLen) {
-                        final char c = lBuf[lPos++];
+                        final char c = lBuf[(lStatus & STATUS_RECHECK_LAST_CHAR) != 0 ? lPos - 1 : lPos++];
+                        lStatus &= ~STATUS_RECHECK_LAST_CHAR;
 
                         if (c == qChar) {
-                            lStatus &= ~STATUS_QUOTED_MODE;
+                            if (ignoreInvalidQuoteChars && lPos == lLen) { // end of buffer reached we first need to fetch more data
+                                // on next iteration don't increment lPos so that quote char will be checked again
+                                lStatus |= STATUS_RECHECK_LAST_CHAR;
+                                continue mode_check;
+                            }
+                            if (ignoreInvalidQuoteChars == false || isInvalidQuoteChar(lPos, lLen, lBuf) == false) {
+                                lStatus &= ~STATUS_QUOTED_MODE;
+                            }
                             continue mode_check;
                         } else if (c == CR) {
                             lStatus |= STATUS_LAST_CHAR_WAS_CR;
@@ -208,7 +220,17 @@ final class RowReader {
         return moreDataNeeded;
     }
 
-    private static String materialize(final char[] lBuf,
+    private boolean isInvalidQuoteChar(int lPos, int lLen, char[] lBuf) {
+        if (lPos < lLen) {
+            char nextChar = lBuf[lPos];
+            if (nextChar != fsep && nextChar != CR && nextChar != LF) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String materialize(final char[] lBuf,
                                       final int lBegin, final int lPos, final int lStatus,
                                       final char quoteCharacter) {
         if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
@@ -222,14 +244,14 @@ final class RowReader {
         return new String(lBuf, lBegin + 1, lPos - 1 - shift);
     }
 
-    private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
+    private int cleanDelimiters(final char[] buf, final int begin, final int pos,
                                        final char quoteCharacter) {
         int shift = 0;
         boolean escape = false;
         for (int i = begin; i < pos; i++) {
             final char c = buf[i];
 
-            if (c == quoteCharacter) {
+            if (c == quoteCharacter && (ignoreInvalidQuoteChars == false || i >= pos - 1)) {
                 if (!escape) {
                     shift++;
                     escape = true;

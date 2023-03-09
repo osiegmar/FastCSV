@@ -44,7 +44,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
+              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount, final boolean ignoreInvalidQuoteChars) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
@@ -54,13 +54,13 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         this.reader = reader;
 
         rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+            commentCharacter, ignoreInvalidQuoteChars);
     }
 
     @SuppressWarnings("PMD.NullAssignment")
     CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount) {
+              final boolean skipEmptyRows, final boolean errorOnDifferentFieldCount, final boolean ignoreInvalidQuoteChars) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
@@ -70,7 +70,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         this.reader = null;
 
         rowReader = new RowReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+            commentCharacter, ignoreInvalidQuoteChars);
     }
 
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
@@ -243,6 +243,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         private char commentCharacter = '#';
         private boolean skipEmptyRows = true;
         private boolean errorOnDifferentFieldCount;
+        private boolean ignoreInvalidQuoteChars = false;
 
         private CsvReaderBuilder() {
         }
@@ -321,6 +322,17 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         }
 
         /**
+         * Defines if invalid placed quote chars like "\"Contains \" in cell content\"" should be ignored.
+         *
+         * @param ignoreInvalidQuoteChars If true invalid placed quote chars will be ignored
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvReaderBuilder ignoreInvalidQuoteChars(final boolean ignoreInvalidQuoteChars) {
+            this.ignoreInvalidQuoteChars = ignoreInvalidQuoteChars;
+            return this;
+        }
+
+        /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
@@ -378,12 +390,12 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
         private CsvReader newReader(final Reader reader) {
             return new CsvReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyRows, errorOnDifferentFieldCount);
+                commentCharacter, skipEmptyRows, errorOnDifferentFieldCount, ignoreInvalidQuoteChars);
         }
 
         private CsvReader newReader(final String data) {
             return new CsvReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyRows, errorOnDifferentFieldCount);
+                commentCharacter, skipEmptyRows, errorOnDifferentFieldCount, ignoreInvalidQuoteChars);
         }
 
         @Override
