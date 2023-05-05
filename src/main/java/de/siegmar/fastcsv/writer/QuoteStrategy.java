@@ -28,6 +28,10 @@ public enum QuoteStrategy {
     /**
      * Enclose any text field with quotes regardless of its content (even empty and {@code null} fields).
      */
-    ALWAYS
+    ALWAYS,
 
+    /**
+     * Enclose any text field with quotes if it has content, excluding empty and {@code null} fields.
+     */
+    ALWAYS_NON_EMPTY
 }
