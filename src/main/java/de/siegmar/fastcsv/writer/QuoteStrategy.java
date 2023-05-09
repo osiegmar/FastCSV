@@ -33,5 +33,5 @@ public enum QuoteStrategy {
     /**
      * Enclose any text field with quotes if it has content, excluding empty and {@code null} fields.
      */
-    ALWAYS_NON_EMPTY
+    NON_EMPTY
 }

@@ -118,7 +118,7 @@ public class CsvWriterTest {
 
     @Test
     public void alwaysQuoteTextIgnoreEmpty() {
-        crw.quoteStrategy(QuoteStrategy.ALWAYS_NON_EMPTY);
+        crw.quoteStrategy(QuoteStrategy.NON_EMPTY);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
                 write("a", "b,c", "d\ne", "f\"g", "", null));
     }
