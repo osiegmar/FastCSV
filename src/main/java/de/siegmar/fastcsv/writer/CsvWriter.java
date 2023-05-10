@@ -153,7 +153,7 @@ public final class CsvWriter implements Closeable {
         }
 
         final int length = value.length();
-        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS;
+        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS || quoteStrategy == QuoteStrategy.NON_EMPTY;
         int nextDelimPos = -1;
 
         for (int i = 0; i < length; i++) {

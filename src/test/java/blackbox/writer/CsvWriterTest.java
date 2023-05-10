@@ -117,6 +117,13 @@ public class CsvWriterTest {
     }
 
     @Test
+    public void alwaysQuoteTextIgnoreEmpty() {
+        crw.quoteStrategy(QuoteStrategy.NON_EMPTY);
+        assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
+                write("a", "b,c", "d\ne", "f\"g", "", null));
+    }
+
+    @Test
     public void fieldSeparator() {
         crw.fieldSeparator(';');
         assertEquals("foo;bar\n", write("foo", "bar"));
