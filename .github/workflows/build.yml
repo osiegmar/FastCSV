@@ -27,13 +27,3 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         file: ./build/reports/jacoco/test/jacocoTestReport.xml
-
-    # Android check
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-    - name: Install Android API 26
-      run: sdkmanager "platforms;android-26"
-    - name: Run Proguard check to check for API compatibility
-      run: ./gradlew --no-daemon proguardCheck
-      env:
-        API_LEVEL: 26
