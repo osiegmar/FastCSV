@@ -27,14 +27,14 @@ import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
-public class CsvWriterTest {
+class CsvWriterTest {
 
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()
         .lineDelimiter(LineDelimiter.LF);
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
-    public void configBuilder(final char c) {
+    void configBuilder(final char c) {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
             CsvWriter.builder().fieldSeparator(c).build(new StringWriter()));
         assertEquals("fieldSeparator must not be a newline char", e.getMessage());
@@ -49,7 +49,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void configWriter() {
+    void configWriter() {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
             crw.fieldSeparator(',').quoteCharacter(',').build(new StringWriter()));
         assertTrue(e.getMessage().contains("Control characters must differ"));
@@ -64,14 +64,14 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void nullQuote() {
+    void nullQuote() {
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,,bar\n", write("foo", "", "bar"));
         assertEquals("foo,\",\",bar\n", write("foo", ",", "bar"));
     }
 
     @Test
-    public void emptyQuote() {
+    void emptyQuote() {
         crw.quoteStrategy(QuoteStrategy.EMPTY);
         assertEquals("foo,,bar\n", write("foo", null, "bar"));
         assertEquals("foo,\"\",bar\n", write("foo", "", "bar"));
@@ -79,17 +79,17 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void oneLineSingleValue() {
+    void oneLineSingleValue() {
         assertEquals("foo\n", write("foo"));
     }
 
     @Test
-    public void oneLineTwoValues() {
+    void oneLineTwoValues() {
         assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void oneLineTwoValuesAsList() {
+    void oneLineTwoValuesAsList() {
         final List<String> cols = new ArrayList<>();
         cols.add("foo");
         cols.add("bar");
@@ -99,55 +99,55 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void twoLinesTwoValues() {
+    void twoLinesTwoValues() {
         assertEquals("foo,bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void delimitText() {
+    void delimitText() {
         assertEquals("a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
-    public void alwaysQuoteText() {
+    void alwaysQuoteText() {
         crw.quoteStrategy(QuoteStrategy.ALWAYS);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n",
             write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
-    public void alwaysQuoteTextIgnoreEmpty() {
+    void alwaysQuoteTextIgnoreEmpty() {
         crw.quoteStrategy(QuoteStrategy.NON_EMPTY);
         assertEquals("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",,\n",
                 write("a", "b,c", "d\ne", "f\"g", "", null));
     }
 
     @Test
-    public void fieldSeparator() {
+    void fieldSeparator() {
         crw.fieldSeparator(';');
         assertEquals("foo;bar\n", write("foo", "bar"));
     }
 
     @Test
-    public void quoteCharacter() {
+    void quoteCharacter() {
         crw.quoteCharacter('\'');
         assertEquals("'foo,bar'\n", write("foo,bar"));
     }
 
     @Test
-    public void escapeQuotes() {
+    void escapeQuotes() {
         assertEquals("foo,\"\"\"bar\"\"\"\n", write("foo", "\"bar\""));
     }
 
     @Test
-    public void commentCharacter() {
+    void commentCharacter() {
         assertEquals("\"#foo\",#bar\n", write("#foo", "#bar"));
         assertEquals(" #foo,#bar\n", write(" #foo", "#bar"));
     }
 
     @Test
-    public void commentCharacterDifferentChar() {
+    void commentCharacterDifferentChar() {
         assertEquals(";foo,bar\n", write(";foo", "bar"));
 
         crw.commentCharacter(';');
@@ -155,35 +155,35 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void writeComment() {
+    void writeComment() {
         assertEquals("#this is a comment\n", write(w -> w.writeComment("this is a comment")));
     }
 
     @Test
-    public void writeCommentWithNewlines() {
+    void writeCommentWithNewlines() {
         assertEquals("#\n#line 2\n#line 3\n#line 4\n#\n",
             write(w -> w.writeComment("\rline 2\nline 3\r\nline 4\n")));
     }
 
     @Test
-    public void writeEmptyComment() {
+    void writeEmptyComment() {
         assertEquals("#\n#\n", write(w -> w.writeComment("").writeComment(null)));
     }
 
     @Test
-    public void writeCommentDifferentChar() {
+    void writeCommentDifferentChar() {
         crw.commentCharacter(';');
         assertEquals(";this is a comment\n", write(w -> w.writeComment("this is a comment")));
     }
 
     @Test
-    public void appending() {
+    void appending() {
         assertEquals("foo,bar\nfoo2,bar2\n",
             write(w -> w.writeRow("foo", "bar").writeRow("foo2", "bar2")));
     }
 
     @Test
-    public void path(@TempDir final Path tempDir) throws IOException {
+    void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file)) {
             csv.writeRow("value1", "value2");
@@ -194,7 +194,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void chained() {
+    void chained() {
         final CsvWriter writer = CsvWriter.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
@@ -206,7 +206,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void streaming() {
+    void streaming() {
         final Stream<String[]> stream = Stream.of(
             new String[]{"header1", "header2"},
             new String[]{"value1", "value2"}
@@ -218,7 +218,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void mixedWriterUsage() {
+    void mixedWriterUsage() {
         final StringWriter stringWriter = new StringWriter();
         final CsvWriter csvWriter = CsvWriter.builder().build(stringWriter);
         csvWriter.writeRow("foo", "bar");
@@ -228,7 +228,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void unwritableArray() {
+    void unwritableArray() {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crw.build(new UnwritableWriter()).writeRow("foo"));
 
@@ -236,7 +236,7 @@ public class CsvWriterTest {
     }
 
     @Test
-    public void unwritableIterable() {
+    void unwritableIterable() {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crw.build(new UnwritableWriter()).writeRow(Collections.singletonList("foo")));
 
@@ -251,12 +251,12 @@ public class CsvWriterTest {
     // buffer
 
     @Test
-    public void invalidBuffer() {
+    void invalidBuffer() {
         assertThrows(IllegalArgumentException.class, () -> crw.bufferSize(-1));
     }
 
     @Test
-    public void disableBuffer() {
+    void disableBuffer() {
         final StringWriter stringWriter = new StringWriter();
         crw.bufferSize(0).build(stringWriter).writeRow("foo", "bar");
         assertEquals("foo,bar\n", stringWriter.toString());
@@ -265,13 +265,13 @@ public class CsvWriterTest {
     // toString()
 
     @Test
-    public void builderToString() {
+    void builderToString() {
         assertEquals("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
             + "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n, bufferSize=8192]", crw.toString());
     }
 
     @Test
-    public void writerToString() {
+    void writerToString() {
         assertEquals("CsvWriter[fieldSeparator=,, quoteCharacter=\", commentCharacter=#, "
             + "quoteStrategy=REQUIRED, lineDelimiter='\n']", crw.build(new StringWriter()).toString());
     }

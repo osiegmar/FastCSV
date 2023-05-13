@@ -15,11 +15,11 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
 
-public class GenericDataTest {
+class GenericDataTest {
 
     @ParameterizedTest
     @MethodSource("dataProvider")
-    public void dataTest(final DataProvider.TestData data) {
+    void dataTest(final DataProvider.TestData data) {
         final String expected = print(data.getExpected());
         final CommentStrategy commentStrategy = data.isReadComments()
             ? CommentStrategy.READ

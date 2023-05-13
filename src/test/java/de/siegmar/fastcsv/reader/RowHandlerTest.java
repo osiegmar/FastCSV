@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class RowHandlerTest {
+class RowHandlerTest {
 
     @Test
-    public void test() {
+    void test() {
         final RowHandler rh = new RowHandler(1);
         rh.add("foo");
         rh.add("bar");

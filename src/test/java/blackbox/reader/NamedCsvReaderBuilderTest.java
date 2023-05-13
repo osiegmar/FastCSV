@@ -22,7 +22,7 @@ import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRow;
 
 @SuppressWarnings("PMD.CloseResource")
-public class NamedCsvReaderBuilderTest {
+class NamedCsvReaderBuilderTest {
 
     private static final String DATA = "header1,header2\nfoo,bar\n";
     private static final String EXPECTED = "{header1=foo, header2=bar}";
@@ -31,26 +31,26 @@ public class NamedCsvReaderBuilderTest {
 
     @ParameterizedTest
     @NullSource
-    public void nullInput(final String text) {
+    void nullInput(final String text) {
         assertThrows(NullPointerException.class, () -> crb.build(text));
     }
 
     @Test
-    public void fieldSeparator() {
+    void fieldSeparator() {
         final Iterator<NamedCsvRow> it = crb.fieldSeparator(';')
             .build("h1;h2\nfoo,bar;baz").iterator();
         assertEquals("{h1=foo,bar, h2=baz}", it.next().getFields().toString());
     }
 
     @Test
-    public void quoteCharacter() {
+    void quoteCharacter() {
         final Iterator<NamedCsvRow> it = crb.quoteCharacter('_')
             .build("h1,h2\n_foo \", __ bar_,foo \" bar").iterator();
         assertEquals("{h1=foo \", _ bar, h2=foo \" bar}", it.next().getFields().toString());
     }
 
     @Test
-    public void commentSkip() {
+    void commentSkip() {
         final Iterator<NamedCsvRow> it = crb.commentCharacter(';').skipComments(true)
             .build("h1\n#foo\n;bar\nbaz").iterator();
         assertEquals("{h1=#foo}", it.next().getFields().toString());
@@ -58,13 +58,13 @@ public class NamedCsvReaderBuilderTest {
     }
 
     @Test
-    public void builderToString() {
+    void builderToString() {
         assertEquals("NamedCsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
             + "commentCharacter=#, skipComments=false]", crb.toString());
     }
 
     @Test
-    public void reader() {
+    void reader() {
         final List<NamedCsvRow> list = crb
             .build(DATA).stream()
             .collect(Collectors.toList());
@@ -72,14 +72,14 @@ public class NamedCsvReaderBuilderTest {
     }
 
     @Test
-    public void string() {
+    void string() {
         final List<NamedCsvRow> list = crb.build(DATA).stream()
             .collect(Collectors.toList());
         assertEquals(EXPECTED, list.get(0).getFields().toString());
     }
 
     @Test
-    public void path(@TempDir final Path tempDir) throws IOException {
+    void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
 
@@ -92,7 +92,7 @@ public class NamedCsvReaderBuilderTest {
     }
 
     @Test
-    public void chained() {
+    void chained() {
         final NamedCsvReader reader = NamedCsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')

@@ -40,13 +40,13 @@ import de.siegmar.fastcsv.reader.MalformedCsvException;
     "PMD.AvoidDuplicateLiterals",
     "PMD.CloseResource"
 })
-public class CsvReaderTest {
+class CsvReaderTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
-    public void configBuilder(final char c) {
+    void configBuilder(final char c) {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
             CsvReader.builder().fieldSeparator(c).build("foo"));
         assertEquals("fieldSeparator must not be a newline char", e.getMessage());
@@ -62,7 +62,7 @@ public class CsvReaderTest {
 
     @ParameterizedTest
     @MethodSource("provideBuilderForMisconfiguration")
-    public void configReader(final CsvReader.CsvReaderBuilder builder) {
+    void configReader(final CsvReader.CsvReaderBuilder builder) {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
             builder.build("foo"));
         assertTrue(e.getMessage().contains("Control characters must differ"));
@@ -77,14 +77,14 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void empty() {
+    void empty() {
         final Iterator<CsvRow> it = crb.build("").iterator();
         assertFalse(it.hasNext());
         assertThrows(NoSuchElementException.class, it::next);
     }
 
     @Test
-    public void immutableResponse() {
+    void immutableResponse() {
         final List<String> fields = crb.build("foo").iterator().next().getFields();
         assertThrows(UnsupportedOperationException.class, () -> fields.add("bar"));
     }
@@ -92,7 +92,7 @@ public class CsvReaderTest {
     // toString()
 
     @Test
-    public void readerToString() {
+    void readerToString() {
         assertEquals("CsvReader[commentStrategy=NONE, skipEmptyRows=true, "
             + "errorOnDifferentFieldCount=false]", crb.build("").toString());
     }
@@ -100,13 +100,13 @@ public class CsvReaderTest {
     // skipped rows
 
     @Test
-    public void singleRowNoSkipEmpty() {
+    void singleRowNoSkipEmpty() {
         crb.skipEmptyRows(false);
         assertFalse(crb.build("").iterator().hasNext());
     }
 
     @Test
-    public void multipleRowsNoSkipEmpty() {
+    void multipleRowsNoSkipEmpty() {
         crb.skipEmptyRows(false);
         final Iterator<CsvRow> it = crb.build("\n\na").iterator();
 
@@ -132,7 +132,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void skippedRows() {
+    void skippedRows() {
         final List<CsvRow> csv = readAll("\n\nfoo\n\nbar\n\n");
         assertEquals(2, csv.size());
 
@@ -150,7 +150,7 @@ public class CsvReaderTest {
     // different field count
 
     @Test
-    public void differentFieldCountSuccess() {
+    void differentFieldCountSuccess() {
         crb.errorOnDifferentFieldCount(true);
 
         assertDoesNotThrow(() -> readAll("foo\nbar"));
@@ -164,7 +164,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void differentFieldCountFail() {
+    void differentFieldCountFail() {
         crb.errorOnDifferentFieldCount(true);
 
         final MalformedCsvException e = assertThrows(MalformedCsvException.class,
@@ -177,7 +177,7 @@ public class CsvReaderTest {
 
     @Test
     @SuppressWarnings("CheckReturnValue")
-    public void getNonExistingFieldByIndex() {
+    void getNonExistingFieldByIndex() {
         assertThrows(IndexOutOfBoundsException.class, () ->
             spotbugs(readSingleRow("foo").getField(1)));
     }
@@ -190,7 +190,7 @@ public class CsvReaderTest {
     // line numbering
 
     @Test
-    public void lineNumbering() {
+    void lineNumbering() {
         final Iterator<CsvRow> it = crb
             .commentStrategy(CommentStrategy.SKIP)
             .build(
@@ -228,7 +228,7 @@ public class CsvReaderTest {
     // comment
 
     @Test
-    public void comment() {
+    void comment() {
         final Iterator<CsvRow> it = crb
             .commentStrategy(CommentStrategy.READ)
             .build("#comment \"1\"\na,#b,c").iterator();
@@ -247,7 +247,7 @@ public class CsvReaderTest {
     // to string
 
     @Test
-    public void toStringWithoutHeader() {
+    void toStringWithoutHeader() {
         assertEquals("CsvRow[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]",
             readSingleRow("fieldA,fieldB\n").toString());
     }
@@ -255,7 +255,7 @@ public class CsvReaderTest {
     // refill buffer while parsing an unquoted field containing a quote character
 
     @Test
-    public void refillBufferInDataWithQuote() {
+    void refillBufferInDataWithQuote() {
         final char[] extra = ",a\"b\"c,d,".toCharArray();
 
         final char[] buf = new char[8192 + extra.length];
@@ -272,7 +272,7 @@ public class CsvReaderTest {
     // buffer exceed
 
     @Test
-    public void bufferExceed() {
+    void bufferExceed() {
         final char[] buf = new char[8 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
@@ -291,7 +291,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void bufferExceedSubsequentRecord() {
+    void bufferExceedSubsequentRecord() {
         final char[] buf = new char[8 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         final String s = "a,b,c\n\"";
@@ -313,7 +313,7 @@ public class CsvReaderTest {
     // API
 
     @Test
-    public void closeApi() throws IOException {
+    void closeApi() throws IOException {
         final Consumer<CsvRow> consumer = csvRow -> { };
 
         final Supplier<CloseStatusReader> supp =
@@ -339,12 +339,12 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void closeStringNoException() {
+    void closeStringNoException() {
         assertDoesNotThrow(() -> crb.build("foo").close());
     }
 
     @Test
-    public void spliterator() {
+    void spliterator() {
         final Spliterator<CsvRow> spliterator =
             crb.build("a,b,c\n1,2,3").spliterator();
 
@@ -364,14 +364,14 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void parallelDistinct() {
+    void parallelDistinct() {
         assertEquals(2, crb.build("foo\nfoo").stream().parallel().distinct().count());
     }
 
     // Coverage
 
     @Test
-    public void closeException() {
+    void closeException() {
         final CsvReader csvReader = crb.build(new UncloseableReader(new StringReader("foo")));
         final UncheckedIOException e = assertThrows(UncheckedIOException.class,
             () -> csvReader.stream().close());
@@ -380,7 +380,7 @@ public class CsvReaderTest {
     }
 
     @Test
-    public void unreadable() {
+    void unreadable() {
         final UncheckedIOException e = assertThrows(UncheckedIOException.class, () ->
             crb.build(new UnreadableReader()).iterator().next());
 

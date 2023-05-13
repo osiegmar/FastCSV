@@ -12,7 +12,7 @@ import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.CloseResource")
-public class CsvReaderLargerDataTest {
+class CsvReaderLargerDataTest {
 
     private static final String[] TEXTS = {
         "Lorem ipsum dolor sit amet",
@@ -29,7 +29,7 @@ public class CsvReaderLargerDataTest {
     };
 
     @Test
-    public void largerData() {
+    void largerData() {
         final CsvReader reader = CsvReader.builder().build(new StringReader(createSampleCSV()));
         int i = 0;
         for (final CsvRow row : reader) {

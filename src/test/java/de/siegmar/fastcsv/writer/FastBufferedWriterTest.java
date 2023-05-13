@@ -8,13 +8,13 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-public class FastBufferedWriterTest {
+class FastBufferedWriterTest {
 
     private final StringWriter sw = new StringWriter();
     private final CsvWriter.FastBufferedWriter cw = new CsvWriter.FastBufferedWriter(sw, 8192);
 
     @Test
-    public void appendSingle() throws IOException {
+    void appendSingle() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -28,7 +28,7 @@ public class FastBufferedWriterTest {
     }
 
     @Test
-    public void appendArray() throws IOException {
+    void appendArray() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < 8192; i++) {
@@ -41,7 +41,7 @@ public class FastBufferedWriterTest {
     }
 
     @Test
-    public void appendLarge() throws IOException {
+    void appendLarge() throws IOException {
         final String sb = buildLargeData();
         cw.write(sb, 0, sb.length());
 
@@ -49,7 +49,7 @@ public class FastBufferedWriterTest {
     }
 
     @Test
-    public void unreachable() {
+    void unreachable() {
         assertThrows(IllegalStateException.class, () -> cw.write(new char[0], 0, 0));
     }
 

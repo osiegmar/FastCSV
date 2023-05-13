@@ -164,7 +164,7 @@ public final class CsvWriter implements Closeable {
                 break;
             }
             if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR
-                || (firstField && i == 0 && c == commentCharacter))) {
+                || firstField && i == 0 && c == commentCharacter)) {
                 needsQuotes = true;
             }
         }
