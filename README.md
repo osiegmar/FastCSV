@@ -6,9 +6,9 @@
   </picture>
 </p>
 
-[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
+[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://app.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/develop/graph/badge.svg?token=WIWkv7HUyk)](https://codecov.io/gh/osiegmar/FastCSV)
+[![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/master/graph/badge.svg?token=WIWkv7HUyk)](https://codecov.io/gh/osiegmar/FastCSV)
 [![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
 [![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv)](https://central.sonatype.com/artifact/de.siegmar/fastcsv)
 
