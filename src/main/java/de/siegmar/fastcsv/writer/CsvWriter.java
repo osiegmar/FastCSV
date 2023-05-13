@@ -153,7 +153,7 @@ public final class CsvWriter implements Closeable {
         }
 
         final int length = value.length();
-        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS;
+        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS || quoteStrategy == QuoteStrategy.NON_EMPTY;
         int nextDelimPos = -1;
 
         for (int i = 0; i < length; i++) {
@@ -164,7 +164,7 @@ public final class CsvWriter implements Closeable {
                 break;
             }
             if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR
-                || (firstField && i == 0 && c == commentCharacter))) {
+                || firstField && i == 0 && c == commentCharacter)) {
                 needsQuotes = true;
             }
         }

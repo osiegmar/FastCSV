@@ -1,9 +1,3 @@
-buildscript {
-    dependencies {
-        classpath 'net.sf.proguard:proguard-gradle:6.2.2'
-    }
-}
-
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -13,11 +7,12 @@ plugins {
     id 'jacoco'
     id 'com.github.spotbugs' version '4.5.0'
     id 'me.champeau.gradle.jmh' version '0.5.1'
-    id 'info.solidsoft.pitest' version '1.5.2'
+    id 'info.solidsoft.pitest' version '1.9.11'
+    id 'ru.vyarus.animalsniffer' version '1.7.0'
 }
 
 group = "de.siegmar"
-version = "2.2.1"
+version = "2.2.2"
 
 java {
     toolchain {
@@ -36,20 +31,16 @@ sourceSets {
 }
 
 dependencies {
-    testImplementation(platform('org.junit:junit-bom:5.7.0'))
+    testImplementation(platform('org.junit:junit-bom:5.9.3'))
     testImplementation('org.junit.jupiter:junit-jupiter')
 
     exampleImplementation sourceSets.main.output
 
-    pitest 'org.pitest:pitest-junit5-plugin:0.12'
+    signature 'net.sf.androidscents.signature:android-api-level-26:8.0.0_r2@signature'
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-tasks.matching { task -> task.name.startsWith('spotbugs') }.forEach {
-    it.reports {
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+    reports {
         html.enabled = true
         xml.enabled = false
     }
@@ -61,7 +52,7 @@ test {
 }
 
 pitest {
-    testPlugin = 'junit5'
+    junit5PluginVersion = "1.1.2"
     targetClasses = ['blackbox.*', 'de.siegmar.*']
     timestampedReports = false
 }
@@ -74,7 +65,7 @@ pmd {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.required = true
     }
 }
 
@@ -98,19 +89,6 @@ jmh {
     benchmarkMode = ['thrpt']
     fork = 2
     operationsPerInvocation = 1
-}
-
-task proguardCheck(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
-    injars project.jar.archivePath
-    libraryjars files(String.format("%s/platforms/android-%s/android.jar",
-            System.getenv("ANDROID_HOME"), System.getenv("API_LEVEL")))
-    libraryjars files(configurations.compile)
-    // Don't really try to do anything, we just want this tool for it's bytecode lint
-    dontshrink
-    dontobfuscate
-    dontoptimize
-    // Don't fail if LambdaMetafactory is missing - it would be handled by Retrolambda / Jack
-    dontwarn 'java.lang.invoke.LambdaMetafactory'
 }
 
 tasks.named('jar') {

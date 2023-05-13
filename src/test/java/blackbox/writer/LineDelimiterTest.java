@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.writer.LineDelimiter;
 
-public class LineDelimiterTest {
+class LineDelimiterTest {
 
     @Test
-    public void test() {
+    void test() {
         assertEquals("\n", LineDelimiter.LF.toString());
         assertEquals("\r", LineDelimiter.CR.toString());
         assertEquals("\r\n", LineDelimiter.CRLF.toString());
@@ -18,7 +18,7 @@ public class LineDelimiterTest {
     }
 
     @Test
-    public void testOf() {
+    void testOf() {
         assertEquals(LineDelimiter.CRLF, LineDelimiter.of("\r\n"));
         assertEquals(LineDelimiter.LF, LineDelimiter.of("\n"));
         assertEquals(LineDelimiter.CR, LineDelimiter.of("\r"));
