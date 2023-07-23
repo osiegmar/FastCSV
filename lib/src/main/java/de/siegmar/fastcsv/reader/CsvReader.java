@@ -230,8 +230,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private boolean skipEmptyLines = true;
+        private boolean skipEmptyRows = true;
         private boolean ignoreDifferentFieldCount = true;
+        private boolean detectBomHeader;
 
         private CsvReaderBuilder() {
         }
@@ -308,6 +309,11 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             return this;
         }
 
+        public CsvReaderBuilder detectBomHeader(final boolean detectBomHeader) {
+            this.detectBomHeader = detectBomHeader;
+            return this;
+        }
+
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          * <p>
@@ -323,6 +329,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @throws NullPointerException if reader is {@code null}
          */
         public CsvReader build(final Reader reader) {
+            if (detectBomHeader) {
+                throw new IllegalStateException("BOM header detect not available reader input mode");
+            }
             return newReader(Objects.requireNonNull(reader, "reader must not be null"));
         }
 
@@ -333,6 +342,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @return a new CsvReader - never {@code null}.
          */
         public CsvReader build(final String data) {
+            if (detectBomHeader) {
+                throw new IllegalStateException("BOM header detect not available in string input mode");
+            }
             return newReader(Objects.requireNonNull(data, "data must not be null"));
         }
 
@@ -361,7 +373,11 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            return newReader(new InputStreamReader(Files.newInputStream(file), charset));
+            final Reader r = detectBomHeader
+                    ? new UnicodeReader(Files.newInputStream(file), charset)
+                    : new InputStreamReader(Files.newInputStream(file), charset);
+
+            return newReader(r);
         }
 
         private CsvReader newReader(final Reader reader) {
