@@ -20,8 +20,8 @@ final class DataProvider {
     }
 
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand"})
-    static List<TestData> loadTestData(final String name) throws IOException {
-        final List<TestData> data = new ArrayList<>();
+    static List<GenericTestData> loadTestData(final String name) throws IOException {
+        final List<GenericTestData> data = new ArrayList<>();
         try (BufferedReader r = resource(name)) {
             String line;
             int lineNo = 0;
@@ -36,7 +36,7 @@ final class DataProvider {
                     final String input = matcher.group("input");
                     final String expected = matcher.group("expected");
                     final String flags = matcher.group("flags");
-                    data.add(new TestData(lineNo, line, input, expected, flags));
+                    data.add(new GenericTestData(lineNo, line, input, expected, flags));
                 }
             }
         }
@@ -49,7 +49,7 @@ final class DataProvider {
             Objects.requireNonNull(DataProvider.class.getResourceAsStream(name)), StandardCharsets.UTF_8));
     }
 
-    public static class TestData {
+    public static class GenericTestData {
 
         private final int lineNo;
         private final String line;
@@ -59,8 +59,8 @@ final class DataProvider {
         private final boolean readComments;
         private final boolean skipComments;
 
-        TestData(final int lineNo, final String line, final String input, final String expected,
-                 final String flags) {
+        GenericTestData(final int lineNo, final String line, final String input, final String expected,
+                        final String flags) {
             this.lineNo = lineNo;
             this.line = line;
             this.input = input;
@@ -100,7 +100,7 @@ final class DataProvider {
 
         @Override
         public String toString() {
-            return new StringJoiner(", ", DataProvider.TestData.class.getSimpleName() + "[", "]")
+            return new StringJoiner(", ", GenericTestData.class.getSimpleName() + "[", "]")
                 .add("lineNo=" + lineNo)
                 .add("line='" + line + "'")
                 .add("input='" + input + "'")

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!-- false-positive bug https://github.com/spotbugs/spotbugs/issues/2083 -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+        <Or>
+            <And>
+                <Class name="de.siegmar.fastcsv.reader.NamedCsvReader"/>
+                <Field name="header"/>
+            </And>
+        </Or>
+    </Match>
+
+</FindBugsFilter>

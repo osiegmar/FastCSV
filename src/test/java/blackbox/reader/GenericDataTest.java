@@ -19,7 +19,7 @@ class GenericDataTest {
 
     @ParameterizedTest
     @MethodSource("dataProvider")
-    void dataTest(final DataProvider.TestData data) {
+    void dataTest(final DataProvider.GenericTestData data) {
         final String expected = print(data.getExpected());
         final CommentStrategy commentStrategy = data.isReadComments()
             ? CommentStrategy.READ
@@ -29,7 +29,7 @@ class GenericDataTest {
         assertEquals(expected, actual, () -> String.format("Error in line: '%s'", data));
     }
 
-    static List<DataProvider.TestData> dataProvider() throws IOException {
+    static List<DataProvider.GenericTestData> dataProvider() throws IOException {
         return DataProvider.loadTestData("/test.txt");
     }
 
