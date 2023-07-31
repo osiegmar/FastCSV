@@ -1,10 +1,4 @@
-<p>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" type="image/avif" srcset="fastcsv_dark.avif 2x">
-    <source media="(prefers-color-scheme: light)" type="image/avif" srcset="fastcsv_light.avif 2x">
-    <img src="fastcsv.jpg" width="400" height="50" alt="FastCSV">
-  </picture>
-</p>
+<img src="fastcsv.svg" width="400" height="50" alt="FastCSV">
 
 [![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://app.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
