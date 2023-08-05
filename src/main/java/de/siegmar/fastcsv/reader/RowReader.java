@@ -247,6 +247,11 @@ final class RowReader {
         return shift;
     }
 
+    public void resetBuffer(final int originalLineNumber) {
+        rowHandler.setOriginalLineNumber(originalLineNumber);
+        buffer.reset();
+    }
+
     @SuppressWarnings("checkstyle:visibilitymodifier")
     private static class Buffer {
         private static final int READ_SIZE = 8192;
@@ -324,6 +329,12 @@ final class RowReader {
             final char[] newBuf = new char[newBufferSize];
             System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
             return newBuf;
+        }
+
+        public void reset() {
+            len = 0;
+            begin = 0;
+            pos = 0;
         }
 
     }
