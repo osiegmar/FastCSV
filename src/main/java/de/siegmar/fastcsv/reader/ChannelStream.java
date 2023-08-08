@@ -10,6 +10,7 @@ final class ChannelStream {
     private final ByteBuffer buf;
     private final StatusConsumer statusConsumer;
     private int totalPosition;
+    private int nextByte;
 
     ChannelStream(final ReadableByteChannel channel, final ByteBuffer buf, final StatusConsumer statusConsumer)
         throws IOException {
@@ -18,62 +19,48 @@ final class ChannelStream {
         this.buf = buf;
         this.statusConsumer = statusConsumer;
 
-        final int readCnt = channel.read(buf);
-        buf.flip();
-        if (readCnt != -1) {
-            statusConsumer.addReadBytes(readCnt);
-        }
+        nextByte = loadData(false) ? buf.get() : -1;
+    }
+
+    int peek() {
+        return nextByte;
     }
 
     int get() throws IOException {
-        if (!buf.hasRemaining()) {
-            if (getReadCnt() == -1) {
-                return -1;
-            }
+        final int ret = nextByte;
+        nextByte = fetchNextByte();
+        return ret;
+    }
+
+    void consume() throws IOException {
+        nextByte = fetchNextByte();
+    }
+
+    boolean hasData() {
+        return nextByte != -1;
+    }
+
+    private boolean loadData(final boolean compact) throws IOException {
+        final int readCnt = channel.read(compact ? buf.compact() : buf);
+        if (readCnt == -1) {
+            return false;
+        }
+        buf.flip();
+        statusConsumer.addReadBytes(readCnt);
+        return true;
+    }
+
+    private int fetchNextByte() throws IOException {
+        if (!buf.hasRemaining() && !loadData(true)) {
+            return -1;
         }
 
         totalPosition++;
-
         return buf.get();
-    }
-
-    private int getReadCnt() throws IOException {
-        final int readCnt = channel.read(buf.compact());
-        buf.flip();
-        if (readCnt != -1) {
-            statusConsumer.addReadBytes(readCnt);
-        }
-        return readCnt;
-    }
-
-    int peek() throws IOException {
-        if (!buf.hasRemaining()) {
-            if (getReadCnt() == -1) {
-                return -1;
-            }
-        }
-
-        return buf.get(buf.position());
     }
 
     int getTotalPosition() {
         return totalPosition;
-    }
-
-    boolean hasData() throws IOException {
-        if (!buf.hasRemaining()) {
-            final int readCnt = getReadCnt();
-            if (readCnt == -1) {
-                return false;
-            }
-        }
-
-        return buf.hasRemaining();
-    }
-
-    void consume() {
-        totalPosition++;
-        buf.get();
     }
 
 }
