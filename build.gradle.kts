@@ -8,7 +8,7 @@ plugins {
     id("com.github.spotbugs") version "5.0.14"
     id("me.champeau.jmh") version "0.7.1"
     id("info.solidsoft.pitest") version "1.9.11"
-    id("ru.vyarus.animalsniffer") version "1.7.0"
+    id("ru.vyarus.animalsniffer") version "1.7.1"
 }
 
 group = "de.siegmar"
