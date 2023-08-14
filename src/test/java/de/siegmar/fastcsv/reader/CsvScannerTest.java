@@ -1,6 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,63 +17,66 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class CsvScannerTest {
 
-//    @Test
-//    void nullInput() {
-//        assertThrows(NullPointerException.class, () -> builder.scan((InputStream) null));
-//    }
+    @Test
+    void nullInput() {
+        assertThatThrownBy(() -> scan((byte[]) null));
+    }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"", " "})
-    void emptyInput(final String str) throws IOException {
-        assertThat(scan(str)).isEmpty();
+    @Test
+    void emptyInput() throws IOException {
+        assertThat(scan("")).isEmpty();
+    }
+
+    @Test
+    void singleInput() throws IOException {
+        assertThat(scan(" ")).containsExactly(0);
     }
 
     @Test
     void oneLine() throws IOException {
-        assertThat(scan("012")).isEmpty();
+        assertThat(scan("012")).containsExactly(0);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"012␊", "012␍", "012␍␊"})
     void oneLineTerminated(final String str) throws IOException {
-        assertThat(scan(str)).isEmpty();
+        assertThat(scan(str)).containsExactly(0);
     }
 
     @Test
     void oneLineDoubleTerminated() throws IOException {
-        assertThat(scan("012␊␊5")).containsExactly(4, 5);
+        assertThat(scan("012␊␊5")).containsExactly(0, 4, 5);
     }
 
     @Test
     void lf() throws IOException {
-        assertThat(scan("012␊456")).containsExactly(4);
+        assertThat(scan("012␊456")).containsExactly(0, 4);
     }
 
     @Test
     void cr() throws IOException {
-        assertThat(scan("012␍456")).containsExactly(4);
+        assertThat(scan("012␍456")).containsExactly(0, 4);
     }
 
     @Test
     void crlf() throws IOException {
-        assertThat(scan("012␍␊567")).containsExactly(5);
+        assertThat(scan("012␍␊567")).containsExactly(0, 5);
     }
 
     @Test
     void quoted() throws IOException {
-        assertThat(scan("'123␊5'␊8")).containsExactly(8);
+        assertThat(scan("'123␊5'␊8")).containsExactly(0, 8);
     }
 
     @Test
     void escapedQuote() throws IOException {
-        assertThat(scan("'1''␊5'␊8")).containsExactly(8);
+        assertThat(scan("'1''␊5'␊8")).containsExactly(0, 8);
     }
 
     @Test
     void multipleLines() throws IOException {
         assertThat(scan("012␊456␍890␍␊123"))
-            .containsExactly(4, 8, 13)
-            .inOrder();
+            .containsExactly(0, 4, 8, 13);
     }
 
     @ParameterizedTest
@@ -81,10 +85,12 @@ class CsvScannerTest {
         final byte[] buf = new byte[pos + 2];
         Arrays.fill(buf, (byte) 'A');
 
-        assertThat(scan(buf)).isEmpty();
+        assertThat(scan(buf))
+            .containsExactly(0);
 
         buf[pos] = '\n';
-        assertThat(scan(buf)).containsExactly(pos + 1);
+        assertThat(scan(buf))
+            .containsExactly(0, pos + 1);
     }
 
     // TODO binary data test
@@ -113,7 +119,7 @@ class CsvScannerTest {
             }
         };
 
-        CsvScanner.scan((byte) '"', Channels.newChannel(new ByteArrayInputStream(data)), statusConsumer);
+        CsvScanner.scan(Channels.newChannel(new ByteArrayInputStream(data)), (byte) '"', statusConsumer);
 
         return positions;
     }

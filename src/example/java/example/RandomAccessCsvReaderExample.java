@@ -3,9 +3,10 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
@@ -23,20 +24,29 @@ public class RandomAccessCsvReaderExample {
         statusMonitor(tmpFile);
     }
 
+    private void foo() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+        Path file = Paths.get("");
+        try (RandomAccessCsvReader csvReader = RandomAccessCsvReader.builder().build(file)) {
+            CsvRow row = csvReader.readRow(3000)
+                .get(1, TimeUnit.SECONDS);
+            System.out.println(row);
+        }
+    }
+
     private static Path prepareTestFile(final long secondsToWrite) throws IOException {
         final Path tmpFile = createTmpFile();
 
         int row = 1;
         final long writeDuration = System.currentTimeMillis() + (secondsToWrite * 1000);
 
-        try (final CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
+        try (CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
             for (; System.currentTimeMillis() < writeDuration; row++) {
                 csv.writeRow("row " + row, "containing standard ASCII, unicode letters öäü and emojis 😎");
             }
         }
 
         System.out.format("Temporary test file with %,d records and %,d bytes successfully prepared%n%n",
-            row, Files.size(tmpFile));
+            row - 1, Files.size(tmpFile));
 
         return tmpFile;
     }
@@ -65,10 +75,10 @@ public class RandomAccessCsvReaderExample {
             final int size = reader.size().get();
             System.out.format("Indexed %,d records%n", size);
 
-            final CsvRow lastRow = reader.read(size - 1).get();
+            final CsvRow lastRow = reader.readRow(size - 1).get();
             System.out.println("Last row: " + lastRow);
 
-            final CsvRow firstRow = reader.read(0).get();
+            final CsvRow firstRow = reader.readRow(0).get();
             System.out.println("First row: " + firstRow);
         }
 
@@ -82,8 +92,7 @@ public class RandomAccessCsvReaderExample {
         final int noOfRecords = 10;
 
         try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
-            final CompletableFuture<Void> future = reader.read(firstRecord, noOfRecords, System.out::println);
-            future.join();
+            reader.readRows(firstRecord, noOfRecords, System.out::println).join();
         }
 
         System.out.println();
@@ -93,7 +102,7 @@ public class RandomAccessCsvReaderExample {
         final long fileSize = Files.size(file);
         System.out.printf("# Read file with a total of %,d bytes%n", fileSize);
 
-        try (final RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
+        try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
             // Indexing takes place in background – we can easily monitor the current status without blocking
             final StatusMonitor statusMonitor = reader.getStatusMonitor();
 

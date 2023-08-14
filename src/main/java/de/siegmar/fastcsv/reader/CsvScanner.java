@@ -3,9 +3,6 @@ package de.siegmar.fastcsv.reader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
 class CsvScanner {
 
@@ -20,18 +17,14 @@ class CsvScanner {
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
-    static void scan(final Path file, final byte quoteCharacter,
-                     final StatusConsumer statusConsumer) throws IOException {
-
-        try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
-            scan(quoteCharacter, channel, statusConsumer);
-        }
-    }
-
-    static void scan(final byte quoteCharacter, final ReadableByteChannel channel,
+    static void scan(final ReadableByteChannel channel, final byte quoteCharacter,
                      final StatusConsumer statusConsumer) throws IOException {
 
         final ChannelStream buf = new ChannelStream(channel, ByteBuffer.allocateDirect(8192), statusConsumer);
+
+        if (buf.peek() != -1) {
+            statusConsumer.addPosition(0);
+        }
 
         int status = STATUS_RESET;
 
@@ -46,6 +39,7 @@ class CsvScanner {
                     }
                 }
             } else {
+                // FIXME ignore quoteCharacter on commented lines
                 if (d == quoteCharacter) {
                     // FIXME quote in data mode?
                     status |= STATUS_QUOTED_MODE;

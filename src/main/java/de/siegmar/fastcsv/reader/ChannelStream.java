@@ -19,7 +19,7 @@ final class ChannelStream {
         this.buf = buf;
         this.statusConsumer = statusConsumer;
 
-        nextByte = loadData(false) ? buf.get() : -1;
+        nextByte = loadData() ? buf.get() : -1;
     }
 
     int peek() {
@@ -40,18 +40,19 @@ final class ChannelStream {
         return nextByte != -1;
     }
 
-    private boolean loadData(final boolean compact) throws IOException {
-        final int readCnt = channel.read(compact ? buf.compact() : buf);
+    private boolean loadData() throws IOException {
+        buf.clear();
+        final int readCnt = channel.read(buf);
         if (readCnt == -1) {
             return false;
         }
-        buf.flip();
         statusConsumer.addReadBytes(readCnt);
+        buf.flip();
         return true;
     }
 
     private int fetchNextByte() throws IOException {
-        if (!buf.hasRemaining() && !loadData(true)) {
+        if (!buf.hasRemaining() && !loadData()) {
             return -1;
         }
 
