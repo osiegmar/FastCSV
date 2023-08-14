@@ -16,7 +16,7 @@ version = "2.2.2"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(11)
     }
     withJavadocJar()
     withSourcesJar()
@@ -39,7 +39,7 @@ dependencies {
 
     "exampleImplementation"(sourceSets.main.get().output)
 
-    signature("net.sf.androidscents.signature:android-api-level-26:8.0.0_r2@signature")
+    signature("com.toasttab.android:gummy-bears-api-33:0.5.1@signature")
 }
 
 tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
@@ -91,10 +91,8 @@ tasks.jmh {
     operationsPerInvocation = 1
 }
 
-tasks.jar {
-    manifest {
-        attributes("Automatic-Module-Name" to "de.siegmar.fastcsv")
-    }
+animalsniffer {
+    sourceSets = listOf(project.sourceSets.main.get())
 }
 
 publishing {

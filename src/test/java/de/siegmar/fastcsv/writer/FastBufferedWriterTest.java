@@ -54,11 +54,7 @@ class FastBufferedWriterTest {
     }
 
     private String buildLargeData() {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8192; i++) {
-            sb.append("ab");
-        }
-        return sb.toString();
+        return "ab".repeat(8192);
     }
 
 }

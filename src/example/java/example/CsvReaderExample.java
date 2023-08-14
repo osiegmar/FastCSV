@@ -3,7 +3,6 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -87,7 +86,7 @@ public class CsvReaderExample {
 
     private static void file() throws IOException {
         final Path path = Files.createTempFile("fastcsv", ".csv");
-        Files.write(path, Collections.singletonList("foo,bar\n"));
+        Files.writeString(path, "foo,bar\n");
 
         try (CsvReader csvReader = CsvReader.builder().build(path)) {
             csvReader.forEach(System.out::println);

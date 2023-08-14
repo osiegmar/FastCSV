@@ -69,6 +69,10 @@
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|https://|ftp://"/>
     </module>
 
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$"/>
+    </module>
+
     <module name="TreeWalker">
 
         <property name="tabWidth" value="4"/>
