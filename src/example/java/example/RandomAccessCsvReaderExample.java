@@ -3,16 +3,16 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
+import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
 import de.siegmar.fastcsv.reader.StatusMonitor;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
+@SuppressWarnings("PMD.SystemPrintln")
 public class RandomAccessCsvReaderExample {
 
     public static void main(final String[] args) throws Exception {
@@ -22,15 +22,7 @@ public class RandomAccessCsvReaderExample {
         simple(tmpFile);
         multiple(tmpFile);
         statusMonitor(tmpFile);
-    }
-
-    private void foo() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-        Path file = Paths.get("");
-        try (RandomAccessCsvReader csvReader = RandomAccessCsvReader.builder().build(file)) {
-            CsvRow row = csvReader.readRow(3000)
-                .get(1, TimeUnit.SECONDS);
-            System.out.println(row);
-        }
+        advancedConfiguration(tmpFile);
     }
 
     private static Path prepareTestFile(final long secondsToWrite) throws IOException {
@@ -99,23 +91,34 @@ public class RandomAccessCsvReaderExample {
     }
 
     private static void statusMonitor(final Path file) throws IOException, InterruptedException, ExecutionException {
-        final long fileSize = Files.size(file);
-        System.out.printf("# Read file with a total of %,d bytes%n", fileSize);
+        System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
-        try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
+        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
             // Indexing takes place in background – we can easily monitor the current status without blocking
-            final StatusMonitor statusMonitor = reader.getStatusMonitor();
+            final StatusMonitor statusMonitor = csv.getStatusMonitor();
 
             do {
-                final long readBytes = statusMonitor.getReadBytes();
-                System.out.format("Read positions: %,d; read bytes: %,d (%.1f %%)%n",
-                    statusMonitor.getPositionCount(), readBytes, 100.0 / fileSize * readBytes);
-            } while (!reader.awaitIndex(250, TimeUnit.MILLISECONDS));
+                // Print current status
+                System.out.println(statusMonitor);
+            } while (!csv.awaitIndex(250, TimeUnit.MILLISECONDS));
 
-            System.out.printf("Finished reading file with a total of %,d records%n", reader.size().get());
+            System.out.printf("Finished reading file with a total of %,d records%n%n", csv.size().get());
         }
+    }
 
-        System.out.println();
+    private static void advancedConfiguration(final Path file)
+        throws IOException, ExecutionException, InterruptedException {
+
+        final CsvRow csvRow = RandomAccessCsvReader.builder()
+            .fieldSeparator(',')
+            .quoteCharacter('"')
+            .commentStrategy(CommentStrategy.NONE)
+            .commentCharacter('#')
+            .build(file)
+            .readRow(2)
+            .get();
+
+        System.out.println("Parsed via advanced config: " + csvRow);
     }
 
 }

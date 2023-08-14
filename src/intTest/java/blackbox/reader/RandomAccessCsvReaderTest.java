@@ -41,12 +41,68 @@ class RandomAccessCsvReaderTest {
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
         new InstanceOfAssertFactory<>(CsvRow.class, CsvRowAssert::assertThat);
+    private static final String TEST_STRING = "foo";
 
     @InjectSoftAssertions
     private SoftAssertions softly;
 
     @TempDir
     private Path tmpDir;
+
+    @Test
+    void outOfBounds() throws IOException {
+        try (RandomAccessCsvReader reader = build("")) {
+            softly.assertThat(reader.size())
+                .succeedsWithin(TIMEOUT)
+                .isEqualTo(0);
+
+            softly.assertThat(reader.readRow(0))
+                .failsWithin(TIMEOUT)
+                .withThrowableOfType(ExecutionException.class)
+                .withCauseInstanceOf(IndexOutOfBoundsException.class);
+
+            softly.assertThat(reader.readRow(1))
+                .failsWithin(TIMEOUT)
+                .withThrowableOfType(ExecutionException.class)
+                .withCauseInstanceOf(IndexOutOfBoundsException.class);
+        }
+    }
+
+    @Test
+    void readerToString() throws IOException {
+        final Path file = prepareTestFile(TEST_STRING);
+
+        assertThat(builder().build(file)).asString()
+            .isEqualTo("RandomAccessCsvReader[file=%s, charset=%s, fieldSeparator=%s, "
+                    + "quoteCharacter=%s, commentStrategy=%s, commentCharacter=%s]",
+                file, UTF_8, ',', '"', CommentStrategy.NONE, '#');
+    }
+
+    // TODO binary data test
+
+    private RandomAccessCsvReader build(final String data) throws IOException {
+        return builder().build(prepareTestFile(data));
+    }
+
+    private static RandomAccessCsvReader.RandomAccessCsvReaderBuilder builder() {
+        return RandomAccessCsvReader.builder();
+    }
+
+    private Path prepareTestFile(final String s) throws IOException {
+        final byte[] data = s
+            .replaceAll("␊", "\n")
+            .replaceAll("␍", "\r")
+            .replaceAll("'", "\"")
+            .getBytes(UTF_8);
+
+        return prepareTestFile(data);
+    }
+
+    private Path prepareTestFile(final byte[] data) throws IOException {
+        final Path file = tmpDir.resolve("foo.csv");
+        Files.write(file, data, StandardOpenOption.CREATE_NEW);
+        return file;
+    }
 
     @Nested
     class IllegalInput {
@@ -94,7 +150,7 @@ class RandomAccessCsvReaderTest {
         }
 
         @Test
-        void controlCharacterDiffer(@TempDir final Path tmpDir) throws IOException {
+        void controlCharacterDiffer() throws IOException {
             final Path emptyFile = Files.createTempFile(tmpDir, "fastcsv", null);
 
             final String expectedMessage =
@@ -125,7 +181,7 @@ class RandomAccessCsvReaderTest {
 
         @Test
         void negativePosition() {
-            assertThatThrownBy(() -> build("foo").readRow(-1))
+            assertThatThrownBy(() -> build(TEST_STRING).readRow(-1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Record# must be >= 0");
         }
@@ -144,13 +200,13 @@ class RandomAccessCsvReaderTest {
 
         @Test
         void await() {
-            assertThatCode(() -> build("foo").awaitIndex())
+            assertThatCode(() -> build(TEST_STRING).awaitIndex())
                 .doesNotThrowAnyException();
         }
 
         @Test
         void awaitDuration() throws IOException, ExecutionException, InterruptedException {
-            assertThat(build("foo").awaitIndex(1, TimeUnit.SECONDS))
+            assertThat(build(TEST_STRING).awaitIndex(1, TimeUnit.SECONDS))
                 .isTrue();
         }
 
@@ -159,41 +215,12 @@ class RandomAccessCsvReaderTest {
             try (RandomAccessCsvReader reader = build("foo␊bar")) {
                 assertThat(reader.awaitIndex(1, TimeUnit.SECONDS)).isTrue();
                 assertThat(reader.getStatusMonitor())
-                    .returns(2L, StatusMonitor::getPositionCount)
+                    .returns(2L, StatusMonitor::getRecordCount)
                     .returns(7L, StatusMonitor::getReadBytes)
-                    .asString().isEqualTo("Read %,d bytes / %,d lines", 7L, 2L);
+                    .asString().isEqualTo("Read 2 lines (7 bytes)");
             }
         }
 
-    }
-
-    @Test
-    void outOfBounds() throws IOException {
-        try (RandomAccessCsvReader reader = build("")) {
-            softly.assertThat(reader.size())
-                .succeedsWithin(TIMEOUT)
-                .isEqualTo(0);
-
-            softly.assertThat(reader.readRow(0))
-                .failsWithin(TIMEOUT)
-                .withThrowableOfType(ExecutionException.class)
-                .withCauseInstanceOf(IndexOutOfBoundsException.class);
-
-            softly.assertThat(reader.readRow(1))
-                .failsWithin(TIMEOUT)
-                .withThrowableOfType(ExecutionException.class)
-                .withCauseInstanceOf(IndexOutOfBoundsException.class);
-        }
-    }
-
-    @Test
-    void readerToString() throws IOException {
-        final Path file = prepareTestFile("foo");
-
-        assertThat(builder().build(file)).asString()
-            .isEqualTo("RandomAccessCsvReader[file=%s, charset=%s, fieldSeparator=%s, " +
-                    "quoteCharacter=%s, commentStrategy=%s, commentCharacter=%s]",
-                file, UTF_8, ',', '"', CommentStrategy.NONE, '#');
     }
 
     @Nested
@@ -201,38 +228,39 @@ class RandomAccessCsvReaderTest {
 
         @Test
         void oneLine() throws IOException {
-            final RandomAccessCsvReader reader = build("012");
+            try (RandomAccessCsvReader reader = build("012")) {
+                softly.assertThat(reader.size())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(1);
 
-            softly.assertThat(reader.size())
-                .succeedsWithin(TIMEOUT)
-                .isEqualTo(1);
-
-            softly.assertThat(reader.readRow(0))
-                .succeedsWithin(TIMEOUT, CSV_ROW)
-                .isOriginalLineNumber(1)
-                .isNotComment()
-                .fields().containsExactly("012");
+                softly.assertThat(reader.readRow(0))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(1)
+                    .isNotComment()
+                    .fields().containsExactly("012");
+            }
         }
 
         @Test
         void twoLines() throws IOException {
-            final RandomAccessCsvReader reader = build("012,foo␊345,bar");
+            try (RandomAccessCsvReader reader = build("012,foo␊345,bar")) {
 
-            softly.assertThat(reader.size())
-                .succeedsWithin(TIMEOUT)
-                .isEqualTo(2);
+                softly.assertThat(reader.size())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(2);
 
-            softly.assertThat(reader.readRow(0))
-                .succeedsWithin(TIMEOUT, CSV_ROW)
-                .isOriginalLineNumber(1)
-                .isNotComment()
-                .fields().containsExactly("012", "foo");
+                softly.assertThat(reader.readRow(0))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(1)
+                    .isNotComment()
+                    .fields().containsExactly("012", TEST_STRING);
 
-            softly.assertThat(reader.readRow(1))
-                .succeedsWithin(TIMEOUT, CSV_ROW)
-                .isOriginalLineNumber(2)
-                .isNotComment()
-                .fields().containsExactly("345", "bar");
+                softly.assertThat(reader.readRow(1))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(2)
+                    .isNotComment()
+                    .fields().containsExactly("345", "bar");
+            }
         }
 
     }
@@ -254,7 +282,9 @@ class RandomAccessCsvReaderTest {
                 .containsExactly("2", "3");
         }
 
-        private List<CsvRow> readRows(final int firstRecord, final int maxRecords) throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        private List<CsvRow> readRows(final int firstRecord, final int maxRecords)
+            throws InterruptedException, ExecutionException, TimeoutException, IOException {
+
             return build("1␊2␊3␊4␊5")
                 .readRows(firstRecord, maxRecords, new CollectingConsumer())
                 .thenApply(CollectingConsumer::getRows)
@@ -263,37 +293,7 @@ class RandomAccessCsvReaderTest {
 
     }
 
-    // TODO binary data test
-
-    private RandomAccessCsvReader build(final String data) throws IOException {
-        return builder().build(prepareTestFile(data));
-    }
-
-    private RandomAccessCsvReader build(final byte[] data) throws IOException {
-        return builder().build(prepareTestFile(data));
-    }
-
-    private static RandomAccessCsvReader.RandomAccessCsvReaderBuilder builder() {
-        return RandomAccessCsvReader.builder();
-    }
-
-    private Path prepareTestFile(final String s) throws IOException {
-        final byte[] data = s
-            .replaceAll("␊", "\n")
-            .replaceAll("␍", "\r")
-            .replaceAll("'", "\"")
-            .getBytes(UTF_8);
-
-        return prepareTestFile(data);
-    }
-
-    private Path prepareTestFile(final byte[] data) throws IOException {
-        final Path file = tmpDir.resolve("foo.csv");
-        Files.write(file, data, StandardOpenOption.CREATE_NEW);
-        return file;
-    }
-
-    class CollectingConsumer implements Consumer<CsvRow> {
+    static class CollectingConsumer implements Consumer<CsvRow> {
 
         private List<CsvRow> rows = new ArrayList<>();
 
@@ -307,6 +307,5 @@ class RandomAccessCsvReaderTest {
         }
 
     }
-
 
 }

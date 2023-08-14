@@ -11,6 +11,9 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="JUnitAssertionsShouldIncludeMessage"/>
         <exclude name="JUnitTestContainsTooManyAsserts"/>
+
+        <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
     </rule>
     <rule ref="category/java/errorprone.xml">
         <exclude name="DataflowAnomalyAnalysis"/>

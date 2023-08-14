@@ -24,7 +24,7 @@ public class NamedCsvReaderExample {
     }
 
     private static void advancedConfiguration() {
-        final String data = "'col a';'col b'\n'field 1';'field 2'";
+        final String data = "'col a';'col b'\n'field 1';'field 2'\n'field 3';'field 4'";
         final String parsedData = NamedCsvReader.builder()
             .fieldSeparator(';')
             .quoteCharacter('\'')

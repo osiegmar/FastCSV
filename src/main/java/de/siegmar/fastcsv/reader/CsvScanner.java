@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-class CsvScanner {
+final class CsvScanner {
 
     private static final char LF = '\n';
     private static final char CR = '\r';
@@ -17,13 +17,18 @@ class CsvScanner {
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
+    private CsvScanner() {
+    }
+
+    @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
+        "checkstyle:NestedIfDepth"})
     static void scan(final ReadableByteChannel channel, final byte quoteCharacter,
                      final StatusConsumer statusConsumer) throws IOException {
 
         final ChannelStream buf = new ChannelStream(channel, ByteBuffer.allocateDirect(8192), statusConsumer);
 
         if (buf.peek() != -1) {
-            statusConsumer.addPosition(0);
+            statusConsumer.addRecordPosition(0);
         }
 
         int status = STATUS_RESET;
@@ -49,11 +54,11 @@ class CsvScanner {
                     }
 
                     if (buf.hasData()) {
-                        statusConsumer.addPosition(buf.getTotalPosition());
+                        statusConsumer.addRecordPosition(buf.getTotalPosition());
                     }
                 } else if (d == LF) {
                     if (buf.hasData()) {
-                        statusConsumer.addPosition(buf.getTotalPosition());
+                        statusConsumer.addRecordPosition(buf.getTotalPosition());
                     }
                 }
             }

@@ -36,22 +36,21 @@ import java.util.function.Consumer;
  * Example use:
  * <pre>{@code
  * try (RandomAccessCsvReader csvReader = RandomAccessCsvReader.builder().build(file)) {
- *     CsvRow row = csvReader.readRow(3000)
- *         get(1, TimeUnit.SECONDS);
- *     System.out.println(row);
+ *     CsvRow row = csvReader.readRow(3000).get();
  * }
  * }</pre>
  */
+@SuppressWarnings("checkstyle:ClassFanOutComplexity")
 public final class RandomAccessCsvReader implements Closeable {
 
     private final List<Integer> positions = Collections.synchronizedList(new ArrayList<>());
-    private final StatusMonitorImpl statusMonitor = new StatusMonitorImpl();
     private final Path file;
     private final Charset charset;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
+    private final StatusConsumerImpl statusConsumer;
     private final CompletableFuture<Void> scanner;
     private final RandomAccessFile raf;
     private final RowReader rowReader;
@@ -74,9 +73,11 @@ public final class RandomAccessCsvReader implements Closeable {
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
 
+        statusConsumer = new StatusConsumerImpl();
+
         scanner = CompletableFuture.runAsync(() -> {
             try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
-                CsvScanner.scan(channel, (byte) quoteCharacter, statusMonitor);
+                CsvScanner.scan(channel, (byte) quoteCharacter, statusConsumer);
             } catch (final IOException e) {
                 throw new CompletionException(e);
             }
@@ -98,13 +99,28 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     public StatusMonitor getStatusMonitor() {
-        return statusMonitor;
+        return statusConsumer.buildMonitor();
     }
 
+    /**
+     * Waits if necessary for the indexing process to complete.
+     *
+     * @throws ExecutionException if the indexing process failed
+     * @throws InterruptedException if the current thread was interrupted while waiting
+     */
     public void awaitIndex() throws ExecutionException, InterruptedException {
         scanner.get();
     }
 
+    /**
+     * Waits if necessary for at most the given time for the indexing process to complete.
+     *
+     * @param timeout the maximum time to wait
+     * @param unit the time unit of the timeout argument
+     * @return {@code true}, if the index building process has finished within the given timeout
+     * @throws ExecutionException if the indexing process failed
+     * @throws InterruptedException if the current thread was interrupted while waiting
+     */
     public boolean awaitIndex(final long timeout, final TimeUnit unit) throws ExecutionException, InterruptedException {
         try {
             scanner.get(timeout, unit);
@@ -141,14 +157,17 @@ public final class RandomAccessCsvReader implements Closeable {
                         throw new ArrayIndexOutOfBoundsException("No data found at rowNum# " + rowNum);
                     }
                     return csvRow;
-                } catch (final Exception e) {
+                } catch (final IOException e) {
                     throw new CompletionException(e);
                 }
             }
         });
     }
 
-    public <CONSUMER extends Consumer<CsvRow>> CompletableFuture<CONSUMER> readRows(final int firstRecord, final int maxRecords, final CONSUMER consumer) {
+    @SuppressWarnings("PMD.AssignmentInOperand")
+    public <C extends Consumer<CsvRow>> CompletableFuture<C> readRows(
+        final int firstRecord, final int maxRecords, final C consumer) {
+
         if (firstRecord < 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -191,6 +210,7 @@ public final class RandomAccessCsvReader implements Closeable {
             .thenApply(unused -> positions.get(record));
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private CompletableFuture<Void> waitForRecord(final int record) {
         return CompletableFuture.runAsync(() -> {
             while (positions.size() < record && !scanner.isDone()) {
@@ -223,7 +243,10 @@ public final class RandomAccessCsvReader implements Closeable {
             .toString();
     }
 
+    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class RandomAccessCsvReaderBuilder {
+
+        private static final int MAX_BASE_ASCII = 127;
 
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
@@ -266,7 +289,8 @@ public final class RandomAccessCsvReader implements Closeable {
          * @return This updated object, so that additional method calls can be chained together.
          * @see #commentCharacter(char)
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
+        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder commentStrategy(
+            final CommentStrategy commentStrategy) {
             this.commentStrategy = commentStrategy;
             return this;
         }
@@ -291,7 +315,7 @@ public final class RandomAccessCsvReader implements Closeable {
          * of RandomAccessCsvReader.
          */
         private static void checkControlCharacter(final char controlChar) {
-            if (controlChar > 127) {
+            if (controlChar > MAX_BASE_ASCII) {
                 throw new IllegalArgumentException(String.format(
                     "Multibyte control characters are not supported in RandomAccessCsvReader: '%s' (value: %d)",
                     controlChar, (int) controlChar));
@@ -314,20 +338,15 @@ public final class RandomAccessCsvReader implements Closeable {
 
     }
 
-    private class StatusMonitorImpl implements StatusConsumer, StatusMonitor {
+    private class StatusConsumerImpl implements StatusConsumer {
 
-        private final AtomicLong positionCount = new AtomicLong();
+        private final AtomicLong recordCount = new AtomicLong();
         private final AtomicLong readBytes = new AtomicLong();
 
         @Override
-        public void addPosition(final int position) {
+        public void addRecordPosition(final int position) {
             positions.add(position);
-            positionCount.incrementAndGet();
-        }
-
-        @Override
-        public long getPositionCount() {
-            return positionCount.get();
+            recordCount.incrementAndGet();
         }
 
         @Override
@@ -335,23 +354,31 @@ public final class RandomAccessCsvReader implements Closeable {
             readBytes.addAndGet(readCnt);
         }
 
-        @Override
-        public long getReadBytes() {
-            return readBytes.get();
-        }
+        public StatusMonitor buildMonitor() {
+            return new StatusMonitor() {
+                @Override
+                public long getRecordCount() {
+                    return recordCount.get();
+                }
 
-        @Override
-        public String toString() {
-            return String.format("Read %,d bytes / %,d lines", readBytes.get(), positionCount.get());
-        }
+                @Override
+                public long getReadBytes() {
+                    return readBytes.get();
+                }
 
+                @Override
+                public String toString() {
+                    return String.format("Read %,d lines (%,d bytes)", getRecordCount(), getReadBytes());
+                }
+            };
+        }
     }
 
     private static class ChannelInputStream extends InputStream {
 
         private final RandomAccessFile raf;
 
-        public ChannelInputStream(final RandomAccessFile raf) {
+        ChannelInputStream(final RandomAccessFile raf) {
             this.raf = raf;
         }
 

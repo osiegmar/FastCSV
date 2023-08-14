@@ -109,7 +109,7 @@ class CsvScannerTest {
 
         final StatusConsumer statusConsumer = new StatusConsumer() {
             @Override
-            public void addPosition(final int position) {
+            public void addRecordPosition(final int position) {
                 positions.add(position);
             }
 
@@ -117,6 +117,7 @@ class CsvScannerTest {
             public void addReadBytes(final int readCnt) {
 
             }
+
         };
 
         CsvScanner.scan(Channels.newChannel(new ByteArrayInputStream(data)), (byte) '"', statusConsumer);
