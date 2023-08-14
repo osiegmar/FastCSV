@@ -20,6 +20,7 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '8'
+    - uses: gradle/wrapper-validation-action@v1
     - uses: gradle/gradle-build-action@v2
     - name: Build with Gradle
       run: ./gradlew build --warning-mode all
