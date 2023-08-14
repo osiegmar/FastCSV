@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2023-??-??
+### Changed
+- Updated from Java 8 to Java 11
+
 ## [2.2.2] - 2023-05-13
 ### Added
 - New quote strategy that adds quotes only for non-empty fields [\#80](https://github.com/osiegmar/FastCSV/pull/80)
@@ -73,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v2.2.2...develop
 [2.2.2]: https://github.com/osiegmar/FastCSV/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/osiegmar/FastCSV/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/osiegmar/FastCSV/compare/v2.1.0...v2.2.0

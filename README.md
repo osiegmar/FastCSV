@@ -60,11 +60,12 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ## Requirements
 
-- Java 8
+- current version: Java 11 (Android 13 / API level 33)
+- for 2.x version: Java 8 (Android 8 / API level 26)
 
 > :bulb: Android is not Java and is not officially supported.
 > Although some basic checks are included in the continuous integration pipeline in order to
-> verify that the library *should* work with Android 8.0 (API level 26).
+> verify that the library *should* work with Android.
 
 ## CsvReader Examples
 
