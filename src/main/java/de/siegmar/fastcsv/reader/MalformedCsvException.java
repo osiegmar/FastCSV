@@ -5,7 +5,7 @@ package de.siegmar.fastcsv.reader;
  */
 public class MalformedCsvException extends RuntimeException {
 
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Construct exception with message.
