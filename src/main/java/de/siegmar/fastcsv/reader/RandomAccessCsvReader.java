@@ -210,17 +210,10 @@ public final class RandomAccessCsvReader implements Closeable {
             .thenApply(unused -> positions.get(record));
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     private CompletableFuture<Void> waitForRecord(final int record) {
         return CompletableFuture.runAsync(() -> {
             while (positions.size() < record && !scanner.isDone()) {
-                try {
-                    scanner.get(100, TimeUnit.MILLISECONDS);
-                } catch (final TimeoutException ignored) {
-                    // ignore
-                } catch (final ExecutionException | InterruptedException e) {
-                    throw new CompletionException("Exception while waiting for scanner result", e);
-                }
+                Thread.onSpinWait();
             }
         });
     }
