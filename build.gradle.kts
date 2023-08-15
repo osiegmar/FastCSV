@@ -28,16 +28,30 @@ repositories {
 
 sourceSets {
     create("example") {
-        java.srcDir("src/example/java")
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+    create("intTest") {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
     }
 }
 
+val intTestImplementation by configurations.getting {
+    extendsFrom(configurations.implementation.get())
+}
+val intTestRuntimeOnly by configurations.getting
+
+configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    "exampleImplementation"(sourceSets.main.get().output)
+    intTestImplementation(platform("org.junit:junit-bom:5.9.3"))
+    intTestImplementation("org.junit.jupiter:junit-jupiter")
+    intTestRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     signature("com.toasttab.android:gummy-bears-api-33:0.5.1@signature")
 }
