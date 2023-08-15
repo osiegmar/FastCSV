@@ -1,25 +1,34 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 final class ChannelStream {
 
     private final ReadableByteChannel channel;
-    private final ByteBuffer buf;
+    private final ByteBuffer byteBuf;
+    private final Buffer buf;
     private final StatusConsumer statusConsumer;
     private int totalPosition;
     private int nextByte;
 
-    ChannelStream(final ReadableByteChannel channel, final ByteBuffer buf, final StatusConsumer statusConsumer)
+    ChannelStream(final ReadableByteChannel channel, final ByteBuffer byteBuf, final StatusConsumer statusConsumer)
         throws IOException {
 
         this.channel = channel;
-        this.buf = buf;
+
+        this.byteBuf = byteBuf;
+
+        // Keep one buf as Buffer to maintain Android compatibility
+        // otherwise calls to clear() and flip() cause NoSuchMethodError
+        // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
+        this.buf = byteBuf;
+
         this.statusConsumer = statusConsumer;
 
-        nextByte = loadData() ? buf.get() : -1;
+        nextByte = loadData() ? byteBuf.get() : -1;
     }
 
     int peek() {
@@ -42,7 +51,7 @@ final class ChannelStream {
 
     private boolean loadData() throws IOException {
         buf.clear();
-        final int readCnt = channel.read(buf);
+        final int readCnt = channel.read(byteBuf);
         if (readCnt == -1) {
             return false;
         }
@@ -57,7 +66,7 @@ final class ChannelStream {
         }
 
         totalPosition++;
-        return buf.get();
+        return byteBuf.get();
     }
 
     int getTotalPosition() {
