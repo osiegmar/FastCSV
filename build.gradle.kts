@@ -27,31 +27,40 @@ repositories {
 }
 
 sourceSets {
+    create("common") {
+        compileClasspath += sourceSets.main.get().output
+    }
     create("example") {
         compileClasspath += sourceSets.main.get().output
         runtimeClasspath += sourceSets.main.get().output
     }
     create("intTest") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
+        compileClasspath += sourceSets["common"].output
+        runtimeClasspath += sourceSets["common"].output
+    }
+    test {
+        compileClasspath += sourceSets["common"].output
+        runtimeClasspath += sourceSets["common"].output
     }
 }
 
-val intTestImplementation by configurations.getting {
+val commonImplementation by configurations.getting {
     extendsFrom(configurations.implementation.get())
 }
-val intTestRuntimeOnly by configurations.getting
 
-configurations["intTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+val intTest by sourceSets.getting
+configurations[intTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
+configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
+    commonImplementation("org.assertj:assertj-core:3.24.2")
+
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    intTestImplementation(platform("org.junit:junit-bom:5.9.3"))
-    intTestImplementation("org.junit.jupiter:junit-jupiter")
-    intTestRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    "intTestImplementation"(project)
 
     signature("com.toasttab.android:gummy-bears-api-33:0.5.1@signature")
 }
@@ -67,6 +76,21 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+val intTestTask = tasks.register<Test>("intTest") {
+    group = "verification"
+    useJUnitPlatform()
+
+    testClassesDirs = intTest.output.classesDirs
+    classpath = sourceSets["intTest"].runtimeClasspath
+
+    finalizedBy(tasks.jacocoTestReport)
+    shouldRunAfter(tasks.test)
+}
+
+tasks.check {
+    dependsOn(intTestTask)
+}
+
 pitest {
     junit5PluginVersion = "1.1.2"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
@@ -80,12 +104,15 @@ pmd {
 }
 
 tasks.jacocoTestReport {
+    executionData = files(fileTree(buildDir).include("/jacoco/*.exec"))
     reports {
         xml.required.set(true)
     }
+    dependsOn(intTestTask)
 }
 
 tasks.jacocoTestCoverageVerification {
+    executionData = files(fileTree(buildDir).include("/jacoco/*.exec"))
     violationRules {
         rule {
             limit {
@@ -95,6 +122,7 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
+    dependsOn(intTestTask)
 }
 
 tasks.jmh {

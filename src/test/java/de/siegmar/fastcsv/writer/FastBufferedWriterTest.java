@@ -1,7 +1,7 @@
 package de.siegmar.fastcsv.writer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -24,7 +24,7 @@ class FastBufferedWriterTest {
         }
         cw.close();
 
-        assertEquals(sb.toString(), sw.toString());
+        assertThat(sb).asString().isEqualTo(sw.toString());
     }
 
     @Test
@@ -37,7 +37,7 @@ class FastBufferedWriterTest {
         }
         cw.close();
 
-        assertEquals(sb.toString(), sw.toString());
+        assertThat(sb).asString().isEqualTo(sw.toString());
     }
 
     @Test
@@ -45,12 +45,13 @@ class FastBufferedWriterTest {
         final String sb = buildLargeData();
         cw.write(sb, 0, sb.length());
 
-        assertEquals(sb, sw.toString());
+        assertThat(sw).asString().isEqualTo(sb);
     }
 
     @Test
     void unreachable() {
-        assertThrows(IllegalStateException.class, () -> cw.write(new char[0], 0, 0));
+        assertThatThrownBy(() -> cw.write(new char[0], 0, 0))
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     private String buildLargeData() {

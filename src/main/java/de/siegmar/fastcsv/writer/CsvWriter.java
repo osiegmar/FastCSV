@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.writer;
 
+import static de.siegmar.fastcsv.util.Util.containsDupe;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -49,7 +51,7 @@ public final class CsvWriter implements Closeable {
         if (commentCharacter == CR || commentCharacter == LF) {
             throw new IllegalArgumentException("commentCharacter must not be a newline char");
         }
-        if (!allDiffers(fieldSeparator, quoteCharacter, commentCharacter)) {
+        if (containsDupe(fieldSeparator, quoteCharacter, commentCharacter)) {
             throw new IllegalArgumentException(String.format("Control characters must differ"
                     + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
                 fieldSeparator, quoteCharacter, commentCharacter));
@@ -62,15 +64,6 @@ public final class CsvWriter implements Closeable {
         this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
         this.syncWriter = syncWriter;
-    }
-
-    private boolean allDiffers(final char... chars) {
-        for (int i = 0; i < chars.length - 1; i++) {
-            if (chars[i] == chars[i + 1]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -222,7 +215,6 @@ public final class CsvWriter implements Closeable {
      *                If the argument {@code comment} contains line break characters (CR, LF), multiple comment lines
      *                will be written, terminated with the line break character configured by
      *                {@link CsvWriterBuilder#lineDelimiter(LineDelimiter)}.
-     *
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
      */
@@ -498,7 +490,7 @@ public final class CsvWriter implements Closeable {
 
         @Override
         public void write(final char[] cbuf, final int off, final int len) {
-            throw new IllegalStateException("Not implemented");
+            throw new UnsupportedOperationException();
         }
 
         @Override

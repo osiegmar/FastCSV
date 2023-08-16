@@ -2,11 +2,11 @@ package blackbox.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,9 +44,10 @@ final class DataProvider {
         return data;
     }
 
-    private static BufferedReader resource(final String name) {
-        return new BufferedReader(new InputStreamReader(
-            Objects.requireNonNull(DataProvider.class.getResourceAsStream(name)), StandardCharsets.UTF_8));
+    @SuppressWarnings("PMD.UseProperClassLoader")
+    private static BufferedReader resource(final String name) throws IOException {
+        final InputStream fileStream = DataProvider.class.getClassLoader().getUnnamedModule().getResourceAsStream(name);
+        return new BufferedReader(new InputStreamReader(fileStream, StandardCharsets.UTF_8));
     }
 
     public static class GenericTestData {

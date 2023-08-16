@@ -2,7 +2,7 @@ package blackbox.reader;
 
 import static blackbox.reader.CharacterConv.parse;
 import static blackbox.reader.CharacterConv.print;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +26,10 @@ class GenericDataTest {
             : data.isSkipComments() ? CommentStrategy.SKIP : CommentStrategy.NONE;
         final String actual = print(readAll(parse(data.getInput()), data.isSkipEmptyLines(),
             commentStrategy));
-        assertEquals(expected, actual, () -> String.format("Error in line: '%s'", data));
+
+        assertThat(actual)
+            .withFailMessage(() -> String.format("Error in line: '%s'", data))
+            .isEqualTo(expected);
     }
 
     static List<DataProvider.GenericTestData> dataProvider() throws IOException {

@@ -1,7 +1,7 @@
 package blackbox.writer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,22 +10,28 @@ import de.siegmar.fastcsv.writer.LineDelimiter;
 class LineDelimiterTest {
 
     @Test
-    void test() {
-        assertEquals("\n", LineDelimiter.LF.toString());
-        assertEquals("\r", LineDelimiter.CR.toString());
-        assertEquals("\r\n", LineDelimiter.CRLF.toString());
-        assertEquals(System.lineSeparator(), LineDelimiter.PLATFORM.toString());
+    void linefeeds() {
+        assertThat(LineDelimiter.of("\r\n"))
+            .isEqualTo(LineDelimiter.CRLF)
+            .asString().isEqualTo("\r\n");
+
+        assertThat(LineDelimiter.of("\n"))
+            .isEqualTo(LineDelimiter.LF)
+            .asString().isEqualTo("\n");
+
+        assertThat(LineDelimiter.of("\r"))
+            .isEqualTo(LineDelimiter.CR)
+            .asString().isEqualTo("\r");
+
+        assertThat(LineDelimiter.PLATFORM)
+            .asString().isEqualTo(System.lineSeparator());
     }
 
     @Test
-    void testOf() {
-        assertEquals(LineDelimiter.CRLF, LineDelimiter.of("\r\n"));
-        assertEquals(LineDelimiter.LF, LineDelimiter.of("\n"));
-        assertEquals(LineDelimiter.CR, LineDelimiter.of("\r"));
-
-        final IllegalArgumentException e =
-            assertThrows(IllegalArgumentException.class, () -> LineDelimiter.of(";"));
-        assertEquals("Unknown line delimiter: ;", e.getMessage());
+    void illegal() {
+        assertThatThrownBy(() -> LineDelimiter.of(";"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Unknown line delimiter: ;");
     }
 
 }

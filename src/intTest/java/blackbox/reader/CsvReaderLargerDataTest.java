@@ -1,6 +1,7 @@
 package blackbox.reader;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static testutil.CsvRowAssert.assertThat;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -8,7 +9,6 @@ import java.io.StringWriter;
 import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.CloseResource")
@@ -28,27 +28,24 @@ class CsvReaderLargerDataTest {
         "Lorem ipsum dolor\n sit amet",
     };
 
+    private static final int TEST_ROWS = 1000;
+
     @Test
     void largerData() {
-        final CsvReader reader = CsvReader.builder().build(new StringReader(createSampleCSV()));
-        int i = 0;
-        for (final CsvRow row : reader) {
-            assertEquals(6, row.getFieldCount());
-            assertEquals(TEXTS[0], row.getField(0));
-            assertEquals(TEXTS[1], row.getField(1));
-            assertEquals(TEXTS[2], row.getField(2));
-            assertEquals(TEXTS[3], row.getField(3));
-            assertEquals(TEXTS[4], row.getField(4));
-            assertEquals(TEXTS[5], row.getField(5));
-            i++;
-        }
-        assertEquals(1000, i);
+        final CsvReader reader = CsvReader.builder()
+            .build(new StringReader(createSampleCSV()));
+
+        assertThat(reader.stream())
+            .hasSize(TEST_ROWS)
+            .allSatisfy(row -> assertThat(row)
+                .isNotComment()
+                .fields().containsExactly(TEXTS));
     }
 
     private String createSampleCSV() {
         final StringWriter sw = new StringWriter();
         final CsvWriter writer = CsvWriter.builder().build(sw);
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < TEST_ROWS; i++) {
             writer.writeRow(TEXTS);
         }
         return sw.toString();

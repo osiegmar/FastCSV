@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.containsDupe;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -83,8 +85,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         if (commentCharacter == CR || commentCharacter == LF) {
             throw new IllegalArgumentException("commentCharacter must not be a newline char");
         }
-        if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
-            || quoteCharacter == commentCharacter) {
+        if (containsDupe(fieldSeparator, quoteCharacter, commentCharacter)) {
             throw new IllegalArgumentException(String.format("Control characters must differ"
                     + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
                 fieldSeparator, quoteCharacter, commentCharacter));
