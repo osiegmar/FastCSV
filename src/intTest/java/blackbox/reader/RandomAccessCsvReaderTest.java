@@ -33,7 +33,7 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
 import de.siegmar.fastcsv.reader.StatusMonitor;
-import de.siegmar.fastcsv.testutil.CsvRowAssert;
+import testutil.CsvRowAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class RandomAccessCsvReaderTest {
@@ -226,14 +226,15 @@ class RandomAccessCsvReaderTest {
     @Nested
     class SingleRead {
 
+        // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void oneLine() throws IOException {
             try (RandomAccessCsvReader reader = build("012")) {
-                softly.assertThat(reader.size())
+                assertThat(reader.size())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(1);
 
-                softly.assertThat(reader.readRow(0))
+                assertThat(reader.readRow(0))
                     .succeedsWithin(TIMEOUT, CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
@@ -241,21 +242,22 @@ class RandomAccessCsvReaderTest {
             }
         }
 
+        // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void twoLines() throws IOException {
             try (RandomAccessCsvReader reader = build("012,foo␊345,bar")) {
 
-                softly.assertThat(reader.size())
+                assertThat(reader.size())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(2);
 
-                softly.assertThat(reader.readRow(0))
+                assertThat(reader.readRow(0))
                     .succeedsWithin(TIMEOUT, CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012", TEST_STRING);
 
-                softly.assertThat(reader.readRow(1))
+                assertThat(reader.readRow(1))
                     .succeedsWithin(TIMEOUT, CSV_ROW)
                     .isOriginalLineNumber(2)
                     .isNotComment()

@@ -90,6 +90,7 @@ public class RandomAccessCsvReaderExample {
         System.out.println();
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private static void statusMonitor(final Path file) throws IOException, InterruptedException, ExecutionException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
