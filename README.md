@@ -76,13 +76,6 @@ CsvReader.builder().build("foo1,bar1\r\nfoo2,bar2")
     .forEach(System.out::println);
 ```
 
-Iterative reading of some CSV data with a header
-
-```java
-NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
-    .forEach(row -> row.getField("header 2"));
-```
-
 Iterative reading of a CSV file
 
 ```java
@@ -91,7 +84,7 @@ try (CsvReader csv = CsvReader.builder().build(path)) {
 }
 ```
 
-Custom settings
+### Custom settings
 
 ```java
 CsvReader.builder()
@@ -103,8 +96,18 @@ CsvReader.builder()
     .errorOnDifferentFieldCount(false);
 ```
 
-For more example see
-[CsvReaderExample.java](src/example/java/example/CsvReaderExample.java)
+For more examples see [CsvReaderExample.java](src/example/java/example/CsvReaderExample.java)
+
+## NamedCsvReader Examples
+
+Iterative reading of some CSV data with a header
+
+```java
+NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
+    .forEach(row -> row.getField("header 2"));
+```
+
+For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
 
 ## CsvWriter Examples
 
@@ -136,8 +139,8 @@ CsvWriter.builder()
     .lineDelimiter(LineDelimiter.LF);
 ```
 
-For more example see
-[CsvWriterExample.java](src/example/java/example/CsvWriterExample.java)
+For more examples see
+[CsvWriterExample.java](src/example/java/example/CsvWriterExample.java).
 
 ## Upgrading from version 1.x
 

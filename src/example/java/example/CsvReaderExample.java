@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
-import de.siegmar.fastcsv.reader.NamedCsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRow;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class CsvReaderExample {
@@ -21,7 +18,6 @@ public class CsvReaderExample {
         forEachLambda();
         stream();
         iterator();
-        header();
         advancedConfiguration();
         file();
     }
@@ -59,14 +55,6 @@ public class CsvReaderExample {
         }
     }
 
-    private static void header() {
-        final Optional<NamedCsvRow> first = NamedCsvReader.builder()
-            .build("header1,header2\nvalue1,value2")
-            .stream().findFirst();
-
-        first.ifPresent(row -> System.out.println("Header/Name based: " + row.getField("header2")));
-    }
-
     private static void advancedConfiguration() {
         final String data = "#commented row\n'quoted ; column';second column\nnew row";
         final String parsedData = CsvReader.builder()
@@ -88,8 +76,8 @@ public class CsvReaderExample {
         final Path path = Files.createTempFile("fastcsv", ".csv");
         Files.writeString(path, "foo,bar\n");
 
-        try (CsvReader csvReader = CsvReader.builder().build(path)) {
-            csvReader.forEach(System.out::println);
+        try (CsvReader csv = CsvReader.builder().build(path)) {
+            csv.forEach(System.out::println);
         }
     }
 
