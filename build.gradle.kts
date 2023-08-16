@@ -1,3 +1,5 @@
+@file:Suppress("StringLiteralDuplication")
+
 plugins {
     `java-library`
     `maven-publish`
