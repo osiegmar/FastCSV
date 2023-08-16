@@ -28,7 +28,8 @@ class GenericDataTest {
             commentStrategy));
 
         assertThat(actual)
-            .withFailMessage(() -> String.format("Error in line: '%s'", data))
+            .withFailMessage(() -> String.format("Error in line %d: expected='%s', actual='%s'",
+                data.getLineNo(), expected, actual))
             .isEqualTo(expected);
     }
 
