@@ -1,0 +1,39 @@
+# $ marks a newline character (all variations will be tested)
+# ^ marks the position where the CsvScanner needs to find a new record
+
+# unterminated
+^___
+^___$^___
+
+# terminated
+^___$
+^___$^$
+
+# mixed newline characters
+^___\n^___\r^___\r\n^___
+
+# quoted fields
+^"___$___"$^___
+^___$^"___"
+^___$^"___$___
+^___$^"___
+
+# escaped quotes
+^"_""_"$^___
+
+# commented lines
+^___$^#___$^___
+^___$^#___"$^___
+^#___
+^#___$
+
+# quote in data fields
+^___"___$^___
+
+# comment in data fields
+^"#___$___"$^___
+
+# multiple fields
+^___,___$^___
+^"___",____$^___
+^"___,___"$^___

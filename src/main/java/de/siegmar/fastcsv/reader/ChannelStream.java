@@ -52,11 +52,11 @@ final class ChannelStream {
     private boolean loadData() throws IOException {
         buf.clear();
         final int readCnt = channel.read(byteBuf);
+        buf.flip();
         if (readCnt == -1) {
             return false;
         }
         statusConsumer.addReadBytes(readCnt);
-        buf.flip();
         return true;
     }
 

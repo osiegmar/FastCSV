@@ -77,7 +77,7 @@ public final class RandomAccessCsvReader implements Closeable {
 
         scanner = CompletableFuture.runAsync(() -> {
             try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
-                CsvScanner.scan(channel, (byte) quoteCharacter, statusConsumer);
+                new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter, statusConsumer).scan();
             } catch (final IOException e) {
                 throw new CompletionException(e);
             }

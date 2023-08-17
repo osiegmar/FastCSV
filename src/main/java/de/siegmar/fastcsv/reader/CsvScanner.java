@@ -9,60 +9,110 @@ final class CsvScanner {
     private static final char LF = '\n';
     private static final char CR = '\r';
 
-    private static final int STATUS_LAST_CHAR_WAS_CR = 32;
-    private static final int STATUS_COMMENTED_ROW = 16;
-    private static final int STATUS_NEW_FIELD = 8;
-    private static final int STATUS_QUOTED_MODE = 4;
-    private static final int STATUS_QUOTED_COLUMN = 2;
-    private static final int STATUS_DATA_COLUMN = 1;
-    private static final int STATUS_RESET = 0;
+    private final byte fieldSeparator;
+    private final byte quoteCharacter;
+    private final CommentStrategy commentStrategy;
+    private final byte commentCharacter;
+    private final StatusConsumer statusConsumer;
+    private final ChannelStream buf;
 
-    private CsvScanner() {
+    CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
+               final CommentStrategy commentStrategy, final byte commentCharacter,
+               final StatusConsumer statusConsumer) throws IOException {
+
+        this.fieldSeparator = fieldSeparator;
+        this.quoteCharacter = quoteCharacter;
+        this.commentStrategy = commentStrategy;
+        this.commentCharacter = commentCharacter;
+        this.statusConsumer = statusConsumer;
+
+        buf = new ChannelStream(channel, ByteBuffer.allocateDirect(8192), statusConsumer);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
         "checkstyle:NestedIfDepth"})
-    static void scan(final ReadableByteChannel channel, final byte quoteCharacter,
-                     final StatusConsumer statusConsumer) throws IOException {
-
-        final ChannelStream buf = new ChannelStream(channel, ByteBuffer.allocateDirect(8192), statusConsumer);
-
+    void scan() throws IOException {
         if (buf.peek() != -1) {
             statusConsumer.addRecordPosition(0);
         }
 
-        int status = STATUS_RESET;
-
         int d;
         while ((d = buf.get()) != -1) {
-            if ((status & STATUS_QUOTED_MODE) != 0) {
-                if (d == quoteCharacter) {
-                    if (buf.peek() == quoteCharacter) {
-                        buf.consume();
-                    } else {
-                        status &= ~STATUS_QUOTED_MODE;
-                    }
-                }
+            // here: always a new row
+            if (d == commentCharacter && commentStrategy != CommentStrategy.NONE) {
+                consumeCommentedRow();
             } else {
-                // FIXME ignore quoteCharacter on commented lines
-                if (d == quoteCharacter) {
-                    // FIXME quote in data mode?
-                    status |= STATUS_QUOTED_MODE;
-                } else if (d == CR) {
-                    if (buf.peek() == LF) {
-                        buf.consume();
-                    }
+                do {
+                    // here: always a new field
+                    final boolean endOfRow = (d == quoteCharacter)
+                        ? consumeQuotedField() : consumeUnquotedField(d);
 
-                    if (buf.hasData()) {
-                        statusConsumer.addRecordPosition(buf.getTotalPosition());
+                    if (endOfRow) {
+                        break;
                     }
-                } else if (d == LF) {
-                    if (buf.hasData()) {
-                        statusConsumer.addRecordPosition(buf.getTotalPosition());
-                    }
+                } while ((d = buf.get()) != -1);
+            }
+        }
+    }
+
+    private void consumeCommentedRow() throws IOException {
+        int d;
+        while ((d = buf.get()) != -1) {
+            if (d == CR) {
+                if (buf.peek() == LF) {
+                    buf.consume();
+                }
+
+                if (buf.hasData()) {
+                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                }
+                break;
+            } else if (d == LF) {
+                if (buf.hasData()) {
+                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                }
+                break;
+            }
+        }
+    }
+
+    private boolean consumeQuotedField() throws IOException {
+        int d;
+        while ((d = buf.get()) != -1) {
+            if (d == quoteCharacter) {
+                if (buf.peek() == quoteCharacter) {
+                    buf.consume();
+                } else {
+                    return !buf.hasData() || consumeUnquotedField(buf.get());
                 }
             }
         }
+
+        return true;
+    }
+
+    private boolean consumeUnquotedField(int d) throws IOException {
+        do {
+            if (d == fieldSeparator) {
+                return false;
+            } else if (d == CR) {
+                if (buf.peek() == LF) {
+                    buf.consume();
+                }
+
+                if (buf.hasData()) {
+                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                }
+                return true;
+            } else if (d == LF) {
+                if (buf.hasData()) {
+                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                }
+                return true;
+            }
+        } while ((d = buf.get()) != -1);
+
+        return true;
     }
 
 }
