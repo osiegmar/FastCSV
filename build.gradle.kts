@@ -7,7 +7,7 @@ plugins {
     checkstyle
     pmd
     jacoco
-    id("com.github.spotbugs") version "5.0.14"
+    id("com.github.spotbugs") version "5.1.3"
     id("me.champeau.jmh") version "0.7.1"
     id("info.solidsoft.pitest") version "1.9.11"
     id("ru.vyarus.animalsniffer") version "1.7.1"
@@ -106,7 +106,7 @@ pmd {
 }
 
 tasks.jacocoTestReport {
-    executionData = files(fileTree(buildDir).include("/jacoco/*.exec"))
+    executionData = files(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
     reports {
         xml.required.set(true)
     }
@@ -114,7 +114,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
-    executionData = files(fileTree(buildDir).include("/jacoco/*.exec"))
+    executionData = files(fileTree(layout.buildDirectory).include("/jacoco/*.exec"))
     violationRules {
         rule {
             limit {
