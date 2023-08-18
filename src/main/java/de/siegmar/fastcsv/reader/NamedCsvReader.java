@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
  * Example use:
  * <pre>{@code
  * try (NamedCsvReader csv = NamedCsvReader.builder().build(file)) {
- *     for (NamedCsvRow row : csvReader) {
+ *     for (NamedCsvRow row : csv) {
  *         ...
  *     }
  * }
