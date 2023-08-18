@@ -23,8 +23,8 @@ import java.util.stream.StreamSupport;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvReader csv = CsvReader.builder().build(path)) {
- *     for (CsvRow row : csv) {
+ * try (CsvReader csv = CsvReader.builder().build(file)) {
+ *     for (CsvRow row : csvReader) {
  *         ...
  *     }
  * }
@@ -350,7 +350,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified path using UTF-8 as the character set.
+         * Constructs a new {@link CsvReader} for the specified file using UTF-8 as the character set.
          *
          * @param file    the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
@@ -371,7 +371,7 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvReader build(final Path file, final Charset charset) throws IOException {
-            Objects.requireNonNull(file, "path must not be null");
+            Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
             return newReader(new InputStreamReader(Files.newInputStream(file), charset));

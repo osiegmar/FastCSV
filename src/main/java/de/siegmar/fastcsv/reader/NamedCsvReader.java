@@ -20,8 +20,8 @@ import java.util.stream.StreamSupport;
  * <p>
  * Example use:
  * <pre>{@code
- * try (NamedCsvReader csv = NamedCsvReader.builder().build(path)) {
- *     for (NamedCsvRow row : csv) {
+ * try (NamedCsvReader csv = NamedCsvReader.builder().build(file)) {
+ *     for (NamedCsvRow row : csvReader) {
  *         ...
  *     }
  * }
@@ -215,7 +215,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         }
 
         /**
-         * Constructs a new {@link NamedCsvReader} for the specified path using UTF-8 as the character set.
+         * Constructs a new {@link NamedCsvReader} for the specified file using UTF-8 as the character set.
          *
          * @param file    the file to read data from.
          * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
