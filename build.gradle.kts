@@ -115,7 +115,7 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
     }
-    dependsOn(tasks.test)
+    dependsOn(intTestTask)
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -129,7 +129,7 @@ tasks.jacocoTestCoverageVerification {
             }
         }
     }
-    dependsOn(tasks.test)
+    dependsOn(intTestTask)
 }
 
 tasks.jmh {
