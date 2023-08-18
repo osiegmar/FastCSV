@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 /**
@@ -111,32 +108,12 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Waits if necessary for the indexing process to complete.
+     * Gets the {@link CompletableFuture} that represents the background indexing task.
      *
-     * @throws ExecutionException   if the indexing process failed
-     * @throws InterruptedException if the current thread was interrupted while waiting
+     * @return the {@link CompletableFuture} that represents the background indexing task.
      */
-    public void awaitIndex() throws ExecutionException, InterruptedException {
-        scanner.get();
-    }
-
-    /**
-     * Waits if necessary for at most the given time for the indexing process to complete.
-     *
-     * @param timeout the maximum time to wait
-     * @param unit    the time unit of the timeout argument
-     * @return {@code true}, if the index building process has finished within the given timeout
-     * @throws ExecutionException   if the indexing process failed
-     * @throws InterruptedException if the current thread was interrupted while waiting
-     */
-    public boolean awaitIndex(final long timeout, final TimeUnit unit) throws ExecutionException, InterruptedException {
-        try {
-            scanner.get(timeout, unit);
-        } catch (final TimeoutException e) {
-            return false;
-        }
-
-        return true;
+    public CompletableFuture<Void> completableFuture() {
+        return CompletableFuture.allOf(scanner);
     }
 
     /**

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.assertj.core.api.InstanceOfAssertFactory;
@@ -30,9 +29,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
-import de.siegmar.fastcsv.reader.StatusListener;
 import testutil.CsvRowAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
@@ -209,31 +208,22 @@ class RandomAccessCsvReaderTest {
 
         @Test
         void await() {
-            assertThatCode(() -> build(TEST_STRING).awaitIndex())
+            assertThatCode(() -> build(TEST_STRING).completableFuture().get())
                 .doesNotThrowAnyException();
         }
 
         @Test
-        void awaitDuration() throws IOException, ExecutionException, InterruptedException {
-            assertThat(build(TEST_STRING).awaitIndex(1, TimeUnit.SECONDS))
-                .isTrue();
-        }
-
-        @Test
         void finalStatus() throws IOException, ExecutionException, InterruptedException {
-            final AtomicInteger rowCount = new AtomicInteger();
-            final AtomicInteger bytesRead = new AtomicInteger();
+            final var statusListener = new CountingStatusListener() {
 
-            final StatusListener statusListener = new StatusListener() {
-                @Override
-                public void readRow() {
-                    rowCount.incrementAndGet();
+                public int getRowCount() {
+                    return rowCnt.intValue();
                 }
 
-                @Override
-                public void readBytes(final int bytes) {
-                    bytesRead.addAndGet(bytes);
+                public long getBytesRead() {
+                    return byteCnt.longValue();
                 }
+
             };
 
             final RandomAccessCsvReader reader = builder()
@@ -241,9 +231,10 @@ class RandomAccessCsvReaderTest {
                 .build(prepareTestFile("foo\nbar"));
 
             try (reader) {
-                assertThat(reader.awaitIndex(1, TimeUnit.SECONDS)).isTrue();
-                assertThat(rowCount).hasValue(2);
-                assertThat(bytesRead).hasValue(7);
+                assertThat(reader.completableFuture()).succeedsWithin(TIMEOUT);
+                assertThat(statusListener.getRowCount()).isEqualTo(2);
+                assertThat(statusListener.getBytesRead()).isEqualTo(7);
+                assertThat(statusListener).asString().isEqualTo("Read 2 rows and 7 of 7 bytes (100,00 %)");
             }
         }
 
