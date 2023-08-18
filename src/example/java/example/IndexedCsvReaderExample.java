@@ -68,16 +68,23 @@ public class IndexedCsvReaderExample {
         System.out.println("# Simple read");
 
         try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
-            System.out.println("Wait until file has been completely indexed");
+            final CompletableFuture<Integer> futureSize = csv.size();
 
-            final int size = csv.size().get();
-            System.out.format("Indexed %,d rows%n", size);
+            // 1) As soon as the file has been indexed, the size is available
+            futureSize
+                .thenCompose(size -> {
+                    System.out.format("Indexed %,d rows%n", size);
+                    return csv.readRow(size - 1);
+                })
+                .thenAccept(lastRow -> {
+                    System.out.println("Last row: " + lastRow);
+                });
 
-            final CsvRow lastRow = csv.readRow(size - 1).get();
-            System.out.println("Last row: " + lastRow);
+            // 2) First row(s) are available right away
+            System.out.println("First row: " + csv.readRow(0).get());
 
-            final CsvRow firstRow = csv.readRow(0).get();
-            System.out.println("First row: " + firstRow);
+            // Wait for 1) to complete
+            futureSize.join();
         }
 
         System.out.println();
@@ -104,7 +111,7 @@ public class IndexedCsvReaderExample {
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")
-    private static void statusMonitor(final Path file) throws IOException, InterruptedException, ExecutionException {
+    private static void statusMonitor(final Path file) throws IOException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
         final StatusListener statusListener = new CountingStatusListener();

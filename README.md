@@ -109,6 +109,34 @@ NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
 
 For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
 
+## IndexedCsvReader Examples
+
+Indexed reading of a CSV file
+
+```java
+try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
+    final CompletableFuture<Integer> futureSize = csv.size();
+
+    // 1) As soon as the file has been indexed, the size is available
+    futureSize
+        .thenCompose(size -> {
+            System.out.format("Indexed %,d rows%n", size);
+            return csv.readRow(size - 1);
+        })
+        .thenAccept(lastRow -> {
+            System.out.println("Last row: " + lastRow);
+        });
+
+    // 2) First row(s) are available right away
+    System.out.println("First row: " + csv.readRow(0).get());
+
+    // Wait for 1) to complete
+    futureSize.join();
+}
+```
+
+For more examples see [IndexedCsvReaderExample.java](src/example/java/example/IndexedCsvReaderExample.java)
+
 ## CsvWriter Examples
 
 Iterative writing of some data to a writer
