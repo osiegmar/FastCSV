@@ -20,7 +20,7 @@ import java.util.StringJoiner;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvWriter csv = CsvWriter.builder().build(path)) {
+ * try (CsvWriter csv = CsvWriter.builder().build(file)) {
  *     csv.writeRow("Hello", "world");
  * }
  * }</pre>
@@ -406,37 +406,37 @@ public final class CsvWriter implements Closeable {
         /**
          * Constructs a {@link CsvWriter} for the specified Path.
          *
-         * @param path        the path to write data to.
+         * @param file        the file to write data to.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
          * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
          * @throws IOException          if a write error occurs
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvWriter build(final Path path, final OpenOption... openOptions)
+        public CsvWriter build(final Path file, final OpenOption... openOptions)
             throws IOException {
-            return build(path, StandardCharsets.UTF_8, openOptions);
+            return build(file, StandardCharsets.UTF_8, openOptions);
         }
 
         /**
          * Constructs a {@link CsvWriter} for the specified Path.
          *
-         * @param path        the path to write data to.
+         * @param file        the file to write data to.
          * @param charset     the character set to be used for writing data to the file.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
          * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
          * @throws IOException          if a write error occurs
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvWriter build(final Path path, final Charset charset,
+        public CsvWriter build(final Path file, final Charset charset,
                                final OpenOption... openOptions)
             throws IOException {
 
-            Objects.requireNonNull(path, "path must not be null");
+            Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            return newWriter(new OutputStreamWriter(Files.newOutputStream(path, openOptions),
+            return newWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
                 charset), false);
         }
 
