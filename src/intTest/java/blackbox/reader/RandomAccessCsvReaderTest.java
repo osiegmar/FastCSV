@@ -11,12 +11,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.SoftAssertions;
@@ -215,7 +214,7 @@ class RandomAccessCsvReaderTest {
             try (RandomAccessCsvReader reader = build("foo␊bar")) {
                 assertThat(reader.awaitIndex(1, TimeUnit.SECONDS)).isTrue();
                 assertThat(reader.getStatusMonitor())
-                    .returns(2L, StatusMonitor::getRecordCount)
+                    .returns(2L, StatusMonitor::getRowCount)
                     .returns(7L, StatusMonitor::getReadBytes)
                     .asString().isEqualTo("Read 2 lines (7 bytes)");
             }
@@ -288,24 +287,9 @@ class RandomAccessCsvReaderTest {
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
             return build("1␊2␊3␊4␊5")
-                .readRows(firstRecord, maxRecords, new CollectingConsumer())
-                .thenApply(CollectingConsumer::getRows)
-                .get(1, TimeUnit.SECONDS);
-        }
-
-    }
-
-    static class CollectingConsumer implements Consumer<CsvRow> {
-
-        private List<CsvRow> rows = new ArrayList<>();
-
-        @Override
-        public void accept(final CsvRow csvRow) {
-            rows.add(csvRow);
-        }
-
-        public List<CsvRow> getRows() {
-            return rows;
+                .readRows(firstRecord, maxRecords)
+                .get(1, TimeUnit.SECONDS)
+                .collect(Collectors.toList());
         }
 
     }

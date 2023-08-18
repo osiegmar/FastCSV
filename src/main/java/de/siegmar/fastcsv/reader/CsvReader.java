@@ -23,8 +23,8 @@ import java.util.stream.StreamSupport;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvReader csvReader = CsvReader.builder().build(path)) {
- *     for (CsvRow row : csvReader) {
+ * try (CsvReader csv = CsvReader.builder().build(path)) {
+ *     for (CsvRow row : csv) {
  *         ...
  *     }
  * }
@@ -352,29 +352,29 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
         /**
          * Constructs a new {@link CsvReader} for the specified path using UTF-8 as the character set.
          *
-         * @param path    the file to read data from.
+         * @param file    the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvReader build(final Path path) throws IOException {
-            return build(path, StandardCharsets.UTF_8);
+        public CsvReader build(final Path file) throws IOException {
+            return build(file, StandardCharsets.UTF_8);
         }
 
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          *
-         * @param path    the file to read data from.
+         * @param file    the file to read data from.
          * @param charset the character set to use.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvReader build(final Path path, final Charset charset) throws IOException {
-            Objects.requireNonNull(path, "path must not be null");
+        public CsvReader build(final Path file, final Charset charset) throws IOException {
+            Objects.requireNonNull(file, "path must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            return newReader(new InputStreamReader(Files.newInputStream(path), charset));
+            return newReader(new InputStreamReader(Files.newInputStream(file), charset));
         }
 
         private CsvReader newReader(final Reader reader) {

@@ -3,8 +3,10 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvRow;
@@ -37,7 +39,7 @@ public class RandomAccessCsvReaderExample {
             }
         }
 
-        System.out.format("Temporary test file with %,d records and %,d bytes successfully prepared%n%n",
+        System.out.format("Temporary test file with %,d rows and %,d bytes successfully prepared%n%n",
             row - 1, Files.size(tmpFile));
 
         return tmpFile;
@@ -65,7 +67,7 @@ public class RandomAccessCsvReaderExample {
             System.out.println("Wait until file has been completely indexed");
 
             final int size = reader.size().get();
-            System.out.format("Indexed %,d records%n", size);
+            System.out.format("Indexed %,d rows%n", size);
 
             final CsvRow lastRow = reader.readRow(size - 1).get();
             System.out.println("Last row: " + lastRow);
@@ -77,14 +79,15 @@ public class RandomAccessCsvReaderExample {
         System.out.println();
     }
 
-    private static void multiple(final Path file) throws IOException {
+    private static void multiple(final Path file) throws IOException, ExecutionException, InterruptedException {
         System.out.println("# Multiple read");
 
-        final int firstRecord = 5_000;
-        final int noOfRecords = 10;
+        final int firstRow = 5_000;
+        final int noOfRows = 10;
 
         try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
-            reader.readRows(firstRecord, noOfRecords, System.out::println).join();
+            final CompletableFuture<Stream<CsvRow>> rows = reader.readRows(firstRow, noOfRows);
+            rows.get().forEach(System.out::println);
         }
 
         System.out.println();
@@ -103,7 +106,7 @@ public class RandomAccessCsvReaderExample {
                 System.out.println(statusMonitor);
             } while (!csv.awaitIndex(250, TimeUnit.MILLISECONDS));
 
-            System.out.printf("Finished reading file with a total of %,d records%n%n", csv.size().get());
+            System.out.printf("Finished reading file with a total of %,d rows%n%n", csv.size().get());
         }
     }
 

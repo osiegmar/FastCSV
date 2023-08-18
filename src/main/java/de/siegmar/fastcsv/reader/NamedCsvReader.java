@@ -16,12 +16,12 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Header name based Csv reader implementation.
+ * Header name based CSV reader implementation.
  * <p>
  * Example use:
  * <pre>{@code
- * try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path)) {
- *     for (NamedCsvRow row : csvReader) {
+ * try (NamedCsvReader csv = NamedCsvReader.builder().build(path)) {
+ *     for (NamedCsvRow row : csv) {
  *         ...
  *     }
  * }
@@ -217,26 +217,26 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         /**
          * Constructs a new {@link NamedCsvReader} for the specified path using UTF-8 as the character set.
          *
-         * @param path    the file to read data from.
+         * @param file    the file to read data from.
          * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public NamedCsvReader build(final Path path) throws IOException {
-            return build(path, StandardCharsets.UTF_8);
+        public NamedCsvReader build(final Path file) throws IOException {
+            return build(file, StandardCharsets.UTF_8);
         }
 
         /**
          * Constructs a new {@link NamedCsvReader} for the specified arguments.
          *
-         * @param path    the file to read data from.
+         * @param file    the file to read data from.
          * @param charset the character set to use.
          * @return a new NamedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
-         * @throws NullPointerException if path or charset is {@code null}
+         * @throws NullPointerException if file or charset is {@code null}
          */
-        public NamedCsvReader build(final Path path, final Charset charset) throws IOException {
-            return new NamedCsvReader(csvReaderBuilder().build(path, charset));
+        public NamedCsvReader build(final Path file, final Charset charset) throws IOException {
+            return new NamedCsvReader(csvReaderBuilder().build(file, charset));
         }
 
         /**

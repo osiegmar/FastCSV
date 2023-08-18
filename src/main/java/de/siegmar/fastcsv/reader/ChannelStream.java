@@ -7,27 +7,22 @@ import java.nio.channels.ReadableByteChannel;
 
 final class ChannelStream {
 
+    private final ByteBuffer byteBuf = ByteBuffer.allocateDirect(8192);
     private final ReadableByteChannel channel;
-    private final ByteBuffer byteBuf;
-    private final Buffer buf;
     private final StatusConsumer statusConsumer;
     private int totalPosition;
     private int nextByte;
 
-    ChannelStream(final ReadableByteChannel channel, final ByteBuffer byteBuf, final StatusConsumer statusConsumer)
+    // Keep one buf as Buffer to maintain Android compatibility
+    // otherwise calls to clear() and flip() cause NoSuchMethodError
+    // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
+    private final Buffer buf = byteBuf;
+
+    ChannelStream(final ReadableByteChannel channel, final StatusConsumer statusConsumer)
         throws IOException {
 
         this.channel = channel;
-
-        this.byteBuf = byteBuf;
-
-        // Keep one buf as Buffer to maintain Android compatibility
-        // otherwise calls to clear() and flip() cause NoSuchMethodError
-        // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
-        this.buf = byteBuf;
-
         this.statusConsumer = statusConsumer;
-
         nextByte = loadData() ? byteBuf.get() : -1;
     }
 

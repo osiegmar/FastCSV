@@ -1,8 +1,8 @@
 package de.siegmar.fastcsv.reader;
 
-public interface StatusConsumer {
+interface StatusConsumer {
 
-    default void addRecordPosition(int position) {
+    default void addRowPosition(int position) {
     }
 
     default void addReadBytes(int readCnt) {

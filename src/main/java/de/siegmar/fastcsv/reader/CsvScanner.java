@@ -1,7 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 final class CsvScanner {
@@ -26,14 +25,14 @@ final class CsvScanner {
         this.commentCharacter = commentCharacter;
         this.statusConsumer = statusConsumer;
 
-        buf = new ChannelStream(channel, ByteBuffer.allocateDirect(8192), statusConsumer);
+        buf = new ChannelStream(channel, statusConsumer);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
         "checkstyle:NestedIfDepth"})
     void scan() throws IOException {
         if (buf.peek() != -1) {
-            statusConsumer.addRecordPosition(0);
+            statusConsumer.addRowPosition(0);
         }
 
         int d;
@@ -55,6 +54,7 @@ final class CsvScanner {
         }
     }
 
+    @SuppressWarnings("PMD.AssignmentInOperand")
     private void consumeCommentedRow() throws IOException {
         int d;
         while ((d = buf.get()) != -1) {
@@ -64,12 +64,12 @@ final class CsvScanner {
                 }
 
                 if (buf.hasData()) {
-                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                    statusConsumer.addRowPosition(buf.getTotalPosition());
                 }
                 break;
             } else if (d == LF) {
                 if (buf.hasData()) {
-                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                    statusConsumer.addRowPosition(buf.getTotalPosition());
                 }
                 break;
             }
@@ -91,6 +91,8 @@ final class CsvScanner {
         return true;
     }
 
+    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment", "checkstyle:ReturnCount"})
     private boolean consumeUnquotedField(int d) throws IOException {
         do {
             if (d == fieldSeparator) {
@@ -101,12 +103,12 @@ final class CsvScanner {
                 }
 
                 if (buf.hasData()) {
-                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                    statusConsumer.addRowPosition(buf.getTotalPosition());
                 }
                 return true;
             } else if (d == LF) {
                 if (buf.hasData()) {
-                    statusConsumer.addRecordPosition(buf.getTotalPosition());
+                    statusConsumer.addRowPosition(buf.getTotalPosition());
                 }
                 return true;
             }

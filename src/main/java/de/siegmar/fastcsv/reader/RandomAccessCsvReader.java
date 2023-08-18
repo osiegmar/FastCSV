@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -17,17 +18,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * CSV reader implementation for random access.
  * <p>
- * Right after instantiating, this class scans the given file for CSV record positions in background.
+ * Right after instantiating, this class scans the given file for CSV row positions in background.
  * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
  * The current status can be monitored via {@link #getStatusMonitor()}.
  * <p>
@@ -35,12 +35,12 @@ import java.util.function.Consumer;
  * <p>
  * Example use:
  * <pre>{@code
- * try (RandomAccessCsvReader csvReader = RandomAccessCsvReader.builder().build(file)) {
+ * try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
  *     CsvRow row = csvReader.readRow(3000).get();
  * }
  * }</pre>
  */
-@SuppressWarnings("checkstyle:ClassFanOutComplexity")
+@SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class RandomAccessCsvReader implements Closeable {
 
     private final List<Integer> positions = Collections.synchronizedList(new ArrayList<>());
@@ -77,9 +77,10 @@ public final class RandomAccessCsvReader implements Closeable {
 
         scanner = CompletableFuture.runAsync(() -> {
             try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
-                new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter, statusConsumer).scan();
+                new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
+                    commentStrategy, (byte) commentCharacter, statusConsumer).scan();
             } catch (final IOException e) {
-                throw new CompletionException(e);
+                throw new UncheckedIOException(e);
             }
         });
 
@@ -98,6 +99,22 @@ public final class RandomAccessCsvReader implements Closeable {
         return new RandomAccessCsvReaderBuilder();
     }
 
+    /**
+     * Gets the status monitor of this reader. FIXME subscribe?
+     * <p>
+     * Use the status monitor to monitor/show the progress of the background indexing process.
+     * <p>
+     * Example use:
+     * <pre>{@code
+     * try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+     *     StatusMonitor statusMonitor = csv.getStatusMonitor();
+     *     do {
+     *         // output the current status to some interface
+     *     } while (!csv.awaitIndex(250, TimeUnit.MILLISECONDS));
+     * }
+     * }</pre>
+     * @return the status monitor of this reader
+     */
     public StatusMonitor getStatusMonitor() {
         return statusConsumer.buildMonitor();
     }
@@ -131,6 +148,11 @@ public final class RandomAccessCsvReader implements Closeable {
         return true;
     }
 
+    /**
+     * Gets the number of rows the file contains.
+     *
+     * @return the number of rows the file contains
+     */
     public CompletableFuture<Integer> size() {
         return scanner.thenApply(unused -> positions.size());
     }
@@ -145,7 +167,7 @@ public final class RandomAccessCsvReader implements Closeable {
      */
     public CompletableFuture<CsvRow> readRow(final int rowNum) {
         if (rowNum < 0) {
-            throw new IllegalArgumentException("Record# must be >= 0");
+            throw new IllegalArgumentException("Row# must be >= 0");
         }
 
         return getOffset(rowNum).thenApply(offset -> {
@@ -158,61 +180,67 @@ public final class RandomAccessCsvReader implements Closeable {
                     }
                     return csvRow;
                 } catch (final IOException e) {
-                    throw new CompletionException(e);
+                    throw new UncheckedIOException(e);
                 }
             }
         });
     }
 
+    /**
+     * Reads a number of rows.
+     *
+     * @param firstRow the first row to read from (0-based).
+     * @param maxRows the maximum number of rows to read.
+     * @return up to {@code maxRows} beginning from {@code firstRow}
+     * @throws IllegalArgumentException if {@code firstRow} is &lt; 0 or {@code maxRows} &le; 0
+     */
     @SuppressWarnings("PMD.AssignmentInOperand")
-    public <C extends Consumer<CsvRow>> CompletableFuture<C> readRows(
-        final int firstRecord, final int maxRecords, final C consumer) {
-
-        if (firstRecord < 0) {
-            throw new ArrayIndexOutOfBoundsException();
+    public CompletableFuture<Stream<CsvRow>> readRows(final int firstRow, final int maxRows) {
+        if (firstRow < 0) {
+            throw new IllegalArgumentException("firstRow must be >= 0");
         }
 
-        if (maxRecords <= 0) {
-            throw new IllegalArgumentException();
+        if (maxRows <= 0) {
+            throw new IllegalArgumentException("maxRows must be > 0");
         }
 
-        Objects.requireNonNull(consumer);
-
-        return getOffset(firstRecord)
-            .thenAccept(offset -> {
+        return getOffset(firstRow)
+            .thenApply(offset -> {
+                final Stream.Builder<CsvRow> ret = Stream.builder();
                 synchronized (rowReader) {
                     try {
-                        seek(firstRecord, offset);
+                        seek(firstRow, offset);
 
                         CsvRow csvRow;
-                        for (int i = 0; i < maxRecords && (csvRow = rowReader.fetchAndRead()) != null; i++) {
-                            consumer.accept(csvRow);
+                        for (int i = 0; i < maxRows && (csvRow = rowReader.fetchAndRead()) != null; i++) {
+                            ret.accept(csvRow);
                         }
+
+                        return ret.build();
                     } catch (final IOException e) {
-                        throw new CompletionException(e);
+                        throw new UncheckedIOException(e);
                     }
                 }
-            })
-            .thenApply(unused -> consumer);
+            });
     }
 
-    private void seek(final int record, final int offset) throws IOException {
-        rowReader.resetBuffer(record + 1);
+    private void seek(final int row, final int offset) throws IOException {
+        rowReader.resetBuffer(row + 1);
         raf.seek(offset);
     }
 
-    private CompletableFuture<Integer> getOffset(final int record) {
-        if (record == 0) {
+    private CompletableFuture<Integer> getOffset(final int row) {
+        if (row == 0) {
             return CompletableFuture.completedFuture(0);
         }
 
-        return waitForRecord(record)
-            .thenApply(unused -> positions.get(record));
+        return waitForRow(row)
+            .thenApply(unused -> positions.get(row));
     }
 
-    private CompletableFuture<Void> waitForRecord(final int record) {
+    private CompletableFuture<Void> waitForRow(final int row) {
         return CompletableFuture.runAsync(() -> {
-            while (positions.size() < record && !scanner.isDone()) {
+            while (positions.size() < row && !scanner.isDone()) {
                 Thread.onSpinWait();
             }
         });
@@ -236,6 +264,13 @@ public final class RandomAccessCsvReader implements Closeable {
             .toString();
     }
 
+    /**
+     * This builder is used to create configured instances of {@link RandomAccessCsvReader}. The default
+     * configuration of this class complies with RFC 4180.
+     * <p>
+     * The line delimiter (line-feed, carriage-return or the combination of both) is detected
+     * automatically and thus not configurable.
+     */
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class RandomAccessCsvReaderBuilder {
 
@@ -246,7 +281,7 @@ public final class RandomAccessCsvReader implements Closeable {
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
 
-        public RandomAccessCsvReaderBuilder() {
+        private RandomAccessCsvReaderBuilder() {
         }
 
         /**
@@ -317,10 +352,27 @@ public final class RandomAccessCsvReader implements Closeable {
             }
         }
 
+        /**
+         * Constructs a new {@link RandomAccessCsvReader} for the specified path using UTF-8 as the character set.
+         *
+         * @param file    the file to read data from.
+         * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
+         * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if file or charset is {@code null}
+         */
         public RandomAccessCsvReader build(final Path file) throws IOException {
             return build(file, StandardCharsets.UTF_8);
         }
 
+        /**
+         * Constructs a new {@link RandomAccessCsvReader} for the specified arguments.
+         *
+         * @param file    the file to read data from.
+         * @param charset the character set to use.
+         * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
+         * @throws IOException if an I/O error occurs.
+         * @throws NullPointerException if file or charset is {@code null}
+         */
         public RandomAccessCsvReader build(final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
@@ -333,13 +385,13 @@ public final class RandomAccessCsvReader implements Closeable {
 
     private class StatusConsumerImpl implements StatusConsumer {
 
-        private final AtomicLong recordCount = new AtomicLong();
+        private final AtomicLong rowCount = new AtomicLong();
         private final AtomicLong readBytes = new AtomicLong();
 
         @Override
-        public void addRecordPosition(final int position) {
+        public void addRowPosition(final int position) {
             positions.add(position);
-            recordCount.incrementAndGet();
+            rowCount.incrementAndGet();
         }
 
         @Override
@@ -350,8 +402,8 @@ public final class RandomAccessCsvReader implements Closeable {
         public StatusMonitor buildMonitor() {
             return new StatusMonitor() {
                 @Override
-                public long getRecordCount() {
-                    return recordCount.get();
+                public long getRowCount() {
+                    return rowCount.get();
                 }
 
                 @Override
@@ -361,7 +413,7 @@ public final class RandomAccessCsvReader implements Closeable {
 
                 @Override
                 public String toString() {
-                    return String.format("Read %,d lines (%,d bytes)", getRecordCount(), getReadBytes());
+                    return String.format("Read %,d lines (%,d bytes)", getRowCount(), getReadBytes());
                 }
             };
         }

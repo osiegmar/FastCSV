@@ -40,7 +40,7 @@ class CsvScannerTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource
-    public void genericData(final String line, final String newLine, final int lineNo) {
+    void genericData(final String line, final String newLine, final int lineNo) {
         final List<Integer> actual = scan(line, newLine);
         final List<Integer> expected = indexesOf(line, newLine);
 
@@ -48,6 +48,27 @@ class CsvScannerTest {
             .withFailMessage("Line %d: expected=%s but actual=%s for line '%s'",
                 lineNo, expected, actual, line)
             .isEqualTo(expected);
+    }
+
+    static List<Arguments> genericData() throws IOException {
+        final List<Arguments> list = new ArrayList<>();
+
+        final List<String> lines = Files.readAllLines(Paths.get("src/intTest/resources/scanner.txt"));
+        int lineNo = 0;
+        for (final String line : lines) {
+            lineNo++;
+            if (line.startsWith("#") || line.isBlank()) {
+                continue;
+            }
+
+            list.add(Arguments.of(line, "\n", lineNo));
+            if (line.contains("$")) {
+                list.add(Arguments.of(line, "\r", lineNo));
+                list.add(Arguments.of(line, "\r\n", lineNo));
+            }
+        }
+
+        return list;
     }
 
     @ParameterizedTest
@@ -66,18 +87,11 @@ class CsvScannerTest {
 
     // TODO binary data test
 
-    private static List<Integer> scan(String line, final String newLine) {
-        line = repl(line, newLine)
+    private static List<Integer> scan(final String line, final String newLine) {
+        final String lineToScan = repl(line, newLine)
             .replace("^", "");
 
-        return scan(line.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private static String repl(String line, final String newLine) {
-        return line
-            .replace("\\n", "\n")
-            .replace("\\r", "\r")
-            .replace("$", newLine);
+        return scan(lineToScan.getBytes(StandardCharsets.UTF_8));
     }
 
     private static List<Integer> scan(final byte[] data) {
@@ -85,7 +99,7 @@ class CsvScannerTest {
 
         final StatusConsumer statusConsumer = new StatusConsumer() {
             @Override
-            public void addRecordPosition(final int position) {
+            public void addRowPosition(final int position) {
                 positions.add(position);
             }
         };
@@ -100,37 +114,23 @@ class CsvScannerTest {
         return positions;
     }
 
-    private static List<Integer> indexesOf(String str, final String newLine) {
-        str = repl(str, newLine);
+    private static String repl(final String line, final String newLine) {
+        return line
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("$", newLine);
+    }
 
+    @SuppressWarnings("PMD.AssignmentInOperand")
+    private static List<Integer> indexesOf(final String str, final String newLine) {
         final List<Integer> indexes = new ArrayList<>();
 
-        for (int index = 0; (index = str.indexOf('^', index)) != -1; index++) {
+        final String strToFindIndexes = repl(str, newLine);
+        for (int index = 0; (index = strToFindIndexes.indexOf('^', index)) != -1; index++) {
             indexes.add(index - indexes.size());
         }
 
         return indexes;
-    }
-
-    public static List<Arguments> genericData() throws IOException {
-        final List<Arguments> list = new ArrayList<>();
-
-        final List<String> lines = Files.readAllLines(Paths.get("src/intTest/resources/scanner.txt"));
-        int lineNo = 0;
-        for (String line : lines) {
-            lineNo++;
-            if (line.startsWith("#") || line.isBlank()) {
-                continue;
-            }
-
-            list.add(Arguments.of(line, "\n", lineNo));
-            if (line.contains("$")) {
-                list.add(Arguments.of(line, "\r", lineNo));
-                list.add(Arguments.of(line, "\r\n", lineNo));
-            }
-        }
-
-        return list;
     }
 
 }

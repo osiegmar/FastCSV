@@ -1,5 +1,5 @@
 # $ marks a newline character (all variations will be tested)
-# ^ marks the position where the CsvScanner needs to find a new record
+# ^ marks the position where the CsvScanner needs to find a new row
 
 # unterminated
 ^___
