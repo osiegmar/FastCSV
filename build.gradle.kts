@@ -78,6 +78,11 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+// Without this, running an example results in "Task with name 'exampleJar' not found"
+tasks.register<Jar>("exampleJar") {
+    from(sourceSets.main.get().output)
+}
+
 val intTestTask = tasks.register<Test>("intTest") {
     group = "verification"
     useJUnitPlatform()
