@@ -108,9 +108,9 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Gets the {@link CompletableFuture} that represents the background indexing task.
+     * Gets the {@link CompletableFuture} that represents the background indexing process.
      *
-     * @return the {@link CompletableFuture} that represents the background indexing task.
+     * @return the {@link CompletableFuture} that represents the background indexing process.
      */
     public CompletableFuture<Void> completableFuture() {
         return CompletableFuture.allOf(scanner);

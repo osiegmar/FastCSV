@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
@@ -66,31 +67,36 @@ public class RandomAccessCsvReaderExample {
     private static void simple(final Path file) throws IOException, ExecutionException, InterruptedException {
         System.out.println("# Simple read");
 
-        try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
+        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
             System.out.println("Wait until file has been completely indexed");
 
-            final int size = reader.size().get();
+            final int size = csv.size().get();
             System.out.format("Indexed %,d rows%n", size);
 
-            final CsvRow lastRow = reader.readRow(size - 1).get();
+            final CsvRow lastRow = csv.readRow(size - 1).get();
             System.out.println("Last row: " + lastRow);
 
-            final CsvRow firstRow = reader.readRow(0).get();
+            final CsvRow firstRow = csv.readRow(0).get();
             System.out.println("First row: " + firstRow);
         }
 
         System.out.println();
     }
 
-    private static void multiple(final Path file) throws IOException, ExecutionException, InterruptedException {
+    private static void multiple(final Path file)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
+
         System.out.println("# Multiple read");
 
         final int firstRow = 5_000;
         final int noOfRows = 10;
 
-        try (RandomAccessCsvReader reader = RandomAccessCsvReader.builder().build(file)) {
-            final CompletableFuture<Stream<CsvRow>> rows = reader.readRows(firstRow, noOfRows);
-            rows.get().forEach(System.out::println);
+        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+            final CompletableFuture<Stream<CsvRow>> rows =
+                csv.readRows(firstRow, noOfRows);
+
+            rows.get(3, TimeUnit.SECONDS)
+                .forEach(System.out::println);
         }
 
         System.out.println();
