@@ -20,7 +20,7 @@ import java.util.StringJoiner;
  * <p>
  * Example use:
  * <pre>{@code
- * try (CsvWriter csv = CsvWriter.builder().build(path)) {
+ * try (CsvWriter csv = CsvWriter.builder().build(file)) {
  *     csv.writeRow("Hello", "world");
  * }
  * }</pre>
@@ -433,7 +433,7 @@ public final class CsvWriter implements Closeable {
                                final OpenOption... openOptions)
             throws IOException {
 
-            Objects.requireNonNull(file, "path must not be null");
+            Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
             return newWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
