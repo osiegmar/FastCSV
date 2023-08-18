@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
-import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
+import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.StatusListener;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.SystemPrintln")
-public class RandomAccessCsvReaderExample {
+public class IndexedCsvReaderExample {
 
     public static void main(final String[] args) throws Exception {
         final int secondsToWrite = 3;
@@ -67,7 +67,7 @@ public class RandomAccessCsvReaderExample {
     private static void simple(final Path file) throws IOException, ExecutionException, InterruptedException {
         System.out.println("# Simple read");
 
-        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+        try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
             System.out.println("Wait until file has been completely indexed");
 
             final int size = csv.size().get();
@@ -83,6 +83,7 @@ public class RandomAccessCsvReaderExample {
         System.out.println();
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private static void multiple(final Path file)
         throws IOException, ExecutionException, InterruptedException, TimeoutException {
 
@@ -91,7 +92,7 @@ public class RandomAccessCsvReaderExample {
         final int firstRow = 5_000;
         final int noOfRows = 10;
 
-        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+        try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
             final CompletableFuture<Stream<CsvRow>> rows =
                 csv.readRows(firstRow, noOfRows);
 
@@ -108,7 +109,7 @@ public class RandomAccessCsvReaderExample {
 
         final StatusListener statusListener = new CountingStatusListener();
 
-        final RandomAccessCsvReader csv = RandomAccessCsvReader.builder()
+        final IndexedCsvReader csv = IndexedCsvReader.builder()
             .statusListener(statusListener)
             .build(file);
 
@@ -136,7 +137,7 @@ public class RandomAccessCsvReaderExample {
     private static void advancedConfiguration(final Path file)
         throws IOException, ExecutionException, InterruptedException {
 
-        final CsvRow csvRow = RandomAccessCsvReader.builder()
+        final CsvRow csvRow = IndexedCsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)

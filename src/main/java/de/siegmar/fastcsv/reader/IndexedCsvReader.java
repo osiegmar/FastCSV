@@ -21,23 +21,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
- * CSV reader implementation for random access.
+ * CSV reader implementation for indexed based access.
  * <p>
  * Right after instantiating, this class scans the given file for CSV row positions in background.
  * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
- * The current status can be monitored via {@link RandomAccessCsvReaderBuilder#statusListener(StatusListener)}.
+ * The current status can be monitored via {@link IndexedCsvReaderBuilder#statusListener(StatusListener)}.
  * <p>
  * This class is thread-safe.
  * <p>
  * Example use:
  * <pre>{@code
- * try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+ * try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
  *     CsvRow row = csvReader.readRow(3000).get();
  * }
  * }</pre>
  */
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
-public final class RandomAccessCsvReader implements Closeable {
+public final class IndexedCsvReader implements Closeable {
 
     private final List<Integer> positions = Collections.synchronizedList(new ArrayList<>());
     private final Path file;
@@ -53,10 +53,10 @@ public final class RandomAccessCsvReader implements Closeable {
     private final RandomAccessFile raf;
     private final RowReader rowReader;
 
-    RandomAccessCsvReader(final Path file, final Charset charset,
-                          final char fieldSeparator, final char quoteCharacter,
-                          final CommentStrategy commentStrategy, final char commentCharacter,
-                          final StatusListener statusListener) throws IOException {
+    IndexedCsvReader(final Path file, final Charset charset,
+                     final char fieldSeparator, final char quoteCharacter,
+                     final CommentStrategy commentStrategy, final char commentCharacter,
+                     final StatusListener statusListener) throws IOException {
 
         if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
             || quoteCharacter == commentCharacter) {
@@ -98,13 +98,13 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Constructs a {@link RandomAccessCsvReader.RandomAccessCsvReaderBuilder} to configure and build instances of
+     * Constructs a {@link IndexedCsvReaderBuilder} to configure and build instances of
      * this class.
      *
-     * @return a new {@link RandomAccessCsvReader.RandomAccessCsvReaderBuilder} instance.
+     * @return a new {@link IndexedCsvReaderBuilder} instance.
      */
-    public static RandomAccessCsvReaderBuilder builder() {
-        return new RandomAccessCsvReaderBuilder();
+    public static IndexedCsvReaderBuilder builder() {
+        return new IndexedCsvReaderBuilder();
     }
 
     /**
@@ -223,7 +223,7 @@ public final class RandomAccessCsvReader implements Closeable {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", RandomAccessCsvReader.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", IndexedCsvReader.class.getSimpleName() + "[", "]")
             .add("file=" + file)
             .add("charset=" + charset)
             .add("fieldSeparator=" + fieldSeparator)
@@ -234,14 +234,14 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * This builder is used to create configured instances of {@link RandomAccessCsvReader}. The default
+     * This builder is used to create configured instances of {@link IndexedCsvReader}. The default
      * configuration of this class complies with RFC 4180.
      * <p>
      * The line delimiter (line-feed, carriage-return or the combination of both) is detected
      * automatically and thus not configurable.
      */
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
-    public static final class RandomAccessCsvReaderBuilder {
+    public static final class IndexedCsvReaderBuilder {
 
         private static final int MAX_BASE_ASCII = 127;
 
@@ -251,7 +251,7 @@ public final class RandomAccessCsvReader implements Closeable {
         private char commentCharacter = '#';
         private StatusListener statusListener;
 
-        private RandomAccessCsvReaderBuilder() {
+        private IndexedCsvReaderBuilder() {
         }
 
         /**
@@ -260,7 +260,7 @@ public final class RandomAccessCsvReader implements Closeable {
          * @param fieldSeparator the field separator character (default: {@code ,} - comma).
          * @return This updated object, so that additional method calls can be chained together.
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder fieldSeparator(final char fieldSeparator) {
+        public IndexedCsvReaderBuilder fieldSeparator(final char fieldSeparator) {
             checkControlCharacter(fieldSeparator);
             this.fieldSeparator = fieldSeparator;
             return this;
@@ -273,7 +273,7 @@ public final class RandomAccessCsvReader implements Closeable {
          *                       (default: {@code "} - double quotes).
          * @return This updated object, so that additional method calls can be chained together.
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
+        public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             checkControlCharacter(quoteCharacter);
             this.quoteCharacter = quoteCharacter;
             return this;
@@ -287,7 +287,7 @@ public final class RandomAccessCsvReader implements Closeable {
          * @return This updated object, so that additional method calls can be chained together.
          * @see #commentCharacter(char)
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder commentStrategy(
+        public IndexedCsvReaderBuilder commentStrategy(
             final CommentStrategy commentStrategy) {
             this.commentStrategy = commentStrategy;
             return this;
@@ -300,7 +300,7 @@ public final class RandomAccessCsvReader implements Closeable {
          * @return This updated object, so that additional method calls can be chained together.
          * @see #commentStrategy(CommentStrategy)
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder commentCharacter(final char commentCharacter) {
+        public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
             checkControlCharacter(commentCharacter);
             this.commentCharacter = commentCharacter;
             return this;
@@ -312,7 +312,7 @@ public final class RandomAccessCsvReader implements Closeable {
          * @param statusListener the status listener.
          * @return This updated object, so that additional method calls can be chained together.
          */
-        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder statusListener(final StatusListener statusListener) {
+        public IndexedCsvReaderBuilder statusListener(final StatusListener statusListener) {
             this.statusListener = statusListener;
             return this;
         }
@@ -321,12 +321,12 @@ public final class RandomAccessCsvReader implements Closeable {
          * Characters from 0 to 127 are base ASCII and collision-free with UTF-8.
          * Characters from 128 to 255 needs to be represented as a multibyte string in UTF-8.
          * Multibyte handling of control characters is currently not supported by the byte-oriented CSV indexer
-         * of RandomAccessCsvReader.
+         * of IndexedCsvReader.
          */
         private static void checkControlCharacter(final char controlChar) {
             if (controlChar > MAX_BASE_ASCII) {
                 throw new IllegalArgumentException(String.format(
-                    "Multibyte control characters are not supported in RandomAccessCsvReader: '%s' (value: %d)",
+                    "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
                     controlChar, (int) controlChar));
             } else if (controlChar == '\r' || controlChar == '\n') {
                 throw new IllegalArgumentException("A newline character must not be used as control character");
@@ -334,34 +334,34 @@ public final class RandomAccessCsvReader implements Closeable {
         }
 
         /**
-         * Constructs a new {@link RandomAccessCsvReader} for the specified path using UTF-8 as the character set.
+         * Constructs a new {@link IndexedCsvReader} for the specified path using UTF-8 as the character set.
          *
          * @param file the file to read data from.
-         * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public RandomAccessCsvReader build(final Path file) throws IOException {
+        public IndexedCsvReader build(final Path file) throws IOException {
             return build(file, StandardCharsets.UTF_8);
         }
 
         /**
-         * Constructs a new {@link RandomAccessCsvReader} for the specified arguments.
+         * Constructs a new {@link IndexedCsvReader} for the specified arguments.
          *
          * @param file    the file to read data from.
          * @param charset the character set to use.
-         * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public RandomAccessCsvReader build(final Path file, final Charset charset) throws IOException {
+        public IndexedCsvReader build(final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
             final StatusListener sl = Objects
                 .requireNonNullElseGet(statusListener, () -> new StatusListener() { });
 
-            return new RandomAccessCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
+            return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, sl);
         }
 

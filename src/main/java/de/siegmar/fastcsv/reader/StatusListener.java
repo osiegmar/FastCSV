@@ -6,7 +6,7 @@ package de.siegmar.fastcsv.reader;
  * FastCSV will call these methods synchronously –
  * make sure <strong>not to perform time consuming / blocking</strong> tasks!
  *
- * @see RandomAccessCsvReader.RandomAccessCsvReaderBuilder#statusListener(StatusListener)
+ * @see IndexedCsvReader.IndexedCsvReaderBuilder#statusListener(StatusListener)
  */
 public interface StatusListener {
 

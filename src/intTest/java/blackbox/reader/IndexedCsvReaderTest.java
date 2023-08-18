@@ -31,11 +31,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
-import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
+import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import testutil.CsvRowAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
-class RandomAccessCsvReaderTest {
+class IndexedCsvReaderTest {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
@@ -50,7 +50,7 @@ class RandomAccessCsvReaderTest {
 
     @Test
     void outOfBounds() throws IOException {
-        try (RandomAccessCsvReader reader = build("")) {
+        try (IndexedCsvReader reader = build("")) {
             softly.assertThat(reader.size())
                 .succeedsWithin(TIMEOUT)
                 .isEqualTo(0);
@@ -72,7 +72,7 @@ class RandomAccessCsvReaderTest {
         final Path file = prepareTestFile(TEST_STRING);
 
         assertThat(builder().build(file)).asString()
-            .isEqualTo("RandomAccessCsvReader[file=%s, charset=%s, fieldSeparator=%s, "
+            .isEqualTo("IndexedCsvReader[file=%s, charset=%s, fieldSeparator=%s, "
                     + "quoteCharacter=%s, commentStrategy=%s, commentCharacter=%s]",
                 file, UTF_8, ',', '"', CommentStrategy.NONE, '#');
     }
@@ -94,12 +94,12 @@ class RandomAccessCsvReaderTest {
             .fields().singleElement().isEqualTo("abc");
     }
 
-    private RandomAccessCsvReader build(final String data) throws IOException {
+    private IndexedCsvReader build(final String data) throws IOException {
         return builder().build(prepareTestFile(data));
     }
 
-    private static RandomAccessCsvReader.RandomAccessCsvReaderBuilder builder() {
-        return RandomAccessCsvReader.builder();
+    private static IndexedCsvReader.IndexedCsvReaderBuilder builder() {
+        return IndexedCsvReader.builder();
     }
 
     private Path prepareTestFile(final String s) throws IOException {
@@ -139,7 +139,7 @@ class RandomAccessCsvReaderTest {
         @Test
         void controlCharacterMultibyte() {
             final String expectedMessage =
-                "Multibyte control characters are not supported in RandomAccessCsvReader: '' (value: 128)";
+                "Multibyte control characters are not supported in IndexedCsvReader: '' (value: 128)";
 
             softly.assertThatThrownBy(() -> builder().fieldSeparator('\u0080'))
                 .as("fieldSeparator")
@@ -226,7 +226,7 @@ class RandomAccessCsvReaderTest {
 
             };
 
-            final RandomAccessCsvReader reader = builder()
+            final IndexedCsvReader reader = builder()
                 .statusListener(statusListener)
                 .build(prepareTestFile("foo\nbar"));
 
@@ -247,7 +247,7 @@ class RandomAccessCsvReaderTest {
         // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void oneLine() throws IOException {
-            try (RandomAccessCsvReader reader = build("012")) {
+            try (IndexedCsvReader reader = build("012")) {
                 assertThat(reader.size())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(1);
@@ -263,7 +263,7 @@ class RandomAccessCsvReaderTest {
         // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void twoLines() throws IOException {
-            try (RandomAccessCsvReader reader = build("012,foo\n345,bar")) {
+            try (IndexedCsvReader reader = build("012,foo\n345,bar")) {
 
                 assertThat(reader.size())
                     .succeedsWithin(TIMEOUT)
