@@ -99,7 +99,7 @@ tasks.check {
 }
 
 pitest {
-    junit5PluginVersion = "1.1.2"
+    junit5PluginVersion = "1.2.0"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
 }
