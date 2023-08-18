@@ -213,7 +213,7 @@ class RandomAccessCsvReaderTest {
         }
 
         @Test
-        void finalStatus() throws IOException, ExecutionException, InterruptedException {
+        void finalStatus() throws IOException {
             final var statusListener = new CountingStatusListener() {
 
                 public int getRowCount() {
@@ -234,7 +234,8 @@ class RandomAccessCsvReaderTest {
                 assertThat(reader.completableFuture()).succeedsWithin(TIMEOUT);
                 assertThat(statusListener.getRowCount()).isEqualTo(2);
                 assertThat(statusListener.getBytesRead()).isEqualTo(7);
-                assertThat(statusListener).asString().isEqualTo("Read 2 rows and 7 of 7 bytes (100,00 %)");
+                assertThat(statusListener).asString()
+                    .isEqualTo("Read %,d rows and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }
         }
 
