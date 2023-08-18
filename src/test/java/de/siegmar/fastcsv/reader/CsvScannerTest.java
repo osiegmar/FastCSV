@@ -85,7 +85,14 @@ class CsvScannerTest {
             .containsExactly(0, pos + 1);
     }
 
-    // TODO binary data test
+    @Test
+    void unicode() {
+        assertThat(scan("012u\n0".getBytes(StandardCharsets.UTF_8)))
+            .containsExactly(0, 5);
+
+        assertThat(scan("012ü\n0".getBytes(StandardCharsets.UTF_8)))
+            .containsExactly(0, 6);
+    }
 
     private static List<Integer> scan(final String line, final String newLine) {
         final String lineToScan = repl(line, newLine)

@@ -76,6 +76,7 @@ final class CsvScanner {
         }
     }
 
+    @SuppressWarnings("PMD.AssignmentInOperand")
     private boolean consumeQuotedField() throws IOException {
         int d;
         while ((d = buf.get()) != -1) {

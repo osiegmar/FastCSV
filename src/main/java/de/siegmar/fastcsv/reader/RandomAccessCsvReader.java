@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 /**
@@ -29,7 +28,7 @@ import java.util.stream.Stream;
  * <p>
  * Right after instantiating, this class scans the given file for CSV row positions in background.
  * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
- * The current status can be monitored via {@link #getStatusMonitor()}.
+ * The current status can be monitored via {@link RandomAccessCsvReaderBuilder#statusListener(StatusListener)}.
  * <p>
  * This class is thread-safe.
  * <p>
@@ -50,6 +49,8 @@ public final class RandomAccessCsvReader implements Closeable {
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
+    private final StatusListener statusListener;
+
     private final StatusConsumerImpl statusConsumer;
     private final CompletableFuture<Void> scanner;
     private final RandomAccessFile raf;
@@ -57,7 +58,8 @@ public final class RandomAccessCsvReader implements Closeable {
 
     RandomAccessCsvReader(final Path file, final Charset charset,
                           final char fieldSeparator, final char quoteCharacter,
-                          final CommentStrategy commentStrategy, final char commentCharacter) throws IOException {
+                          final CommentStrategy commentStrategy, final char commentCharacter,
+                          final StatusListener statusListener) throws IOException {
 
         if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
             || quoteCharacter == commentCharacter) {
@@ -72,8 +74,11 @@ public final class RandomAccessCsvReader implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
+        this.statusListener = statusListener;
 
         statusConsumer = new StatusConsumerImpl();
+
+        statusListener.initialize(Files.size(file));
 
         scanner = CompletableFuture.runAsync(() -> {
             try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
@@ -81,6 +86,12 @@ public final class RandomAccessCsvReader implements Closeable {
                     commentStrategy, (byte) commentCharacter, statusConsumer).scan();
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
+            }
+        }).whenComplete((unused, throwable) -> {
+            if (throwable != null) {
+                statusListener.failed(throwable);
+            } else {
+                statusListener.completed();
             }
         });
 
@@ -100,29 +111,9 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Gets the status monitor of this reader. FIXME subscribe?
-     * <p>
-     * Use the status monitor to monitor/show the progress of the background indexing process.
-     * <p>
-     * Example use:
-     * <pre>{@code
-     * try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
-     *     StatusMonitor statusMonitor = csv.getStatusMonitor();
-     *     do {
-     *         // output the current status to some interface
-     *     } while (!csv.awaitIndex(250, TimeUnit.MILLISECONDS));
-     * }
-     * }</pre>
-     * @return the status monitor of this reader
-     */
-    public StatusMonitor getStatusMonitor() {
-        return statusConsumer.buildMonitor();
-    }
-
-    /**
      * Waits if necessary for the indexing process to complete.
      *
-     * @throws ExecutionException if the indexing process failed
+     * @throws ExecutionException   if the indexing process failed
      * @throws InterruptedException if the current thread was interrupted while waiting
      */
     public void awaitIndex() throws ExecutionException, InterruptedException {
@@ -133,9 +124,9 @@ public final class RandomAccessCsvReader implements Closeable {
      * Waits if necessary for at most the given time for the indexing process to complete.
      *
      * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
+     * @param unit    the time unit of the timeout argument
      * @return {@code true}, if the index building process has finished within the given timeout
-     * @throws ExecutionException if the indexing process failed
+     * @throws ExecutionException   if the indexing process failed
      * @throws InterruptedException if the current thread was interrupted while waiting
      */
     public boolean awaitIndex(final long timeout, final TimeUnit unit) throws ExecutionException, InterruptedException {
@@ -158,8 +149,8 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Reads a CSV row by the given row number (0-based), returning a {@link CompletableFuture} to
-     * allow non-blocking read.
+     * Reads a CSV row by the given row number, returning a {@link CompletableFuture} to
+     * allow non-blocking read. The result will be available when the requested row has been read.
      *
      * @param rowNum the row number (0-based) to read from
      * @return a {@link CsvRow} fetched from the specified {@code rowNum}
@@ -187,10 +178,11 @@ public final class RandomAccessCsvReader implements Closeable {
     }
 
     /**
-     * Reads a number of rows.
+     * Reads a number of rows, returning a {@link CompletableFuture} to
+     * allow non-blocking read. The result will be available when the requested rows have been read.
      *
      * @param firstRow the first row to read from (0-based).
-     * @param maxRows the maximum number of rows to read.
+     * @param maxRows  the maximum number of rows to read.
      * @return up to {@code maxRows} beginning from {@code firstRow}
      * @throws IllegalArgumentException if {@code firstRow} is &lt; 0 or {@code maxRows} &le; 0
      */
@@ -280,6 +272,7 @@ public final class RandomAccessCsvReader implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
+        private StatusListener statusListener;
 
         private RandomAccessCsvReaderBuilder() {
         }
@@ -336,6 +329,17 @@ public final class RandomAccessCsvReader implements Closeable {
             return this;
         }
 
+        /**
+         * Sets the {@code statusListener} to listen for indexer status updates.
+         *
+         * @param statusListener the status listener.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public RandomAccessCsvReader.RandomAccessCsvReaderBuilder statusListener(final StatusListener statusListener) {
+            this.statusListener = statusListener;
+            return this;
+        }
+
         /*
          * Characters from 0 to 127 are base ASCII and collision-free with UTF-8.
          * Characters from 128 to 255 needs to be represented as a multibyte string in UTF-8.
@@ -355,9 +359,9 @@ public final class RandomAccessCsvReader implements Closeable {
         /**
          * Constructs a new {@link RandomAccessCsvReader} for the specified path using UTF-8 as the character set.
          *
-         * @param file    the file to read data from.
+         * @param file the file to read data from.
          * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public RandomAccessCsvReader build(final Path file) throws IOException {
@@ -370,53 +374,35 @@ public final class RandomAccessCsvReader implements Closeable {
          * @param file    the file to read data from.
          * @param charset the character set to use.
          * @return a new RandomAccessCsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public RandomAccessCsvReader build(final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
+            final StatusListener sl = Objects
+                .requireNonNullElseGet(statusListener, () -> new StatusListener() { });
+
             return new RandomAccessCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter);
+                commentCharacter, sl);
         }
 
     }
 
     private class StatusConsumerImpl implements StatusConsumer {
 
-        private final AtomicLong rowCount = new AtomicLong();
-        private final AtomicLong readBytes = new AtomicLong();
-
         @Override
         public void addRowPosition(final int position) {
             positions.add(position);
-            rowCount.incrementAndGet();
+            statusListener.readRow();
         }
 
         @Override
         public void addReadBytes(final int readCnt) {
-            readBytes.addAndGet(readCnt);
+            statusListener.readBytes(readCnt);
         }
 
-        public StatusMonitor buildMonitor() {
-            return new StatusMonitor() {
-                @Override
-                public long getRowCount() {
-                    return rowCount.get();
-                }
-
-                @Override
-                public long getReadBytes() {
-                    return readBytes.get();
-                }
-
-                @Override
-                public String toString() {
-                    return String.format("Read %,d lines (%,d bytes)", getRowCount(), getReadBytes());
-                }
-            };
-        }
     }
 
     private static class ChannelInputStream extends InputStream {

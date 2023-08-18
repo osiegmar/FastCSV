@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.assertj.core.api.InstanceOfAssertFactory;
@@ -31,7 +32,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
-import de.siegmar.fastcsv.reader.StatusMonitor;
+import de.siegmar.fastcsv.reader.StatusListener;
 import testutil.CsvRowAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
@@ -77,7 +78,22 @@ class RandomAccessCsvReaderTest {
                 file, UTF_8, ',', '"', CommentStrategy.NONE, '#');
     }
 
-    // TODO binary data test
+    // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
+    @Test
+    void unicode() throws IOException {
+        final Path file = prepareTestFile("abc\nüöä\nabc");
+        assertThat(builder().build(file).readRow(0))
+            .succeedsWithin(TIMEOUT, CSV_ROW)
+            .fields().singleElement().isEqualTo("abc");
+
+        assertThat(builder().build(file).readRow(1))
+            .succeedsWithin(TIMEOUT, CSV_ROW)
+            .fields().singleElement().isEqualTo("üöä");
+
+        assertThat(builder().build(file).readRow(2))
+            .succeedsWithin(TIMEOUT, CSV_ROW)
+            .fields().singleElement().isEqualTo("abc");
+    }
 
     private RandomAccessCsvReader build(final String data) throws IOException {
         return builder().build(prepareTestFile(data));
@@ -88,13 +104,7 @@ class RandomAccessCsvReaderTest {
     }
 
     private Path prepareTestFile(final String s) throws IOException {
-        final byte[] data = s
-            .replaceAll("␊", "\n")
-            .replaceAll("␍", "\r")
-            .replaceAll("'", "\"")
-            .getBytes(UTF_8);
-
-        return prepareTestFile(data);
+        return prepareTestFile(s.getBytes(UTF_8));
     }
 
     private Path prepareTestFile(final byte[] data) throws IOException {
@@ -182,7 +192,7 @@ class RandomAccessCsvReaderTest {
         void negativePosition() {
             assertThatThrownBy(() -> build(TEST_STRING).readRow(-1))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Record# must be >= 0");
+                .hasMessage("Row# must be >= 0");
         }
 
         @Test
@@ -211,12 +221,29 @@ class RandomAccessCsvReaderTest {
 
         @Test
         void finalStatus() throws IOException, ExecutionException, InterruptedException {
-            try (RandomAccessCsvReader reader = build("foo␊bar")) {
+            final AtomicInteger rowCount = new AtomicInteger();
+            final AtomicInteger bytesRead = new AtomicInteger();
+
+            final StatusListener statusListener = new StatusListener() {
+                @Override
+                public void readRow() {
+                    rowCount.incrementAndGet();
+                }
+
+                @Override
+                public void readBytes(final int bytes) {
+                    bytesRead.addAndGet(bytes);
+                }
+            };
+
+            final RandomAccessCsvReader reader = builder()
+                .statusListener(statusListener)
+                .build(prepareTestFile("foo\nbar"));
+
+            try (reader) {
                 assertThat(reader.awaitIndex(1, TimeUnit.SECONDS)).isTrue();
-                assertThat(reader.getStatusMonitor())
-                    .returns(2L, StatusMonitor::getRowCount)
-                    .returns(7L, StatusMonitor::getReadBytes)
-                    .asString().isEqualTo("Read 2 lines (7 bytes)");
+                assertThat(rowCount).hasValue(2);
+                assertThat(bytesRead).hasValue(7);
             }
         }
 
@@ -244,7 +271,7 @@ class RandomAccessCsvReaderTest {
         // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void twoLines() throws IOException {
-            try (RandomAccessCsvReader reader = build("012,foo␊345,bar")) {
+            try (RandomAccessCsvReader reader = build("012,foo\n345,bar")) {
 
                 assertThat(reader.size())
                     .succeedsWithin(TIMEOUT)
@@ -286,7 +313,7 @@ class RandomAccessCsvReaderTest {
         private List<CsvRow> readRows(final int firstRecord, final int maxRecords)
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
-            return build("1␊2␊3␊4␊5")
+            return build("1\n2\n3\n4\n5")
                 .readRows(firstRecord, maxRecords)
                 .get(1, TimeUnit.SECONDS)
                 .collect(Collectors.toList());

@@ -5,13 +5,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RandomAccessCsvReader;
-import de.siegmar.fastcsv.reader.StatusMonitor;
+import de.siegmar.fastcsv.reader.StatusListener;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.SystemPrintln")
@@ -97,16 +100,30 @@ public class RandomAccessCsvReaderExample {
     private static void statusMonitor(final Path file) throws IOException, InterruptedException, ExecutionException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
-        try (RandomAccessCsvReader csv = RandomAccessCsvReader.builder().build(file)) {
+        final StatusListener statusListener = new CountingStatusListener();
+
+        final RandomAccessCsvReader csv = RandomAccessCsvReader.builder()
+            .statusListener(statusListener)
+            .build(file);
+
+        try (csv) {
             // Indexing takes place in background – we can easily monitor the current status without blocking
-            final StatusMonitor statusMonitor = csv.getStatusMonitor();
+            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(() -> System.out.println(statusListener),
+                0, 250, TimeUnit.MILLISECONDS);
 
-            do {
-                // Print current status
-                System.out.println(statusMonitor);
-            } while (!csv.awaitIndex(250, TimeUnit.MILLISECONDS));
+            final CompletableFuture<Integer> future = csv.size()
+                .whenComplete((size, err) -> {
+                    executor.shutdown();
+                    if (err != null) {
+                        err.printStackTrace(System.err);
+                    } else {
+                        System.out.printf("Finished reading file with a total of %,d rows%n%n", size);
+                    }
+                });
 
-            System.out.printf("Finished reading file with a total of %,d rows%n%n", csv.size().get());
+            // Wait for the completion of the future
+            future.join();
         }
     }
 
