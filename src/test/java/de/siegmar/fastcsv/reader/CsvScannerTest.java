@@ -104,16 +104,9 @@ class CsvScannerTest {
     private static List<Integer> scan(final byte[] data) {
         final List<Integer> positions = new ArrayList<>();
 
-        final StatusConsumer statusConsumer = new StatusConsumer() {
-            @Override
-            public void addRowPosition(final int position) {
-                positions.add(position);
-            }
-        };
-
         try {
             new CsvScanner(Channels.newChannel(new ByteArrayInputStream(data)), (byte) ',', (byte) '"',
-                CommentStrategy.READ, (byte) '#', statusConsumer).scan();
+                CommentStrategy.READ, (byte) '#', p -> positions.add(p.intValue()), new StatusListener() { }).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

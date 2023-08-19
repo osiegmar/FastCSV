@@ -2,6 +2,7 @@ package de.siegmar.fastcsv.reader;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
+import java.util.function.Consumer;
 
 final class CsvScanner {
 
@@ -12,27 +13,29 @@ final class CsvScanner {
     private final byte quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final byte commentCharacter;
-    private final StatusConsumer statusConsumer;
+    private final Consumer<Long> positionConsumer;
+    private final StatusListener statusListener;
     private final ChannelStream buf;
 
     CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
                final CommentStrategy commentStrategy, final byte commentCharacter,
-               final StatusConsumer statusConsumer) throws IOException {
+               final Consumer<Long> positionConsumer, final StatusListener statusListener) throws IOException {
 
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
-        this.statusConsumer = statusConsumer;
+        this.positionConsumer = positionConsumer;
+        this.statusListener = statusListener;
 
-        buf = new ChannelStream(channel, statusConsumer);
+        buf = new ChannelStream(channel, statusListener);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
         "checkstyle:NestedIfDepth"})
     void scan() throws IOException {
         if (buf.peek() != -1) {
-            statusConsumer.addRowPosition(0);
+            addRowPosition(0);
         }
 
         int d;
@@ -64,16 +67,21 @@ final class CsvScanner {
                 }
 
                 if (buf.hasData()) {
-                    statusConsumer.addRowPosition(buf.getTotalPosition());
+                    addRowPosition(buf.getTotalPosition());
                 }
                 break;
             } else if (d == LF) {
                 if (buf.hasData()) {
-                    statusConsumer.addRowPosition(buf.getTotalPosition());
+                    addRowPosition(buf.getTotalPosition());
                 }
                 break;
             }
         }
+    }
+
+    private void addRowPosition(final long totalPosition) {
+        positionConsumer.accept(totalPosition);
+        statusListener.readRow();
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
@@ -104,12 +112,12 @@ final class CsvScanner {
                 }
 
                 if (buf.hasData()) {
-                    statusConsumer.addRowPosition(buf.getTotalPosition());
+                    addRowPosition(buf.getTotalPosition());
                 }
                 return true;
             } else if (d == LF) {
                 if (buf.hasData()) {
-                    statusConsumer.addRowPosition(buf.getTotalPosition());
+                    addRowPosition(buf.getTotalPosition());
                 }
                 return true;
             }

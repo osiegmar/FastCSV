@@ -39,16 +39,13 @@ import java.util.stream.Stream;
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader implements Closeable {
 
-    private final List<Integer> positions = Collections.synchronizedList(new ArrayList<>());
+    private final List<Long> positions = Collections.synchronizedList(new ArrayList<>());
     private final Path file;
     private final Charset charset;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
-    private final StatusListener statusListener;
-
-    private final StatusConsumerImpl statusConsumer;
     private final CompletableFuture<Void> scanner;
     private final RandomAccessFile raf;
     private final RowReader rowReader;
@@ -71,16 +68,13 @@ public final class IndexedCsvReader implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
-        this.statusListener = statusListener;
-
-        statusConsumer = new StatusConsumerImpl();
 
         statusListener.initialize(Files.size(file));
 
         scanner = CompletableFuture.runAsync(() -> {
             try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
                 new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
-                    commentStrategy, (byte) commentCharacter, statusConsumer).scan();
+                    commentStrategy, (byte) commentCharacter, positions::add, statusListener).scan();
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -127,7 +121,7 @@ public final class IndexedCsvReader implements Closeable {
 
     /**
      * Reads a CSV row by the given row number, returning a {@link CompletableFuture} to
-     * allow non-blocking read. The result will be available when the requested row has been read.
+     * allow non-blocking read. The result will be available when the requested row has been found/indexed.
      *
      * @param rowNum the row number (0-based) to read from
      * @return a {@link CsvRow} fetched from the specified {@code rowNum}
@@ -193,14 +187,14 @@ public final class IndexedCsvReader implements Closeable {
             });
     }
 
-    private void seek(final int row, final int offset) throws IOException {
+    private void seek(final int row, final long offset) throws IOException {
         rowReader.resetBuffer(row + 1);
         raf.seek(offset);
     }
 
-    private CompletableFuture<Integer> getOffset(final int row) {
+    private CompletableFuture<Long> getOffset(final int row) {
         if (row == 0) {
-            return CompletableFuture.completedFuture(0);
+            return CompletableFuture.completedFuture(0L);
         }
 
         return waitForRow(row)
@@ -363,21 +357,6 @@ public final class IndexedCsvReader implements Closeable {
 
             return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, sl);
-        }
-
-    }
-
-    private class StatusConsumerImpl implements StatusConsumer {
-
-        @Override
-        public void addRowPosition(final int position) {
-            positions.add(position);
-            statusListener.readRow();
-        }
-
-        @Override
-        public void addReadBytes(final int readCnt) {
-            statusListener.readBytes(readCnt);
         }
 
     }

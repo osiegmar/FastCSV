@@ -9,8 +9,8 @@ final class ChannelStream {
 
     private final ByteBuffer byteBuf = ByteBuffer.allocateDirect(8192);
     private final ReadableByteChannel channel;
-    private final StatusConsumer statusConsumer;
-    private int totalPosition;
+    private final StatusListener statusListener;
+    private long totalPosition;
     private int nextByte;
 
     // Keep one buf as Buffer to maintain Android compatibility
@@ -18,11 +18,11 @@ final class ChannelStream {
     // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
     private final Buffer buf = byteBuf;
 
-    ChannelStream(final ReadableByteChannel channel, final StatusConsumer statusConsumer)
+    ChannelStream(final ReadableByteChannel channel, final StatusListener statusListener)
         throws IOException {
 
         this.channel = channel;
-        this.statusConsumer = statusConsumer;
+        this.statusListener = statusListener;
         nextByte = loadData() ? byteBuf.get() : -1;
     }
 
@@ -51,7 +51,7 @@ final class ChannelStream {
         if (readCnt == -1) {
             return false;
         }
-        statusConsumer.addReadBytes(readCnt);
+        statusListener.readBytes(readCnt);
         return true;
     }
 
@@ -64,7 +64,7 @@ final class ChannelStream {
         return byteBuf.get();
     }
 
-    int getTotalPosition() {
+    long getTotalPosition() {
         return totalPosition;
     }
 
