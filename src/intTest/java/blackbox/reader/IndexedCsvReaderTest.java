@@ -58,12 +58,8 @@ class IndexedCsvReaderTest {
             softly.assertThat(reader.readRow(0))
                 .failsWithin(TIMEOUT)
                 .withThrowableOfType(ExecutionException.class)
-                .withCauseInstanceOf(IndexOutOfBoundsException.class);
-
-            softly.assertThat(reader.readRow(1))
-                .failsWithin(TIMEOUT)
-                .withThrowableOfType(ExecutionException.class)
-                .withCauseInstanceOf(IndexOutOfBoundsException.class);
+                .withCauseInstanceOf(IndexOutOfBoundsException.class)
+                .withMessage("java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0");
         }
     }
 

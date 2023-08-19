@@ -120,11 +120,13 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     /**
-     * Reads a CSV row by the given row number, returning a {@link CompletableFuture} to
-     * allow non-blocking read. The result will be available when the requested row has been found/indexed.
+     * Reads a single CSV row by the given row number, returning a {@link CompletableFuture} to
+     * allow non-blocking read.
      *
-     * @param rowNum the row number (0-based) to read from
-     * @return a {@link CsvRow} fetched from the specified {@code rowNum}
+     * @param rowNum the row number (0-based) to read
+     * @return a Java Future of {@link CsvRow} that when completed contains the requested row, never {@code null}.
+     *     The CompletableFuture returned by this method can be completed exceptionally with an
+     *     {@link ArrayIndexOutOfBoundsException} if the file does not contain the specified row.
      * @throws IllegalArgumentException if specified {@code rowNum} is lower than 0
      */
     public CompletableFuture<CsvRow> readRow(final int rowNum) {
@@ -132,15 +134,11 @@ public final class IndexedCsvReader implements Closeable {
             throw new IllegalArgumentException("Row# must be >= 0");
         }
 
-        return getOffset(rowNum).thenApply(offset -> {
+        return findOffset(rowNum).thenApply(offset -> {
             synchronized (rowReader) {
                 try {
                     seek(rowNum, offset);
-                    final CsvRow csvRow = rowReader.fetchAndRead();
-                    if (csvRow == null) {
-                        throw new ArrayIndexOutOfBoundsException("No data found at rowNum# " + rowNum);
-                    }
-                    return csvRow;
+                    return rowReader.fetchAndRead();
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -149,12 +147,15 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     /**
-     * Reads a number of rows, returning a {@link CompletableFuture} to
-     * allow non-blocking read. The result will be available when the requested rows have been read.
+     * Reads a sequence of rows, returning a {@link CompletableFuture} to
+     * allow non-blocking read.
      *
-     * @param firstRow the first row to read from (0-based).
+     * @param firstRow the first row to read (0-based).
      * @param maxRows  the maximum number of rows to read.
-     * @return up to {@code maxRows} beginning from {@code firstRow}
+     * @return a Java Future of Stream of {@link CsvRow} that when completed contains the requested rows,
+     *     never {@code null}.
+     *     The CompletableFuture returned by this method can be completed exceptionally with an
+     *     {@link ArrayIndexOutOfBoundsException} if the file does not contain the specified first row.
      * @throws IllegalArgumentException if {@code firstRow} is &lt; 0 or {@code maxRows} &le; 0
      */
     @SuppressWarnings("PMD.AssignmentInOperand")
@@ -167,7 +168,7 @@ public final class IndexedCsvReader implements Closeable {
             throw new IllegalArgumentException("maxRows must be > 0");
         }
 
-        return getOffset(firstRow)
+        return findOffset(firstRow)
             .thenApply(offset -> {
                 final Stream.Builder<CsvRow> ret = Stream.builder();
                 synchronized (rowReader) {
@@ -192,11 +193,7 @@ public final class IndexedCsvReader implements Closeable {
         raf.seek(offset);
     }
 
-    private CompletableFuture<Long> getOffset(final int row) {
-        if (row == 0) {
-            return CompletableFuture.completedFuture(0L);
-        }
-
+    private CompletableFuture<Long> findOffset(final int row) {
         return waitForRow(row)
             .thenApply(unused -> positions.get(row));
     }
@@ -209,6 +206,11 @@ public final class IndexedCsvReader implements Closeable {
         });
     }
 
+    /**
+     * Interrupts the scanning process (if still running) and closes the file.
+     *
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void close() throws IOException {
         scanner.cancel(true);
@@ -353,7 +355,8 @@ public final class IndexedCsvReader implements Closeable {
             Objects.requireNonNull(charset, "charset must not be null");
 
             final StatusListener sl = Objects
-                .requireNonNullElseGet(statusListener, () -> new StatusListener() { });
+                .requireNonNullElseGet(statusListener, () -> new StatusListener() {
+                });
 
             return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, sl);
