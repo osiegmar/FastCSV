@@ -200,7 +200,7 @@ public final class IndexedCsvReader implements Closeable {
 
     private CompletableFuture<Void> waitForRow(final int row) {
         return CompletableFuture.runAsync(() -> {
-            while (positions.size() < row && !scanner.isDone()) {
+            while (row >= positions.size() && !scanner.isDone()) {
                 Thread.onSpinWait();
             }
         });
