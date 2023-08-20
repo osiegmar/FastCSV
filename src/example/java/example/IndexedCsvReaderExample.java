@@ -14,7 +14,6 @@ import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
-import de.siegmar.fastcsv.reader.StatusListener;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.SystemPrintln")
@@ -113,7 +112,7 @@ public class IndexedCsvReaderExample {
     private static void statusMonitor(final Path file) throws IOException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
-        final StatusListener statusListener = new CollectingStatusListener();
+        final var statusListener = new CollectingStatusListener();
 
         final IndexedCsvReader csv = IndexedCsvReader.builder()
             .statusListener(statusListener)

@@ -165,10 +165,10 @@ class IndexedCsvReaderTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, "\"", "\"", "#");
 
-            softly.assertThatThrownBy(() -> builder().quoteCharacter(',').build(emptyFile))
+            softly.assertThatThrownBy(() -> builder().quoteCharacter('#').build(emptyFile))
                 .as("quoteCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(expectedMessage, ",", ",", "#");
+                .hasMessage(expectedMessage, ",", "#", "#");
 
             softly.assertThatThrownBy(() -> builder().commentCharacter(',').build(emptyFile))
                 .as("commentCharacter")
@@ -184,10 +184,24 @@ class IndexedCsvReaderTest {
         }
 
         @Test
-        void negativePosition() {
+        void illegalRowNum() {
             assertThatThrownBy(() -> build(TEST_STRING).readRow(-1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Row# must be >= 0");
+        }
+
+        @Test
+        void illegalFirstRow() {
+            assertThatThrownBy(() -> build(TEST_STRING).readRows(-1, 100))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("firstRow must be >= 0");
+        }
+
+        @Test
+        void illegalMaxRows() {
+            assertThatThrownBy(() -> build(TEST_STRING).readRows(0, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("maxRows must be > 0");
         }
 
         @Test
@@ -290,8 +304,11 @@ class IndexedCsvReaderTest {
                 assertThat(reader.completableFuture())
                     .succeedsWithin(TIMEOUT);
 
+                assertThat(statusListener.getTotalSize()).isEqualTo(7L);
                 assertThat(statusListener.getRowCount()).isEqualTo(2L);
                 assertThat(statusListener.getByteCount()).isEqualTo(7L);
+                assertThat(statusListener.isCompleted()).isTrue();
+                assertThat(statusListener.getThrowable()).isNull();
                 assertThat(statusListener).asString()
                     .isEqualTo("Read %,d rows and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }

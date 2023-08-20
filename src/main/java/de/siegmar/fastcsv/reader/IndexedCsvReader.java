@@ -1,8 +1,10 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
@@ -72,22 +74,26 @@ public final class IndexedCsvReader implements Closeable {
         rowReader = new RowReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
             fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
 
-        scanner = CompletableFuture.runAsync(() -> {
-            try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
-                statusListener.onInit(channel.size());
+        scanner = CompletableFuture
+            .runAsync(() -> scan(statusListener))
+            .whenComplete((unused, throwable) -> {
+                if (throwable != null) {
+                    statusListener.onError(throwable);
+                } else {
+                    statusListener.onComplete();
+                }
+            });
+    }
 
-                new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
-                    commentStrategy, (byte) commentCharacter, positions::add, statusListener).scan();
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }).whenComplete((unused, throwable) -> {
-            if (throwable != null) {
-                statusListener.onError(throwable);
-            } else {
-                statusListener.onComplete();
-            }
-        });
+    private void scan(final StatusListener statusListener) {
+        try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
+            statusListener.onInit(channel.size());
+
+            new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
+                commentStrategy, (byte) commentCharacter, positions::add, statusListener).scan();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -326,7 +332,7 @@ public final class IndexedCsvReader implements Closeable {
                 throw new IllegalArgumentException(String.format(
                     "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
                     controlChar, (int) controlChar));
-            } else if (controlChar == '\r' || controlChar == '\n') {
+            } else if (controlChar == CR || controlChar == LF) {
                 throw new IllegalArgumentException("A newline character must not be used as control character");
             }
         }
@@ -362,26 +368,6 @@ public final class IndexedCsvReader implements Closeable {
 
             return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, sl);
-        }
-
-    }
-
-    private static class RandomAccessFileInputStream extends InputStream {
-
-        private final RandomAccessFile raf;
-
-        RandomAccessFileInputStream(final RandomAccessFile raf) {
-            this.raf = raf;
-        }
-
-        @Override
-        public int read() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
-            return raf.read(b, off, len);
         }
 
     }

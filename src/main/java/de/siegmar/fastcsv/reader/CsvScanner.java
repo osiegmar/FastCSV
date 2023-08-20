@@ -1,13 +1,13 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
+
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.function.Consumer;
 
 final class CsvScanner {
-
-    private static final char LF = '\n';
-    private static final char CR = '\r';
 
     private final byte fieldSeparator;
     private final byte quoteCharacter;

@@ -1,5 +1,8 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -15,9 +18,6 @@ import java.io.Reader;
     "PMD.UnusedAssignment"
 })
 final class RowReader {
-
-    private static final char LF = '\n';
-    private static final char CR = '\r';
 
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_ROW = 16;
