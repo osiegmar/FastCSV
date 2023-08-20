@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,18 +31,35 @@ class CsvScannerTest {
 
     @Test
     void nullInput() {
-        assertThatThrownBy(() -> scan((String) null, "\n"));
+        assertThatThrownBy(() -> scan((String) null, "\n", CommentStrategy.READ));
     }
 
     @Test
     void emptyInput() {
-        assertThat(scan(new byte[0])).isEmpty();
+        assertThat(scan(new byte[0], CommentStrategy.READ)).isEmpty();
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource
-    void genericData(final String line, final String newLine, final int lineNo) {
-        final List<Integer> actual = scan(line, newLine);
+    void genericData(final String line, final List<String> attributes, final String newLine, final int lineNo) {
+        CommentStrategy commentStrategy = CommentStrategy.READ;
+        for (final String attribute : attributes) {
+            switch (attribute) {
+                case "COMMENT_NONE":
+                    commentStrategy = CommentStrategy.NONE;
+                    break;
+                case "COMMENT_READ":
+                    commentStrategy = CommentStrategy.READ;
+                    break;
+                case "COMMENT_SKIP":
+                    commentStrategy = CommentStrategy.SKIP;
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown attribute: " + attributes);
+            }
+        }
+
+        final List<Integer> actual = scan(line, newLine, commentStrategy);
         final List<Integer> expected = indexesOf(line, newLine);
 
         assertThat(actual)
@@ -50,6 +68,7 @@ class CsvScannerTest {
             .isEqualTo(expected);
     }
 
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
     static List<Arguments> genericData() throws IOException {
         final List<Arguments> list = new ArrayList<>();
 
@@ -61,14 +80,30 @@ class CsvScannerTest {
                 continue;
             }
 
-            list.add(Arguments.of(line, "\n", lineNo));
+            final String[] parts = line.split("\\s+");
+            if (parts.length > 2) {
+                throw new IllegalStateException("Found to many parts");
+            }
+            final String pattern = parts[0];
+            final List<String> attributes = parseAttributes(parts);
+
+            list.add(Arguments.of(pattern, attributes, "\n", lineNo));
             if (line.contains("$")) {
-                list.add(Arguments.of(line, "\r", lineNo));
-                list.add(Arguments.of(line, "\r\n", lineNo));
+                list.add(Arguments.of(pattern, attributes, "\r", lineNo));
+                list.add(Arguments.of(pattern, attributes, "\r\n", lineNo));
             }
         }
 
         return list;
+    }
+
+    @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+    private static List<String> parseAttributes(final String... parts) {
+        if (parts.length < 2) {
+            return List.of();
+        }
+
+        return List.of(parts[1].split(","));
     }
 
     @ParameterizedTest
@@ -77,36 +112,43 @@ class CsvScannerTest {
         final byte[] buf = new byte[pos + 2];
         Arrays.fill(buf, (byte) 'A');
 
-        assertThat(scan(buf))
+        assertThat(scan(buf, CommentStrategy.READ))
             .containsExactly(0);
 
         buf[pos] = '\n';
-        assertThat(scan(buf))
+        assertThat(scan(buf, CommentStrategy.READ))
             .containsExactly(0, pos + 1);
     }
 
     @Test
     void unicode() {
-        assertThat(scan("012u\n0".getBytes(StandardCharsets.UTF_8)))
+        assertThat(scan("012u\n0".getBytes(StandardCharsets.UTF_8), CommentStrategy.READ))
             .containsExactly(0, 5);
 
-        assertThat(scan("012ü\n0".getBytes(StandardCharsets.UTF_8)))
+        assertThat(scan("012ü\n0".getBytes(StandardCharsets.UTF_8), CommentStrategy.READ))
             .containsExactly(0, 6);
     }
 
-    private static List<Integer> scan(final String line, final String newLine) {
+    private static List<Integer> scan(final String line, final String newLine, final CommentStrategy commentStrategy) {
         final String lineToScan = repl(line, newLine)
             .replace("^", "");
 
-        return scan(lineToScan.getBytes(StandardCharsets.UTF_8));
+        return scan(lineToScan.getBytes(StandardCharsets.UTF_8), commentStrategy);
     }
 
-    private static List<Integer> scan(final byte[] data) {
+    private static List<Integer> scan(final byte[] data, final CommentStrategy commentStrategy) {
         final List<Integer> positions = new ArrayList<>();
 
-        try {
-            new CsvScanner(Channels.newChannel(new ByteArrayInputStream(data)), (byte) ',', (byte) '"',
-                CommentStrategy.READ, (byte) '#', p -> positions.add(p.intValue()), new StatusListener() { }).scan();
+        final var fieldSeparator = (byte) ',';
+        final var quoteCharacter = (byte) '"';
+        final var commentCharacter = (byte) '#';
+        final Consumer<Long> positionCollector = p -> positions.add(p.intValue());
+        final var statusListener = new StatusListener() {
+        };
+
+        try (var channel = Channels.newChannel(new ByteArrayInputStream(data))) {
+            new CsvScanner(channel, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+                positionCollector, statusListener).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

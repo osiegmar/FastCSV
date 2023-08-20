@@ -11,11 +11,11 @@ final class CsvScanner {
 
     private final byte fieldSeparator;
     private final byte quoteCharacter;
-    private final CommentStrategy commentStrategy;
     private final byte commentCharacter;
     private final Consumer<Long> positionConsumer;
     private final StatusListener statusListener;
-    private final ChannelStream buf;
+    private final ByteChannelStream stream;
+    private final boolean ignoreComments;
 
     CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
                final CommentStrategy commentStrategy, final byte commentCharacter,
@@ -23,107 +23,91 @@ final class CsvScanner {
 
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
-        this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
         this.positionConsumer = positionConsumer;
         this.statusListener = statusListener;
 
-        buf = new ChannelStream(channel, statusListener);
+        ignoreComments = commentStrategy == CommentStrategy.NONE;
+
+        stream = new ByteChannelStream(channel, statusListener);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
         "checkstyle:NestedIfDepth"})
     void scan() throws IOException {
-        if (buf.peek() != -1) {
-            addRowPosition(0);
-        }
-
         int d;
-        while ((d = buf.get()) != -1) {
-            // here: always a new row
-            if (d == commentCharacter && commentStrategy != CommentStrategy.NONE) {
-                consumeCommentedRow();
-            } else {
-                do {
-                    // here: always a new field
-                    final boolean endOfRow = (d == quoteCharacter)
-                        ? consumeQuotedField() : consumeUnquotedField(d);
+        while ((d = stream.get()) != -1) {
+            positionConsumer.accept(stream.getTotalPosition());
 
-                    if (endOfRow) {
+            // parse a row
+            if (d != commentCharacter || ignoreComments) {
+                do {
+                    // parse fields
+                    if (d == quoteCharacter) {
+                        if (consumeQuotedField()) {
+                            // reached end of line
+                            break;
+                        }
+                    } else if (consumeUnquotedField(d)) {
+                        // reached end of line
                         break;
                     }
-                } while ((d = buf.get()) != -1);
+                } while ((d = stream.get()) != -1);
+            } else {
+                consumeCommentedRow();
             }
+
+            statusListener.onReadRow();
         }
-    }
-
-    @SuppressWarnings("PMD.AssignmentInOperand")
-    private void consumeCommentedRow() throws IOException {
-        int d;
-        while ((d = buf.get()) != -1) {
-            if (d == CR) {
-                if (buf.peek() == LF) {
-                    buf.consume();
-                }
-
-                if (buf.hasData()) {
-                    addRowPosition(buf.getTotalPosition());
-                }
-                break;
-            } else if (d == LF) {
-                if (buf.hasData()) {
-                    addRowPosition(buf.getTotalPosition());
-                }
-                break;
-            }
-        }
-    }
-
-    private void addRowPosition(final long totalPosition) {
-        positionConsumer.accept(totalPosition);
-        statusListener.readRow();
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
     private boolean consumeQuotedField() throws IOException {
         int d;
-        while ((d = buf.get()) != -1) {
+        while ((d = stream.get()) != -1) {
             if (d == quoteCharacter) {
-                if (buf.peek() == quoteCharacter) {
-                    buf.consume();
-                } else {
-                    return !buf.hasData() || consumeUnquotedField(buf.get());
+                if (!stream.consumeIfNextEq(quoteCharacter)) {
+                    break;
                 }
             }
         }
 
-        return true;
+        if (stream.hasData()) {
+            // handle all kinds of characters after closing quote
+            return consumeUnquotedField(stream.get());
+        }
+
+        return false;
     }
 
     @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment", "checkstyle:ReturnCount"})
+        "checkstyle:ParameterAssignment"})
     private boolean consumeUnquotedField(int d) throws IOException {
         do {
             if (d == fieldSeparator) {
                 return false;
             } else if (d == CR) {
-                if (buf.peek() == LF) {
-                    buf.consume();
-                }
-
-                if (buf.hasData()) {
-                    addRowPosition(buf.getTotalPosition());
-                }
-                return true;
+                stream.consumeIfNextEq(LF);
+                break;
             } else if (d == LF) {
-                if (buf.hasData()) {
-                    addRowPosition(buf.getTotalPosition());
-                }
-                return true;
+                break;
             }
-        } while ((d = buf.get()) != -1);
+        } while ((d = stream.get()) != -1);
 
         return true;
+    }
+
+    @SuppressWarnings("PMD.AssignmentInOperand")
+    private void consumeCommentedRow() throws IOException {
+        int d;
+        while ((d = stream.get()) != -1) {
+            if (d == CR) {
+                stream.consumeIfNextEq(LF);
+                break;
+            } else if (d == LF) {
+                break;
+            }
+        }
     }
 
 }

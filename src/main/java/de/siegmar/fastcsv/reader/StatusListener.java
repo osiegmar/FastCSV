@@ -15,13 +15,13 @@ public interface StatusListener {
      *
      * @param totalSize the total file size.
      */
-    default void initialize(long totalSize) {
+    default void onInit(long totalSize) {
     }
 
     /**
      * Called when a new row has been read.
      */
-    default void readRow() {
+    default void onReadRow() {
     }
 
     /**
@@ -29,7 +29,13 @@ public interface StatusListener {
      *
      * @param bytes number of bytes read.
      */
-    default void readBytes(int bytes) {
+    default void onReadBytes(int bytes) {
+    }
+
+    /**
+     * Called when the indexing finished successfully (without an exception).
+     */
+    default void onComplete() {
     }
 
     /**
@@ -37,13 +43,7 @@ public interface StatusListener {
      *
      * @param throwable the exception thrown.
      */
-    default void failed(Throwable throwable) {
-    }
-
-    /**
-     * Called when the indexing finished successfully (without an exception).
-     */
-    default void completed() {
+    default void onError(Throwable throwable) {
     }
 
 }

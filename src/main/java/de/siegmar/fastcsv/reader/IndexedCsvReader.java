@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,9 +45,9 @@ public final class IndexedCsvReader implements Closeable {
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
-    private final CompletableFuture<Void> scanner;
     private final RandomAccessFile raf;
     private final RowReader rowReader;
+    private final CompletableFuture<Void> scanner;
 
     IndexedCsvReader(final Path file, final Charset charset,
                      final char fieldSeparator, final char quoteCharacter,
@@ -69,10 +68,14 @@ public final class IndexedCsvReader implements Closeable {
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
 
-        statusListener.initialize(Files.size(file));
+        raf = new RandomAccessFile(file.toFile(), "r");
+        rowReader = new RowReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
+            fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
 
         scanner = CompletableFuture.runAsync(() -> {
-            try (ReadableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
+            try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
+                statusListener.onInit(channel.size());
+
                 new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
                     commentStrategy, (byte) commentCharacter, positions::add, statusListener).scan();
             } catch (final IOException e) {
@@ -80,15 +83,11 @@ public final class IndexedCsvReader implements Closeable {
             }
         }).whenComplete((unused, throwable) -> {
             if (throwable != null) {
-                statusListener.failed(throwable);
+                statusListener.onError(throwable);
             } else {
-                statusListener.completed();
+                statusListener.onComplete();
             }
         });
-
-        raf = new RandomAccessFile(file.toFile(), "r");
-        rowReader = new RowReader(new InputStreamReader(new ChannelInputStream(raf), charset),
-            fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
     /**
@@ -281,10 +280,13 @@ public final class IndexedCsvReader implements Closeable {
          *
          * @param commentStrategy the strategy for handling comments.
          * @return This updated object, so that additional method calls can be chained together.
+         * @throws IllegalArgumentException if {@link CommentStrategy#SKIP} is passed, as this is not supported
          * @see #commentCharacter(char)
          */
-        public IndexedCsvReaderBuilder commentStrategy(
-            final CommentStrategy commentStrategy) {
+        public IndexedCsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
+            if (commentStrategy == CommentStrategy.SKIP) {
+                throw new IllegalArgumentException("CommentStrategy SKIP is not supported in IndexedCsvReader");
+            }
             this.commentStrategy = commentStrategy;
             return this;
         }
@@ -364,11 +366,11 @@ public final class IndexedCsvReader implements Closeable {
 
     }
 
-    private static class ChannelInputStream extends InputStream {
+    private static class RandomAccessFileInputStream extends InputStream {
 
         private final RandomAccessFile raf;
 
-        ChannelInputStream(final RandomAccessFile raf) {
+        RandomAccessFileInputStream(final RandomAccessFile raf) {
             this.raf = raf;
         }
 

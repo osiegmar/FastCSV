@@ -28,8 +28,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import testutil.CsvRowAssert;
@@ -200,6 +200,76 @@ class IndexedCsvReaderTest {
     }
 
     @Nested
+    class Comment {
+
+        @Test
+        void readComment() throws IOException {
+            final Path file = prepareTestFile("foo\n#a,b,c\nbaz");
+
+            final IndexedCsvReader csv = builder()
+                .commentStrategy(CommentStrategy.READ)
+                .build(file);
+
+            try (csv) {
+                assertThat(csv.readRow(0))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(1)
+                    .isNotComment()
+                    .fields().containsExactly("foo");
+
+                assertThat(csv.readRow(1))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(2)
+                    .isComment()
+                    .fields().containsExactly("a,b,c");
+
+                assertThat(csv.readRow(2))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(3)
+                    .isNotComment()
+                    .fields().containsExactly("baz");
+            }
+        }
+
+        @Test
+        void noneComment() throws IOException {
+            final Path file = prepareTestFile("foo\n#a,b,c\nbaz");
+
+            final IndexedCsvReader csv = builder()
+                .commentStrategy(CommentStrategy.NONE)
+                .build(file);
+
+            try (csv) {
+                assertThat(csv.readRow(0))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(1)
+                    .isNotComment()
+                    .fields().containsExactly("foo");
+
+                assertThat(csv.readRow(1))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(2)
+                    .isNotComment()
+                    .fields().containsExactly("#a", "b", "c");
+
+                assertThat(csv.readRow(2))
+                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                    .isOriginalLineNumber(3)
+                    .isNotComment()
+                    .fields().containsExactly("baz");
+            }
+        }
+
+        @Test
+        void skipComment() {
+            assertThatThrownBy(() -> builder().commentStrategy(CommentStrategy.SKIP))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("CommentStrategy SKIP is not supported in IndexedCsvReader");
+        }
+
+    }
+
+    @Nested
     class Status {
 
         @Test
@@ -210,26 +280,18 @@ class IndexedCsvReaderTest {
 
         @Test
         void finalStatus() throws IOException {
-            final var statusListener = new CountingStatusListener() {
-
-                public int getRowCount() {
-                    return rowCnt.intValue();
-                }
-
-                public long getBytesRead() {
-                    return byteCnt.longValue();
-                }
-
-            };
+            final var statusListener = new CollectingStatusListener();
 
             final IndexedCsvReader reader = builder()
                 .statusListener(statusListener)
                 .build(prepareTestFile("foo\nbar"));
 
             try (reader) {
-                assertThat(reader.completableFuture()).succeedsWithin(TIMEOUT);
-                assertThat(statusListener.getRowCount()).isEqualTo(2);
-                assertThat(statusListener.getBytesRead()).isEqualTo(7);
+                assertThat(reader.completableFuture())
+                    .succeedsWithin(TIMEOUT);
+
+                assertThat(statusListener.getRowCount()).isEqualTo(2L);
+                assertThat(statusListener.getByteCount()).isEqualTo(7L);
                 assertThat(statusListener).asString()
                     .isEqualTo("Read %,d rows and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }

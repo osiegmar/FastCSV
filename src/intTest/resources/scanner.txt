@@ -18,6 +18,9 @@
 ^___$^"___$___
 ^___$^"___
 
+# quote in data fields
+^___"___$^___
+
 # escaped quotes
 ^"_""_"$^___
 
@@ -27,13 +30,15 @@
 ^#___
 ^#___$
 
-# quote in data fields
-^___"___$^___
+# ignore comment
+^#"___$^___"
+^#"___$^___"                     COMMENT_NONE
 
 # comment in data fields
 ^"#___$___"$^___
 
 # multiple fields
 ^___,___$^___
+^___,___,
 ^"___",____$^___
 ^"___,___"$^___

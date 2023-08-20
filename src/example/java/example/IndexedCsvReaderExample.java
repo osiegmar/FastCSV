@@ -6,13 +6,12 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CountingStatusListener;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.StatusListener;
@@ -114,7 +113,7 @@ public class IndexedCsvReaderExample {
     private static void statusMonitor(final Path file) throws IOException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
-        final StatusListener statusListener = new CountingStatusListener();
+        final StatusListener statusListener = new CollectingStatusListener();
 
         final IndexedCsvReader csv = IndexedCsvReader.builder()
             .statusListener(statusListener)
@@ -122,7 +121,7 @@ public class IndexedCsvReaderExample {
 
         try (csv) {
             // Indexing takes place in background – we can easily monitor the current status without blocking
-            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            final var executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleAtFixedRate(() -> System.out.println(statusListener),
                 0, 250, TimeUnit.MILLISECONDS);
 
