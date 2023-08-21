@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.LongConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -142,13 +141,15 @@ class CsvScannerTest {
         final var fieldSeparator = (byte) ',';
         final var quoteCharacter = (byte) '"';
         final var commentCharacter = (byte) '#';
-        final LongConsumer positionCollector = p -> positions.add(Long.valueOf(p).intValue());
-        final var statusListener = new StatusListener() {
-        };
 
         try (var channel = Channels.newChannel(new ByteArrayInputStream(data))) {
             new CsvScanner(channel, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-                positionCollector, statusListener).scan();
+                new CsvScanner.Listener() {
+                    @Override
+                    public void startOffset(final long offset) {
+                        positions.add(Math.toIntExact(offset));
+                    }
+                }).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -5,31 +5,28 @@ import static de.siegmar.fastcsv.util.Util.LF;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
-import java.util.function.LongConsumer;
 
 final class CsvScanner {
 
     private final byte fieldSeparator;
     private final byte quoteCharacter;
     private final byte commentCharacter;
-    private final LongConsumer offsetConsumer;
-    private final StatusListener statusListener;
+    private final Listener listener;
     private final ByteChannelStream stream;
-    private final boolean ignoreComments;
+    private final boolean readComments;
 
     CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
                final CommentStrategy commentStrategy, final byte commentCharacter,
-               final LongConsumer offsetConsumer, final StatusListener statusListener) throws IOException {
+               final Listener listener) throws IOException {
 
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
-        this.offsetConsumer = offsetConsumer;
-        this.statusListener = statusListener;
+        this.listener = listener;
 
-        ignoreComments = commentStrategy == CommentStrategy.NONE;
+        readComments = commentStrategy != CommentStrategy.NONE;
 
-        stream = new ByteChannelStream(channel, statusListener);
+        stream = new ByteChannelStream(channel, listener);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
@@ -37,28 +34,34 @@ final class CsvScanner {
     void scan() throws IOException {
         int d;
         while ((d = stream.get()) != -1) {
-            offsetConsumer.accept(stream.getTotalOffset());
+            listener.startOffset(stream.getTotalOffset());
 
             // parse a row
-            if (d != commentCharacter || ignoreComments) {
-                do {
-                    // parse fields
-                    if (d == quoteCharacter) {
-                        if (consumeQuotedField()) {
-                            // reached end of line
-                            break;
-                        }
-                    } else if (consumeUnquotedField(d)) {
-                        // reached end of line
-                        break;
-                    }
-                } while ((d = stream.get()) != -1);
+            if (d == commentCharacter && readComments) {
+                consumeCommentedLine();
             } else {
-                consumeCommentedRow();
+                consumeRow(d);
             }
 
-            statusListener.onReadRow();
+            listener.onReadRow();
         }
+    }
+
+    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment"})
+    private void consumeRow(int d) throws IOException {
+        do {
+            // parse fields
+            if (d == quoteCharacter) {
+                if (consumeQuotedField()) {
+                    // reached end of row
+                    break;
+                }
+            } else if (consumeUnquotedField(d)) {
+                // reached end of row
+                break;
+            }
+        } while ((d = stream.get()) != -1);
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
@@ -69,15 +72,16 @@ final class CsvScanner {
                 if (!stream.consumeIfNextEq(quoteCharacter)) {
                     break;
                 }
+            } else if (d == CR) {
+                stream.consumeIfNextEq(LF);
+                listener.additionalLine();
+            } else if (d == LF) {
+                listener.additionalLine();
             }
         }
 
-        if (stream.hasData()) {
-            // handle all kinds of characters after closing quote
-            return consumeUnquotedField(stream.get());
-        }
-
-        return false;
+        // handle all kinds of characters after closing quote
+        return stream.hasData() && consumeUnquotedField(stream.get());
     }
 
     @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
@@ -98,7 +102,7 @@ final class CsvScanner {
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
-    private void consumeCommentedRow() throws IOException {
+    private void consumeCommentedLine() throws IOException {
         int d;
         while ((d = stream.get()) != -1) {
             if (d == CR) {
@@ -108,6 +112,22 @@ final class CsvScanner {
                 break;
             }
         }
+    }
+
+    public interface Listener {
+
+        default void onReadBytes(int readCnt) {
+        }
+
+        default void startOffset(long offset) {
+        }
+
+        default void onReadRow() {
+        }
+
+        default void additionalLine() {
+        }
+
     }
 
 }

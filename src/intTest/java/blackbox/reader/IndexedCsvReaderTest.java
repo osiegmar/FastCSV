@@ -399,7 +399,7 @@ class IndexedCsvReaderTest {
         void start1End2() throws IOException {
             final IndexedCsvReader csv = IndexedCsvReader.builder()
                 .pageSize(2)
-                .build(prepareTestFile("1\n2\n3\n4\n5"));
+                .build(prepareTestFile("1\n2a,2b\n\"3\nfoo\"\n4\n5"));
 
             try (csv) {
                 assertThat(csv.pageCount())
@@ -413,21 +413,31 @@ class IndexedCsvReaderTest {
                 assertThat(csv.readPage(0))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("1"),
-                        item2 -> CsvRowAssert.assertThat(item2).fields().containsExactly("2")
+                        item1 -> CsvRowAssert.assertThat(item1)
+                            .isOriginalLineNumber(1)
+                            .fields().containsExactly("1"),
+                        item2 -> CsvRowAssert.assertThat(item2)
+                            .isOriginalLineNumber(2)
+                            .fields().containsExactly("2a", "2b")
                     );
 
                 assertThat(csv.readPage(1))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("3"),
-                        item2 -> CsvRowAssert.assertThat(item2).fields().containsExactly("4")
+                        item1 -> CsvRowAssert.assertThat(item1)
+                            .isOriginalLineNumber(3)
+                            .fields().containsExactly("3\nfoo"),
+                        item2 -> CsvRowAssert.assertThat(item2)
+                            .isOriginalLineNumber(5)
+                            .fields().containsExactly("4")
                     );
 
                 assertThat(csv.readPage(2))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("5")
+                        item1 -> CsvRowAssert.assertThat(item1)
+                            .isOriginalLineNumber(6)
+                            .fields().containsExactly("5")
                     );
             }
         }

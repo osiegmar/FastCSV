@@ -9,7 +9,7 @@ final class ByteChannelStream {
 
     private final ByteBuffer byteBuf = ByteBuffer.allocateDirect(8192);
     private final ReadableByteChannel channel;
-    private final StatusListener statusListener;
+    private final CsvScanner.Listener listener;
     private long totalPosition = -1;
     private int nextByte;
 
@@ -18,11 +18,11 @@ final class ByteChannelStream {
     // see https://www.morling.dev/blog/bytebuffer-and-the-dreaded-nosuchmethoderror/
     private final Buffer buf = byteBuf;
 
-    ByteChannelStream(final ReadableByteChannel channel, final StatusListener statusListener)
+    ByteChannelStream(final ReadableByteChannel channel, final CsvScanner.Listener listener)
         throws IOException {
 
         this.channel = channel;
-        this.statusListener = statusListener;
+        this.listener = listener;
         nextByte = loadData() ? byteBuf.get() : -1;
     }
 
@@ -65,7 +65,7 @@ final class ByteChannelStream {
         buf.flip();
 
         if (readCnt != -1) {
-            statusListener.onReadBytes(readCnt);
+            listener.onReadBytes(readCnt);
             return true;
         }
 

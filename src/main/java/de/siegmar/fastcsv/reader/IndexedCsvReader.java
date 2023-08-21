@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader implements Closeable {
 
-    private final List<Long> pageOffsets = Collections.synchronizedList(new ArrayList<>());
+    private final List<Page> pageOffsets = Collections.synchronizedList(new ArrayList<>());
     private final AtomicLong rowCounter = new AtomicLong();
 
     private final Path file;
@@ -94,16 +94,15 @@ public final class IndexedCsvReader implements Closeable {
         try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
             statusListener.onInit(channel.size());
 
-            new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
-                commentStrategy, (byte) commentCharacter, this::collectOffset, statusListener).scan();
+            new CsvScanner(channel,
+                (byte) fieldSeparator,
+                (byte) quoteCharacter,
+                commentStrategy,
+                (byte) commentCharacter,
+                new ScannerListener(statusListener)
+            ).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        }
-    }
-
-    private void collectOffset(final long offset) {
-        if (rowCounter.getAndIncrement() % pageSize == 0) {
-            pageOffsets.add(offset);
         }
     }
 
@@ -160,13 +159,13 @@ public final class IndexedCsvReader implements Closeable {
             throw new IllegalArgumentException("page must be >= 0");
         }
 
-        return findFirstRowOffsetOfPage(page)
-            .thenApply(offset -> {
+        return findPage(page)
+            .thenApply(pageRecord -> {
                 final List<CsvRow> ret = new ArrayList<>(pageSize);
                 synchronized (rowReader) {
                     try {
-                        raf.seek(offset);
-                        rowReader.resetBuffer((pageSize * page) + 1);
+                        raf.seek(pageRecord.offset);
+                        rowReader.resetBuffer(pageRecord.startingLineNumber);
 
                         CsvRow csvRow;
                         for (int i = 0; i < pageSize && (csvRow = rowReader.fetchAndRead()) != null; i++) {
@@ -181,7 +180,7 @@ public final class IndexedCsvReader implements Closeable {
             });
     }
 
-    private CompletableFuture<Long> findFirstRowOffsetOfPage(final int page) {
+    private CompletableFuture<Page> findPage(final int page) {
         return waitForPage(page)
             .thenApply(unused -> pageOffsets.get(page));
     }
@@ -371,6 +370,51 @@ public final class IndexedCsvReader implements Closeable {
                 commentCharacter, pageSize, sl);
         }
 
+    }
+
+    private static final class Page {
+
+        private final long offset;
+        private final long startingLineNumber;
+
+        private Page(final long offset, final long startingLineNumber) {
+            this.offset = offset;
+            this.startingLineNumber = startingLineNumber;
+        }
+
+    }
+
+    private final class ScannerListener implements CsvScanner.Listener {
+
+        private final StatusListener statusListener;
+        private long startingLineNumber = 1;
+
+        private ScannerListener(final StatusListener statusListener) {
+            this.statusListener = statusListener;
+        }
+
+        @Override
+        public void onReadBytes(final int readCnt) {
+            statusListener.onReadBytes(readCnt);
+        }
+
+        @Override
+        public void startOffset(final long offset) {
+            if (rowCounter.getAndIncrement() % pageSize == 0) {
+                pageOffsets.add(new Page(offset, startingLineNumber));
+            }
+        }
+
+        @Override
+        public void onReadRow() {
+            startingLineNumber++;
+            statusListener.onReadRow();
+        }
+
+        @Override
+        public void additionalLine() {
+            startingLineNumber++;
+        }
     }
 
 }
