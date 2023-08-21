@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static testutil.CsvRowAssert.CSV_PAGE;
+import static testutil.CsvRowAssert.CSV_ROW;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -38,8 +38,6 @@ import testutil.CsvRowAssert;
 class IndexedCsvReaderTest {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
-    private static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
-        new InstanceOfAssertFactory<>(CsvRow.class, CsvRowAssert::assertThat);
 
     private static final String TEST_STRING = "foo";
 
