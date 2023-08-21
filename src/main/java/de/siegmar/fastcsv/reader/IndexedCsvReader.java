@@ -101,7 +101,6 @@ public final class IndexedCsvReader implements Closeable {
         }
     }
 
-    @SuppressWarnings("checkstyle:ParameterAssignment")
     private void collectOffset(final long offset) {
         if (rowCounter.getAndIncrement() % pageSize == 0) {
             pageOffsets.add(offset);
