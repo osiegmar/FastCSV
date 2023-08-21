@@ -12,16 +12,12 @@
 
     <!-- Ignore mutable throwable exposure in listener -->
     <Match>
-        <Bug pattern="EI_EXPOSE_REP"/>
         <Class name="de.siegmar.fastcsv.reader.CollectingStatusListener"/>
-        <Method name="getThrowable"/>
-    </Match>
-
-    <!-- Ignore mutable throwable exposure in listener -->
-    <Match>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-        <Class name="de.siegmar.fastcsv.reader.CollectingStatusListener"/>
-        <Method name="onError"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Or>
+            <Method name="onError"/>
+            <Method name="getThrowable"/>
+        </Or>
     </Match>
 
 </FindBugsFilter>
