@@ -1,5 +1,7 @@
 package testutil;
 
+import java.util.List;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ListAssert;
@@ -10,6 +12,10 @@ public class CsvRowAssert extends AbstractAssert<CsvRowAssert, CsvRow> {
 
     public static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
         new InstanceOfAssertFactory<>(CsvRow.class, CsvRowAssert::assertThat);
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static final InstanceOfAssertFactory<List<CsvRow>, ListAssert<CsvRow>> CSV_PAGE =
+        new InstanceOfAssertFactory<>((Class<List<CsvRow>>) (Class<?>) List.class, o -> new ListAssert<>((List) o));
 
     protected CsvRowAssert(final CsvRow actual) {
         super(actual, CsvRowAssert.class);

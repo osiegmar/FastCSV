@@ -31,7 +31,7 @@ class CsvScannerTest {
 
     @Test
     void nullInput() {
-        assertThatThrownBy(() -> scan((String) null, "\n", CommentStrategy.READ));
+        assertThatThrownBy(() -> scan(null, "\n", CommentStrategy.READ));
     }
 
     @Test

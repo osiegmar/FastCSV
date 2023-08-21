@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static testutil.CsvRowAssert.CSV_PAGE;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.SoftAssertions;
@@ -40,6 +40,7 @@ class IndexedCsvReaderTest {
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
         new InstanceOfAssertFactory<>(CsvRow.class, CsvRowAssert::assertThat);
+
     private static final String TEST_STRING = "foo";
 
     @InjectSoftAssertions
@@ -50,12 +51,12 @@ class IndexedCsvReaderTest {
 
     @Test
     void outOfBounds() throws IOException {
-        try (IndexedCsvReader reader = build("")) {
-            softly.assertThat(reader.size())
+        try (var csv = buildSinglePage("")) {
+            softly.assertThat(csv.size())
                 .succeedsWithin(TIMEOUT)
                 .isEqualTo(0);
 
-            softly.assertThat(reader.readRow(0))
+            softly.assertThat(csv.readPage(0))
                 .failsWithin(TIMEOUT)
                 .withThrowableOfType(ExecutionException.class)
                 .withCauseInstanceOf(IndexOutOfBoundsException.class)
@@ -67,35 +68,39 @@ class IndexedCsvReaderTest {
     void readerToString() throws IOException {
         final Path file = prepareTestFile(TEST_STRING);
 
-        assertThat(builder().build(file)).asString()
+        assertThat(singlePageBuilder().build(file)).asString()
             .isEqualTo("IndexedCsvReader[file=%s, charset=%s, fieldSeparator=%s, "
-                    + "quoteCharacter=%s, commentStrategy=%s, commentCharacter=%s]",
-                file, UTF_8, ',', '"', CommentStrategy.NONE, '#');
+                    + "quoteCharacter=%s, commentStrategy=%s, commentCharacter=%s, pageSize=%d]",
+                file, UTF_8, ',', '"', CommentStrategy.NONE, '#', 1);
     }
 
     // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
     @Test
     void unicode() throws IOException {
-        final Path file = prepareTestFile("abc\nüöä\nabc");
-        assertThat(builder().build(file).readRow(0))
-            .succeedsWithin(TIMEOUT, CSV_ROW)
-            .fields().singleElement().isEqualTo("abc");
+        try (var csv = buildSinglePage("abc\nüöä\nabc")) {
+            assertThat(csv.readPage(0))
+                .succeedsWithin(TIMEOUT, CSV_PAGE)
+                .singleElement(CSV_ROW)
+                .fields().singleElement().isEqualTo("abc");
 
-        assertThat(builder().build(file).readRow(1))
-            .succeedsWithin(TIMEOUT, CSV_ROW)
-            .fields().singleElement().isEqualTo("üöä");
+            assertThat(csv.readPage(1))
+                .succeedsWithin(TIMEOUT, CSV_PAGE)
+                .singleElement(CSV_ROW)
+                .fields().singleElement().isEqualTo("üöä");
 
-        assertThat(builder().build(file).readRow(2))
-            .succeedsWithin(TIMEOUT, CSV_ROW)
-            .fields().singleElement().isEqualTo("abc");
+            assertThat(csv.readPage(2))
+                .succeedsWithin(TIMEOUT, CSV_PAGE)
+                .singleElement(CSV_ROW)
+                .fields().singleElement().isEqualTo("abc");
+        }
     }
 
-    private IndexedCsvReader build(final String data) throws IOException {
-        return builder().build(prepareTestFile(data));
+    private IndexedCsvReader buildSinglePage(final String data) throws IOException {
+        return singlePageBuilder().build(prepareTestFile(data));
     }
 
-    private static IndexedCsvReader.IndexedCsvReaderBuilder builder() {
-        return IndexedCsvReader.builder();
+    private static IndexedCsvReader.IndexedCsvReaderBuilder singlePageBuilder() {
+        return IndexedCsvReader.builder().pageSize(1);
     }
 
     private Path prepareTestFile(final String s) throws IOException {
@@ -116,17 +121,17 @@ class IndexedCsvReaderTest {
         void controlCharacterNewline(final char c) {
             final String expectedMessage = "A newline character must not be used as control character";
 
-            softly.assertThatThrownBy(() -> builder().fieldSeparator(c))
+            softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator(c))
                 .as("fieldSeparator=%h", c)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
 
-            softly.assertThatThrownBy(() -> builder().quoteCharacter(c))
+            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter(c))
                 .as("quoteCharacter=%h", c)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
 
-            softly.assertThatThrownBy(() -> builder().commentCharacter(c))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter(c))
                 .as("commentCharacter=%h", c)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
@@ -137,17 +142,17 @@ class IndexedCsvReaderTest {
             final String expectedMessage =
                 "Multibyte control characters are not supported in IndexedCsvReader: '' (value: 128)";
 
-            softly.assertThatThrownBy(() -> builder().fieldSeparator('\u0080'))
+            softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator('\u0080'))
                 .as("fieldSeparator")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
 
-            softly.assertThatThrownBy(() -> builder().quoteCharacter('\u0080'))
+            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter('\u0080'))
                 .as("quoteCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
 
-            softly.assertThatThrownBy(() -> builder().commentCharacter('\u0080'))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter('\u0080'))
                 .as("commentCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage);
@@ -160,17 +165,17 @@ class IndexedCsvReaderTest {
             final String expectedMessage =
                 "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)";
 
-            softly.assertThatThrownBy(() -> builder().fieldSeparator('"').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator('"').build(emptyFile))
                 .as("fieldSeparator")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, "\"", "\"", "#");
 
-            softly.assertThatThrownBy(() -> builder().quoteCharacter('#').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter('#').build(emptyFile))
                 .as("quoteCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "#", "#");
 
-            softly.assertThatThrownBy(() -> builder().commentCharacter(',').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter(',').build(emptyFile))
                 .as("commentCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "\"", ",");
@@ -178,35 +183,30 @@ class IndexedCsvReaderTest {
 
         @Test
         void nullFile() {
-            assertThatThrownBy(() -> builder().build(null))
+            assertThatThrownBy(() -> singlePageBuilder().build(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("file must not be null");
         }
 
         @Test
-        void illegalRowNum() {
-            assertThatThrownBy(() -> build(TEST_STRING).readRow(-1))
+        void illegalPage() {
+            assertThatThrownBy(() -> buildSinglePage(TEST_STRING).readPage(-1))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Row# must be >= 0");
+                .hasMessage("page must be >= 0");
         }
 
         @Test
-        void illegalFirstRow() {
-            assertThatThrownBy(() -> build(TEST_STRING).readRows(-1, 100))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("firstRow must be >= 0");
-        }
-
-        @Test
-        void illegalMaxRows() {
-            assertThatThrownBy(() -> build(TEST_STRING).readRows(0, 0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("maxRows must be > 0");
+        void pageOutOfBounds() throws IOException {
+            assertThat(buildSinglePage(TEST_STRING).readPage(10))
+                .failsWithin(TIMEOUT)
+                .withThrowableOfType(ExecutionException.class)
+                .withCauseInstanceOf(IndexOutOfBoundsException.class)
+                .withMessage("java.lang.IndexOutOfBoundsException: Index 10 out of bounds for length 1");
         }
 
         @Test
         void nullCharset() {
-            assertThatThrownBy(() -> builder().build(Paths.get("/tmp"), null))
+            assertThatThrownBy(() -> singlePageBuilder().build(Paths.get("/tmp"), null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("charset must not be null");
         }
@@ -220,25 +220,28 @@ class IndexedCsvReaderTest {
         void readComment() throws IOException {
             final Path file = prepareTestFile("foo\n#a,b,c\nbaz");
 
-            final IndexedCsvReader csv = builder()
+            final var csv = singlePageBuilder()
                 .commentStrategy(CommentStrategy.READ)
                 .build(file);
 
             try (csv) {
-                assertThat(csv.readRow(0))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(0))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
-                assertThat(csv.readRow(1))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(1))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(2)
                     .isComment()
                     .fields().containsExactly("a,b,c");
 
-                assertThat(csv.readRow(2))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(2))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -249,25 +252,28 @@ class IndexedCsvReaderTest {
         void noneComment() throws IOException {
             final Path file = prepareTestFile("foo\n#a,b,c\nbaz");
 
-            final IndexedCsvReader csv = builder()
+            final IndexedCsvReader csv = singlePageBuilder()
                 .commentStrategy(CommentStrategy.NONE)
                 .build(file);
 
             try (csv) {
-                assertThat(csv.readRow(0))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(0))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
-                assertThat(csv.readRow(1))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(1))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("#a", "b", "c");
 
-                assertThat(csv.readRow(2))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(2))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -276,7 +282,7 @@ class IndexedCsvReaderTest {
 
         @Test
         void skipComment() {
-            assertThatThrownBy(() -> builder().commentStrategy(CommentStrategy.SKIP))
+            assertThatThrownBy(() -> singlePageBuilder().commentStrategy(CommentStrategy.SKIP))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("CommentStrategy SKIP is not supported in IndexedCsvReader");
         }
@@ -288,7 +294,7 @@ class IndexedCsvReaderTest {
 
         @Test
         void await() {
-            assertThatCode(() -> build(TEST_STRING).completableFuture().get())
+            assertThatCode(() -> buildSinglePage(TEST_STRING).completableFuture().get())
                 .doesNotThrowAnyException();
         }
 
@@ -296,12 +302,12 @@ class IndexedCsvReaderTest {
         void finalStatus() throws IOException {
             final var statusListener = new CollectingStatusListener();
 
-            final IndexedCsvReader reader = builder()
+            final IndexedCsvReader csv = singlePageBuilder()
                 .statusListener(statusListener)
                 .build(prepareTestFile("foo\nbar"));
 
-            try (reader) {
-                assertThat(reader.completableFuture())
+            try (csv) {
+                assertThat(csv.completableFuture())
                     .succeedsWithin(TIMEOUT);
 
                 assertThat(statusListener.getTotalSize()).isEqualTo(7L);
@@ -322,13 +328,14 @@ class IndexedCsvReaderTest {
         // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void oneLine() throws IOException {
-            try (IndexedCsvReader reader = build("012")) {
-                assertThat(reader.size())
+            try (var csv = buildSinglePage("012")) {
+                assertThat(csv.size())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(1);
 
-                assertThat(reader.readRow(0))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(0))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012");
@@ -338,20 +345,21 @@ class IndexedCsvReaderTest {
         // Softly does not work (IllegalAccessException: module org.assertj.core does not read module common)
         @Test
         void twoLines() throws IOException {
-            try (IndexedCsvReader reader = build("012,foo\n345,bar")) {
-
-                assertThat(reader.size())
+            try (var csv = buildSinglePage("012,foo\n345,bar")) {
+                assertThat(csv.size())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(2);
 
-                assertThat(reader.readRow(0))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(0))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012", TEST_STRING);
 
-                assertThat(reader.readRow(1))
-                    .succeedsWithin(TIMEOUT, CSV_ROW)
+                assertThat(csv.readPage(1))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .singleElement(CSV_ROW)
                     .isOriginalLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("345", "bar");
@@ -361,29 +369,55 @@ class IndexedCsvReaderTest {
     }
 
     @Nested
-    class Multilines {
+    class MultipleRowsPerPage {
 
         @Test
         void start0EndInfinite() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-            assertThat(readRows(0, Integer.MAX_VALUE))
+            assertThat(readRows(0, 100))
                 .flatMap(CsvRow::getFields)
                 .containsExactly("1", "2", "3", "4", "5");
         }
 
         @Test
-        void start1End2() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-            assertThat(readRows(1, 2))
-                .flatMap(CsvRow::getFields)
-                .containsExactly("2", "3");
+        void start1End2() throws IOException {
+            final IndexedCsvReader csv = IndexedCsvReader.builder()
+                .pageSize(2)
+                .build(prepareTestFile("1\n2\n3\n4\n5"));
+
+            try (csv) {
+                assertThat(csv.size())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(3);
+
+                assertThat(csv.readPage(0))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .satisfiesExactly(
+                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("1"),
+                        item2 -> CsvRowAssert.assertThat(item2).fields().containsExactly("2")
+                    );
+
+                assertThat(csv.readPage(1))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .satisfiesExactly(
+                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("3"),
+                        item2 -> CsvRowAssert.assertThat(item2).fields().containsExactly("4")
+                    );
+
+                assertThat(csv.readPage(2))
+                    .succeedsWithin(TIMEOUT, CSV_PAGE)
+                    .satisfiesExactly(
+                        item1 -> CsvRowAssert.assertThat(item1).fields().containsExactly("5")
+                    );
+            }
         }
 
-        private List<CsvRow> readRows(final int firstRecord, final int maxRecords)
+        private List<CsvRow> readRows(final int page, final int pageSize)
             throws InterruptedException, ExecutionException, TimeoutException, IOException {
 
-            return build("1\n2\n3\n4\n5")
-                .readRows(firstRecord, maxRecords)
-                .get(1, TimeUnit.SECONDS)
-                .collect(Collectors.toList());
+            return IndexedCsvReader.builder().pageSize(pageSize)
+                .build(prepareTestFile("1\n2\n3\n4\n5"))
+                .readPage(page)
+                .get(1, TimeUnit.SECONDS);
         }
 
     }

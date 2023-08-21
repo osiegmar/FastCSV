@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * CSV reader implementation for indexed based access.
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * Example use:
  * <pre>{@code
  * try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
- *     CsvRow row = csvReader.readRow(3000).get();
+ *     List<CsvRow> rows = csvReader.readPage(10).get();
  * }
  * }</pre>
  */
@@ -41,20 +41,24 @@ import java.util.stream.Stream;
 public final class IndexedCsvReader implements Closeable {
 
     private final List<Long> positions = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicInteger itemsOnCurrentPage = new AtomicInteger();
+
     private final Path file;
     private final Charset charset;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
+    private final int pageSize;
     private final RandomAccessFile raf;
     private final RowReader rowReader;
     private final CompletableFuture<Void> scanner;
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     IndexedCsvReader(final Path file, final Charset charset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final StatusListener statusListener) throws IOException {
+                     final int pageSize, final StatusListener statusListener) throws IOException {
 
         if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
             || quoteCharacter == commentCharacter) {
@@ -69,6 +73,7 @@ public final class IndexedCsvReader implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
+        this.pageSize = pageSize;
 
         raf = new RandomAccessFile(file.toFile(), "r");
         rowReader = new RowReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
@@ -90,9 +95,16 @@ public final class IndexedCsvReader implements Closeable {
             statusListener.onInit(channel.size());
 
             new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
-                commentStrategy, (byte) commentCharacter, positions::add, statusListener).scan();
+                commentStrategy, (byte) commentCharacter, this::addPosition, statusListener).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    @SuppressWarnings("checkstyle:ParameterAssignment")
+    private void addPosition(final long position) {
+        if (itemsOnCurrentPage.getAndUpdate(prev -> ++prev >= pageSize ? 0 : prev) == 0) {
+            positions.add(position);
         }
     }
 
@@ -125,67 +137,35 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     /**
-     * Reads a single CSV row by the given row number, returning a {@link CompletableFuture} to
-     * allow non-blocking read.
+     * Reads a page of rows, returning a {@link CompletableFuture} to allow non-blocking read.
      *
-     * @param rowNum the row number (0-based) to read
-     * @return a Java Future of {@link CsvRow} that when completed contains the requested row, never {@code null}.
-     *     The CompletableFuture returned by this method can be completed exceptionally with an
-     *     {@link ArrayIndexOutOfBoundsException} if the file does not contain the specified row.
-     * @throws IllegalArgumentException if specified {@code rowNum} is lower than 0
-     */
-    public CompletableFuture<CsvRow> readRow(final int rowNum) {
-        if (rowNum < 0) {
-            throw new IllegalArgumentException("Row# must be >= 0");
-        }
-
-        return findOffset(rowNum).thenApply(offset -> {
-            synchronized (rowReader) {
-                try {
-                    seek(rowNum, offset);
-                    return rowReader.fetchAndRead();
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-        });
-    }
-
-    /**
-     * Reads a sequence of rows, returning a {@link CompletableFuture} to
-     * allow non-blocking read.
-     *
-     * @param firstRow the first row to read (0-based).
-     * @param maxRows  the maximum number of rows to read.
-     * @return a Java Future of Stream of {@link CsvRow} that when completed contains the requested rows,
+     * @param page the page to read (0-based).
+     * @return a Java Future of Stream of {@link List} that when completed contains the requested rows,
      *     never {@code null}.
      *     The CompletableFuture returned by this method can be completed exceptionally with an
-     *     {@link ArrayIndexOutOfBoundsException} if the file does not contain the specified first row.
-     * @throws IllegalArgumentException if {@code firstRow} is &lt; 0 or {@code maxRows} &le; 0
+     *     {@link IndexOutOfBoundsException} if the file does not contain the specified page.
+     * @throws IllegalArgumentException if {@code page} is &lt; 0
      */
     @SuppressWarnings("PMD.AssignmentInOperand")
-    public CompletableFuture<Stream<CsvRow>> readRows(final int firstRow, final int maxRows) {
-        if (firstRow < 0) {
-            throw new IllegalArgumentException("firstRow must be >= 0");
+    public CompletableFuture<List<CsvRow>> readPage(final int page) {
+        if (page < 0) {
+            throw new IllegalArgumentException("page must be >= 0");
         }
 
-        if (maxRows <= 0) {
-            throw new IllegalArgumentException("maxRows must be > 0");
-        }
-
-        return findOffset(firstRow)
+        return findFirstRowOffsetOfPage(page)
             .thenApply(offset -> {
-                final Stream.Builder<CsvRow> ret = Stream.builder();
+                final List<CsvRow> ret = new ArrayList<>(pageSize);
                 synchronized (rowReader) {
                     try {
-                        seek(firstRow, offset);
+                        raf.seek(offset);
+                        rowReader.resetBuffer((pageSize * page) + 1);
 
                         CsvRow csvRow;
-                        for (int i = 0; i < maxRows && (csvRow = rowReader.fetchAndRead()) != null; i++) {
-                            ret.accept(csvRow);
+                        for (int i = 0; i < pageSize && (csvRow = rowReader.fetchAndRead()) != null; i++) {
+                            ret.add(csvRow);
                         }
 
-                        return ret.build();
+                        return ret;
                     } catch (final IOException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -193,19 +173,14 @@ public final class IndexedCsvReader implements Closeable {
             });
     }
 
-    private void seek(final int row, final long offset) throws IOException {
-        rowReader.resetBuffer(row + 1);
-        raf.seek(offset);
+    private CompletableFuture<Long> findFirstRowOffsetOfPage(final int page) {
+        return waitForPage(page)
+            .thenApply(unused -> positions.get(page));
     }
 
-    private CompletableFuture<Long> findOffset(final int row) {
-        return waitForRow(row)
-            .thenApply(unused -> positions.get(row));
-    }
-
-    private CompletableFuture<Void> waitForRow(final int row) {
+    private CompletableFuture<Void> waitForPage(final int page) {
         return CompletableFuture.runAsync(() -> {
-            while (row >= positions.size() && !scanner.isDone()) {
+            while (page >= positions.size() && !scanner.isDone()) {
                 Thread.onSpinWait();
             }
         });
@@ -231,6 +206,7 @@ public final class IndexedCsvReader implements Closeable {
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
+            .add("pageSize=" + pageSize)
             .toString();
     }
 
@@ -245,12 +221,15 @@ public final class IndexedCsvReader implements Closeable {
     public static final class IndexedCsvReaderBuilder {
 
         private static final int MAX_BASE_ASCII = 127;
+        private static final int DEFAULT_PAGE_SIZE = 100;
+        private static final int MIN_PAGE_SIZE = 1;
 
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private StatusListener statusListener;
+        private int pageSize = DEFAULT_PAGE_SIZE;
 
         private IndexedCsvReaderBuilder() {
         }
@@ -321,6 +300,20 @@ public final class IndexedCsvReader implements Closeable {
             return this;
         }
 
+        /**
+         * Sets the {@code pageSize} for pages returned by {@link IndexedCsvReader#readPage(int)}.
+         *
+         * @param pageSize the maximum size of pages.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public IndexedCsvReaderBuilder pageSize(final int pageSize) {
+            if (pageSize < MIN_PAGE_SIZE) {
+                throw new IllegalArgumentException("pageSize must be > 0");
+            }
+            this.pageSize = pageSize;
+            return this;
+        }
+
         /*
          * Characters from 0 to 127 are base ASCII and collision-free with UTF-8.
          * Characters from 128 to 255 needs to be represented as a multibyte string in UTF-8.
@@ -367,7 +360,7 @@ public final class IndexedCsvReader implements Closeable {
                 });
 
             return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, sl);
+                commentCharacter, pageSize, sl);
         }
 
     }

@@ -3,12 +3,12 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
@@ -24,7 +24,6 @@ public class IndexedCsvReaderExample {
         final Path tmpFile = prepareTestFile(secondsToWrite);
 
         simple(tmpFile);
-        multiple(tmpFile);
         statusMonitor(tmpFile);
         advancedConfiguration(tmpFile);
     }
@@ -62,53 +61,38 @@ public class IndexedCsvReaderExample {
         return tmpFile;
     }
 
-    private static void simple(final Path file) throws IOException, ExecutionException, InterruptedException {
-        System.out.println("# Simple read");
-
-        try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
-            final CompletableFuture<Integer> futureSize = csv.size();
-
-            // 1) As soon as the file has been indexed, the size is available
-            futureSize
-                .thenCompose(size -> {
-                    System.out.format("Indexed %,d rows%n", size);
-                    return csv.readRow(size - 1);
-                })
-                .thenAccept(lastRow -> {
-                    System.out.println("Last row: " + lastRow);
-                });
-
-            // 2) First row(s) are available right away
-            System.out.println("First row: " + csv.readRow(0).get());
-
-            // Wait for 1) to complete
-            futureSize.join();
-        }
-
-        System.out.println();
-    }
-
-    @SuppressWarnings("checkstyle:MagicNumber")
-    private static void multiple(final Path file)
+    private static void simple(final Path file)
         throws IOException, ExecutionException, InterruptedException, TimeoutException {
 
-        System.out.println("# Multiple read");
+        System.out.println("# Simple read");
 
-        final int firstRow = 5_000;
-        final int noOfRows = 10;
+        final IndexedCsvReader csv = IndexedCsvReader.builder()
+            .pageSize(5)
+            .build(file);
 
-        try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
-            final CompletableFuture<Stream<CsvRow>> rows =
-                csv.readRows(firstRow, noOfRows);
+        try (csv) {
+            // 1) As soon as the file has been indexed, the last page can be retrieved
+            final CompletableFuture<List<CsvRow>> lastPage = csv.size()
+                .thenCompose(pages -> {
+                    System.out.format("Indexed %,d pages%n%n", pages);
+                    return csv.readPage(pages - 1);
+                });
 
-            rows.get(3, TimeUnit.SECONDS)
-                .forEach(System.out::println);
+            // 2) First rows are available right away
+            System.out.println("Items of first page:");
+            final List<CsvRow> firstPage = csv.readPage(0).get();
+            firstPage.forEach(System.out::println);
+            System.out.println();
+
+            // Wait for 1) to complete
+            final List<CsvRow> lastPageRows = lastPage.get(10, TimeUnit.SECONDS);
+            System.out.println("Items of last page:");
+            lastPageRows.forEach(System.out::println);
         }
 
         System.out.println();
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     private static void statusMonitor(final Path file) throws IOException {
         System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
 
@@ -142,16 +126,22 @@ public class IndexedCsvReaderExample {
     private static void advancedConfiguration(final Path file)
         throws IOException, ExecutionException, InterruptedException {
 
-        final CsvRow csvRow = IndexedCsvReader.builder()
+        final IndexedCsvReader csv = IndexedCsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
-            .build(file)
-            .readRow(2)
-            .get();
+            .pageSize(5)
+            .build(file);
 
-        System.out.println("Parsed via advanced config: " + csvRow);
+        try (csv) {
+            final List<CsvRow> rows = csv
+                .readPage(2)
+                .get();
+
+            System.out.println("Parsed via advanced config:");
+            rows.forEach(System.out::println);
+        }
     }
 
 }
