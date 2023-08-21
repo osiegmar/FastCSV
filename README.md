@@ -114,20 +114,13 @@ For more examples see [NamedCsvReaderExample.java](src/example/java/example/Name
 Indexed reading of a CSV file
 
 ```java
-IndexedCsvReader csv = IndexedCsvReader.builder()
-    .pageSize(5)
-    .build(file);
+try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
+    CsvIndex index = csv.index();
 
-try (csv) {
-    CompletableFuture<List<CsvRow>> lastPage = csv.pageCount()
-        .thenCompose(pageCount -> {
-            System.out.format("Indexed %,d pages%n%n", pageCount);
-            return csv.readPage(pageCount - 1);
-        });
-
-    List<CsvRow> lastPageRows = lastPage.get(10, TimeUnit.SECONDS);
     System.out.println("Items of last page:");
-    lastPageRows.forEach(System.out::println);
+    int lastPage = index.pageCount() - 1;
+    List<CsvRow> rows = csv.readPage(lastPage);
+    rows.forEach(System.out::println);
 }
 ```
 

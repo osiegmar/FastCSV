@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvIndex;
 import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -24,6 +22,7 @@ public class IndexedCsvReaderExample {
         final Path tmpFile = prepareTestFile(secondsToWrite);
 
         simple(tmpFile);
+        reuseIndex(tmpFile);
         statusMonitor(tmpFile);
         advancedConfiguration(tmpFile);
     }
@@ -61,9 +60,7 @@ public class IndexedCsvReaderExample {
         return tmpFile;
     }
 
-    private static void simple(final Path file)
-        throws IOException, ExecutionException, InterruptedException, TimeoutException {
-
+    private static void simple(final Path file) throws IOException {
         System.out.println("# Simple read");
 
         final IndexedCsvReader csv = IndexedCsvReader.builder()
@@ -71,22 +68,39 @@ public class IndexedCsvReaderExample {
             .build(file);
 
         try (csv) {
-            // 1) As soon as the file has been indexed, the last page can be retrieved
-            final CompletableFuture<List<CsvRow>> lastPage = csv.pageCount()
-                .thenCompose(pageCount -> {
-                    System.out.format("Indexed %,d pages%n%n", pageCount);
-                    return csv.readPage(pageCount - 1);
-                });
+            final CsvIndex index = csv.index();
+            System.out.printf("Indexed %,d rows%n", index.rowCount());
 
-            // 2) First rows are available right away
-            System.out.println("Items of first page:");
-            final List<CsvRow> firstPage = csv.readPage(0).get();
-            firstPage.forEach(System.out::println);
-            System.out.println();
+            System.out.println("Show records of last page");
+            final int lastPage = index.pageCount() - 1;
+            final List<CsvRow> lastPageRows = csv.readPage(lastPage);
+            lastPageRows.forEach(System.out::println);
+        }
 
-            // Wait for 1) to complete
-            final List<CsvRow> lastPageRows = lastPage.get(10, TimeUnit.SECONDS);
-            System.out.println("Items of last page:");
+        System.out.println();
+    }
+
+    private static void reuseIndex(final Path file) throws IOException {
+        System.out.println("# Reuse Index");
+
+        final CsvIndex csvIndex = IndexedCsvReader.builder()
+            .pageSize(5)
+            .build(file)
+            .index();
+
+        System.out.printf("Indexed %,d rows%n", csvIndex.rowCount());
+
+        // Store index for the given file somewhere, and use it later ...
+
+        final IndexedCsvReader csv = IndexedCsvReader.builder()
+            .pageSize(5)
+            .index(csvIndex)
+            .build(file);
+
+        try (csv) {
+            System.out.println("Show records of last page");
+            final int lastPage = csvIndex.pageCount() - 1;
+            final List<CsvRow> lastPageRows = csv.readPage(lastPage);
             lastPageRows.forEach(System.out::println);
         }
 
@@ -98,34 +112,30 @@ public class IndexedCsvReaderExample {
 
         final var statusListener = new CollectingStatusListener();
 
+        // Indexing takes place in background – we can easily monitor the current status without blocking
+        final var executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(
+            () -> {
+                if (statusListener.isCompleted()) {
+                    executor.shutdown();
+                } else {
+                    System.out.println(statusListener);
+                }
+            },
+            0, 250, TimeUnit.MILLISECONDS);
+
         final IndexedCsvReader csv = IndexedCsvReader.builder()
             .statusListener(statusListener)
             .build(file);
 
         try (csv) {
-            // Indexing takes place in background – we can easily monitor the current status without blocking
-            final var executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(() -> System.out.println(statusListener),
-                0, 250, TimeUnit.MILLISECONDS);
-
-            final CompletableFuture<Integer> pageCountFuture = csv.pageCount()
-                .whenComplete((pageCount, err) -> {
-                    executor.shutdown();
-                    if (err != null) {
-                        err.printStackTrace(System.err);
-                    } else {
-                        System.out.printf("Finished reading file with a total of %,d pages%n%n", pageCount);
-                    }
-                });
-
-            // Wait for the completion of the future
-            pageCountFuture.join();
+            System.out.printf("Indexed %,d rows%n", csv.index().rowCount());
         }
+
+        System.out.println();
     }
 
-    private static void advancedConfiguration(final Path file)
-        throws IOException, ExecutionException, InterruptedException {
-
+    private static void advancedConfiguration(final Path file) throws IOException {
         final IndexedCsvReader csv = IndexedCsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
@@ -135,9 +145,7 @@ public class IndexedCsvReaderExample {
             .build(file);
 
         try (csv) {
-            final List<CsvRow> rows = csv
-                .readPage(2)
-                .get();
+            final List<CsvRow> rows = csv.readPage(2);
 
             System.out.println("Parsed via advanced config:");
             rows.forEach(System.out::println);
