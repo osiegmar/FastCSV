@@ -247,7 +247,7 @@ final class RowReader {
         return shift;
     }
 
-    public void resetBuffer(final int originalLineNumber) {
+    void resetBuffer(final int originalLineNumber) {
         rowHandler.setOriginalLineNumber(originalLineNumber);
         buffer.reset();
     }
@@ -331,7 +331,7 @@ final class RowReader {
             return newBuf;
         }
 
-        public void reset() {
+        private void reset() {
             len = 0;
             begin = 0;
             pos = 0;

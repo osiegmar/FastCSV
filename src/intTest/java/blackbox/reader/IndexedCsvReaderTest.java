@@ -215,6 +215,13 @@ class IndexedCsvReaderTest {
                 .hasMessage("charset must not be null");
         }
 
+        @Test
+        void zeroPageSize() {
+            assertThatThrownBy(() -> singlePageBuilder().pageSize(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("pageSize must be > 0");
+        }
+
     }
 
     @Nested
