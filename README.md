@@ -119,10 +119,10 @@ IndexedCsvReader csv = IndexedCsvReader.builder()
     .build(file);
 
 try (csv) {
-    CompletableFuture<List<CsvRow>> lastPage = csv.size()
-        .thenCompose(pages -> {
-            System.out.format("Indexed %,d pages%n%n", pages);
-            return csv.readPage(pages - 1);
+    CompletableFuture<List<CsvRow>> lastPage = csv.pageCount()
+        .thenCompose(pageCount -> {
+            System.out.format("Indexed %,d pages%n%n", pageCount);
+            return csv.readPage(pageCount - 1);
         });
 
     List<CsvRow> lastPageRows = lastPage.get(10, TimeUnit.SECONDS);

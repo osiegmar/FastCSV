@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * CSV reader implementation for indexed based access.
@@ -40,8 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader implements Closeable {
 
-    private final List<Long> positions = Collections.synchronizedList(new ArrayList<>());
-    private final AtomicInteger itemsOnCurrentPage = new AtomicInteger();
+    private final List<Long> pageOffsets = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicLong rowCounter = new AtomicLong();
 
     private final Path file;
     private final Charset charset;
@@ -95,16 +95,16 @@ public final class IndexedCsvReader implements Closeable {
             statusListener.onInit(channel.size());
 
             new CsvScanner(channel, (byte) fieldSeparator, (byte) quoteCharacter,
-                commentStrategy, (byte) commentCharacter, this::addPosition, statusListener).scan();
+                commentStrategy, (byte) commentCharacter, this::collectOffset, statusListener).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     @SuppressWarnings("checkstyle:ParameterAssignment")
-    private void addPosition(final long position) {
-        if (itemsOnCurrentPage.getAndUpdate(prev -> ++prev >= pageSize ? 0 : prev) == 0) {
-            positions.add(position);
+    private void collectOffset(final long offset) {
+        if (rowCounter.getAndIncrement() % pageSize == 0) {
+            pageOffsets.add(offset);
         }
     }
 
@@ -128,12 +128,21 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     /**
+     * Gets the number of pages the file contents is partitioned to.
+     *
+     * @return the number of pages the file contents is partitioned to
+     */
+    public CompletableFuture<Integer> pageCount() {
+        return scanner.thenApply(unused -> pageOffsets.size());
+    }
+
+    /**
      * Gets the number of rows the file contains.
      *
      * @return the number of rows the file contains
      */
-    public CompletableFuture<Integer> size() {
-        return scanner.thenApply(unused -> positions.size());
+    public CompletableFuture<Long> rowCount() {
+        return scanner.thenApply(unused -> rowCounter.get());
     }
 
     /**
@@ -175,12 +184,12 @@ public final class IndexedCsvReader implements Closeable {
 
     private CompletableFuture<Long> findFirstRowOffsetOfPage(final int page) {
         return waitForPage(page)
-            .thenApply(unused -> positions.get(page));
+            .thenApply(unused -> pageOffsets.get(page));
     }
 
     private CompletableFuture<Void> waitForPage(final int page) {
         return CompletableFuture.runAsync(() -> {
-            while (page >= positions.size() && !scanner.isDone()) {
+            while (page >= pageOffsets.size() && !scanner.isDone()) {
                 Thread.onSpinWait();
             }
         });

@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class CollectingStatusListener implements StatusListener {
 
-    private volatile long totalSize;
+    private volatile long fileSize;
     private final AtomicLong rowCount = new AtomicLong();
     private final AtomicLong byteCount = new AtomicLong();
     private volatile boolean completionStatus;
@@ -15,8 +15,8 @@ public class CollectingStatusListener implements StatusListener {
 
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
-    public void onInit(final long totalSize) {
-        this.totalSize = totalSize;
+    public void onInit(final long fileSize) {
+        this.fileSize = fileSize;
     }
 
     /**
@@ -24,8 +24,8 @@ public class CollectingStatusListener implements StatusListener {
      *
      * @return the total size in bytes
      */
-    public long getTotalSize() {
-        return totalSize;
+    public long getFileSize() {
+        return fileSize;
     }
 
     @Override
@@ -87,9 +87,9 @@ public class CollectingStatusListener implements StatusListener {
     @Override
     public String toString() {
         final long byteCntVal = this.byteCount.longValue();
-        final double percentage = byteCntVal * 100.0 / totalSize;
+        final double percentage = byteCntVal * 100.0 / fileSize;
         return String.format("Read %,d rows and %,d of %,d bytes (%.2f %%)",
-            rowCount.longValue(), byteCntVal, totalSize, percentage);
+            rowCount.longValue(), byteCntVal, fileSize, percentage);
     }
 
 }

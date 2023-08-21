@@ -51,7 +51,7 @@ final class ByteChannelStream {
         return nextByte != -1;
     }
 
-    long getTotalPosition() {
+    long getTotalOffset() {
         return totalPosition;
     }
 

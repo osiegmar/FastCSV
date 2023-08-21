@@ -72,10 +72,10 @@ public class IndexedCsvReaderExample {
 
         try (csv) {
             // 1) As soon as the file has been indexed, the last page can be retrieved
-            final CompletableFuture<List<CsvRow>> lastPage = csv.size()
-                .thenCompose(pages -> {
-                    System.out.format("Indexed %,d pages%n%n", pages);
-                    return csv.readPage(pages - 1);
+            final CompletableFuture<List<CsvRow>> lastPage = csv.pageCount()
+                .thenCompose(pageCount -> {
+                    System.out.format("Indexed %,d pages%n%n", pageCount);
+                    return csv.readPage(pageCount - 1);
                 });
 
             // 2) First rows are available right away
@@ -108,18 +108,18 @@ public class IndexedCsvReaderExample {
             executor.scheduleAtFixedRate(() -> System.out.println(statusListener),
                 0, 250, TimeUnit.MILLISECONDS);
 
-            final CompletableFuture<Integer> future = csv.size()
-                .whenComplete((size, err) -> {
+            final CompletableFuture<Integer> pageCountFuture = csv.pageCount()
+                .whenComplete((pageCount, err) -> {
                     executor.shutdown();
                     if (err != null) {
                         err.printStackTrace(System.err);
                     } else {
-                        System.out.printf("Finished reading file with a total of %,d rows%n%n", size);
+                        System.out.printf("Finished reading file with a total of %,d pages%n%n", pageCount);
                     }
                 });
 
             // Wait for the completion of the future
-            future.join();
+            pageCountFuture.join();
         }
     }
 

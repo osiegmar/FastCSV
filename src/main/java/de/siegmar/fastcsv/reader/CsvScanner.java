@@ -5,26 +5,26 @@ import static de.siegmar.fastcsv.util.Util.LF;
 
 import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
-import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 final class CsvScanner {
 
     private final byte fieldSeparator;
     private final byte quoteCharacter;
     private final byte commentCharacter;
-    private final Consumer<Long> positionConsumer;
+    private final LongConsumer offsetConsumer;
     private final StatusListener statusListener;
     private final ByteChannelStream stream;
     private final boolean ignoreComments;
 
     CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
                final CommentStrategy commentStrategy, final byte commentCharacter,
-               final Consumer<Long> positionConsumer, final StatusListener statusListener) throws IOException {
+               final LongConsumer offsetConsumer, final StatusListener statusListener) throws IOException {
 
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
-        this.positionConsumer = positionConsumer;
+        this.offsetConsumer = offsetConsumer;
         this.statusListener = statusListener;
 
         ignoreComments = commentStrategy == CommentStrategy.NONE;
@@ -37,7 +37,7 @@ final class CsvScanner {
     void scan() throws IOException {
         int d;
         while ((d = stream.get()) != -1) {
-            positionConsumer.accept(stream.getTotalPosition());
+            offsetConsumer.accept(stream.getTotalOffset());
 
             // parse a row
             if (d != commentCharacter || ignoreComments) {

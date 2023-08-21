@@ -13,9 +13,9 @@ public interface StatusListener {
     /**
      * Called on initialization.
      *
-     * @param totalSize the total file size.
+     * @param fileSize the total file size.
      */
-    default void onInit(long totalSize) {
+    default void onInit(long fileSize) {
     }
 
     /**

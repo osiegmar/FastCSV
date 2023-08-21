@@ -52,9 +52,13 @@ class IndexedCsvReaderTest {
     @Test
     void outOfBounds() throws IOException {
         try (var csv = buildSinglePage("")) {
-            softly.assertThat(csv.size())
+            softly.assertThat(csv.pageCount())
                 .succeedsWithin(TIMEOUT)
                 .isEqualTo(0);
+
+            softly.assertThat(csv.rowCount())
+                .succeedsWithin(TIMEOUT)
+                .isEqualTo(0L);
 
             softly.assertThat(csv.readPage(0))
                 .failsWithin(TIMEOUT)
@@ -310,7 +314,7 @@ class IndexedCsvReaderTest {
                 assertThat(csv.completableFuture())
                     .succeedsWithin(TIMEOUT);
 
-                assertThat(statusListener.getTotalSize()).isEqualTo(7L);
+                assertThat(statusListener.getFileSize()).isEqualTo(7L);
                 assertThat(statusListener.getRowCount()).isEqualTo(2L);
                 assertThat(statusListener.getByteCount()).isEqualTo(7L);
                 assertThat(statusListener.isCompleted()).isTrue();
@@ -329,9 +333,13 @@ class IndexedCsvReaderTest {
         @Test
         void oneLine() throws IOException {
             try (var csv = buildSinglePage("012")) {
-                assertThat(csv.size())
+                assertThat(csv.pageCount())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(1);
+
+                assertThat(csv.rowCount())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(1L);
 
                 assertThat(csv.readPage(0))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)
@@ -346,9 +354,13 @@ class IndexedCsvReaderTest {
         @Test
         void twoLines() throws IOException {
             try (var csv = buildSinglePage("012,foo\n345,bar")) {
-                assertThat(csv.size())
+                assertThat(csv.pageCount())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(2);
+
+                assertThat(csv.rowCount())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)
@@ -385,9 +397,13 @@ class IndexedCsvReaderTest {
                 .build(prepareTestFile("1\n2\n3\n4\n5"));
 
             try (csv) {
-                assertThat(csv.size())
+                assertThat(csv.pageCount())
                     .succeedsWithin(TIMEOUT)
                     .isEqualTo(3);
+
+                assertThat(csv.rowCount())
+                    .succeedsWithin(TIMEOUT)
+                    .isEqualTo(5L);
 
                 assertThat(csv.readPage(0))
                     .succeedsWithin(TIMEOUT, CSV_PAGE)

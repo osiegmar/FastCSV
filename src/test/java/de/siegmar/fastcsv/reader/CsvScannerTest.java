@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -142,7 +142,7 @@ class CsvScannerTest {
         final var fieldSeparator = (byte) ',';
         final var quoteCharacter = (byte) '"';
         final var commentCharacter = (byte) '#';
-        final Consumer<Long> positionCollector = p -> positions.add(p.intValue());
+        final LongConsumer positionCollector = p -> positions.add(Long.valueOf(p).intValue());
         final var statusListener = new StatusListener() {
         };
 
