@@ -433,7 +433,7 @@ class IndexedCsvReaderTest {
         @Test
         void start0EndInfinite() throws IOException, ExecutionException, InterruptedException, TimeoutException {
             assertThat(readRecords(0, 100))
-                .flatMap(CsvRecord::getFields)
+                .flatMap(CsvRecord::fields)
                 .containsExactly("1", "2", "3", "4", "5");
         }
 
@@ -502,7 +502,7 @@ class IndexedCsvReaderTest {
 
                 assertThat(expectedCsv.readPage(0))
                     .singleElement()
-                    .extracting(e -> e.getField(0))
+                    .extracting(e -> e.field(0))
                     .isEqualTo(TEST_STRING);
 
                 expectedIndex = expectedCsv.index();
@@ -521,7 +521,7 @@ class IndexedCsvReaderTest {
 
                 assertThat(actualCsv.readPage(0))
                     .singleElement()
-                    .extracting(e -> e.getField(0))
+                    .extracting(e -> e.field(0))
                     .isEqualTo(TEST_STRING);
             }
         }

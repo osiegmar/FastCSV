@@ -98,11 +98,11 @@ public final class IndexedCsvReader implements Closeable {
             .add("commentCharacter=" + commentCharacter)
             .toString();
         final var actualSignature = new StringJoiner(", ")
-            .add("fileSize=" + csvIndex.getFileSize())
-            .add("fieldSeparator=" + csvIndex.getFieldSeparator())
-            .add("quoteCharacter=" + csvIndex.getQuoteCharacter())
-            .add("commentStrategy=" + csvIndex.getCommentStrategy())
-            .add("commentCharacter=" + csvIndex.getCommentCharacter())
+            .add("fileSize=" + csvIndex.fileSize())
+            .add("fieldSeparator=" + csvIndex.fieldSeparator())
+            .add("quoteCharacter=" + csvIndex.quoteCharacter())
+            .add("commentStrategy=" + csvIndex.commentStrategy())
+            .add("commentCharacter=" + csvIndex.commentCharacter())
             .toString();
 
         Preconditions.checkArgument(expectedSignature.equals(actualSignature),

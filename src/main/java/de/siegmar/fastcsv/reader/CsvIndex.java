@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 /**
  * Index built by {@link IndexedCsvReader} to access large CSV data files.
  */
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class CsvIndex implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -59,23 +60,23 @@ public final class CsvIndex implements Serializable {
         this.pages = Objects.requireNonNull(pages);
     }
 
-    long getFileSize() {
+    long fileSize() {
         return fileSize;
     }
 
-    byte getFieldSeparator() {
+    byte fieldSeparator() {
         return fieldSeparator;
     }
 
-    byte getQuoteCharacter() {
+    byte quoteCharacter() {
         return quoteCharacter;
     }
 
-    CommentStrategy getCommentStrategy() {
+    CommentStrategy commentStrategy() {
         return commentStrategy;
     }
 
-    byte getCommentCharacter() {
+    byte commentCharacter() {
         return commentCharacter;
     }
 

@@ -21,9 +21,9 @@ public class CsvRecordAssert extends AbstractAssert<CsvRecordAssert, CsvRecord> 
 
     public CsvRecordAssert isOriginalLineNumber(final long originalLineNumber) {
         isNotNull();
-        if (actual.getOriginalLineNumber() != originalLineNumber) {
+        if (actual.originalLineNumber() != originalLineNumber) {
             failWithMessage("Expected original line number to be <%d> but was <%d>",
-                originalLineNumber, actual.getOriginalLineNumber());
+                originalLineNumber, actual.originalLineNumber());
         }
 
         return this;
@@ -31,9 +31,9 @@ public class CsvRecordAssert extends AbstractAssert<CsvRecordAssert, CsvRecord> 
 
     public CsvRecordAssert isComment(final boolean comment) {
         isNotNull();
-        if (actual.isComment() != comment) {
+        if (actual.comment() != comment) {
             failWithMessage("Expected comment to be <%b> but was <%b>",
-                comment, actual.isComment());
+                comment, actual.comment());
         }
 
         return this;
@@ -49,7 +49,7 @@ public class CsvRecordAssert extends AbstractAssert<CsvRecordAssert, CsvRecord> 
 
     public ListAssert<String> fields() {
         isNotNull();
-        return new ListAssert<>(actual.getFields());
+        return new ListAssert<>(actual.fields());
     }
 
 }

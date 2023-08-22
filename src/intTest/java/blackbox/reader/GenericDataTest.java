@@ -45,7 +45,7 @@ class GenericDataTest {
             .commentStrategy(commentStrategy)
             .build(data)
             .stream()
-            .map(CsvRecord::getFields)
+            .map(CsvRecord::fields)
             .collect(Collectors.toList());
     }
 

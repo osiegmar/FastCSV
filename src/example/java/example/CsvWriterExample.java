@@ -69,8 +69,8 @@ public class CsvWriterExample {
             writer.writeRecord("name", "age");
             for (final NamedCsvRecord csvRecord : reader) {
                 writer.writeRecord(
-                    csvRecord.getField("firstname") + " " + csvRecord.getField("lastname"),
-                    csvRecord.getField("age")
+                    csvRecord.field("firstname") + " " + csvRecord.field("lastname"),
+                    csvRecord.field("age")
                 );
             }
         }

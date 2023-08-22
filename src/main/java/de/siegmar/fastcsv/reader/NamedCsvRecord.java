@@ -10,18 +10,19 @@ import java.util.StringJoiner;
 /**
  * Name (header) based CSV-record.
  */
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class NamedCsvRecord {
 
     private final long originalLineNumber;
     private final Map<String, String> fieldMap;
 
     NamedCsvRecord(final Set<String> header, final CsvRecord csvRecord) {
-        this.originalLineNumber = csvRecord.getOriginalLineNumber();
+        this.originalLineNumber = csvRecord.originalLineNumber();
 
         fieldMap = new LinkedHashMap<>(header.size());
         int i = 0;
         for (final String h : header) {
-            fieldMap.put(h, csvRecord.getField(i++));
+            fieldMap.put(h, csvRecord.field(i++));
         }
     }
 
@@ -32,7 +33,7 @@ public final class NamedCsvRecord {
      *
      * @return the original line number
      */
-    public long getOriginalLineNumber() {
+    public long originalLineNumber() {
         return originalLineNumber;
     }
 
@@ -43,7 +44,7 @@ public final class NamedCsvRecord {
      * @return field value, never {@code null}
      * @throws NoSuchElementException if this record has no such field
      */
-    public String getField(final String name) {
+    public String field(final String name) {
         final String val = fieldMap.get(name);
         if (val == null) {
             throw new NoSuchElementException("No element with name '" + name + "' found. "
@@ -59,7 +60,7 @@ public final class NamedCsvRecord {
      *
      * @return an unmodifiable map of header names and field values of this record
      */
-    public Map<String, String> getFields() {
+    public Map<String, String> fields() {
         return Collections.unmodifiableMap(fieldMap);
     }
 

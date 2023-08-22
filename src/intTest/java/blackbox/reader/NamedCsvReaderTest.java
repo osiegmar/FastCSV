@@ -125,7 +125,7 @@ class NamedCsvReaderTest {
 
     @Test
     void findNonExistingFieldByName() {
-        assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
+        assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().field("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("No element with name 'bar' found. Valid names are: [foo]");
     }
