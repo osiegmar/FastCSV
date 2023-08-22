@@ -3,6 +3,7 @@ package de.siegmar.fastcsv.reader;
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -17,7 +18,7 @@ import java.io.Reader;
     "checkstyle:NestedIfDepth",
     "PMD.UnusedAssignment"
 })
-final class RecordReader {
+final class RecordReader implements Closeable {
 
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_RECORD = 16;
@@ -252,8 +253,13 @@ final class RecordReader {
         buffer.reset();
     }
 
+    @Override
+    public void close() throws IOException {
+        buffer.close();
+    }
+
     @SuppressWarnings("checkstyle:visibilitymodifier")
-    private static class Buffer {
+    private static class Buffer implements Closeable {
         private static final int READ_SIZE = 8192;
         private static final int BUFFER_SIZE = READ_SIZE;
         private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
@@ -335,6 +341,13 @@ final class RecordReader {
             len = 0;
             begin = 0;
             pos = 0;
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (reader != null) {
+                reader.close();
+            }
         }
 
     }

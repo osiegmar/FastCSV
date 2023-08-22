@@ -40,7 +40,6 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
     private final boolean errorOnDifferentFieldCount;
     private final CloseableIterator<CsvRecord> csvRecordIterator = new CsvRecordIterator();
 
-    private final Reader reader;
     private int firstLineFieldCount = -1;
 
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
@@ -52,7 +51,6 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         this.commentStrategy = commentStrategy;
         this.skipEmptyRecords = skipEmptyRecords;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
-        this.reader = reader;
 
         recordReader = new RecordReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
             commentCharacter);
@@ -68,7 +66,6 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         this.commentStrategy = commentStrategy;
         this.skipEmptyRecords = skipEmptyRecords;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
-        this.reader = null;
 
         recordReader = new RecordReader(data, fieldSeparator, quoteCharacter, commentStrategy,
             commentCharacter);
@@ -166,9 +163,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     @Override
     public void close() throws IOException {
-        if (reader != null) {
-            reader.close();
-        }
+        recordReader.close();
     }
 
     @Override
