@@ -3,7 +3,7 @@ package blackbox.reader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static testutil.CsvRowAssert.CSV_ROW;
+import static testutil.CsvRecordAssert.CSV_RECORD;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,9 +34,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvIndex;
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
-import testutil.CsvRowAssert;
+import testutil.CsvRecordAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class IndexedCsvReaderTest {
@@ -58,7 +58,7 @@ class IndexedCsvReaderTest {
             softly.assertThat(index.pageCount())
                 .isZero();
 
-            softly.assertThat(index.rowCount())
+            softly.assertThat(index.recordCount())
                 .isZero();
 
             softly.assertThatThrownBy(() -> csv.readPage(0))
@@ -75,7 +75,7 @@ class IndexedCsvReaderTest {
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
                     + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, pageSize=1, "
                     + "index=CsvIndex[fileSize=3, fieldSeparator=44, quoteCharacter=34, commentStrategy=NONE, "
-                    + "commentCharacter=35, rowCount=1, pageCount=1]]",
+                    + "commentCharacter=35, recordCount=1, pageCount=1]]",
                 file);
     }
 
@@ -88,19 +88,19 @@ class IndexedCsvReaderTest {
             softly.assertThat(index.pageCount())
                 .isEqualTo(3);
 
-            softly.assertThat(index.rowCount())
+            softly.assertThat(index.recordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
-                .singleElement(CSV_ROW)
+                .singleElement(CSV_RECORD)
                 .fields().singleElement().isEqualTo("abc");
 
             assertThat(csv.readPage(1))
-                .singleElement(CSV_ROW)
+                .singleElement(CSV_RECORD)
                 .fields().singleElement().isEqualTo("üöä");
 
             assertThat(csv.readPage(2))
-                .singleElement(CSV_ROW)
+                .singleElement(CSV_RECORD)
                 .fields().singleElement().isEqualTo("abc");
         }
     }
@@ -281,19 +281,19 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(2)
                     .isComment()
                     .fields().containsExactly("a,b,c");
 
                 assertThat(csv.readPage(2))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -310,19 +310,19 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("#a", "b", "c");
 
                 assertThat(csv.readPage(2))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -351,12 +351,12 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(statusListener.getFileSize()).isEqualTo(7L);
-                assertThat(statusListener.getRowCount()).isEqualTo(2L);
+                assertThat(statusListener.getRecordCount()).isEqualTo(2L);
                 assertThat(statusListener.getByteCount()).isEqualTo(7L);
                 assertThat(statusListener.isCompleted()).isTrue();
                 assertThat(statusListener.getThrowable()).isNull();
                 assertThat(statusListener).asString()
-                    .isEqualTo("Read %,d rows and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
+                    .isEqualTo("Read %,d records and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }
         }
 
@@ -370,7 +370,7 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(statusListener).asString()
-                    .isEqualTo("Read 0 rows and 0 of 0 bytes (NaN %)");
+                    .isEqualTo("Read 0 records and 0 of 0 bytes (NaN %)");
             }
         }
 
@@ -388,11 +388,11 @@ class IndexedCsvReaderTest {
                 assertThat(index.pageCount())
                     .isEqualTo(1);
 
-                assertThat(index.rowCount())
+                assertThat(index.recordCount())
                     .isEqualTo(1L);
 
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012");
@@ -408,17 +408,17 @@ class IndexedCsvReaderTest {
                 assertThat(index.pageCount())
                     .isEqualTo(2);
 
-                assertThat(index.rowCount())
+                assertThat(index.recordCount())
                     .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012", TEST_STRING);
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_ROW)
+                    .singleElement(CSV_RECORD)
                     .isOriginalLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("345", "bar");
@@ -428,12 +428,12 @@ class IndexedCsvReaderTest {
     }
 
     @Nested
-    class MultipleRowsPerPage {
+    class MultipleRecordsPerPage {
 
         @Test
         void start0EndInfinite() throws IOException, ExecutionException, InterruptedException, TimeoutException {
-            assertThat(readRows(0, 100))
-                .flatMap(CsvRow::getFields)
+            assertThat(readRecords(0, 100))
+                .flatMap(CsvRecord::getFields)
                 .containsExactly("1", "2", "3", "4", "5");
         }
 
@@ -449,39 +449,39 @@ class IndexedCsvReaderTest {
                 assertThat(index.pageCount())
                     .isEqualTo(3);
 
-                assertThat(index.rowCount())
+                assertThat(index.recordCount())
                     .isEqualTo(5L);
 
                 assertThat(csv.readPage(0))
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1)
+                        item1 -> CsvRecordAssert.assertThat(item1)
                             .isOriginalLineNumber(1)
                             .fields().containsExactly("1"),
-                        item2 -> CsvRowAssert.assertThat(item2)
+                        item2 -> CsvRecordAssert.assertThat(item2)
                             .isOriginalLineNumber(2)
                             .fields().containsExactly("2a", "2b")
                     );
 
                 assertThat(csv.readPage(1))
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1)
+                        item1 -> CsvRecordAssert.assertThat(item1)
                             .isOriginalLineNumber(3)
                             .fields().containsExactly("3\nfoo"),
-                        item2 -> CsvRowAssert.assertThat(item2)
+                        item2 -> CsvRecordAssert.assertThat(item2)
                             .isOriginalLineNumber(5)
                             .fields().containsExactly("4")
                     );
 
                 assertThat(csv.readPage(2))
                     .satisfiesExactly(
-                        item1 -> CsvRowAssert.assertThat(item1)
+                        item1 -> CsvRecordAssert.assertThat(item1)
                             .isOriginalLineNumber(6)
                             .fields().containsExactly("5")
                     );
             }
         }
 
-        private List<CsvRow> readRows(final int page, final int pageSize) throws IOException {
+        private List<CsvRecord> readRecords(final int page, final int pageSize) throws IOException {
             return IndexedCsvReader.builder().pageSize(pageSize)
                 .build(prepareTestFile("1\n2\n3\n4\n5"))
                 .readPage(page);

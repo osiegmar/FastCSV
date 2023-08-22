@@ -50,7 +50,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 - Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation
 - Support for (optional) header lines (get field based on column name)
-- Support for skipping empty rows
+- Support for skipping empty records
 - Support for commented lines (skipping & reading) and configurable comment character
 
 ### Writer specific
@@ -92,7 +92,7 @@ CsvReader.builder()
     .quoteCharacter('"')
     .commentStrategy(CommentStrategy.SKIP)
     .commentCharacter('#')
-    .skipEmptyRows(true)
+    .skipEmptyRecords(true)
     .errorOnDifferentFieldCount(false);
 ```
 
@@ -104,7 +104,7 @@ Iterative reading of some CSV data with a header
 
 ```java
 NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
-    .forEach(row -> row.getField("header 2"));
+    .forEach(csvRecord -> csvRecord.getField("header 2"));
 ```
 
 For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
@@ -119,8 +119,8 @@ try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
 
     System.out.println("Items of last page:");
     int lastPage = index.pageCount() - 1;
-    List<CsvRow> rows = csv.readPage(lastPage);
-    rows.forEach(System.out::println);
+    List<CsvRecord> csvRecords = csv.readPage(lastPage);
+    csvRecords.forEach(System.out::println);
 }
 ```
 
@@ -132,8 +132,8 @@ Iterative writing of some data to a writer
 
 ```java
 CsvWriter.builder().build(new PrintWriter(System.out, true))
-    .writeRow("header1", "header2")
-    .writeRow("value1", "value2");
+    .writeRecord("header1", "header2")
+    .writeRecord("value1", "value2");
 ```
 
 Iterative writing of a CSV file
@@ -141,8 +141,8 @@ Iterative writing of a CSV file
 ```java
 try (CsvWriter csv = CsvWriter.builder().build(path)) {
     csv
-        .writeRow("header1", "header2")
-        .writeRow("value1", "value2");
+        .writeRecord("header1", "header2")
+        .writeRecord("value1", "value2");
 }
 ```
 

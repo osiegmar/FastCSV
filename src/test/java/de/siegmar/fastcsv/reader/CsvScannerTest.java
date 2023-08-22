@@ -185,7 +185,7 @@ class CsvScannerTest {
         }
 
         @Override
-        public void onReadRow() {
+        public void onReadRecord() {
 
         }
 

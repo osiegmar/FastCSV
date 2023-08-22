@@ -21,7 +21,7 @@ class CsvIndexTest {
         .quoteCharacter('"')
         .commentStrategy(NONE)
         .commentCharacter('#')
-        .rowCount(2)
+        .recordCount(2)
         .pages(defaultPages);
 
     @Test
@@ -82,9 +82,9 @@ class CsvIndexTest {
     }
 
     @Test
-    void rowCount() {
+    void recordCount() {
         assertThat(defaultBuilder.build())
-            .isNotEqualTo(defaultBuilder.rowCount(3).build());
+            .isNotEqualTo(defaultBuilder.recordCount(3).build());
     }
 
     @Test
@@ -133,7 +133,7 @@ class CsvIndexTest {
         private char quoteCharacter;
         private CommentStrategy commentStrategy;
         private char commentCharacter;
-        private long rowCount;
+        private long recordCount;
         private List<CsvIndex.CsvPage> pages;
 
         CsvIndexBuilder fileSize(final long fileSize) {
@@ -161,8 +161,8 @@ class CsvIndexTest {
             return this;
         }
 
-        CsvIndexBuilder rowCount(final long rowCount) {
-            this.rowCount = rowCount;
+        CsvIndexBuilder recordCount(final long recordCount) {
+            this.recordCount = recordCount;
             return this;
         }
 
@@ -174,7 +174,7 @@ class CsvIndexTest {
         CsvIndex build() {
             return new CsvIndex(fileSize, (byte) fieldSeparator, (byte) quoteCharacter,
                 commentStrategy, (byte) commentCharacter,
-                rowCount, pages);
+                recordCount, pages);
         }
 
     }

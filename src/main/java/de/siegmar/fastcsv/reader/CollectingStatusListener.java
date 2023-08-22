@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CollectingStatusListener implements StatusListener {
 
     private volatile long fileSize;
-    private final AtomicLong rowCount = new AtomicLong();
+    private final AtomicLong recordCount = new AtomicLong();
     private final AtomicLong byteCount = new AtomicLong();
     private volatile boolean completionStatus;
     private volatile Throwable failedThrowable;
@@ -35,17 +35,17 @@ public class CollectingStatusListener implements StatusListener {
     }
 
     @Override
-    public void onReadRow() {
-        rowCount.incrementAndGet();
+    public void onReadRecord() {
+        recordCount.incrementAndGet();
     }
 
     /**
-     * Get the number of rows already indexed.
+     * Get the number of records already indexed.
      *
-     * @return the number of rows already indexed
+     * @return the number of records already indexed
      */
-    public long getRowCount() {
-        return rowCount.longValue();
+    public long getRecordCount() {
+        return recordCount.longValue();
     }
 
     @Override
@@ -94,8 +94,8 @@ public class CollectingStatusListener implements StatusListener {
     public String toString() {
         final long byteCntVal = byteCount.longValue();
         final double percentage = byteCntVal * 100.0 / fileSize;
-        return String.format("Read %,d rows and %,d of %,d bytes (%.2f %%)",
-            rowCount.longValue(), byteCntVal, fileSize, percentage);
+        return String.format("Read %,d records and %,d of %,d bytes (%.2f %%)",
+            recordCount.longValue(), byteCntVal, fileSize, percentage);
     }
 
 }

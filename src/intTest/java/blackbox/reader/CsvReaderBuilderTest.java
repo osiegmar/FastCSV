@@ -3,7 +3,7 @@ package blackbox.reader;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static testutil.CsvRowAssert.CSV_ROW;
+import static testutil.CsvRecordAssert.CSV_RECORD;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +18,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
-import testutil.CsvRowAssert;
+import de.siegmar.fastcsv.reader.CsvRecord;
+import testutil.CsvRecordAssert;
 
 @SuppressWarnings("PMD.CloseResource")
 class CsvReaderBuilderTest {
@@ -37,10 +37,10 @@ class CsvReaderBuilderTest {
 
     @Test
     void fieldSeparator() {
-        final Iterator<CsvRow> it = crb.fieldSeparator(';')
+        final Iterator<CsvRecord> it = crb.fieldSeparator(';')
             .build("foo,bar;baz").iterator();
         assertThat(it).toIterable()
-            .singleElement(CSV_ROW)
+            .singleElement(CSV_RECORD)
             .isOriginalLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo,bar", "baz");
@@ -48,10 +48,10 @@ class CsvReaderBuilderTest {
 
     @Test
     void quoteCharacter() {
-        final Iterator<CsvRow> it = crb.quoteCharacter('_')
+        final Iterator<CsvRecord> it = crb.quoteCharacter('_')
             .build("_foo \", __ bar_,foo \" bar").iterator();
         assertThat(it).toIterable()
-            .singleElement(CSV_ROW)
+            .singleElement(CSV_RECORD)
             .isOriginalLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo \", _ bar", "foo \" bar");
@@ -59,15 +59,15 @@ class CsvReaderBuilderTest {
 
     @Test
     void commentSkip() {
-        final Iterator<CsvRow> it = crb.commentCharacter(';').commentStrategy(CommentStrategy.SKIP)
+        final Iterator<CsvRecord> it = crb.commentCharacter(';').commentStrategy(CommentStrategy.SKIP)
             .build("#foo\n;bar\nbaz").iterator();
         assertThat(it).toIterable()
             .satisfiesExactly(
-                item1 -> CsvRowAssert.assertThat(item1)
+                item1 -> CsvRecordAssert.assertThat(item1)
                     .isOriginalLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("#foo"),
-                item2 -> CsvRowAssert.assertThat(item2)
+                item2 -> CsvRecordAssert.assertThat(item2)
                     .isOriginalLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz"));
@@ -77,14 +77,14 @@ class CsvReaderBuilderTest {
     void builderToString() {
         assertThat(crb).asString()
             .isEqualTo("CsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentStrategy=NONE, commentCharacter=#, skipEmptyRows=true, "
+                + "commentStrategy=NONE, commentCharacter=#, skipEmptyRecords=true, "
                 + "errorOnDifferentFieldCount=false]");
     }
 
     @Test
     void string() {
         assertThat(crb.build(DATA).stream())
-            .singleElement(CSV_ROW)
+            .singleElement(CSV_RECORD)
             .isOriginalLineNumber(1)
             .isNotComment()
             .fields().isEqualTo(EXPECTED);
@@ -95,9 +95,9 @@ class CsvReaderBuilderTest {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
 
-        try (Stream<CsvRow> stream = crb.build(file).stream()) {
+        try (Stream<CsvRecord> stream = crb.build(file).stream()) {
             assertThat(stream)
-                .singleElement(CSV_ROW)
+                .singleElement(CSV_RECORD)
                 .isOriginalLineNumber(1)
                 .isNotComment()
                 .fields().isEqualTo(EXPECTED);
@@ -111,7 +111,7 @@ class CsvReaderBuilderTest {
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
-            .skipEmptyRows(true)
+            .skipEmptyRecords(true)
             .errorOnDifferentFieldCount(false)
             .build("foo");
 

@@ -17,17 +17,17 @@ import java.io.Reader;
     "checkstyle:NestedIfDepth",
     "PMD.UnusedAssignment"
 })
-final class RowReader {
+final class RecordReader {
 
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
-    private static final int STATUS_COMMENTED_ROW = 16;
+    private static final int STATUS_COMMENTED_RECORD = 16;
     private static final int STATUS_NEW_FIELD = 8;
     private static final int STATUS_QUOTED_MODE = 4;
     private static final int STATUS_QUOTED_COLUMN = 2;
     private static final int STATUS_DATA_COLUMN = 1;
     private static final int STATUS_RESET = 0;
 
-    private final RowHandler rowHandler = new RowHandler(32);
+    private final RecordHandler recordHandler = new RecordHandler(32);
     private final Buffer buffer;
     private final char fsep;
     private final char qChar;
@@ -37,8 +37,8 @@ final class RowReader {
     private int status;
     private boolean finished;
 
-    RowReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter) {
+    RecordReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
+                 final CommentStrategy commentStrategy, final char commentCharacter) {
         buffer = new Buffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
@@ -46,8 +46,8 @@ final class RowReader {
         this.cChar = commentCharacter;
     }
 
-    RowReader(final String data, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter) {
+    RecordReader(final String data, final char fieldSeparator, final char quoteCharacter,
+                 final CommentStrategy commentStrategy, final char commentCharacter) {
         buffer = new Buffer(data);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
@@ -55,7 +55,7 @@ final class RowReader {
         this.cChar = commentCharacter;
     }
 
-    CsvRow fetchAndRead() throws IOException {
+    CsvRecord fetchAndRead() throws IOException {
         if (finished) {
             return null;
         }
@@ -65,24 +65,24 @@ final class RowReader {
                 // cursor reached current EOD -- need to fetch
                 if (buffer.fetchData()) {
                     // reached end of stream
-                    if (buffer.begin < buffer.pos || rowHandler.isCommentMode()) {
-                        rowHandler.add(materialize(buffer.buf, buffer.begin,
+                    if (buffer.begin < buffer.pos || recordHandler.isCommentMode()) {
+                        recordHandler.add(materialize(buffer.buf, buffer.begin,
                             buffer.pos - buffer.begin, status, qChar));
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
-                        rowHandler.add("");
+                        recordHandler.add("");
                     }
 
                     finished = true;
                     break;
                 }
             }
-        } while (consume(rowHandler, buffer.buf, buffer.len));
+        } while (consume(recordHandler, buffer.buf, buffer.len));
 
-        return rowHandler.buildAndReset();
+        return recordHandler.buildAndReset();
     }
 
     @SuppressWarnings("PMD.EmptyIfStmt")
-    boolean consume(final RowHandler rh, final char[] lBuf, final int lLen) {
+    boolean consume(final RecordHandler rh, final char[] lBuf, final int lLen) {
         int lPos = buffer.pos;
         int lBegin = buffer.begin;
         int lStatus = status;
@@ -118,7 +118,7 @@ final class RowReader {
                             }
                         }
                     }
-                } else if ((lStatus & STATUS_COMMENTED_ROW) != 0) {
+                } else if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
                     // commented line
                     while (lPos < lLen) {
                         final char lookAhead = lBuf[lPos++];
@@ -171,7 +171,7 @@ final class RowReader {
                         } else if (cStrat != CommentStrategy.NONE && c == cChar
                             && (lStatus == STATUS_RESET || lStatus == STATUS_LAST_CHAR_WAS_CR)) {
                             lBegin = lPos;
-                            lStatus = STATUS_COMMENTED_ROW;
+                            lStatus = STATUS_COMMENTED_RECORD;
                             rh.enableCommentMode();
                             continue mode_check;
                         } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
@@ -248,7 +248,7 @@ final class RowReader {
     }
 
     void resetBuffer(final long originalLineNumber) {
-        rowHandler.setOriginalLineNumber(originalLineNumber);
+        recordHandler.setOriginalLineNumber(originalLineNumber);
         buffer.reset();
     }
 

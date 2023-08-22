@@ -21,17 +21,17 @@ import java.util.stream.StreamSupport;
  * Example use:
  * {@snippet :
  * try (NamedCsvReader csv = NamedCsvReader.builder().build(file)) {
- *     for (NamedCsvRow row : csv) {
+ *     for (NamedCsvRecord csvRecord : csv) {
  *         // ...
  *     }
  * }
- * }
+ *}
  */
-public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
+public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable {
 
     private final CsvReader csvReader;
-    private final CloseableIterator<CsvRow> csvIterator;
-    private final CloseableIterator<NamedCsvRow> namedCsvIterator;
+    private final CloseableIterator<CsvRecord> csvIterator;
+    private final CloseableIterator<NamedCsvRecord> namedCsvIterator;
 
     private Set<String> header;
     private boolean isInitialized;
@@ -39,17 +39,17 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     private NamedCsvReader(final CsvReader csvReader) {
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
-        namedCsvIterator = new NamedCsvRowIterator(csvIterator);
+        namedCsvIterator = new NamedCsvRecordIterator(csvIterator);
     }
 
     private void initialize() {
         if (!csvIterator.hasNext()) {
             header = Collections.emptySet();
         } else {
-            final CsvRow firstRow = csvIterator.next();
+            final CsvRecord firstRecord = csvIterator.next();
 
-            final Set<String> headerSet = new LinkedHashSet<>(firstRow.getFieldCount());
-            for (final String field : firstRow.getFields()) {
+            final Set<String> headerSet = new LinkedHashSet<>(firstRecord.getFieldCount());
+            for (final String field : firstRecord.getFields()) {
                 if (!headerSet.add(field)) {
                     throw new IllegalStateException("Duplicate header field '" + field + "' found");
                 }
@@ -81,7 +81,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     }
 
     @Override
-    public CloseableIterator<NamedCsvRow> iterator() {
+    public CloseableIterator<NamedCsvRecord> iterator() {
         if (!isInitialized) {
             initialize();
         }
@@ -90,8 +90,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
     }
 
     @Override
-    public Spliterator<NamedCsvRow> spliterator() {
-        return new CsvRowSpliterator<>(iterator());
+    public Spliterator<NamedCsvRecord> spliterator() {
+        return new CsvRecordSpliterator<>(iterator());
     }
 
     /**
@@ -102,7 +102,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
      *
      * @return a new sequential {@link Stream}.
      */
-    public Stream<NamedCsvRow> stream() {
+    public Stream<NamedCsvRecord> stream() {
         return StreamSupport.stream(spliterator(), false).onClose(() -> {
             try {
                 close();
@@ -125,11 +125,11 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
             .toString();
     }
 
-    private class NamedCsvRowIterator implements CloseableIterator<NamedCsvRow> {
+    private class NamedCsvRecordIterator implements CloseableIterator<NamedCsvRecord> {
 
-        private final CloseableIterator<CsvRow> csvIterator;
+        private final CloseableIterator<CsvRecord> csvIterator;
 
-        NamedCsvRowIterator(final CloseableIterator<CsvRow> csvIterator) {
+        NamedCsvRecordIterator(final CloseableIterator<CsvRecord> csvIterator) {
             this.csvIterator = csvIterator;
         }
 
@@ -139,8 +139,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         }
 
         @Override
-        public NamedCsvRow next() {
-            return new NamedCsvRow(header, csvIterator.next());
+        public NamedCsvRecord next() {
+            return new NamedCsvRecord(header, csvIterator.next());
         }
 
         @Override
@@ -204,9 +204,9 @@ public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
         }
 
         /**
-         * Defines if commented rows should be detected and skipped when reading data.
+         * Defines if commented records should be detected and skipped when reading data.
          *
-         * @param skipComments if commented rows should be skipped (default: {@code true}).
+         * @param skipComments if commented records should be skipped (default: {@code true}).
          * @return This updated object, so that additional method calls can be chained together.
          */
         public NamedCsvReaderBuilder skipComments(final boolean skipComments) {

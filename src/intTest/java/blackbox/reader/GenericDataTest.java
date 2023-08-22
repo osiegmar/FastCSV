@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 
 class GenericDataTest {
 
@@ -40,12 +40,12 @@ class GenericDataTest {
     public static List<List<String>> readAll(final String data, final boolean skipEmptyLines,
                                              final CommentStrategy commentStrategy) {
         return CsvReader.builder()
-            .skipEmptyRows(skipEmptyLines)
+            .skipEmptyRecords(skipEmptyLines)
             .commentCharacter(';')
             .commentStrategy(commentStrategy)
             .build(data)
             .stream()
-            .map(CsvRow::getFields)
+            .map(CsvRecord::getFields)
             .collect(Collectors.toList());
     }
 

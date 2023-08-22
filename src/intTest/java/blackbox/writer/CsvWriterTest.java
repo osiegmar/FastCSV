@@ -92,7 +92,7 @@ class CsvWriterTest {
         cols.add("foo");
         cols.add("bar");
 
-        assertThat(write(w -> w.writeRow(cols).writeRow(cols)))
+        assertThat(write(w -> w.writeRecord(cols).writeRecord(cols)))
             .isEqualTo("foo,bar\nfoo,bar\n");
     }
 
@@ -174,7 +174,7 @@ class CsvWriterTest {
 
     @Test
     void appending() {
-        assertThat(write(w -> w.writeRow("foo", "bar").writeRow("foo2", "bar2")))
+        assertThat(write(w -> w.writeRecord("foo", "bar").writeRecord("foo2", "bar2")))
             .isEqualTo("foo,bar\nfoo2,bar2\n");
     }
 
@@ -182,7 +182,7 @@ class CsvWriterTest {
     void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
         try (CsvWriter csv = CsvWriter.builder().build(file)) {
-            csv.writeRow("value1", "value2");
+            csv.writeRecord("value1", "value2");
         }
 
         assertThat(file).hasContent("value1,value2\r\n");
@@ -208,7 +208,7 @@ class CsvWriterTest {
         );
         final StringWriter sw = new StringWriter();
         final CsvWriter csvWriter = CsvWriter.builder().build(sw);
-        stream.forEach(csvWriter::writeRow);
+        stream.forEach(csvWriter::writeRecord);
 
         assertThat(sw).asString()
             .isEqualTo("header1,header2\r\nvalue1,value2\r\n");
@@ -218,9 +218,9 @@ class CsvWriterTest {
     void mixedWriterUsage() {
         final StringWriter stringWriter = new StringWriter();
         final CsvWriter csvWriter = CsvWriter.builder().build(stringWriter);
-        csvWriter.writeRow("foo", "bar");
+        csvWriter.writeRecord("foo", "bar");
         stringWriter.write("# my comment\r\n");
-        csvWriter.writeRow("1", "2");
+        csvWriter.writeRecord("1", "2");
 
         assertThat(stringWriter).asString()
             .isEqualTo("foo,bar\r\n# my comment\r\n1,2\r\n");
@@ -228,14 +228,14 @@ class CsvWriterTest {
 
     @Test
     void unwritableArray() {
-        assertThatThrownBy(() -> crw.build(new UnwritableWriter()).writeRow("foo"))
+        assertThatThrownBy(() -> crw.build(new UnwritableWriter()).writeRecord("foo"))
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("java.io.IOException: Cannot write");
     }
 
     @Test
     void unwritableIterable() {
-        assertThatThrownBy(() -> crw.build(new UnwritableWriter()).writeRow(List.of("foo")))
+        assertThatThrownBy(() -> crw.build(new UnwritableWriter()).writeRecord(List.of("foo")))
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("java.io.IOException: Cannot write");
 
@@ -255,7 +255,7 @@ class CsvWriterTest {
     @Test
     void disableBuffer() {
         final StringWriter stringWriter = new StringWriter();
-        crw.bufferSize(0).build(stringWriter).writeRow("foo", "bar");
+        crw.bufferSize(0).build(stringWriter).writeRecord("foo", "bar");
 
         assertThat(stringWriter).asString().isEqualTo("foo,bar\n");
     }
@@ -277,7 +277,7 @@ class CsvWriterTest {
     }
 
     private String write(final String... cols) {
-        return write(w -> w.writeRow(cols));
+        return write(w -> w.writeRecord(cols));
     }
 
     private String write(final Consumer<CsvWriter> c) {

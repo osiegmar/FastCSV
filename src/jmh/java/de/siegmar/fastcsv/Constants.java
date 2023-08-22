@@ -5,7 +5,7 @@ final class Constants {
     /**
      * Data to write CSV.
      */
-    static final String[] ROW = {
+    static final String[] RECORD = {
         "Simple field",
         "Example with separator ,",
         "Example with delimiter \"",

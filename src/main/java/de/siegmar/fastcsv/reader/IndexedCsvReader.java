@@ -33,9 +33,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
  *     CsvIndex index = csv.index();
  *     int lastPage = index.pageCount() - 1;
- *     List<CsvRow> rows = csv.readPage(lastPage);
+ *     List<CsvRecord> csvRecords = csv.readPage(lastPage);
  * }
- * }
+ *}
  */
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader implements Closeable {
@@ -49,7 +49,7 @@ public final class IndexedCsvReader implements Closeable {
     private final int pageSize;
     private final RandomAccessFile raf;
     private final InputStreamReader reader;
-    private final RowReader rowReader;
+    private final RecordReader recordReader;
     private final CsvIndex csvIndex;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
@@ -84,7 +84,7 @@ public final class IndexedCsvReader implements Closeable {
 
         raf = new RandomAccessFile(file.toFile(), "r");
         reader = new InputStreamReader(new RandomAccessFileInputStream(raf), charset);
-        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
+        recordReader = new RecordReader(reader, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
     private static CsvIndex validatePrebuiltIndex(final Path file, final byte fieldSeparator, final byte quoteCharacter,
@@ -132,7 +132,7 @@ public final class IndexedCsvReader implements Closeable {
 
             final var idx = new CsvIndex(channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
                 commentStrategy, (byte) commentCharacter,
-                listener.rowCounter.get(), listener.pageOffsets);
+                listener.recordCounter.get(), listener.pageOffsets);
 
             statusListener.onComplete();
             return idx;
@@ -164,15 +164,15 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     /**
-     * Reads a page of rows.
+     * Reads a page of records.
      *
      * @param page the page to read (0-based).
-     * @return a page of rows, never {@code null}.
+     * @return a page of records, never {@code null}.
      * @throws IOException               if an I/O error occurs.
      * @throws IllegalArgumentException  if {@code page} is &lt; 0
      * @throws IndexOutOfBoundsException if the file does not contain the specified page
      */
-    public List<CsvRow> readPage(final int page) throws IOException {
+    public List<CsvRecord> readPage(final int page) throws IOException {
         if (page < 0) {
             throw new IllegalArgumentException("page must be >= 0");
         }
@@ -181,15 +181,15 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
-    private List<CsvRow> readPage(final CsvIndex.CsvPage page) throws IOException {
-        final List<CsvRow> ret = new ArrayList<>(pageSize);
+    private List<CsvRecord> readPage(final CsvIndex.CsvPage page) throws IOException {
+        final List<CsvRecord> ret = new ArrayList<>(pageSize);
         synchronized (raf) {
             raf.seek(page.offset());
-            rowReader.resetBuffer(page.startingLineNumber());
+            recordReader.resetBuffer(page.startingLineNumber());
 
-            CsvRow csvRow;
-            for (int i = 0; i < pageSize && (csvRow = rowReader.fetchAndRead()) != null; i++) {
-                ret.add(csvRow);
+            CsvRecord csvRecord;
+            for (int i = 0; i < pageSize && (csvRecord = recordReader.fetchAndRead()) != null; i++) {
+                ret.add(csvRecord);
             }
 
             return ret;
@@ -386,7 +386,7 @@ public final class IndexedCsvReader implements Closeable {
 
         private final StatusListener statusListener;
         private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
-        private final AtomicLong rowCounter = new AtomicLong();
+        private final AtomicLong recordCounter = new AtomicLong();
         private long startingLineNumber = 1;
 
         private ScannerListener(final StatusListener statusListener) {
@@ -400,15 +400,15 @@ public final class IndexedCsvReader implements Closeable {
 
         @Override
         public void startOffset(final long offset) {
-            if (rowCounter.getAndIncrement() % pageSize == 0) {
+            if (recordCounter.getAndIncrement() % pageSize == 0) {
                 pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber));
             }
         }
 
         @Override
-        public void onReadRow() {
+        public void onReadRecord() {
             startingLineNumber++;
-            statusListener.onReadRow();
+            statusListener.onReadRecord();
         }
 
         @Override

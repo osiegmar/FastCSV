@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.siegmar.fastcsv.reader.NamedCsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRow;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class NamedCsvReaderExample {
@@ -16,11 +16,11 @@ public class NamedCsvReaderExample {
     }
 
     private static void header() {
-        final Optional<NamedCsvRow> first = NamedCsvReader.builder()
+        final Optional<NamedCsvRecord> first = NamedCsvReader.builder()
             .build("header1,header2\nvalue1,value2")
             .stream().findFirst();
 
-        first.ifPresent(row -> System.out.println("Header/Name based: " + row.getField("header2")));
+        first.ifPresent(csvRecord -> System.out.println("Header/Name based: " + csvRecord.getField("header2")));
     }
 
     private static void advancedConfiguration() {
@@ -32,7 +32,7 @@ public class NamedCsvReaderExample {
             .skipComments(false)
             .build(data)
             .stream()
-            .map(csvRow -> csvRow.getFields().toString())
+            .map(csvRecord -> csvRecord.getFields().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

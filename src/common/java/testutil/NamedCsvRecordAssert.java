@@ -5,22 +5,22 @@ import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.MapAssert;
 import org.assertj.core.api.StringAssert;
 
-import de.siegmar.fastcsv.reader.NamedCsvRow;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
-public class NamedCsvRowAssert extends AbstractAssert<NamedCsvRowAssert, NamedCsvRow> {
+public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, NamedCsvRecord> {
 
-    public static final InstanceOfAssertFactory<NamedCsvRow, NamedCsvRowAssert> NAMED_CSV_ROW =
-        new InstanceOfAssertFactory<>(NamedCsvRow.class, NamedCsvRowAssert::assertThat);
+    public static final InstanceOfAssertFactory<NamedCsvRecord, NamedCsvRecordAssert> NAMED_CSV_RECORD =
+        new InstanceOfAssertFactory<>(NamedCsvRecord.class, NamedCsvRecordAssert::assertThat);
 
-    protected NamedCsvRowAssert(final NamedCsvRow actual) {
-        super(actual, NamedCsvRowAssert.class);
+    protected NamedCsvRecordAssert(final NamedCsvRecord actual) {
+        super(actual, NamedCsvRecordAssert.class);
     }
 
-    public static NamedCsvRowAssert assertThat(final NamedCsvRow actual) {
-        return new NamedCsvRowAssert(actual);
+    public static NamedCsvRecordAssert assertThat(final NamedCsvRecord actual) {
+        return new NamedCsvRecordAssert(actual);
     }
 
-    public NamedCsvRowAssert isOriginalLineNumber(final long originalLineNumber) {
+    public NamedCsvRecordAssert isOriginalLineNumber(final long originalLineNumber) {
         isNotNull();
         if (actual.getOriginalLineNumber() != originalLineNumber) {
             failWithMessage("Expected original line number to be <%d> but was <%d>",

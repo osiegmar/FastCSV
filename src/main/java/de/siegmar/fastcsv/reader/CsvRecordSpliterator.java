@@ -4,12 +4,12 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-final class CsvRowSpliterator<T> implements Spliterator<T> {
+final class CsvRecordSpliterator<T> implements Spliterator<T> {
 
     private static final int FIXED_CHARACTERISTICS = ORDERED | DISTINCT | NONNULL | IMMUTABLE;
     private final Iterator<T> iterator;
 
-    CsvRowSpliterator(final Iterator<T> iterator) {
+    CsvRecordSpliterator(final Iterator<T> iterator) {
         this.iterator = iterator;
     }
 

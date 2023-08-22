@@ -36,29 +36,29 @@ final class CsvScanner {
         while ((d = stream.get()) != -1) {
             listener.startOffset(stream.getOffset());
 
-            // parse a row
+            // parse a record
             if (d == commentCharacter && readComments) {
                 consumeCommentedLine();
             } else {
-                consumeRow(d);
+                consumeRecord(d);
             }
 
-            listener.onReadRow();
+            listener.onReadRecord();
         }
     }
 
     @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
         "checkstyle:ParameterAssignment"})
-    private void consumeRow(int d) throws IOException {
+    private void consumeRecord(int d) throws IOException {
         do {
             // parse fields
             if (d == quoteCharacter) {
                 if (consumeQuotedField()) {
-                    // reached end of row
+                    // reached end of record
                     break;
                 }
             } else if (consumeUnquotedField(d)) {
-                // reached end of row
+                // reached end of record
                 break;
             }
         } while ((d = stream.get()) != -1);
@@ -120,7 +120,7 @@ final class CsvScanner {
 
         void startOffset(long offset);
 
-        void onReadRow();
+        void onReadRecord();
 
         void additionalLine();
 

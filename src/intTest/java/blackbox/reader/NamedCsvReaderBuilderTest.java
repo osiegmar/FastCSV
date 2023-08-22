@@ -4,7 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
-import static testutil.NamedCsvRowAssert.NAMED_CSV_ROW;
+import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.NamedCsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRow;
-import testutil.NamedCsvRowAssert;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import testutil.NamedCsvRecordAssert;
 
 @SuppressWarnings("PMD.CloseResource")
 class NamedCsvReaderBuilderTest {
@@ -38,7 +38,7 @@ class NamedCsvReaderBuilderTest {
     @Test
     void fieldSeparator() {
         assertThat(crb.fieldSeparator(';').build("h1;h2\nfoo,bar;baz").stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo,bar"), entry("h2", "baz"));
     }
@@ -46,7 +46,7 @@ class NamedCsvReaderBuilderTest {
     @Test
     void quoteCharacter() {
         assertThat(crb.quoteCharacter('_').build("h1,h2\n_foo \", __ bar_,foo \" bar").stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo \", _ bar"), entry("h2", "foo \" bar"));
     }
@@ -55,8 +55,8 @@ class NamedCsvReaderBuilderTest {
     void commentSkip() {
         assertThat(crb.commentCharacter(';').skipComments(true).build("h1\n#foo\n;bar\nbaz").stream())
             .satisfiesExactly(
-                item1 -> NamedCsvRowAssert.assertThat(item1).fields().containsExactly(entry("h1", "#foo")),
-                item2 -> NamedCsvRowAssert.assertThat(item2).fields().containsExactly(entry("h1", "baz"))
+                item1 -> NamedCsvRecordAssert.assertThat(item1).fields().containsExactly(entry("h1", "#foo")),
+                item2 -> NamedCsvRecordAssert.assertThat(item2).fields().containsExactly(entry("h1", "baz"))
             );
     }
 
@@ -70,7 +70,7 @@ class NamedCsvReaderBuilderTest {
     @Test
     void string() {
         assertThat(crb.build(DATA).stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactlyInAnyOrderEntriesOf(EXPECTED);
     }
@@ -80,9 +80,9 @@ class NamedCsvReaderBuilderTest {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
 
-        try (Stream<NamedCsvRow> stream = crb.build(file).stream()) {
+        try (Stream<NamedCsvRecord> stream = crb.build(file).stream()) {
             assertThat(stream)
-                .singleElement(NAMED_CSV_ROW)
+                .singleElement(NAMED_CSV_RECORD)
                 .fields()
                 .containsExactlyInAnyOrderEntriesOf(EXPECTED);
         }

@@ -10,19 +10,19 @@ import org.openjdk.jmh.annotations.TearDown;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 
 public class FastCsvReadBenchmark {
 
     @Benchmark
-    public CsvRow read(final ReadState state) {
+    public CsvRecord read(final ReadState state) {
         return state.it.next();
     }
 
     @State(Scope.Benchmark)
     public static class ReadState {
 
-        private CloseableIterator<CsvRow> it;
+        private CloseableIterator<CsvRecord> it;
 
         @Setup
         public void setup() {

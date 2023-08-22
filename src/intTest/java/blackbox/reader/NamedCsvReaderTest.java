@@ -3,7 +3,7 @@ package blackbox.reader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.MapEntry.entry;
-import static testutil.NamedCsvRowAssert.NAMED_CSV_ROW;
+import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRow;
-import testutil.NamedCsvRowAssert;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import testutil.NamedCsvRecordAssert;
 
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 class NamedCsvReaderTest {
@@ -48,7 +48,7 @@ class NamedCsvReaderTest {
     void readerToString() {
         assertThat(crb.build("h1\nd1")).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
-                + "commentStrategy=NONE, skipEmptyRows=true, errorOnDifferentFieldCount=true]]");
+                + "commentStrategy=NONE, skipEmptyRecords=true, errorOnDifferentFieldCount=true]]");
     }
 
     @Test
@@ -74,7 +74,7 @@ class NamedCsvReaderTest {
     @Test
     void getFieldByName() {
         assertThat(parse("foo\nbar").stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .field("foo").isEqualTo("bar");
     }
 
@@ -94,7 +94,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getHeaderEmptyRows() {
+    void getHeaderEmptyRecords() {
         final NamedCsvReader csv = parse("foo,bar");
 
         assertThat(csv.getHeader())
@@ -107,7 +107,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getHeaderAfterSkippedRow() {
+    void getHeaderAfterSkippedRecord() {
         final NamedCsvReader csv = parse("\nfoo,bar");
 
         assertThat(csv.getHeader())
@@ -118,7 +118,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getHeaderWithoutNextRowCall() {
+    void getHeaderWithoutNextRecordCall() {
         assertThat(parse("foo\n").getHeader())
             .containsExactly("foo");
     }
@@ -135,14 +135,14 @@ class NamedCsvReaderTest {
         assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("NamedCsvRow[originalLineNumber=2, "
+            .isEqualTo("NamedCsvRecord[originalLineNumber=2, "
                 + "fieldMap={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
     }
 
     @Test
     void fieldMap() {
         assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("headerA", "fieldA"), entry("headerB", "fieldB"), entry("headerC", "fieldC"))
             .asString()
@@ -153,7 +153,7 @@ class NamedCsvReaderTest {
 
     @Test
     void lineNumbering() {
-        final Stream<NamedCsvRow> stream = crb
+        final Stream<NamedCsvRecord> stream = crb
             .build(
                 "h1,h2\n"
                     + "a,line 2\n"
@@ -165,15 +165,15 @@ class NamedCsvReaderTest {
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> NamedCsvRowAssert.assertThat(item1).isOriginalLineNumber(2)
+                item1 -> NamedCsvRecordAssert.assertThat(item1).isOriginalLineNumber(2)
                     .fields().containsOnly(entry("h1", "a"), entry("h2", "line 2")),
-                item2 -> NamedCsvRowAssert.assertThat(item2).isOriginalLineNumber(3)
+                item2 -> NamedCsvRecordAssert.assertThat(item2).isOriginalLineNumber(3)
                     .fields().containsOnly(entry("h1", "b"), entry("h2", "line 3")),
-                item3 -> NamedCsvRowAssert.assertThat(item3).isOriginalLineNumber(4)
+                item3 -> NamedCsvRecordAssert.assertThat(item3).isOriginalLineNumber(4)
                     .fields().containsOnly(entry("h1", "c"), entry("h2", "line 4")),
-                item4 -> NamedCsvRowAssert.assertThat(item4).isOriginalLineNumber(5)
+                item4 -> NamedCsvRecordAssert.assertThat(item4).isOriginalLineNumber(5)
                     .fields().containsOnly(entry("h1", "d"), entry("h2", "line 5\rwith\r\nand\n")),
-                item5 -> NamedCsvRowAssert.assertThat(item5).isOriginalLineNumber(9)
+                item5 -> NamedCsvRecordAssert.assertThat(item5).isOriginalLineNumber(9)
                     .fields().containsOnly(entry("h1", "e"), entry("h2", "line 9"))
             );
     }
@@ -182,7 +182,7 @@ class NamedCsvReaderTest {
 
     @Test
     void closeApi() throws IOException {
-        final Consumer<NamedCsvRow> consumer = csvRow -> { };
+        final Consumer<NamedCsvRecord> consumer = csvRecord -> { };
 
         final Supplier<CloseStatusReader> supp =
             () -> new CloseStatusReader(new StringReader("h1,h2\nfoo,bar"));
@@ -195,13 +195,13 @@ class NamedCsvReaderTest {
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (CloseableIterator<NamedCsvRow> it = crb.build(csr).iterator()) {
+        try (CloseableIterator<NamedCsvRecord> it = crb.build(csr).iterator()) {
             it.forEachRemaining(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (Stream<NamedCsvRow> stream = crb.build(csr).stream()) {
+        try (Stream<NamedCsvRecord> stream = crb.build(csr).stream()) {
             stream.forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
@@ -210,26 +210,26 @@ class NamedCsvReaderTest {
     @Test
     void noComments() {
         assertThat(readAll("# comment 1\nfieldA").stream())
-            .singleElement(NAMED_CSV_ROW)
+            .singleElement(NAMED_CSV_RECORD)
             .fields().containsExactly(entry("# comment 1", "fieldA"));
     }
 
     @Test
     void spliterator() {
-        final Spliterator<NamedCsvRow> spliterator =
+        final Spliterator<NamedCsvRecord> spliterator =
             crb.build("a,b,c\n1,2,3\n4,5,6").spliterator();
 
         assertThat(spliterator.trySplit()).isNull();
         assertThat(spliterator.estimateSize()).isEqualTo(Long.MAX_VALUE);
 
-        final AtomicInteger rows = new AtomicInteger();
-        final AtomicInteger rows2 = new AtomicInteger();
-        while (spliterator.tryAdvance(row -> rows.incrementAndGet())) {
-            rows2.incrementAndGet();
+        final AtomicInteger records = new AtomicInteger();
+        final AtomicInteger records2 = new AtomicInteger();
+        while (spliterator.tryAdvance(csvRecord -> records.incrementAndGet())) {
+            records2.incrementAndGet();
         }
 
-        assertThat(rows).hasValue(2);
-        assertThat(rows2).hasValue(2);
+        assertThat(records).hasValue(2);
+        assertThat(records2).hasValue(2);
     }
 
     // Coverage
@@ -250,7 +250,7 @@ class NamedCsvReaderTest {
         return crb.build(data);
     }
 
-    private List<NamedCsvRow> readAll(final String data) {
+    private List<NamedCsvRecord> readAll(final String data) {
         return parse(data).stream().collect(Collectors.toList());
     }
 

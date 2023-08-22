@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import de.siegmar.fastcsv.reader.NamedCsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRow;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
@@ -23,7 +23,7 @@ public class CsvWriterExample {
 
     private static void simple() {
         final StringWriter sw = new StringWriter();
-        CsvWriter.builder().build(sw).writeRow("value1", "value2");
+        CsvWriter.builder().build(sw).writeRecord("value1", "value2");
         System.out.print("Simple CSV: " + sw);
     }
 
@@ -37,8 +37,8 @@ public class CsvWriterExample {
             .lineDelimiter(LineDelimiter.LF)
             .build(sw)
             .writeComment("File created by foo on 2021-02-07")
-            .writeRow("header1", "header2")
-            .writeRow("value1", "value2");
+            .writeRecord("header1", "header2")
+            .writeRecord("value1", "value2");
 
         System.out.println("Advanced CSV:");
         System.out.println(sw);
@@ -49,8 +49,8 @@ public class CsvWriterExample {
 
         try (CsvWriter csv = CsvWriter.builder().build(path)) {
             csv
-                .writeRow("header1", "header2")
-                .writeRow("value1", "value2");
+                .writeRecord("header1", "header2")
+                .writeRecord("value1", "value2");
         }
 
         Files.lines(path)
@@ -66,11 +66,11 @@ public class CsvWriterExample {
             CsvWriter writer = CsvWriter.builder().build(out)
         ) {
             // transform firstname,lastname,age => name,age
-            writer.writeRow("name", "age");
-            for (final NamedCsvRow csvRow : reader) {
-                writer.writeRow(
-                    csvRow.getField("firstname") + " " + csvRow.getField("lastname"),
-                    csvRow.getField("age")
+            writer.writeRecord("name", "age");
+            for (final NamedCsvRecord csvRecord : reader) {
+                writer.writeRecord(
+                    csvRecord.getField("firstname") + " " + csvRecord.getField("lastname"),
+                    csvRecord.getField("age")
                 );
             }
         }

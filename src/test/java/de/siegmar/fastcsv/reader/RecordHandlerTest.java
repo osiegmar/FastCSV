@@ -1,14 +1,14 @@
 package de.siegmar.fastcsv.reader;
 
-import static testutil.CsvRowAssert.assertThat;
+import static testutil.CsvRecordAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-class RowHandlerTest {
+class RecordHandlerTest {
 
     @Test
     void test() {
-        final RowHandler rh = new RowHandler(1);
+        final RecordHandler rh = new RecordHandler(1);
         rh.add("foo");
         rh.add("bar");
 

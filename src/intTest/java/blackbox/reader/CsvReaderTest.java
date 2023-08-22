@@ -3,7 +3,7 @@ package blackbox.reader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static testutil.CsvRowAssert.CSV_ROW;
+import static testutil.CsvRecordAssert.CSV_RECORD;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -26,9 +26,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.MalformedCsvException;
-import testutil.CsvRowAssert;
+import testutil.CsvRecordAssert;
 
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
@@ -90,35 +90,35 @@ class CsvReaderTest {
     void readerToString() {
         assertThat(crb.build(""))
             .asString()
-            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyRows=true, "
+            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyRecords=true, "
                 + "errorOnDifferentFieldCount=false]");
     }
 
-    // skipped rows
+    // skipped record
 
     @Test
-    void singleRowNoSkipEmpty() {
-        crb.skipEmptyRows(false);
+    void singleRecordNoSkipEmpty() {
+        crb.skipEmptyRecords(false);
         assertThat(crb.build("").iterator()).isExhausted();
     }
 
     @Test
-    void multipleRowsNoSkipEmpty() {
-        crb.skipEmptyRows(false);
+    void multipleRecordsNoSkipEmpty() {
+        crb.skipEmptyRecords(false);
 
         assertThat(crb.build("\n\na").iterator()).toIterable()
             .satisfiesExactly(
-                item1 -> CsvRowAssert.assertThat(item1).isOriginalLineNumber(1).fields().containsExactly(""),
-                item2 -> CsvRowAssert.assertThat(item2).isOriginalLineNumber(2).fields().containsExactly(""),
-                item3 -> CsvRowAssert.assertThat(item3).isOriginalLineNumber(3).fields().containsExactly("a"));
+                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1).fields().containsExactly(""),
+                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2).fields().containsExactly(""),
+                item3 -> CsvRecordAssert.assertThat(item3).isOriginalLineNumber(3).fields().containsExactly("a"));
     }
 
     @Test
-    void skippedRows() {
+    void skippedRecords() {
         assertThat(crb.build("\n\nfoo\n\nbar\n\n").stream())
             .satisfiesExactly(
-                item1 -> CsvRowAssert.assertThat(item1).isOriginalLineNumber(3).fields().containsExactly("foo"),
-                item2 -> CsvRowAssert.assertThat(item2).isOriginalLineNumber(5).fields().containsExactly("bar")
+                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(3).fields().containsExactly("foo"),
+                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(5).fields().containsExactly("bar")
             );
     }
 
@@ -144,7 +144,7 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
             .isInstanceOf(MalformedCsvException.class)
-            .hasMessage("Row 2 has 2 fields, but first row had 1 fields");
+            .hasMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
     // field by index
@@ -167,7 +167,7 @@ class CsvReaderTest {
 
     @Test
     void lineNumbering() {
-        final Stream<CsvRow> stream = crb
+        final Stream<CsvRecord> stream = crb
             .commentStrategy(CommentStrategy.SKIP)
             .build(
                 "line 1\n"
@@ -180,15 +180,15 @@ class CsvReaderTest {
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> CsvRowAssert.assertThat(item1).isOriginalLineNumber(1)
+                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1)
                     .fields().containsExactly("line 1"),
-                item2 -> CsvRowAssert.assertThat(item2).isOriginalLineNumber(2)
+                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2)
                     .fields().containsExactly("line 2"),
-                item3 -> CsvRowAssert.assertThat(item3).isOriginalLineNumber(3)
+                item3 -> CsvRecordAssert.assertThat(item3).isOriginalLineNumber(3)
                     .fields().containsExactly("line 3"),
-                item4 -> CsvRowAssert.assertThat(item4).isOriginalLineNumber(4)
+                item4 -> CsvRecordAssert.assertThat(item4).isOriginalLineNumber(4)
                     .fields().containsExactly("line 4\rwith\r\nand\n"),
-                item5 -> CsvRowAssert.assertThat(item5).isOriginalLineNumber(9)
+                item5 -> CsvRecordAssert.assertThat(item5).isOriginalLineNumber(9)
                     .fields().containsExactly("line 9")
             );
     }
@@ -197,15 +197,15 @@ class CsvReaderTest {
 
     @Test
     void comment() {
-        final Stream<CsvRow> stream = crb
+        final Stream<CsvRecord> stream = crb
             .commentStrategy(CommentStrategy.READ)
             .build("#comment \"1\"\na,#b,c").stream();
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> CsvRowAssert.assertThat(item1).isOriginalLineNumber(1)
+                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1)
                     .fields().containsExactly("comment \"1\""),
-                item2 -> CsvRowAssert.assertThat(item2).isOriginalLineNumber(2)
+                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2)
                     .fields().containsExactly("a", "#b", "c")
             );
     }
@@ -217,7 +217,7 @@ class CsvReaderTest {
         assertThat(crb.build("fieldA,fieldB\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("CsvRow[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]");
+            .isEqualTo("CsvRecord[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]");
     }
 
     // refill buffer while parsing an unquoted field containing a quote character
@@ -231,7 +231,7 @@ class CsvReaderTest {
         System.arraycopy(extra, 0, buf, 8190, extra.length);
 
         assertThat(crb.build(new CharArrayReader(buf)).stream())
-            .singleElement(CSV_ROW)
+            .singleElement(CSV_RECORD)
             .fields().hasSize(4)
             .endsWith("a\"b\"c", "d", "XX");
     }
@@ -263,7 +263,7 @@ class CsvReaderTest {
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
 
-        final CloseableIterator<CsvRow> iterator = crb.build(new CharArrayReader(buf)).iterator();
+        final CloseableIterator<CsvRecord> iterator = crb.build(new CharArrayReader(buf)).iterator();
         iterator.next();
 
         assertThatThrownBy(iterator::next)
@@ -278,7 +278,7 @@ class CsvReaderTest {
 
     @Test
     void closeApi() throws IOException {
-        final Consumer<CsvRow> consumer = csvRow -> {
+        final Consumer<CsvRecord> consumer = csvRecord -> {
         };
 
         final Supplier<CloseStatusReader> supp =
@@ -291,13 +291,13 @@ class CsvReaderTest {
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (CloseableIterator<CsvRow> it = crb.build(csr).iterator()) {
+        try (CloseableIterator<CsvRecord> it = crb.build(csr).iterator()) {
             it.forEachRemaining(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (Stream<CsvRow> stream = crb.build(csr).stream()) {
+        try (Stream<CsvRecord> stream = crb.build(csr).stream()) {
             stream.forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
@@ -311,7 +311,7 @@ class CsvReaderTest {
 
     @Test
     void spliterator() {
-        final Spliterator<CsvRow> spliterator =
+        final Spliterator<CsvRecord> spliterator =
             crb.build("a,b,c\n1,2,3").spliterator();
 
         assertThat(spliterator.trySplit()).isNull();
@@ -320,14 +320,14 @@ class CsvReaderTest {
             .isEqualTo(Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL
                 | Spliterator.IMMUTABLE);
 
-        final AtomicInteger rows = new AtomicInteger();
-        final AtomicInteger rows2 = new AtomicInteger();
-        while (spliterator.tryAdvance(row -> rows.incrementAndGet())) {
-            rows2.incrementAndGet();
+        final var csvRecords = new AtomicInteger();
+        final var csvRecords2 = new AtomicInteger();
+        while (spliterator.tryAdvance(csvRecord -> csvRecords.incrementAndGet())) {
+            csvRecords2.incrementAndGet();
         }
 
-        assertThat(rows).hasValue(2);
-        assertThat(rows2).hasValue(2);
+        assertThat(csvRecords).hasValue(2);
+        assertThat(csvRecords2).hasValue(2);
     }
 
     @Test
@@ -354,7 +354,7 @@ class CsvReaderTest {
 
     // test helpers
 
-    private List<CsvRow> readAll(final String data) {
+    private List<CsvRecord> readAll(final String data) {
         return crb.build(data).stream().collect(Collectors.toList());
     }
 

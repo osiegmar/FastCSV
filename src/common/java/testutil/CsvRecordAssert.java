@@ -4,22 +4,22 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ListAssert;
 
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 
-public class CsvRowAssert extends AbstractAssert<CsvRowAssert, CsvRow> {
+public class CsvRecordAssert extends AbstractAssert<CsvRecordAssert, CsvRecord> {
 
-    public static final InstanceOfAssertFactory<CsvRow, CsvRowAssert> CSV_ROW =
-        new InstanceOfAssertFactory<>(CsvRow.class, CsvRowAssert::assertThat);
+    public static final InstanceOfAssertFactory<CsvRecord, CsvRecordAssert> CSV_RECORD =
+        new InstanceOfAssertFactory<>(CsvRecord.class, CsvRecordAssert::assertThat);
 
-    protected CsvRowAssert(final CsvRow actual) {
-        super(actual, CsvRowAssert.class);
+    protected CsvRecordAssert(final CsvRecord actual) {
+        super(actual, CsvRecordAssert.class);
     }
 
-    public static CsvRowAssert assertThat(final CsvRow actual) {
-        return new CsvRowAssert(actual);
+    public static CsvRecordAssert assertThat(final CsvRecord actual) {
+        return new CsvRecordAssert(actual);
     }
 
-    public CsvRowAssert isOriginalLineNumber(final long originalLineNumber) {
+    public CsvRecordAssert isOriginalLineNumber(final long originalLineNumber) {
         isNotNull();
         if (actual.getOriginalLineNumber() != originalLineNumber) {
             failWithMessage("Expected original line number to be <%d> but was <%d>",
@@ -29,7 +29,7 @@ public class CsvRowAssert extends AbstractAssert<CsvRowAssert, CsvRow> {
         return this;
     }
 
-    public CsvRowAssert isComment(final boolean comment) {
+    public CsvRecordAssert isComment(final boolean comment) {
         isNotNull();
         if (actual.isComment() != comment) {
             failWithMessage("Expected comment to be <%b> but was <%b>",
@@ -39,11 +39,11 @@ public class CsvRowAssert extends AbstractAssert<CsvRowAssert, CsvRow> {
         return this;
     }
 
-    public CsvRowAssert isComment() {
+    public CsvRecordAssert isComment() {
         return isComment(true);
     }
 
-    public CsvRowAssert isNotComment() {
+    public CsvRecordAssert isNotComment() {
         return isComment(false);
     }
 

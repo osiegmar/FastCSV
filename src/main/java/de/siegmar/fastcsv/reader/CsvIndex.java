@@ -38,9 +38,9 @@ public final class CsvIndex implements Serializable {
     private final byte commentCharacter;
 
     /**
-     * The total number of rows the CSV file contains this index was built for.
+     * The total number of records the CSV file contains this index was built for.
      */
-    private final long rowCounter;
+    private final long recordCounter;
 
     /**
      * The pages this index is partitioned.
@@ -49,13 +49,13 @@ public final class CsvIndex implements Serializable {
 
     CsvIndex(final long fileSize, final byte fieldSeparator, final byte quoteCharacter,
              final CommentStrategy commentStrategy, final byte commentCharacter,
-             final long rowCounter, final List<CsvPage> pages) {
+             final long recordCounter, final List<CsvPage> pages) {
         this.fileSize = fileSize;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = Objects.requireNonNull(commentStrategy);
         this.commentCharacter = commentCharacter;
-        this.rowCounter = rowCounter;
+        this.recordCounter = recordCounter;
         this.pages = Objects.requireNonNull(pages);
     }
 
@@ -89,12 +89,12 @@ public final class CsvIndex implements Serializable {
     }
 
     /**
-     * Gets the number of rows the file contains.
+     * Gets the number of records the file contains.
      *
-     * @return the number of rows the file contains
+     * @return the number of records the file contains
      */
-    public long rowCount() {
-        return rowCounter;
+    public long recordCount() {
+        return recordCounter;
     }
 
     CsvPage page(final int pageNumber) {
@@ -115,14 +115,14 @@ public final class CsvIndex implements Serializable {
             && quoteCharacter == csvIndex.quoteCharacter
             && commentStrategy == csvIndex.commentStrategy
             && commentCharacter == csvIndex.commentCharacter
-            && rowCounter == csvIndex.rowCounter
+            && recordCounter == csvIndex.recordCounter
             && Objects.equals(pages, csvIndex.pages);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(fileSize, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            pages, rowCounter);
+            pages, recordCounter);
     }
 
     @Override
@@ -133,7 +133,7 @@ public final class CsvIndex implements Serializable {
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
-            .add("rowCount=" + rowCounter)
+            .add("recordCount=" + recordCounter)
             .add("pageCount=" + pages.size())
             .toString();
     }

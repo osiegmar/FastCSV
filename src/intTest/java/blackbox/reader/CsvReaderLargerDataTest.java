@@ -1,7 +1,7 @@
 package blackbox.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static testutil.CsvRowAssert.assertThat;
+import static testutil.CsvRecordAssert.assertThat;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -28,7 +28,7 @@ class CsvReaderLargerDataTest {
         "Lorem ipsum dolor\n sit amet",
     };
 
-    private static final int TEST_ROWS = 1000;
+    private static final int TEST_RECORDS = 1000;
 
     @Test
     void largerData() {
@@ -36,8 +36,8 @@ class CsvReaderLargerDataTest {
             .build(new StringReader(createSampleCSV()));
 
         assertThat(reader.stream())
-            .hasSize(TEST_ROWS)
-            .allSatisfy(row -> assertThat(row)
+            .hasSize(TEST_RECORDS)
+            .allSatisfy(csvRecord -> assertThat(csvRecord)
                 .isNotComment()
                 .fields().containsExactly(TEXTS));
     }
@@ -45,8 +45,8 @@ class CsvReaderLargerDataTest {
     private String createSampleCSV() {
         final StringWriter sw = new StringWriter();
         final CsvWriter writer = CsvWriter.builder().build(sw);
-        for (int i = 0; i < TEST_ROWS; i++) {
-            writer.writeRow(TEXTS);
+        for (int i = 0; i < TEST_RECORDS; i++) {
+            writer.writeRecord(TEXTS);
         }
         return sw.toString();
     }

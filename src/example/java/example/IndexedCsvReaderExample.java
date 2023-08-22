@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvIndex;
-import de.siegmar.fastcsv.reader.CsvRow;
+import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -30,17 +30,17 @@ public class IndexedCsvReaderExample {
     private static Path prepareTestFile(final long secondsToWrite) throws IOException {
         final Path tmpFile = createTmpFile();
 
-        int row = 1;
+        int record = 1;
         final long writeDuration = System.currentTimeMillis() + (secondsToWrite * 1000);
 
         try (CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
-            for (; System.currentTimeMillis() < writeDuration; row++) {
-                csv.writeRow("row " + row, "containing standard ASCII, unicode letters öäü and emojis 😎");
+            for (; System.currentTimeMillis() < writeDuration; record++) {
+                csv.writeRecord("record " + record, "containing standard ASCII, unicode letters öäü and emojis 😎");
             }
         }
 
-        System.out.format("Temporary test file with %,d rows and %,d bytes successfully prepared%n%n",
-            row - 1, Files.size(tmpFile));
+        System.out.format("Temporary test file with %,d records and %,d bytes successfully prepared%n%n",
+            record - 1, Files.size(tmpFile));
 
         return tmpFile;
     }
@@ -69,12 +69,12 @@ public class IndexedCsvReaderExample {
 
         try (csv) {
             final CsvIndex index = csv.index();
-            System.out.printf("Indexed %,d rows%n", index.rowCount());
+            System.out.printf("Indexed %,d records%n", index.recordCount());
 
             System.out.println("Show records of last page");
             final int lastPage = index.pageCount() - 1;
-            final List<CsvRow> lastPageRows = csv.readPage(lastPage);
-            lastPageRows.forEach(System.out::println);
+            final List<CsvRecord> lastPageRecords = csv.readPage(lastPage);
+            lastPageRecords.forEach(System.out::println);
         }
 
         System.out.println();
@@ -88,7 +88,7 @@ public class IndexedCsvReaderExample {
             .build(file)
             .index();
 
-        System.out.printf("Indexed %,d rows%n", csvIndex.rowCount());
+        System.out.printf("Indexed %,d records%n", csvIndex.recordCount());
 
         // Store index for the given file somewhere, and use it later ...
 
@@ -100,8 +100,8 @@ public class IndexedCsvReaderExample {
         try (csv) {
             System.out.println("Show records of last page");
             final int lastPage = csvIndex.pageCount() - 1;
-            final List<CsvRow> lastPageRows = csv.readPage(lastPage);
-            lastPageRows.forEach(System.out::println);
+            final List<CsvRecord> lastPageRecords = csv.readPage(lastPage);
+            lastPageRecords.forEach(System.out::println);
         }
 
         System.out.println();
@@ -129,7 +129,7 @@ public class IndexedCsvReaderExample {
             .build(file);
 
         try (csv) {
-            System.out.printf("Indexed %,d rows%n", csv.index().rowCount());
+            System.out.printf("Indexed %,d records%n", csv.index().recordCount());
         }
 
         System.out.println();
@@ -145,10 +145,10 @@ public class IndexedCsvReaderExample {
             .build(file);
 
         try (csv) {
-            final List<CsvRow> rows = csv.readPage(2);
+            final List<CsvRecord> csvRecords = csv.readPage(2);
 
             System.out.println("Parsed via advanced config:");
-            rows.forEach(System.out::println);
+            csvRecords.forEach(System.out::println);
         }
     }
 

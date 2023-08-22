@@ -19,9 +19,9 @@ public interface StatusListener {
     }
 
     /**
-     * Called when a new row has been read.
+     * Called when a new record has been read.
      */
-    default void onReadRow() {
+    default void onReadRecord() {
     }
 
     /**

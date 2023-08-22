@@ -23,9 +23,9 @@ import java.util.StringJoiner;
  * Example use:
  * {@snippet :
  * try (CsvWriter csv = CsvWriter.builder().build(file)) {
- *     csv.writeRow("Hello", "world");
+ *     csv.writeRecord("Hello", "world");
  * }
- * }
+ *}
  */
 @SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
 public final class CsvWriter implements Closeable {
@@ -82,9 +82,9 @@ public final class CsvWriter implements Closeable {
      *               not configured otherwise ({@link QuoteStrategy#EMPTY})).
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
-     * @see #writeRow(String...)
+     * @see #writeRecord(String...)
      */
-    public CsvWriter writeRow(final Iterable<String> values) {
+    public CsvWriter writeRecord(final Iterable<String> values) {
         try {
             boolean firstField = true;
             for (final String value : values) {
@@ -94,7 +94,7 @@ public final class CsvWriter implements Closeable {
                 writeInternal(value, firstField);
                 firstField = false;
             }
-            endRow();
+            endRecord();
             return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -108,9 +108,9 @@ public final class CsvWriter implements Closeable {
      *               not configured otherwise ({@link QuoteStrategy#EMPTY}))
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
-     * @see #writeRow(Iterable)
+     * @see #writeRecord(Iterable)
      */
-    public CsvWriter writeRow(final String... values) {
+    public CsvWriter writeRecord(final String... values) {
         try {
             for (int i = 0; i < values.length; i++) {
                 if (i > 0) {
@@ -118,7 +118,7 @@ public final class CsvWriter implements Closeable {
                 }
                 writeInternal(values[i], i == 0);
             }
-            endRow();
+            endRecord();
             return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -223,7 +223,7 @@ public final class CsvWriter implements Closeable {
             if (comment != null && !comment.isEmpty()) {
                 writeCommentInternal(comment);
             }
-            endRow();
+            endRecord();
             return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
@@ -265,7 +265,7 @@ public final class CsvWriter implements Closeable {
         }
     }
 
-    private void endRow() throws IOException {
+    private void endRecord() throws IOException {
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         if (syncWriter) {
             writer.flush();
@@ -386,8 +386,8 @@ public final class CsvWriter implements Closeable {
          * Constructs a {@link CsvWriter} for the specified Writer.
          * <p>
          * This library uses built-in buffering but writes its internal buffer to the given
-         * {@code writer} on every {@link CsvWriter#writeRow(String...)} or
-         * {@link CsvWriter#writeRow(Iterable)} call. Therefore, you probably want to pass in a
+         * {@code writer} on every {@link CsvWriter#writeRecord(String...)} or
+         * {@link CsvWriter#writeRecord(Iterable)} call. Therefore, you probably want to pass in a
          * {@link java.io.BufferedWriter} to retain good performance.
          * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
          * files.

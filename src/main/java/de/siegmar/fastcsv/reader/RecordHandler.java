@@ -1,50 +1,50 @@
 package de.siegmar.fastcsv.reader;
 
-final class RowHandler {
+final class RecordHandler {
 
     private int len;
-    private String[] row;
+    private String[] record;
     private int idx;
     private int lines = 1;
     private boolean commentMode;
     private long originalLineNumber = 1;
 
-    RowHandler(final int len) {
+    RecordHandler(final int len) {
         this.len = len;
-        row = new String[len];
+        record = new String[len];
     }
 
     void add(final String value) {
         if (idx == len) {
             extendCapacity();
         }
-        row[idx++] = value;
+        record[idx++] = value;
     }
 
     private void extendCapacity() {
         len *= 2;
-        final String[] newRow = new String[len];
-        System.arraycopy(row, 0, newRow, 0, idx);
-        row = newRow;
+        final String[] newRecord = new String[len];
+        System.arraycopy(record, 0, newRecord, 0, idx);
+        record = newRecord;
     }
 
-    CsvRow buildAndReset() {
-        final CsvRow csvRow = idx > 0 ? build() : null;
+    CsvRecord buildAndReset() {
+        final CsvRecord csvRecord = idx > 0 ? build() : null;
         idx = 0;
         originalLineNumber += lines;
         lines = 1;
         commentMode = false;
-        return csvRow;
+        return csvRecord;
     }
 
-    private CsvRow build() {
-        if (idx > 1 || !row[0].isEmpty()) {
+    private CsvRecord build() {
+        if (idx > 1 || !record[0].isEmpty()) {
             final String[] ret = new String[idx];
-            System.arraycopy(row, 0, ret, 0, idx);
-            return new CsvRow(originalLineNumber, ret, commentMode);
+            System.arraycopy(record, 0, ret, 0, idx);
+            return new CsvRecord(originalLineNumber, ret, commentMode);
         }
 
-        return new CsvRow(originalLineNumber, commentMode);
+        return new CsvRecord(originalLineNumber, commentMode);
     }
 
     public void enableCommentMode() {
