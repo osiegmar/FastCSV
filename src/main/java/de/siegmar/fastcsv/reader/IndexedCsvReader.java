@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class is thread-safe.
  * <p>
  * Example use:
- * <pre>{@code
+ * {@snippet :
  * try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
  *     CsvIndex index = csv.index();
  *     int lastPage = index.pageCount() - 1;
  *     List<CsvRow> rows = csv.readPage(lastPage);
  * }
- * }</pre>
+ * }
  */
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader implements Closeable {

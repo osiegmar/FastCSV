@@ -21,11 +21,11 @@ import java.util.StringJoiner;
  * This is the main class for writing CSV data.
  * <p>
  * Example use:
- * <pre>{@code
+ * {@snippet :
  * try (CsvWriter csv = CsvWriter.builder().build(file)) {
  *     csv.writeRow("Hello", "world");
  * }
- * }</pre>
+ * }
  */
 @SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
 public final class CsvWriter implements Closeable {
