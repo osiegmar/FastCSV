@@ -19,13 +19,13 @@ import java.util.stream.StreamSupport;
  * Header name based CSV reader implementation.
  * <p>
  * Example use:
- * <pre>{@code
+ * {@snippet :
  * try (NamedCsvReader csv = NamedCsvReader.builder().build(file)) {
  *     for (NamedCsvRow row : csv) {
- *         ...
+ *         // ...
  *     }
  * }
- * }</pre>
+ * }
  */
 public final class NamedCsvReader implements Iterable<NamedCsvRow>, Closeable {
 

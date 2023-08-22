@@ -12,13 +12,40 @@ public final class CsvIndex implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The CSV file size this index was built for.
+     */
     private final long fileSize;
+
+    /**
+     * The field separator used when building this index.
+     */
     private final byte fieldSeparator;
+
+    /**
+     * The quote character used when building this index.
+     */
     private final byte quoteCharacter;
+
+    /**
+     * The comment strategy used when building this index.
+     */
     private final CommentStrategy commentStrategy;
+
+    /**
+     * The comment character used when building this index.
+     */
     private final byte commentCharacter;
-    private final List<CsvPage> pages;
+
+    /**
+     * The total number of rows the CSV file contains this index was built for.
+     */
     private final long rowCounter;
+
+    /**
+     * The pages this index is partitioned.
+     */
+    private final List<CsvPage> pages;
 
     CsvIndex(final long fileSize, final byte fieldSeparator, final byte quoteCharacter,
              final CommentStrategy commentStrategy, final byte commentCharacter,
@@ -86,9 +113,9 @@ public final class CsvIndex implements Serializable {
         return fileSize == csvIndex.fileSize
             && fieldSeparator == csvIndex.fieldSeparator
             && quoteCharacter == csvIndex.quoteCharacter
+            && commentStrategy == csvIndex.commentStrategy
             && commentCharacter == csvIndex.commentCharacter
             && rowCounter == csvIndex.rowCounter
-            && commentStrategy == csvIndex.commentStrategy
             && Objects.equals(pages, csvIndex.pages);
     }
 
