@@ -180,11 +180,11 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
-    private List<CsvRow> readPage(final CsvPage pageRecord) throws IOException {
+    private List<CsvRow> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<CsvRow> ret = new ArrayList<>(pageSize);
         synchronized (raf) {
-            raf.seek(pageRecord.offset());
-            rowReader.resetBuffer(pageRecord.startingLineNumber());
+            raf.seek(page.offset());
+            rowReader.resetBuffer(page.startingLineNumber());
 
             CsvRow csvRow;
             for (int i = 0; i < pageSize && (csvRow = rowReader.fetchAndRead()) != null; i++) {
@@ -383,7 +383,7 @@ public final class IndexedCsvReader implements Closeable {
     private final class ScannerListener implements CsvScanner.Listener {
 
         private final StatusListener statusListener;
-        private final List<CsvPage> pageOffsets = new ArrayList<>();
+        private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
         private final AtomicLong rowCounter = new AtomicLong();
         private long startingLineNumber = 1;
 
@@ -399,7 +399,7 @@ public final class IndexedCsvReader implements Closeable {
         @Override
         public void startOffset(final long offset) {
             if (rowCounter.getAndIncrement() % pageSize == 0) {
-                pageOffsets.add(new CsvPage(offset, startingLineNumber));
+                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber));
             }
         }
 
