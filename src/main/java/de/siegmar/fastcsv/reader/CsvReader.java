@@ -22,13 +22,13 @@ import java.util.stream.StreamSupport;
  * This is the main class for reading CSV data.
  * <p>
  * Example use:
- * <pre>{@code
+ * {@snippet :
  * try (CsvReader csv = CsvReader.builder().build(file)) {
  *     for (CsvRow row : csv) {
- *         ...
+ *         // ...
  *     }
  * }
- * }</pre>
+ * }
  */
 public final class CsvReader implements Iterable<CsvRow>, Closeable {
 
