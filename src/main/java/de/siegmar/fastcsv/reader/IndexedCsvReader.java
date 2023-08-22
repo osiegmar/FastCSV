@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -119,7 +120,7 @@ public final class IndexedCsvReader implements Closeable {
     private CsvIndex buildIndex(final StatusListener statusListener) throws IOException {
         final var listener = new ScannerListener(statusListener);
 
-        try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
+        try (var channel = openFileChannel()) {
             statusListener.onInit(channel.size());
 
             new CsvScanner(channel,
@@ -140,6 +141,10 @@ public final class IndexedCsvReader implements Closeable {
             statusListener.onError(t);
             throw t;
         }
+    }
+
+    SeekableByteChannel openFileChannel() throws IOException {
+        return Files.newByteChannel(file, StandardOpenOption.READ);
     }
 
     /**

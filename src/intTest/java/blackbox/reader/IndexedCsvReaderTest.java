@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -41,6 +42,7 @@ import testutil.CsvRowAssert;
 class IndexedCsvReaderTest {
 
     private static final String TEST_STRING = "foo";
+    private static final String NON_EXISTENT_FILENAME = "/tmp/non-existent";
 
     @InjectSoftAssertions
     private SoftAssertions softly;
@@ -197,6 +199,27 @@ class IndexedCsvReaderTest {
         }
 
         @Test
+        void nonExistingFile() {
+            assertThatThrownBy(() -> singlePageBuilder()
+                .build(Path.of(NON_EXISTENT_FILENAME)))
+                .isInstanceOf(NoSuchFileException.class)
+                .hasMessage(NON_EXISTENT_FILENAME);
+        }
+
+        @Test
+        void nonExistingFileWithListener() throws IOException {
+            final var statusListener = new CollectingStatusListener();
+
+            assertThatThrownBy(() -> singlePageBuilder()
+                .statusListener(statusListener)
+                .build(Path.of(NON_EXISTENT_FILENAME)));
+
+            assertThat(statusListener.getThrowable())
+                .isInstanceOf(NoSuchFileException.class)
+                .hasMessage(NON_EXISTENT_FILENAME);
+        }
+
+        @Test
         void illegalPage() {
             assertThatThrownBy(() -> buildSinglePage(TEST_STRING).readPage(-1))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -334,6 +357,20 @@ class IndexedCsvReaderTest {
                 assertThat(statusListener.getThrowable()).isNull();
                 assertThat(statusListener).asString()
                     .isEqualTo("Read %,d rows and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
+            }
+        }
+
+        @Test
+        void emptyFileStatus() throws IOException {
+            final var statusListener = new CollectingStatusListener();
+
+            final IndexedCsvReader csv = singlePageBuilder()
+                .statusListener(statusListener)
+                .build(prepareTestFile(""));
+
+            try (csv) {
+                assertThat(statusListener).asString()
+                    .isEqualTo("Read 0 rows and 0 of 0 bytes (NaN %)");
             }
         }
 

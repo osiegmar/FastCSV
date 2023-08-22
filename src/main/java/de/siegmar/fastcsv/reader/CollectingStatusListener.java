@@ -86,7 +86,7 @@ public class CollectingStatusListener implements StatusListener {
 
     @Override
     public String toString() {
-        final long byteCntVal = this.byteCount.longValue();
+        final long byteCntVal = byteCount.longValue();
         final double percentage = byteCntVal * 100.0 / fileSize;
         return String.format("Read %,d rows and %,d of %,d bytes (%.2f %%)",
             rowCount.longValue(), byteCntVal, fileSize, percentage);
