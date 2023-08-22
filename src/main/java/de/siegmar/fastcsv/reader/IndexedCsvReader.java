@@ -318,7 +318,8 @@ public final class IndexedCsvReader implements Closeable {
         }
 
         /**
-         * Sets the {@code pageSize} for pages returned by {@link IndexedCsvReader#readPage(int)}.
+         * Sets the {@code pageSize} for pages returned by {@link IndexedCsvReader#readPage(int)}
+         * (default: {@value DEFAULT_PAGE_SIZE}).
          *
          * @param pageSize the maximum size of pages.
          * @return This updated object, so that additional method calls can be chained together.
