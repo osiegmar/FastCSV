@@ -110,12 +110,12 @@ public final class CsvReader implements Iterable<CsvRow>, Closeable {
     }
 
     /**
-     * Creates a new sequential {@code Stream} from this instance.
+     * Creates a new sequential {@link Stream} from this instance.
      * <p>
      * A close handler is registered by this method in order to close the underlying resources.
      * Don't forget to close the returned stream when you're done.
      *
-     * @return a new sequential {@code Stream}.
+     * @return a new sequential {@link Stream}.
      */
     public Stream<CsvRow> stream() {
         return StreamSupport.stream(spliterator(), false)
