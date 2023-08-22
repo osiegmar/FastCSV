@@ -104,7 +104,7 @@ Iterative reading of some CSV data with a header
 
 ```java
 NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
-    .forEach(csvRecord -> csvRecord.getField("header 2"));
+    .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
 ```
 
 For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
