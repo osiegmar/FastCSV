@@ -91,14 +91,14 @@ public final class IndexedCsvReader implements Closeable {
                                                   final CommentStrategy commentStrategy, final byte commentCharacter,
                                                   final CsvIndex csvIndex)
         throws IOException {
-        final String expectedSignature = new StringJoiner(", ")
+        final var expectedSignature = new StringJoiner(", ")
             .add("fileSize=" + Files.size(file))
             .add("fieldSeparator=" + fieldSeparator)
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
             .toString();
-        final String actualSignature = new StringJoiner(", ")
+        final var actualSignature = new StringJoiner(", ")
             .add("fileSize=" + csvIndex.getFileSize())
             .add("fieldSeparator=" + csvIndex.getFieldSeparator())
             .add("quoteCharacter=" + csvIndex.getQuoteCharacter())

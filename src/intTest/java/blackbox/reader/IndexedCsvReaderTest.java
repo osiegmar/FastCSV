@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
@@ -208,9 +210,10 @@ class IndexedCsvReaderTest {
                 .hasMessage("Index 10 out of bounds for length 1");
         }
 
-        @Test
-        void nullCharset() {
-            assertThatThrownBy(() -> singlePageBuilder().build(Paths.get("/tmp"), null))
+        @ParameterizedTest
+        @NullSource
+        void nullCharset(final Charset charset) {
+            assertThatThrownBy(() -> singlePageBuilder().build(Paths.get("/tmp"), charset))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("charset must not be null");
         }
