@@ -13,6 +13,12 @@ public class CollectingStatusListener implements StatusListener {
     private volatile boolean completionStatus;
     private volatile Throwable failedThrowable;
 
+    /**
+     * Default constructor.
+     */
+    public CollectingStatusListener() {
+    }
+
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     public void onInit(final long fileSize) {
