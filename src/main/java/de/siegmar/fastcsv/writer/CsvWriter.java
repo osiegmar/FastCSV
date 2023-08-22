@@ -17,6 +17,9 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import de.siegmar.fastcsv.util.Preconditions;
+import de.siegmar.fastcsv.util.Util;
+
 /**
  * This is the main class for writing CSV data.
  * <p>
@@ -41,20 +44,12 @@ public final class CsvWriter implements Closeable {
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
               final boolean syncWriter) {
-        if (fieldSeparator == CR || fieldSeparator == LF) {
-            throw new IllegalArgumentException("fieldSeparator must not be a newline char");
-        }
-        if (quoteCharacter == CR || quoteCharacter == LF) {
-            throw new IllegalArgumentException("quoteCharacter must not be a newline char");
-        }
-        if (commentCharacter == CR || commentCharacter == LF) {
-            throw new IllegalArgumentException("commentCharacter must not be a newline char");
-        }
-        if (containsDupe(fieldSeparator, quoteCharacter, commentCharacter)) {
-            throw new IllegalArgumentException(String.format("Control characters must differ"
-                    + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-                fieldSeparator, quoteCharacter, commentCharacter));
-        }
+        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
+        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+                fieldSeparator, quoteCharacter, commentCharacter);
 
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
@@ -375,9 +370,7 @@ public final class CsvWriter implements Closeable {
          * @return This updated object, so that additional method calls can be chained together.
          */
         public CsvWriterBuilder bufferSize(final int bufferSize) {
-            if (bufferSize < 0) {
-                throw new IllegalArgumentException("buffer size must be >= 0");
-            }
+            Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
             this.bufferSize = bufferSize;
             return this;
         }

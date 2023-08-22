@@ -37,4 +37,14 @@ public final class Util {
         return false;
     }
 
+    /**
+     * Checks if the given character is a newline character.
+     *
+     * @param character character to test.
+     * @return {@code true} if the argument is {@value CR} or {@value LF}
+     */
+    public static boolean isNewline(final char character) {
+        return character == CR || character == LF;
+    }
+
 }

@@ -1,7 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
-import static de.siegmar.fastcsv.util.Util.CR;
-import static de.siegmar.fastcsv.util.Util.LF;
+import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,6 +16,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
+
+import de.siegmar.fastcsv.util.Preconditions;
+import de.siegmar.fastcsv.util.Util;
 
 /**
  * CSV reader implementation for indexed based access.
@@ -58,12 +60,10 @@ public final class IndexedCsvReader implements Closeable {
                      final int pageSize, final CsvIndex csvIndex, final StatusListener statusListener)
         throws IOException {
 
-        if (fieldSeparator == quoteCharacter || fieldSeparator == commentCharacter
-            || quoteCharacter == commentCharacter) {
-            throw new IllegalArgumentException(String.format("Control characters must differ"
-                    + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-                fieldSeparator, quoteCharacter, commentCharacter));
-        }
+        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+            "Control characters must differ"
+                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+            fieldSeparator, quoteCharacter, commentCharacter);
 
         this.file = file;
         this.charset = charset;
@@ -105,11 +105,9 @@ public final class IndexedCsvReader implements Closeable {
             .add("commentCharacter=" + csvIndex.getCommentCharacter())
             .toString();
 
-        if (!expectedSignature.equals(actualSignature)) {
-            throw new IllegalArgumentException("Index does not match! "
-                + "Expected: " + expectedSignature + "; "
-                + "Actual: " + actualSignature);
-        }
+        Preconditions.checkArgument(expectedSignature.equals(actualSignature),
+            "Index does not match! Expected: %s; Actual: %s",
+            expectedSignature, actualSignature);
 
         return csvIndex;
     }
@@ -172,10 +170,7 @@ public final class IndexedCsvReader implements Closeable {
      * @throws IndexOutOfBoundsException if the file does not contain the specified page
      */
     public List<CsvRecord> readPage(final int page) throws IOException {
-        if (page < 0) {
-            throw new IllegalArgumentException("page must be >= 0");
-        }
-
+        Preconditions.checkArgument(page >= 0, "page must be >= 0");
         return readPage(csvIndex.page(page));
     }
 
@@ -274,9 +269,8 @@ public final class IndexedCsvReader implements Closeable {
          * @see #commentCharacter(char)
          */
         public IndexedCsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
-            if (commentStrategy == CommentStrategy.SKIP) {
-                throw new IllegalArgumentException("CommentStrategy SKIP is not supported in IndexedCsvReader");
-            }
+            Preconditions.checkArgument(commentStrategy != CommentStrategy.SKIP,
+                "CommentStrategy SKIP is not supported in IndexedCsvReader");
             this.commentStrategy = commentStrategy;
             return this;
         }
@@ -324,9 +318,8 @@ public final class IndexedCsvReader implements Closeable {
          * @return This updated object, so that additional method calls can be chained together.
          */
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
-            if (pageSize < MIN_PAGE_SIZE) {
-                throw new IllegalArgumentException("pageSize must be > 0");
-            }
+            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE,
+                "pageSize must be >= %d", MIN_PAGE_SIZE);
             this.pageSize = pageSize;
             return this;
         }
@@ -338,13 +331,11 @@ public final class IndexedCsvReader implements Closeable {
          * of IndexedCsvReader.
          */
         private static void checkControlCharacter(final char controlChar) {
-            if (controlChar > MAX_BASE_ASCII) {
-                throw new IllegalArgumentException(String.format(
-                    "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
-                    controlChar, (int) controlChar));
-            } else if (controlChar == CR || controlChar == LF) {
-                throw new IllegalArgumentException("A newline character must not be used as control character");
-            }
+            Preconditions.checkArgument(!Util.isNewline(controlChar),
+                "A newline character must not be used as control character");
+            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII,
+                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
+                controlChar, (int) controlChar);
         }
 
         /**

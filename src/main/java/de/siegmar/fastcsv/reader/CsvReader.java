@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import static de.siegmar.fastcsv.util.Util.CR;
-import static de.siegmar.fastcsv.util.Util.LF;
 import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
@@ -19,6 +17,9 @@ import java.util.Spliterator;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import de.siegmar.fastcsv.util.Preconditions;
+import de.siegmar.fastcsv.util.Util;
 
 /**
  * This is the main class for reading CSV data.
@@ -72,20 +73,13 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
     }
 
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
-        if (fieldSeparator == CR || fieldSeparator == LF) {
-            throw new IllegalArgumentException("fieldSeparator must not be a newline char");
-        }
-        if (quoteCharacter == CR || quoteCharacter == LF) {
-            throw new IllegalArgumentException("quoteCharacter must not be a newline char");
-        }
-        if (commentCharacter == CR || commentCharacter == LF) {
-            throw new IllegalArgumentException("commentCharacter must not be a newline char");
-        }
-        if (containsDupe(fieldSeparator, quoteCharacter, commentCharacter)) {
-            throw new IllegalArgumentException(String.format("Control characters must differ"
-                    + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-                fieldSeparator, quoteCharacter, commentCharacter));
-        }
+        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
+        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+            "Control characters must differ"
+                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+            fieldSeparator, quoteCharacter, commentCharacter);
     }
 
     /**
