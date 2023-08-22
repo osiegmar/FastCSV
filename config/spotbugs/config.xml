@@ -10,4 +10,14 @@
         <Field name="header"/>
     </Match>
 
+    <!-- Ignore mutable throwable exposure in listener -->
+    <Match>
+        <Class name="de.siegmar.fastcsv.reader.CollectingStatusListener"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Or>
+            <Method name="onError"/>
+            <Method name="getThrowable"/>
+        </Or>
+    </Match>
+
 </FindBugsFilter>

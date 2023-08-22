@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
 import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
@@ -31,9 +33,6 @@ import java.util.stream.StreamSupport;
  * }
  */
 public final class CsvReader implements Iterable<CsvRow>, Closeable {
-
-    private static final char CR = '\r';
-    private static final char LF = '\n';
 
     private final RowReader rowReader;
     private final CommentStrategy commentStrategy;

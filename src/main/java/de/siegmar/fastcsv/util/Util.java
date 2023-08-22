@@ -2,6 +2,16 @@ package de.siegmar.fastcsv.util;
 
 public final class Util {
 
+    /**
+     * Carriage return.
+     */
+    public static final char CR = '\r';
+
+    /**
+     * Line feed.
+     */
+    public static final char LF = '\n';
+
     private Util() {
     }
 

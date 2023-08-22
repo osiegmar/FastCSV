@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.writer;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
 import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
@@ -27,9 +29,6 @@ import java.util.StringJoiner;
  */
 @SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
 public final class CsvWriter implements Closeable {
-
-    private static final char CR = '\r';
-    private static final char LF = '\n';
 
     private final Writer writer;
     private final char fieldSeparator;

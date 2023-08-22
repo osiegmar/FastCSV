@@ -59,4 +59,8 @@ final class RowHandler {
         lines++;
     }
 
+    public void setOriginalLineNumber(final long originalLineNumber) {
+        this.originalLineNumber = originalLineNumber;
+    }
+
 }
