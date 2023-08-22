@@ -20,7 +20,7 @@ public class NamedCsvReaderExample {
             .build("header1,header2\nvalue1,value2")
             .stream().findFirst();
 
-        first.ifPresent(csvRecord -> System.out.println("Header/Name based: " + csvRecord.getField("header2")));
+        first.ifPresent(csvRecord -> System.out.println("Header/Name based: " + csvRecord.field("header2")));
     }
 
     private static void advancedConfiguration() {
@@ -32,7 +32,7 @@ public class NamedCsvReaderExample {
             .skipComments(false)
             .build(data)
             .stream()
-            .map(csvRecord -> csvRecord.getFields().toString())
+            .map(csvRecord -> csvRecord.fields().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

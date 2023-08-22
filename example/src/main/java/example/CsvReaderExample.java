@@ -25,7 +25,7 @@ public class CsvReaderExample {
     private static void simple() {
         System.out.print("For-Each loop: ");
         for (final CsvRecord csvRecord : CsvReader.builder().build("foo,bar")) {
-            System.out.println(csvRecord.getFields());
+            System.out.println(csvRecord.fields());
         }
     }
 
@@ -46,7 +46,7 @@ public class CsvReaderExample {
             .build("foo,bar\nfoo2,bar2").iterator(); iterator.hasNext();) {
 
             final CsvRecord csvRecord = iterator.next();
-            System.out.print(csvRecord.getFields());
+            System.out.print(csvRecord.fields());
             if (iterator.hasNext()) {
                 System.out.print(" || ");
             } else {
@@ -66,7 +66,7 @@ public class CsvReaderExample {
             .errorOnDifferentFieldCount(false)
             .build(data)
             .stream()
-            .map(csvRecord -> csvRecord.getFields().toString())
+            .map(csvRecord -> csvRecord.fields().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

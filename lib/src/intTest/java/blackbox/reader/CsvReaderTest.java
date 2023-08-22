@@ -79,7 +79,7 @@ class CsvReaderTest {
 
     @Test
     void immutableResponse() {
-        final List<String> fields = crb.build("foo").iterator().next().getFields();
+        final List<String> fields = crb.build("foo").iterator().next().fields();
         assertThatThrownBy(() -> fields.add("bar"))
             .isInstanceOf(UnsupportedOperationException.class);
     }
@@ -154,7 +154,7 @@ class CsvReaderTest {
     void getNonExistingFieldByIndex() {
         assertThat(crb.build("foo").stream())
             .singleElement()
-            .satisfies(item -> assertThatThrownBy(() -> spotbugs(item.getField(1)))
+            .satisfies(item -> assertThatThrownBy(() -> spotbugs(item.field(1)))
                 .isInstanceOf(IndexOutOfBoundsException.class));
     }
 

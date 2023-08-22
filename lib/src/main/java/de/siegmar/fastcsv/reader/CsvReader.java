@@ -127,17 +127,17 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         CsvRecord csvRecord;
         while ((csvRecord = recordReader.fetchAndRead()) != null) {
             // skip commented records
-            if (commentStrategy == CommentStrategy.SKIP && csvRecord.isComment()) {
+            if (commentStrategy == CommentStrategy.SKIP && csvRecord.comment()) {
                 continue;
             }
 
             // skip empty records
-            if (csvRecord.isEmpty()) {
+            if (csvRecord.empty()) {
                 if (skipEmptyRecords) {
                     continue;
                 }
             } else if (errorOnDifferentFieldCount) {
-                final int fieldCount = csvRecord.getFieldCount();
+                final int fieldCount = csvRecord.fieldCount();
 
                 // check the field count consistency on every record
                 if (firstLineFieldCount == -1) {
@@ -145,7 +145,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 } else if (fieldCount != firstLineFieldCount) {
                     throw new MalformedCsvException(
                         String.format("Record %d has %d fields, but first record had %d fields",
-                            csvRecord.getOriginalLineNumber(), fieldCount, firstLineFieldCount));
+                            csvRecord.originalLineNumber(), fieldCount, firstLineFieldCount));
                 }
             }
 
@@ -201,7 +201,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             } catch (final IOException e) {
                 if (fetchedRecord != null) {
                     throw new UncheckedIOException("IOException when reading record that started in line "
-                        + (fetchedRecord.getOriginalLineNumber() + 1), e);
+                        + (fetchedRecord.originalLineNumber() + 1), e);
                 } else {
                     throw new UncheckedIOException("IOException when reading first record", e);
                 }

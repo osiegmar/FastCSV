@@ -8,7 +8,7 @@ import java.util.StringJoiner;
 /**
  * Index based CSV-record.
  */
-@SuppressWarnings("PMD.ArrayIsStoredDirectly")
+@SuppressWarnings({"PMD.ArrayIsStoredDirectly", "PMD.AvoidFieldNameMatchingMethodName"})
 public final class CsvRecord {
 
     private static final String[] EMPTY = {""};
@@ -35,7 +35,7 @@ public final class CsvRecord {
      *
      * @return the original line number
      */
-    public long getOriginalLineNumber() {
+    public long originalLineNumber() {
         return originalLineNumber;
     }
 
@@ -46,7 +46,7 @@ public final class CsvRecord {
      * @return field value, never {@code null}
      * @throws IndexOutOfBoundsException if index is out of range
      */
-    public String getField(final int index) {
+    public String field(final int index) {
         return fields[index];
     }
 
@@ -55,7 +55,7 @@ public final class CsvRecord {
      *
      * @return all fields of this record, never {@code null}
      */
-    public List<String> getFields() {
+    public List<String> fields() {
         return Collections.unmodifiableList(Arrays.asList(fields));
     }
 
@@ -65,7 +65,7 @@ public final class CsvRecord {
      * @return the number of fields of this record
      * @see CsvReader.CsvReaderBuilder#errorOnDifferentFieldCount(boolean)
      */
-    public int getFieldCount() {
+    public int fieldCount() {
         return fields.length;
     }
 
@@ -75,7 +75,7 @@ public final class CsvRecord {
      * @return {@code true} if the record is a commented record
      * @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
      */
-    public boolean isComment() {
+    public boolean comment() {
         return comment;
     }
 
@@ -85,7 +85,7 @@ public final class CsvRecord {
      * @return {@code true} if the record is an empty record
      * @see CsvReader.CsvReaderBuilder#skipEmptyRecords(boolean)
      */
-    public boolean isEmpty() {
+    public boolean empty() {
         return fields == EMPTY;
     }
 

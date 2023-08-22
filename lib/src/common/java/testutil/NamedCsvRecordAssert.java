@@ -22,9 +22,9 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
 
     public NamedCsvRecordAssert isOriginalLineNumber(final long originalLineNumber) {
         isNotNull();
-        if (actual.getOriginalLineNumber() != originalLineNumber) {
+        if (actual.originalLineNumber() != originalLineNumber) {
             failWithMessage("Expected original line number to be <%d> but was <%d>",
-                originalLineNumber, actual.getOriginalLineNumber());
+                originalLineNumber, actual.originalLineNumber());
         }
 
         return this;
@@ -32,12 +32,12 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
 
     public MapAssert<String, String> fields() {
         isNotNull();
-        return new MapAssert<>(actual.getFields());
+        return new MapAssert<>(actual.fields());
     }
 
     public StringAssert field(final String name) {
         isNotNull();
-        return new StringAssert(actual.getField(name));
+        return new StringAssert(actual.field(name));
     }
 
 }
