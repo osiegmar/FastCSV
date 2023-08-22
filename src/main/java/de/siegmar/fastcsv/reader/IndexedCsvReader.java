@@ -48,6 +48,7 @@ public final class IndexedCsvReader implements Closeable {
     private final char commentCharacter;
     private final int pageSize;
     private final RandomAccessFile raf;
+    private final InputStreamReader reader;
     private final RowReader rowReader;
     private final CsvIndex csvIndex;
 
@@ -82,8 +83,8 @@ public final class IndexedCsvReader implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        rowReader = new RowReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
-            fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
+        reader = new InputStreamReader(new RandomAccessFileInputStream(raf), charset);
+        rowReader = new RowReader(reader, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
     private static CsvIndex validatePrebuiltIndex(final Path file, final byte fieldSeparator, final byte quoteCharacter,
@@ -197,7 +198,7 @@ public final class IndexedCsvReader implements Closeable {
 
     @Override
     public void close() throws IOException {
-        raf.close();
+        reader.close();
     }
 
     @Override

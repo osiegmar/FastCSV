@@ -22,4 +22,9 @@ class RandomAccessFileInputStream extends InputStream {
         return raf.read(b, off, len);
     }
 
+    @Override
+    public void close() throws IOException {
+        raf.close();
+    }
+
 }
