@@ -22,14 +22,14 @@ public final class CsvIndex implements Serializable {
 
     CsvIndex(final long fileSize, final byte fieldSeparator, final byte quoteCharacter,
              final CommentStrategy commentStrategy, final byte commentCharacter,
-             final List<CsvPage> pages, final long rowCounter) {
+             final long rowCounter, final List<CsvPage> pages) {
         this.fileSize = fileSize;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
-        this.commentStrategy = commentStrategy;
+        this.commentStrategy = Objects.requireNonNull(commentStrategy);
         this.commentCharacter = commentCharacter;
-        this.pages = pages;
         this.rowCounter = rowCounter;
+        this.pages = Objects.requireNonNull(pages);
     }
 
     long getFileSize() {
@@ -106,7 +106,8 @@ public final class CsvIndex implements Serializable {
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
-            .add("rowCounter=" + rowCounter)
+            .add("rowCount=" + rowCounter)
+            .add("pageCount=" + pages.size())
             .toString();
     }
 

@@ -136,25 +136,20 @@ class CsvScannerTest {
     }
 
     private static List<Integer> scan(final byte[] data, final CommentStrategy commentStrategy) {
-        final List<Integer> positions = new ArrayList<>();
-
         final var fieldSeparator = (byte) ',';
         final var quoteCharacter = (byte) '"';
         final var commentCharacter = (byte) '#';
 
+        final var listener = new CollectingListener();
+
         try (var channel = Channels.newChannel(new ByteArrayInputStream(data))) {
             new CsvScanner(channel, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-                new CsvScanner.Listener() {
-                    @Override
-                    public void startOffset(final long offset) {
-                        positions.add(Math.toIntExact(offset));
-                    }
-                }).scan();
+                listener).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        return positions;
+        return listener.getOffsets();
     }
 
     private static String repl(final String line, final String newLine) {
@@ -174,6 +169,34 @@ class CsvScannerTest {
         }
 
         return indexes;
+    }
+
+    private static class CollectingListener implements CsvScanner.Listener {
+        private final List<Integer> offsets = new ArrayList<>();
+
+        @Override
+        public void onReadBytes(final int readCnt) {
+
+        }
+
+        @Override
+        public void startOffset(final long offset) {
+            offsets.add(Math.toIntExact(offset));
+        }
+
+        @Override
+        public void onReadRow() {
+
+        }
+
+        @Override
+        public void additionalLine() {
+
+        }
+
+        public List<Integer> getOffsets() {
+            return offsets;
+        }
     }
 
 }

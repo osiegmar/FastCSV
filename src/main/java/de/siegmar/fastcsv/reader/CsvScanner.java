@@ -34,7 +34,7 @@ final class CsvScanner {
     void scan() throws IOException {
         int d;
         while ((d = stream.get()) != -1) {
-            listener.startOffset(stream.getTotalOffset());
+            listener.startOffset(stream.getOffset());
 
             // parse a row
             if (d == commentCharacter && readComments) {
@@ -116,17 +116,13 @@ final class CsvScanner {
 
     public interface Listener {
 
-        default void onReadBytes(int readCnt) {
-        }
+        void onReadBytes(int readCnt);
 
-        default void startOffset(long offset) {
-        }
+        void startOffset(long offset);
 
-        default void onReadRow() {
-        }
+        void onReadRow();
 
-        default void additionalLine() {
-        }
+        void additionalLine();
 
     }
 

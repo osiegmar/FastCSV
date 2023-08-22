@@ -10,7 +10,7 @@ final class ByteChannelStream {
     private final ByteBuffer byteBuf = ByteBuffer.allocateDirect(8192);
     private final ReadableByteChannel channel;
     private final CsvScanner.Listener listener;
-    private long totalPosition = -1;
+    private long offset = -1;
     private int nextByte;
 
     // Keep one buf as Buffer to maintain Android compatibility
@@ -33,7 +33,7 @@ final class ByteChannelStream {
 
         final int ret = nextByte;
         nextByte = fetchNextByte();
-        totalPosition++;
+        offset++;
         return ret;
     }
 
@@ -43,7 +43,7 @@ final class ByteChannelStream {
         }
 
         nextByte = fetchNextByte();
-        totalPosition++;
+        offset++;
         return true;
     }
 
@@ -51,8 +51,8 @@ final class ByteChannelStream {
         return nextByte != -1;
     }
 
-    long getTotalOffset() {
-        return totalPosition;
+    long getOffset() {
+        return offset;
     }
 
     private int fetchNextByte() throws IOException {

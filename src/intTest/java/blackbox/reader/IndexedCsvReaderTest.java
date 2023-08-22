@@ -71,7 +71,7 @@ class IndexedCsvReaderTest {
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
                     + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, pageSize=1, "
                     + "index=CsvIndex[fileSize=3, fieldSeparator=44, quoteCharacter=34, commentStrategy=NONE, "
-                    + "commentCharacter=35, rowCounter=1]]",
+                    + "commentCharacter=35, rowCount=1, pageCount=1]]",
                 file);
     }
 

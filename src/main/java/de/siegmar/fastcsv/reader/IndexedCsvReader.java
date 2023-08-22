@@ -116,7 +116,7 @@ public final class IndexedCsvReader implements Closeable {
 
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
     private CsvIndex buildIndex(final StatusListener statusListener) throws IOException {
-        final ScannerListener listener = new ScannerListener(statusListener);
+        final var listener = new ScannerListener(statusListener);
 
         try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
             statusListener.onInit(channel.size());
@@ -129,11 +129,12 @@ public final class IndexedCsvReader implements Closeable {
                 listener
             ).scan();
 
-            statusListener.onComplete();
-
-            return new CsvIndex(channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
+            final var idx = new CsvIndex(channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
                 commentStrategy, (byte) commentCharacter,
-                listener.pageOffsets, listener.rowCounter.get());
+                listener.rowCounter.get(), listener.pageOffsets);
+
+            statusListener.onComplete();
+            return idx;
         } catch (final Throwable t) {
             statusListener.onError(t);
             throw t;
