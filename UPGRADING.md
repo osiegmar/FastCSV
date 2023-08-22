@@ -1,7 +1,12 @@
-# Migrating from 1.0.x to 2.x
+# Upgrading to 3.0
 
-This document shows the most commonly used features of FastCSV 1.x
-and how these can be migrated to version 2 easily.
+This document shows a list of breaking changes in version 3 and how to upgrade.
+
+- Java version requirement raised from version 8 to 11
+- This also raised the required Android API level from version 26 (Android 8) to 33 (Android 13)
+- Rows are now called Records (aligned to RFC 4180)
+
+If you're still on version 1, read on.
 
 ## Reader
 
@@ -21,7 +26,7 @@ New way:
 CsvReader.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
-    .skipEmptyRows(true)
+    .skipEmptyRecords(true)
     .errorOnDifferentFieldCount(false);
 ```
 
@@ -40,8 +45,8 @@ try (CsvParser csvParser = new CsvReader().parse(file, UTF_8)) {
 New way:
 ```java
 try (CsvReader csvReader = CsvReader.builder().build(path)) {
-    csvReader.forEach(row ->
-        System.out.println("First column of line: " + row.getField(0))
+    csvReader.forEach(csvRecord ->
+        System.out.println("First column of line: " + csvRecord.getField(0))
     );
 }
 ```
@@ -63,8 +68,8 @@ try (CsvParser csvParser = csvReader.parse(file, UTF_8)) {
 New way:
 ```java
 try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path)) {
-    csvReader.forEach(row ->
-        System.out.println("Column named firstname: " + row.getField("firstname"))
+    csvReader.forEach(csvRecord ->
+        System.out.println("Column named firstname: " + csvRecord.getField("firstname"))
     );
 }
 ```
@@ -80,9 +85,12 @@ New way:
 The container concept has been removed, but you can
 easily build something similar using the Java Stream API.
 ```java
-List<CsvRow> data;
-try (CsvReader csvReader = CsvReader.builder().build(path)) {
-    data = csvReader.stream().collect(Collectors.toList());
+List<CsvRecord> data;
+try (CsvReader csv = CsvReader.builder().build(path)) {
+    data = csv.stream().toList();
+
+    // or in Java < 16:
+    // data = csv.stream().collect(Collectors.toList());
 }
 ```
 
@@ -110,7 +118,7 @@ CsvWriter.builder()
 
 > :warning: Also note that the default line delimiter has changed!
 > In version 1.x the line delimiter was set based on system default `System.lineSeparator()`.
-> In version 2.x the default is `\r\n` as defined in RFC 4180.
+> In version 2/3 the default is `\r\n` as defined in RFC 4180.
 
 ### Write to file
 
@@ -124,10 +132,10 @@ try (CsvAppender csvAppender = new CsvWriter().append(file)) {
 
 New way:
 ```java
-try (CsvWriter csvWriter = CsvWriter.builder().build(file)) {
-    csvWriter
-        .writeRow("header1", "header2")
-        .writeRow("value1", "value2");
+try (CsvWriter csv = CsvWriter.builder().build(file)) {
+    csv
+        .writeRecord("header1", "header2")
+        .writeRecord("value1", "value2");
 }
 ```
 
@@ -145,14 +153,14 @@ try (CsvAppender csvAppender = new CsvWriter().append(writer)) {
 New way:
 ```java
 Writer writer = new StringWriter();
-try (CsvWriter csvWriter = CsvWriter.builder().build(writer)) {
-    csvWriter
-        .writeRow("header1", "header2")
-        .writeRow("value1", "value2");
+try (CsvWriter csv = CsvWriter.builder().build(writer)) {
+    csv
+        .writeRecord("header1", "header2")
+        .writeRecord("value1", "value2");
 }
 ```
 
 > :warning: Be aware of a change in the semantic in FastCSV.
-> In version 2.x you probably want to pass in a `java.io.BufferedWriter` for proper
+> In version 2/3 you probably want to pass in a `java.io.BufferedWriter` for proper
 > performance. The opposite was recommended in version 1.x.
 > Check the Javadoc for further information.

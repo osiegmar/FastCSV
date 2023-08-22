@@ -159,10 +159,9 @@ CsvWriter.builder()
 For more examples see
 [CsvWriterExample.java](src/example/java/example/CsvWriterExample.java).
 
-## Upgrading from version 1.x
+## Upgrading from an older version
 
-Please see [UPGRADING.md](UPGRADING.md) for an overview of the main functionality of 1.x
-and how to upgrade them to version 2.
+Please see [UPGRADING.md](UPGRADING.md) for a list of breaking changes in version 3 and how to upgrade.
 
 ---
 
