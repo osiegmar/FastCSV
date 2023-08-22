@@ -1,5 +1,8 @@
 package de.siegmar.fastcsv.reader;
 
+import static de.siegmar.fastcsv.util.Util.CR;
+import static de.siegmar.fastcsv.util.Util.LF;
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -15,9 +18,6 @@ import java.io.Reader;
     "PMD.UnusedAssignment"
 })
 final class RowReader {
-
-    private static final char LF = '\n';
-    private static final char CR = '\r';
 
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_ROW = 16;
@@ -247,6 +247,11 @@ final class RowReader {
         return shift;
     }
 
+    void resetBuffer(final long originalLineNumber) {
+        rowHandler.setOriginalLineNumber(originalLineNumber);
+        buffer.reset();
+    }
+
     @SuppressWarnings("checkstyle:visibilitymodifier")
     private static class Buffer {
         private static final int READ_SIZE = 8192;
@@ -324,6 +329,12 @@ final class RowReader {
             final char[] newBuf = new char[newBufferSize];
             System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
             return newBuf;
+        }
+
+        private void reset() {
+            len = 0;
+            begin = 0;
+            pos = 0;
         }
 
     }

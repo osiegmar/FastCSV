@@ -109,6 +109,23 @@ NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
 
 For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
 
+## IndexedCsvReader Examples
+
+Indexed reading of a CSV file
+
+```java
+try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
+    CsvIndex index = csv.index();
+
+    System.out.println("Items of last page:");
+    int lastPage = index.pageCount() - 1;
+    List<CsvRow> rows = csv.readPage(lastPage);
+    rows.forEach(System.out::println);
+}
+```
+
+For more examples see [IndexedCsvReaderExample.java](src/example/java/example/IndexedCsvReaderExample.java)
+
 ## CsvWriter Examples
 
 Iterative writing of some data to a writer
