@@ -96,7 +96,7 @@ CsvReader.builder()
     .errorOnDifferentFieldCount(false);
 ```
 
-For more examples see [CsvReaderExample.java](src/example/java/example/CsvReaderExample.java)
+For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvReaderExample.java)
 
 ## NamedCsvReader Examples
 
@@ -107,7 +107,7 @@ NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
     .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
 ```
 
-For more examples see [NamedCsvReaderExample.java](src/example/java/example/NamedCsvReaderExample.java)
+For more examples see [NamedCsvReaderExample.java](example/src/main/java/example/NamedCsvReaderExample.java)
 
 ## IndexedCsvReader Examples
 
@@ -124,7 +124,7 @@ try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
 }
 ```
 
-For more examples see [IndexedCsvReaderExample.java](src/example/java/example/IndexedCsvReaderExample.java)
+For more examples see [IndexedCsvReaderExample.java](example/src/main/java/example/IndexedCsvReaderExample.java)
 
 ## CsvWriter Examples
 
@@ -157,7 +157,7 @@ CsvWriter.builder()
 ```
 
 For more examples see
-[CsvWriterExample.java](src/example/java/example/CsvWriterExample.java).
+[CsvWriterExample.java](example/src/main/java/example/CsvWriterExample.java).
 
 ## Upgrading from an older version
 

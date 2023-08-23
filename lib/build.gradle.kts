@@ -1,13 +1,11 @@
 @file:Suppress("StringLiteralDuplication")
 
 plugins {
+    id("fastcsv.java-conventions")
     `java-library`
     `maven-publish`
     signing
-    checkstyle
-    pmd
     jacoco
-    id("com.github.spotbugs") version "5.1.3"
     id("me.champeau.jmh") version "0.7.1"
     id("info.solidsoft.pitest") version "1.9.11"
     id("ru.vyarus.animalsniffer") version "1.7.1"
@@ -17,9 +15,6 @@ group = "de.siegmar"
 version = "3.0.0-SNAPSHOT"
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
     withJavadocJar()
     withSourcesJar()
 }
@@ -30,17 +25,9 @@ tasks.javadoc {
     })
 }
 
-repositories {
-    mavenCentral()
-}
-
 sourceSets {
     create("common") {
         compileClasspath += sourceSets.main.get().output
-    }
-    create("example") {
-        compileClasspath += sourceSets.main.get().output
-        runtimeClasspath += sourceSets.main.get().output
     }
     create("intTest") {
         compileClasspath += sourceSets["common"].output
@@ -73,20 +60,9 @@ dependencies {
     signature("com.toasttab.android:gummy-bears-api-33:0.5.1@signature")
 }
 
-tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
-    excludeFilter = file("config/spotbugs/config.xml")
-    reports.maybeCreate("xml").required = false
-    reports.maybeCreate("html").required = true
-}
-
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
-}
-
-// Without this, running an example results in "Task with name 'exampleJar' not found"
-tasks.register<Jar>("exampleJar") {
-    from(sourceSets.main.get().output)
 }
 
 val intTestTask = tasks.register<Test>("intTest") {
@@ -108,12 +84,6 @@ pitest {
     junit5PluginVersion = "1.2.0"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
-}
-
-pmd {
-    isConsoleOutput = true
-    ruleSets = emptyList()
-    ruleSetFiles = files("config/pmd/config.xml")
 }
 
 tasks.jacocoTestReport {
