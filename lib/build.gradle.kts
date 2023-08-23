@@ -14,6 +14,8 @@ plugins {
 group = "de.siegmar"
 version = "3.0.0-SNAPSHOT"
 
+project.base.archivesName = "fastcsv"
+
 java {
     withJavadocJar()
     withSourcesJar()
