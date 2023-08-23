@@ -1,17 +1,24 @@
-<img src="fastcsv.svg" width="400" height="50" alt="FastCSV">
+<p align="center">
+  <img src="fastcsv.svg" width="400" height="50" alt="FastCSV">
+</p>
 
-[![build](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/osiegmar/FastCSV/actions/workflows/build.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942)](https://app.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![codecov](https://codecov.io/gh/osiegmar/FastCSV/branch/master/graph/badge.svg?token=WIWkv7HUyk)](https://codecov.io/gh/osiegmar/FastCSV)
-[![javadoc](https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg)](https://javadoc.io/doc/de.siegmar/fastcsv)
-[![Maven Central](https://img.shields.io/maven-central/v/de.siegmar/fastcsv)](https://central.sonatype.com/artifact/de.siegmar/fastcsv)
+<p align="center">
+  FastCSV is an ultra-fast, dependency-free and RFC-compliant CSV library for Java.
+</p>
 
-FastCSV is an ultra-fast and dependency-free [RFC 4180](https://tools.ietf.org/html/rfc4180) compliant CSV
-library for Java.
+<p align="center">
+  <a href="https://github.com/osiegmar/FastCSV/actions/workflows/build.yml"><img src="https://github.com/osiegmar/FastCSV/actions/workflows/build.yml/badge.svg?branch=master" alt="build"></a>
+  <a href="https://app.codacy.com/gh/osiegmar/FastCSV/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/7270301676d6463bad9dd1fe23429942" alt="Codacy Badge"></a>
+  <a href="https://codecov.io/gh/osiegmar/FastCSV"><img src="https://codecov.io/gh/osiegmar/FastCSV/branch/master/graph/badge.svg?token=WIWkv7HUyk" alt="codecov"></a>
+  <a href="https://javadoc.io/doc/de.siegmar/fastcsv"><img src="https://javadoc.io/badge2/de.siegmar/fastcsv/javadoc.svg" alt="javadoc"></a>
+  <a href="https://central.sonatype.com/artifact/de.siegmar/fastcsv"><img src="https://img.shields.io/maven-central/v/de.siegmar/fastcsv" alt="Maven Central"></a>
+</p>
 
-Actively developed and maintained since 2015 its primary intended use cases are:
-- big data applications to read and write data on a massive scale
-- small data applications with the need for a lightweight library
+------
+
+The primary use cases of FastCSV are:
+- in big data applications: read and write data on a massive scale
+- in small data applications: a lightweight library without any further dependencies
 
 ## Benchmark & Compatibility
 
@@ -34,7 +41,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ### CSV specific
 
-- RFC 4180 compliant – including:
+- Compliant to [RFC 4180](https://tools.ietf.org/html/rfc4180) – including:
   - Newline and field separator characters in fields
   - Quote escaping
 - Configurable field separator
