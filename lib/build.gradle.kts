@@ -23,6 +23,7 @@ tasks.javadoc {
     javadocTool.set(javaToolchains.javadocToolFor {
         languageVersion.set(JavaLanguageVersion.of(20))
     })
+    options.jFlags = listOf("-Duser.language=en")
 }
 
 sourceSets {
