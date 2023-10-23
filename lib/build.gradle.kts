@@ -123,7 +123,8 @@ tasks.jmh {
 tasks.jar {
     manifest {
         attributes("Bundle-SymbolicName" to "de.siegmar.fastcsv",
-                   "-exportcontents" to "*")
+                "-exportcontents" to "!de.siegmar.fastcsv.util, *",
+                "-removeheaders" to "Private-Package")
     }
 }
 
