@@ -9,7 +9,7 @@ plugins {
     id("me.champeau.jmh") version "0.7.1"
     id("info.solidsoft.pitest") version "1.9.11"
     id("ru.vyarus.animalsniffer") version "1.7.1"
-    id("biz.aQute.bnd.builder") version "6.4.0"
+    id("biz.aQute.bnd.builder") version "7.0.0"
 }
 
 group = "de.siegmar"
@@ -123,8 +123,8 @@ tasks.jmh {
 tasks.jar {
     manifest {
         attributes("Bundle-SymbolicName" to "de.siegmar.fastcsv",
-                "-exportcontents" to "!de.siegmar.fastcsv.util, *",
-                "-removeheaders" to "Private-Package")
+                   "-exportcontents" to "de.siegmar.fastcsv.reader.*, de.siegmar.fastcsv.writer.*",
+                   "-removeheaders" to "Private-Package")
     }
 }
 
