@@ -9,9 +9,9 @@ plugins {
     id("me.champeau.jmh") version "0.7.1"
     id("info.solidsoft.pitest") version "1.9.11"
     id("ru.vyarus.animalsniffer") version "1.7.1"
-    id("biz.aQute.bnd.builder") version "6.4.0"
+    id("biz.aQute.bnd.builder") version "7.0.0"
 }
- 
+
 group = "de.siegmar"
 version = "3.0.0-SNAPSHOT"
 
@@ -23,9 +23,6 @@ java {
 }
 
 tasks.javadoc {
-    javadocTool.set(javaToolchains.javadocToolFor {
-        languageVersion.set(JavaLanguageVersion.of(20))
-    })
     options.jFlags = listOf("-Duser.language=en")
 }
 
@@ -52,8 +49,6 @@ configurations[intTest.implementationConfigurationName].extendsFrom(configuratio
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
-    compileOnly("org.osgi:org.osgi.annotation.bundle:1.1.0")
-    compileOnly("org.osgi:org.osgi.annotation.versioning:1.1.2")
     commonImplementation("org.assertj:assertj-core:3.24.2")
 
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
@@ -124,9 +119,10 @@ tasks.jmh {
 
 tasks.jar {
     manifest {
-        attributes("Bundle-SymbolicName" to "de.siegmar.fastcsv",
-                "-removeheaders" to "Private-Package",
-                "-jpms-module-info" to "")
+        attributes(
+            "Bundle-SymbolicName" to "de.siegmar.fastcsv",
+            "-exportcontents" to "de.siegmar.fastcsv.reader.*, de.siegmar.fastcsv.writer.*"
+        )
     }
 }
 
