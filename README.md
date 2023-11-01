@@ -32,12 +32,14 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ## Features
 
-### API
+### Library specific
 
 - Ultra fast
 - Small footprint
 - Zero runtime dependencies
 - Null-free
+- Works with GraalVM Native Image
+- OSGi capable
 
 ### CSV specific
 
@@ -67,7 +69,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ## Requirements
 
-- current version: Java 11 (Android 13 / API level 33)
+- for 3.x version: Java 11 (Android 13 / API level 33)
 - for 2.x version: Java 8 (Android 8 / API level 26)
 
 > :bulb: Android is not Java and is not officially supported.
