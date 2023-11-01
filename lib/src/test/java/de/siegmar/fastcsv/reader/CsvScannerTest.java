@@ -173,7 +173,7 @@ class CsvScannerTest {
         return indexes;
     }
 
-    private static class CollectingListener implements CsvScanner.Listener {
+    private static class CollectingListener implements CsvScanner.CsvListener {
         private final List<Integer> offsets = new ArrayList<>();
 
         @Override

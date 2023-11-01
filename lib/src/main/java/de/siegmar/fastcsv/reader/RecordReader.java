@@ -29,7 +29,7 @@ final class RecordReader implements Closeable {
     private static final int STATUS_RESET = 0;
 
     private final RecordHandler recordHandler = new RecordHandler(32);
-    private final Buffer buffer;
+    private final CsvBuffer csvBuffer;
     private final char fsep;
     private final char qChar;
     private final CommentStrategy cStrat;
@@ -40,7 +40,7 @@ final class RecordReader implements Closeable {
 
     RecordReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
                  final CommentStrategy commentStrategy, final char commentCharacter) {
-        buffer = new Buffer(reader);
+        csvBuffer = new CsvBuffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
@@ -49,7 +49,7 @@ final class RecordReader implements Closeable {
 
     RecordReader(final String data, final char fieldSeparator, final char quoteCharacter,
                  final CommentStrategy commentStrategy, final char commentCharacter) {
-        buffer = new Buffer(data);
+        csvBuffer = new CsvBuffer(data);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
@@ -62,13 +62,13 @@ final class RecordReader implements Closeable {
         }
 
         do {
-            if (buffer.len == buffer.pos) {
+            if (csvBuffer.len == csvBuffer.pos) {
                 // cursor reached current EOD -- need to fetch
-                if (buffer.fetchData()) {
+                if (csvBuffer.fetchData()) {
                     // reached end of stream
-                    if (buffer.begin < buffer.pos || recordHandler.isCommentMode()) {
-                        recordHandler.add(materialize(buffer.buf, buffer.begin,
-                            buffer.pos - buffer.begin, status, qChar));
+                    if (csvBuffer.begin < csvBuffer.pos || recordHandler.isCommentMode()) {
+                        recordHandler.add(materialize(csvBuffer.buf, csvBuffer.begin,
+                            csvBuffer.pos - csvBuffer.begin, status, qChar));
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
                         recordHandler.add("");
                     }
@@ -77,15 +77,15 @@ final class RecordReader implements Closeable {
                     break;
                 }
             }
-        } while (consume(recordHandler, buffer.buf, buffer.len));
+        } while (consume(recordHandler, csvBuffer.buf, csvBuffer.len));
 
         return recordHandler.buildAndReset();
     }
 
     @SuppressWarnings("PMD.EmptyIfStmt")
     boolean consume(final RecordHandler rh, final char[] lBuf, final int lLen) {
-        int lPos = buffer.pos;
-        int lBegin = buffer.begin;
+        int lPos = csvBuffer.pos;
+        int lBegin = csvBuffer.begin;
         int lStatus = status;
         boolean moreDataNeeded = true;
 
@@ -203,8 +203,8 @@ final class RecordReader implements Closeable {
             status = lStatus;
         }
 
-        buffer.pos = lPos;
-        buffer.begin = lBegin;
+        csvBuffer.pos = lPos;
+        csvBuffer.begin = lBegin;
 
         return moreDataNeeded;
     }
@@ -250,16 +250,16 @@ final class RecordReader implements Closeable {
 
     void resetBuffer(final long originalLineNumber) {
         recordHandler.setOriginalLineNumber(originalLineNumber);
-        buffer.reset();
+        csvBuffer.reset();
     }
 
     @Override
     public void close() throws IOException {
-        buffer.close();
+        csvBuffer.close();
     }
 
     @SuppressWarnings("checkstyle:visibilitymodifier")
-    private static class Buffer implements Closeable {
+    private static class CsvBuffer implements Closeable {
         private static final int READ_SIZE = 8192;
         private static final int BUFFER_SIZE = READ_SIZE;
         private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
@@ -271,12 +271,12 @@ final class RecordReader implements Closeable {
 
         private final Reader reader;
 
-        Buffer(final Reader reader) {
+        CsvBuffer(final Reader reader) {
             this.reader = reader;
             buf = new char[BUFFER_SIZE];
         }
 
-        Buffer(final String data) {
+        CsvBuffer(final String data) {
             reader = null;
             buf = data.toCharArray();
             len = data.length();

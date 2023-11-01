@@ -1,6 +1,6 @@
 package de.siegmar.fastcsv;
 
-final class Constants {
+final class CsvConstants {
 
     /**
      * Data to write CSV.
@@ -23,7 +23,7 @@ final class Constants {
         + "\"Example with , and \"\" and \nnewline\""
         + "\n";
 
-    private Constants() {
+    private CsvConstants() {
     }
 
 }

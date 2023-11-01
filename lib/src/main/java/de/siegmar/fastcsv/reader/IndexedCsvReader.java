@@ -372,7 +372,7 @@ public final class IndexedCsvReader implements Closeable {
 
     }
 
-    private final class ScannerListener implements CsvScanner.Listener {
+    private final class ScannerListener implements CsvScanner.CsvListener {
 
         private final StatusListener statusListener;
         private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
