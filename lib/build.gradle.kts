@@ -6,8 +6,8 @@ plugins {
     `maven-publish`
     signing
     jacoco
-    id("me.champeau.jmh") version "0.7.1"
-    id("info.solidsoft.pitest") version "1.9.11"
+    id("me.champeau.jmh") version "0.7.2"
+    id("info.solidsoft.pitest") version "1.15.0"
     id("ru.vyarus.animalsniffer") version "1.7.1"
     id("biz.aQute.bnd.builder") version "7.0.0"
 }
