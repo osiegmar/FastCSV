@@ -32,7 +32,7 @@ public class NamedCsvReaderExample {
             .skipComments(false)
             .build(data)
             .stream()
-            .map(csvRecord -> csvRecord.getFields().toString())
+            .map(csvRecord -> csvRecord.getFieldsAsMap().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

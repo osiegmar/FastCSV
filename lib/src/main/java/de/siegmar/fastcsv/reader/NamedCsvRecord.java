@@ -1,10 +1,11 @@
 package de.siegmar.fastcsv.reader;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -13,16 +14,13 @@ import java.util.StringJoiner;
 public final class NamedCsvRecord {
 
     private final long originalLineNumber;
-    private final Map<String, String> fieldMap;
+    private final List<String> header;
+    private final CsvRecord csvRecord;
 
-    NamedCsvRecord(final Set<String> header, final CsvRecord csvRecord) {
+    NamedCsvRecord(final List<String> header, final CsvRecord csvRecord) {
         this.originalLineNumber = csvRecord.getOriginalLineNumber();
-
-        fieldMap = new LinkedHashMap<>(header.size());
-        int i = 0;
-        for (final String h : header) {
-            fieldMap.put(h, csvRecord.getField(i++));
-        }
+        this.header = header;
+        this.csvRecord = csvRecord;
     }
 
     /**
@@ -44,12 +42,16 @@ public final class NamedCsvRecord {
      * @throws NoSuchElementException if this record has no such field
      */
     public String getField(final String name) {
-        final String val = fieldMap.get(name);
-        if (val == null) {
-            throw new NoSuchElementException("No element with name '" + name + "' found. "
-                + "Valid names are: " + fieldMap.keySet());
+        final int fieldPos = header.indexOf(name);
+        if (fieldPos == -1) {
+            throw new NoSuchElementException(MessageFormat.format(
+                "Header does not contain a field ''{0}''. Valid names are: {1}", name, header));
+        } else if (fieldPos >= csvRecord.getFieldCount()) {
+            throw new NoSuchElementException(MessageFormat.format(
+                "Field ''{0}'' is on position {1}, but current record only contains {2} fields",
+                name, fieldPos + 1, csvRecord.getFieldCount()));
         }
-        return val;
+        return csvRecord.getField(fieldPos);
     }
 
     /**
@@ -59,7 +61,12 @@ public final class NamedCsvRecord {
      *
      * @return an unmodifiable map of header names and field values of this record
      */
-    public Map<String, String> getFields() {
+    public Map<String, String> getFieldsAsMap() {
+        final int size = Math.min(header.size(), csvRecord.getFieldCount());
+        final Map<String, String> fieldMap = new LinkedHashMap<>(size);
+        for (int i = 0; i < size; i++) {
+            fieldMap.put(header.get(i), csvRecord.getField(i));
+        }
         return Collections.unmodifiableMap(fieldMap);
     }
 
@@ -67,7 +74,8 @@ public final class NamedCsvRecord {
     public String toString() {
         return new StringJoiner(", ", NamedCsvRecord.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
-            .add("fieldMap=" + fieldMap)
+            .add("fields=" + csvRecord.getFields())
+            .add("header=" + header)
             .toString();
     }
 

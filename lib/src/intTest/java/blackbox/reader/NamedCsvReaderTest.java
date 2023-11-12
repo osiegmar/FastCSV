@@ -127,7 +127,7 @@ class NamedCsvReaderTest {
     void findNonExistingFieldByName() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
-            .hasMessage("No element with name 'bar' found. Valid names are: [foo]");
+            .hasMessage("Header does not contain a field 'bar'. Valid names are: [foo]");
     }
 
     @Test
@@ -135,8 +135,10 @@ class NamedCsvReaderTest {
         assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("NamedCsvRecord[originalLineNumber=2, "
-                + "fieldMap={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
+            .isEqualTo("NamedCsvRecord["
+                + "originalLineNumber=2, "
+                + "fields=[fieldA, fieldB, fieldC], "
+                + "header=[headerA, headerB, headerC]]");
     }
 
     @Test
