@@ -66,7 +66,7 @@ class NamedCsvReaderBuilderTest {
     void builderToString() {
         assertThat(crb).asString()
             .isEqualTo("NamedCsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, skipComments=false, errorOnDifferentFieldCount=true]");
+                + "commentCharacter=#, skipComments=false, errorOnDifferentFieldCount=false]");
     }
 
     @Test
@@ -97,7 +97,7 @@ class NamedCsvReaderBuilderTest {
             .quoteCharacter('"')
             .commentCharacter('#')
             .skipComments(false)
-            .errorOnDifferentFieldCount(true)
+            .errorOnDifferentFieldCount(false)
             .build("foo");
 
         assertThat(reader).isNotNull();
@@ -105,7 +105,7 @@ class NamedCsvReaderBuilderTest {
 
     @Test
     void differentFieldCountSuccess() {
-        assertThat(crb.errorOnDifferentFieldCount(false).build("h1,h2,h3\nfoo,bar").stream())
+        assertThat(crb.build("h1,h2,h3\nfoo,bar").stream())
             .singleElement(NAMED_CSV_RECORD)
             .field("h2")
             .isEqualTo("bar");
@@ -113,7 +113,7 @@ class NamedCsvReaderBuilderTest {
 
     @Test
     void differentFieldCountNullField() {
-        assertThat(crb.errorOnDifferentFieldCount(false).build("h1,h2\nfoo").stream())
+        assertThat(crb.build("h1,h2\nfoo").stream())
             .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"));
@@ -130,7 +130,7 @@ class NamedCsvReaderBuilderTest {
 
     @Test
     void differentFieldCountFailAccess() {
-        assertThatThrownBy(() -> crb.errorOnDifferentFieldCount(false).build("h1,h2,h3\nfoo,bar").stream()
+        assertThatThrownBy(() -> crb.build("h1,h2,h3\nfoo,bar").stream()
             .findFirst().orElseThrow()
             .getField("h3"))
             .isInstanceOf(NoSuchElementException.class)

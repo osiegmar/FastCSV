@@ -165,7 +165,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
         private boolean skipComments;
-        private boolean errorOnDifferentFieldCount = true;
+        private boolean errorOnDifferentFieldCount;
 
         private NamedCsvReaderBuilder() {
         }
