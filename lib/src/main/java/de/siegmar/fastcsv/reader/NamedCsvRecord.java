@@ -55,9 +55,10 @@ public final class NamedCsvRecord {
     }
 
     /**
-     * Gets an unmodifiable map of header names and field values of this record.
+     * Builds an unmodifiable and ordered map of header names and field values of this record.
      * <p>
-     * The map will always contain all header names - even if their value is {@code null}.
+     * The map will contain only keys for existing fields of this record –
+     * no map entry will have a {@code null} key or value.
      *
      * @return an unmodifiable map of header names and field values of this record
      */
