@@ -75,8 +75,7 @@ public final class NamedCsvRecord {
     public String toString() {
         return new StringJoiner(", ", NamedCsvRecord.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
-            .add("fields=" + csvRecord.getFields())
-            .add("header=" + header)
+            .add("fields=" + getFieldsAsMap())
             .toString();
     }
 

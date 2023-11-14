@@ -137,8 +137,7 @@ class NamedCsvReaderTest {
             .asString()
             .isEqualTo("NamedCsvRecord["
                 + "originalLineNumber=2, "
-                + "fields=[fieldA, fieldB, fieldC], "
-                + "header=[headerA, headerB, headerC]]");
+                + "fields={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
     }
 
     @Test
