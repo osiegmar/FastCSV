@@ -27,7 +27,7 @@ CsvReader.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
     .skipEmptyLines(true)
-    .errorOnDifferentFieldCount(false);
+    .ignoreDifferentFieldCount(false);
 ```
 
 ### Reading data from file

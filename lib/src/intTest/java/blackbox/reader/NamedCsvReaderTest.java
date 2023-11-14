@@ -48,7 +48,7 @@ class NamedCsvReaderTest {
     void readerToString() {
         assertThat(crb.build("h1\nd1")).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
-                + "commentStrategy=NONE, skipEmptyLines=true, errorOnDifferentFieldCount=false]]");
+                + "commentStrategy=NONE, skipEmptyLines=true, ignoreDifferentFieldCount=true]]");
     }
 
     @Test

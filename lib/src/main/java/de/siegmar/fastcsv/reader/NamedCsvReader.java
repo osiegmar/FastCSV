@@ -165,7 +165,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
         private boolean skipComments;
-        private boolean errorOnDifferentFieldCount;
+        private boolean ignoreDifferentFieldCount = true;
 
         private NamedCsvReaderBuilder() {
         }
@@ -220,12 +220,12 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
          * Defines if an {@link MalformedCsvException} should be thrown if records do contain a
          * different number of fields.
          *
-         * @param errorOnDifferentFieldCount if an exception should be thrown, if CSV data contains
-         *                                   different field count (default: {@code false}).
+         * @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains
+         *                                   different field count (default: {@code true}).
          * @return This updated object, so that additional method calls can be chained together.
          */
-        public NamedCsvReaderBuilder errorOnDifferentFieldCount(final boolean errorOnDifferentFieldCount) {
-            this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
+        public NamedCsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
+            this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
             return this;
         }
 
@@ -287,7 +287,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .quoteCharacter(quoteCharacter)
                 .commentCharacter(commentCharacter)
                 .commentStrategy(skipComments ? CommentStrategy.SKIP : CommentStrategy.NONE)
-                .errorOnDifferentFieldCount(errorOnDifferentFieldCount);
+                .ignoreDifferentFieldCount(ignoreDifferentFieldCount);
         }
 
         @Override
@@ -297,7 +297,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .add("quoteCharacter=" + quoteCharacter)
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipComments=" + skipComments)
-                .add("errorOnDifferentFieldCount=" + errorOnDifferentFieldCount)
+                .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
                 .toString();
         }
 

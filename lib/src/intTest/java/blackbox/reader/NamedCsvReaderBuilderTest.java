@@ -66,7 +66,7 @@ class NamedCsvReaderBuilderTest {
     void builderToString() {
         assertThat(crb).asString()
             .isEqualTo("NamedCsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, skipComments=false, errorOnDifferentFieldCount=false]");
+                + "commentCharacter=#, skipComments=false, ignoreDifferentFieldCount=true]");
     }
 
     @Test
@@ -97,7 +97,7 @@ class NamedCsvReaderBuilderTest {
             .quoteCharacter('"')
             .commentCharacter('#')
             .skipComments(false)
-            .errorOnDifferentFieldCount(false)
+            .ignoreDifferentFieldCount(false)
             .build("foo");
 
         assertThat(reader).isNotNull();
@@ -121,7 +121,7 @@ class NamedCsvReaderBuilderTest {
 
     @Test
     void differentFieldCountFailInit() {
-        crb.errorOnDifferentFieldCount(true);
+        crb.ignoreDifferentFieldCount(false);
 
         assertThatThrownBy(() -> crb.build("foo\nbar,\"baz\nbax\"").stream().findFirst())
             .isInstanceOf(MalformedCsvException.class)

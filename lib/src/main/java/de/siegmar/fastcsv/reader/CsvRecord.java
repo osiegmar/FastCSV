@@ -63,7 +63,7 @@ public final class CsvRecord {
      * Gets the number of fields of this record.
      *
      * @return the number of fields of this record
-     * @see CsvReader.CsvReaderBuilder#errorOnDifferentFieldCount(boolean)
+     * @see CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)
      */
     public int getFieldCount() {
         return fields.length;

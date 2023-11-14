@@ -64,7 +64,7 @@ public class CsvReaderExample {
             .commentStrategy(CommentStrategy.SKIP)
             .commentCharacter('#')
             .skipEmptyLines(true)
-            .errorOnDifferentFieldCount(false)
+            .ignoreDifferentFieldCount(false)
             .build(data)
             .stream()
             .map(csvRecord -> csvRecord.getFields().toString())

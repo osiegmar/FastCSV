@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated from Java 8 to Java 11
 - Updated naming (rows/lines -> records, columns -> fields, differentiate between lines and records)
+- Rename `errorOnDifferentFieldCount()` to `ignoreDifferentFieldCount()`
 
 ## [2.2.2] - 2023-05-13
 ### Added

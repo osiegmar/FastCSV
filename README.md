@@ -102,7 +102,7 @@ CsvReader.builder()
     .commentStrategy(CommentStrategy.SKIP)
     .commentCharacter('#')
     .skipEmptyLines(true)
-    .errorOnDifferentFieldCount(false);
+    .ignoreDifferentFieldCount(false);
 ```
 
 For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvReaderExample.java)
