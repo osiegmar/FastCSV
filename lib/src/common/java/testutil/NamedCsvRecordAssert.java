@@ -32,7 +32,7 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
 
     public MapAssert<String, String> fields() {
         isNotNull();
-        return new MapAssert<>(actual.getFields());
+        return new MapAssert<>(actual.getFieldsAsMap());
     }
 
     public StringAssert field(final String name) {

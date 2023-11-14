@@ -10,11 +10,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import de.siegmar.fastcsv.reader.MalformedCsvException;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import testutil.NamedCsvRecordAssert;
@@ -64,7 +66,7 @@ class NamedCsvReaderBuilderTest {
     void builderToString() {
         assertThat(crb).asString()
             .isEqualTo("NamedCsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, skipComments=false]");
+                + "commentCharacter=#, skipComments=false, errorOnDifferentFieldCount=false]");
     }
 
     @Test
@@ -95,9 +97,44 @@ class NamedCsvReaderBuilderTest {
             .quoteCharacter('"')
             .commentCharacter('#')
             .skipComments(false)
+            .errorOnDifferentFieldCount(false)
             .build("foo");
 
         assertThat(reader).isNotNull();
+    }
+
+    @Test
+    void differentFieldCountSuccess() {
+        assertThat(crb.build("h1,h2,h3\nfoo,bar").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .field("h2")
+            .isEqualTo("bar");
+    }
+
+    @Test
+    void differentFieldCountNullField() {
+        assertThat(crb.build("h1,h2\nfoo").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .fields()
+            .containsExactly(entry("h1", "foo"));
+    }
+
+    @Test
+    void differentFieldCountFailInit() {
+        crb.errorOnDifferentFieldCount(true);
+
+        assertThatThrownBy(() -> crb.build("foo\nbar,\"baz\nbax\"").stream().findFirst())
+            .isInstanceOf(MalformedCsvException.class)
+            .hasMessage("Record 2 has 2 fields, but first record had 1 fields");
+    }
+
+    @Test
+    void differentFieldCountFailAccess() {
+        assertThatThrownBy(() -> crb.build("h1,h2,h3\nfoo,bar").stream()
+            .findFirst().orElseThrow()
+            .getField("h3"))
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("Field 'h3' is on position 3, but current record only contains 2 fields");
     }
 
 }
