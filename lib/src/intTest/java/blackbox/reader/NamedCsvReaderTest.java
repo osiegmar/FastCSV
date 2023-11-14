@@ -48,7 +48,7 @@ class NamedCsvReaderTest {
     void readerToString() {
         assertThat(crb.build("h1\nd1")).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
-                + "commentStrategy=NONE, skipEmptyRecords=true, errorOnDifferentFieldCount=false]]");
+                + "commentStrategy=NONE, skipEmptyLines=true, errorOnDifferentFieldCount=false]]");
     }
 
     @Test
@@ -94,7 +94,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getHeaderEmptyRecords() {
+    void getHeaderEmptyLines() {
         final NamedCsvReader csv = parse("foo,bar");
 
         assertThat(csv.getHeader())

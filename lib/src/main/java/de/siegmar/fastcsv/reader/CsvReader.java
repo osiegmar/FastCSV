@@ -37,20 +37,20 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     private final RecordReader recordReader;
     private final CommentStrategy commentStrategy;
-    private final boolean skipEmptyRecords;
+    private final boolean skipEmptyLines;
     private final boolean errorOnDifferentFieldCount;
     private final CloseableIterator<CsvRecord> csvRecordIterator = new CsvRecordIterator();
 
-    private int firstLineFieldCount = -1;
+    private int firstRecordFieldCount = -1;
 
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyRecords, final boolean errorOnDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean errorOnDifferentFieldCount) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
         this.commentStrategy = commentStrategy;
-        this.skipEmptyRecords = skipEmptyRecords;
+        this.skipEmptyLines = skipEmptyLines;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
 
         recordReader = new RecordReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
@@ -60,12 +60,12 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
     @SuppressWarnings("PMD.NullAssignment")
     CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyRecords, final boolean errorOnDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean errorOnDifferentFieldCount) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
         this.commentStrategy = commentStrategy;
-        this.skipEmptyRecords = skipEmptyRecords;
+        this.skipEmptyLines = skipEmptyLines;
         this.errorOnDifferentFieldCount = errorOnDifferentFieldCount;
 
         recordReader = new RecordReader(data, fieldSeparator, quoteCharacter, commentStrategy,
@@ -133,19 +133,19 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
             // skip empty records
             if (csvRecord.isEmpty()) {
-                if (skipEmptyRecords) {
+                if (skipEmptyLines) {
                     continue;
                 }
             } else if (errorOnDifferentFieldCount) {
                 final int fieldCount = csvRecord.getFieldCount();
 
                 // check the field count consistency on every record
-                if (firstLineFieldCount == -1) {
-                    firstLineFieldCount = fieldCount;
-                } else if (fieldCount != firstLineFieldCount) {
+                if (firstRecordFieldCount == -1) {
+                    firstRecordFieldCount = fieldCount;
+                } else if (fieldCount != firstRecordFieldCount) {
                     throw new MalformedCsvException(
                         String.format("Record %d has %d fields, but first record had %d fields",
-                            csvRecord.getOriginalLineNumber(), fieldCount, firstLineFieldCount));
+                            csvRecord.getOriginalLineNumber(), fieldCount, firstRecordFieldCount));
                 }
             }
 
@@ -164,7 +164,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
     public String toString() {
         return new StringJoiner(", ", CsvReader.class.getSimpleName() + "[", "]")
             .add("commentStrategy=" + commentStrategy)
-            .add("skipEmptyRecords=" + skipEmptyRecords)
+            .add("skipEmptyLines=" + skipEmptyLines)
             .add("errorOnDifferentFieldCount=" + errorOnDifferentFieldCount)
             .toString();
     }
@@ -230,7 +230,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private boolean skipEmptyRecords = true;
+        private boolean skipEmptyLines = true;
         private boolean errorOnDifferentFieldCount;
 
         private CsvReaderBuilder() {
@@ -287,17 +287,17 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         /**
          * Defines if empty records should be skipped when reading data.
          *
-         * @param skipEmptyRecords if empty records should be skipped (default: {@code true}).
+         * @param skipEmptyLines if empty records should be skipped (default: {@code true}).
          * @return This updated object, so that additional method calls can be chained together.
          */
-        public CsvReaderBuilder skipEmptyRecords(final boolean skipEmptyRecords) {
-            this.skipEmptyRecords = skipEmptyRecords;
+        public CsvReaderBuilder skipEmptyLines(final boolean skipEmptyLines) {
+            this.skipEmptyLines = skipEmptyLines;
             return this;
         }
 
         /**
-         * Defines if an {@link MalformedCsvException} should be thrown if lines do contain a
-         * different number of columns.
+         * Defines if an {@link MalformedCsvException} should be thrown if records do contain a
+         * different number of fields.
          *
          * @param errorOnDifferentFieldCount if an exception should be thrown, if CSV data contains
          *                                   different field count (default: {@code false}).
@@ -367,12 +367,12 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
         private CsvReader newReader(final Reader reader) {
             return new CsvReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyRecords, errorOnDifferentFieldCount);
+                commentCharacter, skipEmptyLines, errorOnDifferentFieldCount);
         }
 
         private CsvReader newReader(final String data) {
             return new CsvReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyRecords, errorOnDifferentFieldCount);
+                commentCharacter, skipEmptyLines, errorOnDifferentFieldCount);
         }
 
         @Override
@@ -382,7 +382,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 .add("quoteCharacter=" + quoteCharacter)
                 .add("commentStrategy=" + commentStrategy)
                 .add("commentCharacter=" + commentCharacter)
-                .add("skipEmptyRecords=" + skipEmptyRecords)
+                .add("skipEmptyLines=" + skipEmptyLines)
                 .add("errorOnDifferentFieldCount=" + errorOnDifferentFieldCount)
                 .toString();
         }

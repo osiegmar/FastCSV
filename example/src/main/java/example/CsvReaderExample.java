@@ -57,13 +57,13 @@ public class CsvReaderExample {
     }
 
     private static void advancedConfiguration() {
-        final String data = "#commented record\n'quoted ; column';second column\nnew record";
+        final String data = "#commented record\n'quoted ; field';second field\nnew record";
         final String parsedData = CsvReader.builder()
             .fieldSeparator(';')
             .quoteCharacter('\'')
             .commentStrategy(CommentStrategy.SKIP)
             .commentCharacter('#')
-            .skipEmptyRecords(true)
+            .skipEmptyLines(true)
             .errorOnDifferentFieldCount(false)
             .build(data)
             .stream()

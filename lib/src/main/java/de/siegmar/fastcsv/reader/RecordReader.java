@@ -24,8 +24,8 @@ final class RecordReader implements Closeable {
     private static final int STATUS_COMMENTED_RECORD = 16;
     private static final int STATUS_NEW_FIELD = 8;
     private static final int STATUS_QUOTED_MODE = 4;
-    private static final int STATUS_QUOTED_COLUMN = 2;
-    private static final int STATUS_DATA_COLUMN = 1;
+    private static final int STATUS_QUOTED_FIELD = 2;
+    private static final int STATUS_DATA_FIELD = 1;
     private static final int STATUS_RESET = 0;
 
     private final RecordHandler recordHandler = new RecordHandler(32);
@@ -175,14 +175,14 @@ final class RecordReader implements Closeable {
                             lStatus = STATUS_COMMENTED_RECORD;
                             rh.enableCommentMode();
                             continue mode_check;
-                        } else if (c == qChar && (lStatus & STATUS_DATA_COLUMN) == 0) {
+                        } else if (c == qChar && (lStatus & STATUS_DATA_FIELD) == 0) {
                             // quote and not in data-only mode
-                            lStatus = STATUS_QUOTED_COLUMN | STATUS_QUOTED_MODE;
+                            lStatus = STATUS_QUOTED_FIELD | STATUS_QUOTED_MODE;
                             continue mode_check;
                         } else {
-                            if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
+                            if ((lStatus & STATUS_QUOTED_FIELD) == 0) {
                                 // normal unquoted data
-                                lStatus = STATUS_DATA_COLUMN;
+                                lStatus = STATUS_DATA_FIELD;
 
                                 // fast-forward
                                 while (lPos < lLen) {
@@ -212,12 +212,12 @@ final class RecordReader implements Closeable {
     private static String materialize(final char[] lBuf,
                                       final int lBegin, final int lPos, final int lStatus,
                                       final char quoteCharacter) {
-        if ((lStatus & STATUS_QUOTED_COLUMN) == 0) {
-            // column without quotes
+        if ((lStatus & STATUS_QUOTED_FIELD) == 0) {
+            // field without quotes
             return new String(lBuf, lBegin, lPos);
         }
 
-        // column with quotes
+        // field with quotes
         final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
             quoteCharacter);
         return new String(lBuf, lBegin + 1, lPos - 1 - shift);

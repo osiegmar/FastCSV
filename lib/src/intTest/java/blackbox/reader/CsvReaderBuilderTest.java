@@ -77,7 +77,7 @@ class CsvReaderBuilderTest {
     void builderToString() {
         assertThat(crb).asString()
             .isEqualTo("CsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentStrategy=NONE, commentCharacter=#, skipEmptyRecords=true, "
+                + "commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, "
                 + "errorOnDifferentFieldCount=false]");
     }
 
@@ -111,7 +111,7 @@ class CsvReaderBuilderTest {
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
-            .skipEmptyRecords(true)
+            .skipEmptyLines(true)
             .errorOnDifferentFieldCount(false)
             .build("foo");
 

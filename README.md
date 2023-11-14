@@ -58,7 +58,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
   helpful for error messages
 - Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation
-- Support for (optional) header lines (get field based on column name)
+- Support for (optional) header records (get field based on field name)
 - Support for skipping empty records
 - Support for commented lines (skipping & reading) and configurable comment character
 
@@ -101,7 +101,7 @@ CsvReader.builder()
     .quoteCharacter('"')
     .commentStrategy(CommentStrategy.SKIP)
     .commentCharacter('#')
-    .skipEmptyRecords(true)
+    .skipEmptyLines(true)
     .errorOnDifferentFieldCount(false);
 ```
 

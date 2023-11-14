@@ -303,7 +303,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to separate columns (default: ',' - comma).
+         * Sets the character that is used to separate fields (default: ',' - comma).
          *
          * @param fieldSeparator the field separator character.
          * @return This updated object, so that additional method calls can be chained together.

@@ -70,9 +70,9 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     }
 
     /**
-     * Returns the header columns. Can be called at any time.
+     * Returns the header fields. Can be called at any time.
      *
-     * @return the header columns
+     * @return the header fields
      */
     public List<String> getHeader() {
         if (!isInitialized) {
@@ -217,8 +217,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         }
 
         /**
-         * Defines if an {@link MalformedCsvException} should be thrown if lines do contain a
-         * different number of columns.
+         * Defines if an {@link MalformedCsvException} should be thrown if records do contain a
+         * different number of fields.
          *
          * @param errorOnDifferentFieldCount if an exception should be thrown, if CSV data contains
          *                                   different field count (default: {@code false}).

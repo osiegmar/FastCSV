@@ -90,7 +90,7 @@ class CsvReaderTest {
     void readerToString() {
         assertThat(crb.build(""))
             .asString()
-            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyRecords=true, "
+            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
                 + "errorOnDifferentFieldCount=false]");
     }
 
@@ -98,13 +98,13 @@ class CsvReaderTest {
 
     @Test
     void singleRecordNoSkipEmpty() {
-        crb.skipEmptyRecords(false);
+        crb.skipEmptyLines(false);
         assertThat(crb.build("").iterator()).isExhausted();
     }
 
     @Test
     void multipleRecordsNoSkipEmpty() {
-        crb.skipEmptyRecords(false);
+        crb.skipEmptyLines(false);
 
         assertThat(crb.build("\n\na").iterator()).toIterable()
             .satisfiesExactly(

@@ -1,6 +1,5 @@
 package example;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,7 +9,7 @@ import de.siegmar.fastcsv.reader.NamedCsvRecord;
 @SuppressWarnings("PMD.SystemPrintln")
 public class NamedCsvReaderExample {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         header();
         advancedConfiguration();
     }
