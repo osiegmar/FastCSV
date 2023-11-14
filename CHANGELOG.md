@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - 2023-??-??
+### Added
+- Add support for different field count for NamedCsvReader
+- Metadata for OSGi capability
+
 ### Changed
 - Updated from Java 8 to Java 11
+- Updated naming (rows/lines -> records, columns -> fields, differentiate between lines and records)
 
 ## [2.2.2] - 2023-05-13
 ### Added
@@ -77,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v2.2.2...develop
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v2.2.2...master
 [2.2.2]: https://github.com/osiegmar/FastCSV/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/osiegmar/FastCSV/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/osiegmar/FastCSV/compare/v2.1.0...v2.2.0
