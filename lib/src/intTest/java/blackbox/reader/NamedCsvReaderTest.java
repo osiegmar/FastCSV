@@ -48,7 +48,7 @@ class NamedCsvReaderTest {
     void readerToString() {
         assertThat(crb.build("h1\nd1")).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
-                + "commentStrategy=NONE, skipEmptyRecords=true, errorOnDifferentFieldCount=true]]");
+                + "commentStrategy=NONE, skipEmptyLines=true, ignoreDifferentFieldCount=true]]");
     }
 
     @Test
@@ -94,7 +94,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getHeaderEmptyRecords() {
+    void getHeaderEmptyLines() {
         final NamedCsvReader csv = parse("foo,bar");
 
         assertThat(csv.getHeader())
@@ -127,7 +127,7 @@ class NamedCsvReaderTest {
     void findNonExistingFieldByName() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().field("bar"))
             .isInstanceOf(NoSuchElementException.class)
-            .hasMessage("No element with name 'bar' found. Valid names are: [foo]");
+            .hasMessage("Header does not contain a field 'bar'. Valid names are: [foo]");
     }
 
     @Test
@@ -135,8 +135,9 @@ class NamedCsvReaderTest {
         assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("NamedCsvRecord[originalLineNumber=2, "
-                + "fieldMap={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
+            .isEqualTo("NamedCsvRecord["
+                + "originalLineNumber=2, "
+                + "fields={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
     }
 
     @Test

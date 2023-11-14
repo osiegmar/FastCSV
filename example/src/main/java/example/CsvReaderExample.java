@@ -1,6 +1,7 @@
 package example;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -56,14 +57,14 @@ public class CsvReaderExample {
     }
 
     private static void advancedConfiguration() {
-        final String data = "#commented record\n'quoted ; column';second column\nnew record";
+        final String data = "#commented record\n'quoted ; field';second field\nnew record";
         final String parsedData = CsvReader.builder()
             .fieldSeparator(';')
             .quoteCharacter('\'')
             .commentStrategy(CommentStrategy.SKIP)
             .commentCharacter('#')
-            .skipEmptyRecords(true)
-            .errorOnDifferentFieldCount(false)
+            .skipEmptyLines(true)
+            .ignoreDifferentFieldCount(false)
             .build(data)
             .stream()
             .map(csvRecord -> csvRecord.fields().toString())
@@ -74,7 +75,7 @@ public class CsvReaderExample {
 
     private static void file() throws IOException {
         final Path path = Files.createTempFile("fastcsv", ".csv");
-        Files.writeString(path, "foo,bar\n");
+        Files.writeString(path, "foo,bar\n", StandardCharsets.UTF_8);
 
         try (CsvReader csv = CsvReader.builder().build(path)) {
             csv.forEach(System.out::println);

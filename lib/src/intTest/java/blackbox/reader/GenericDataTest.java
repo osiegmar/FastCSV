@@ -40,7 +40,7 @@ class GenericDataTest {
     public static List<List<String>> readAll(final String data, final boolean skipEmptyLines,
                                              final CommentStrategy commentStrategy) {
         return CsvReader.builder()
-            .skipEmptyRecords(skipEmptyLines)
+            .skipEmptyLines(skipEmptyLines)
             .commentCharacter(';')
             .commentStrategy(commentStrategy)
             .build(data)

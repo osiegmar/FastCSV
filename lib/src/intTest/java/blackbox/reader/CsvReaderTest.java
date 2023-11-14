@@ -90,21 +90,21 @@ class CsvReaderTest {
     void readerToString() {
         assertThat(crb.build(""))
             .asString()
-            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyRecords=true, "
-                + "errorOnDifferentFieldCount=false]");
+            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
+                + "ignoreDifferentFieldCount=true]");
     }
 
     // skipped record
 
     @Test
     void singleRecordNoSkipEmpty() {
-        crb.skipEmptyRecords(false);
+        crb.skipEmptyLines(false);
         assertThat(crb.build("").iterator()).isExhausted();
     }
 
     @Test
     void multipleRecordsNoSkipEmpty() {
-        crb.skipEmptyRecords(false);
+        crb.skipEmptyLines(false);
 
         assertThat(crb.build("\n\na").iterator()).toIterable()
             .satisfiesExactly(
@@ -134,13 +134,13 @@ class CsvReaderTest {
         ",bar\nfaz,baz"
     })
     void differentFieldCountSuccess(final String s) {
-        assertThat(crb.errorOnDifferentFieldCount(true).build(s).stream())
+        assertThat(crb.ignoreDifferentFieldCount(true).build(s).stream())
             .isNotEmpty();
     }
 
     @Test
     void differentFieldCountFail() {
-        crb.errorOnDifferentFieldCount(true);
+        crb.ignoreDifferentFieldCount(false);
 
         assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
             .isInstanceOf(MalformedCsvException.class)

@@ -269,7 +269,7 @@ class IndexedCsvReaderTest {
     }
 
     @Nested
-    class Comment {
+    class CsvComment {
 
         @Test
         void readComment() throws IOException {
@@ -339,7 +339,7 @@ class IndexedCsvReaderTest {
     }
 
     @Nested
-    class Status {
+    class CsvStatus {
 
         @Test
         void finalStatus() throws IOException {

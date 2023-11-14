@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.StringJoiner;
@@ -33,7 +34,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     private final CloseableIterator<CsvRecord> csvIterator;
     private final CloseableIterator<NamedCsvRecord> namedCsvIterator;
 
-    private Set<String> header;
+    private List<String> header;
     private boolean isInitialized;
 
     private NamedCsvReader(final CsvReader csvReader) {
@@ -44,7 +45,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
 
     private void initialize() {
         if (!csvIterator.hasNext()) {
-            header = Collections.emptySet();
+            header = Collections.emptyList();
         } else {
             final CsvRecord firstRecord = csvIterator.next();
 
@@ -54,7 +55,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                     throw new IllegalStateException("Duplicate header field '" + field + "' found");
                 }
             }
-            header = Collections.unmodifiableSet(headerSet);
+            header = List.copyOf(headerSet);
         }
 
         isInitialized = true;
@@ -69,11 +70,11 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     }
 
     /**
-     * Returns the header columns. Can be called at any time.
+     * Returns the header fields. Can be called at any time.
      *
-     * @return the header columns
+     * @return the header fields
      */
-    public Set<String> getHeader() {
+    public List<String> getHeader() {
         if (!isInitialized) {
             initialize();
         }
@@ -164,6 +165,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
         private boolean skipComments;
+        private boolean ignoreDifferentFieldCount = true;
 
         private NamedCsvReaderBuilder() {
         }
@@ -211,6 +213,19 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
          */
         public NamedCsvReaderBuilder skipComments(final boolean skipComments) {
             this.skipComments = skipComments;
+            return this;
+        }
+
+        /**
+         * Defines if an {@link MalformedCsvException} should be thrown if records do contain a
+         * different number of fields.
+         *
+         * @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains
+         *                                   different field count (default: {@code true}).
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public NamedCsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
+            this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
             return this;
         }
 
@@ -272,7 +287,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .quoteCharacter(quoteCharacter)
                 .commentCharacter(commentCharacter)
                 .commentStrategy(skipComments ? CommentStrategy.SKIP : CommentStrategy.NONE)
-                .errorOnDifferentFieldCount(true);
+                .ignoreDifferentFieldCount(ignoreDifferentFieldCount);
         }
 
         @Override
@@ -282,6 +297,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .add("quoteCharacter=" + quoteCharacter)
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipComments=" + skipComments)
+                .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
                 .toString();
         }
 

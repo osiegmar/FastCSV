@@ -25,7 +25,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build --warning-mode all
     - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v3
+      uses: mikepenz/action-junit-report@v4
       if: ${{ !cancelled() }}
       with:
         report_paths: 'build/test-results/**/TEST-*.xml'

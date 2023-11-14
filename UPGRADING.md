@@ -26,8 +26,8 @@ New way:
 CsvReader.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
-    .skipEmptyRecords(true)
-    .errorOnDifferentFieldCount(false);
+    .skipEmptyLines(true)
+    .ignoreDifferentFieldCount(false);
 ```
 
 ### Reading data from file
@@ -37,7 +37,7 @@ Old way:
 try (CsvParser csvParser = new CsvReader().parse(file, UTF_8)) {
     CsvRow row;
     while ((row = csvParser.nextRow()) != null) {
-        System.out.println("First column of line: " + row.getField(0));
+        System.out.println("First field of record: " + row.getField(0));
     }
 }
 ```
@@ -46,7 +46,7 @@ New way:
 ```java
 try (CsvReader csvReader = CsvReader.builder().build(path)) {
     csvReader.forEach(csvRecord ->
-        System.out.println("First column of line: " + csvRecord.getField(0))
+        System.out.println("First field of record: " + csvRecord.getField(0))
     );
 }
 ```
@@ -60,7 +60,7 @@ csvReader.setContainsHeader(true);
 try (CsvParser csvParser = csvReader.parse(file, UTF_8)) {
     CsvRow row;
     while ((row = csvParser.nextRow()) != null) {
-        System.out.println("Column named firstname: " + row.getField("firstname"));
+        System.out.println("Field named firstname: " + row.getField("firstname"));
     }
 }
 ```
@@ -69,7 +69,7 @@ New way:
 ```java
 try (NamedCsvReader csvReader = NamedCsvReader.builder().build(path)) {
     csvReader.forEach(csvRecord ->
-        System.out.println("Column named firstname: " + csvRecord.getField("firstname"))
+        System.out.println("Field named firstname: " + csvRecord.getField("firstname"))
     );
 }
 ```

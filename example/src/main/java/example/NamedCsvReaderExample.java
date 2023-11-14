@@ -1,6 +1,5 @@
 package example;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,7 +9,7 @@ import de.siegmar.fastcsv.reader.NamedCsvRecord;
 @SuppressWarnings("PMD.SystemPrintln")
 public class NamedCsvReaderExample {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         header();
         advancedConfiguration();
     }
@@ -32,7 +31,7 @@ public class NamedCsvReaderExample {
             .skipComments(false)
             .build(data)
             .stream()
-            .map(csvRecord -> csvRecord.fields().toString())
+            .map(csvRecord -> csvRecord.fieldsAsMap().toString())
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);

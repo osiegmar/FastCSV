@@ -11,22 +11,22 @@ final class CsvScanner {
     private final byte fieldSeparator;
     private final byte quoteCharacter;
     private final byte commentCharacter;
-    private final Listener listener;
+    private final CsvListener csvListener;
     private final ByteChannelStream stream;
     private final boolean readComments;
 
     CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
                final CommentStrategy commentStrategy, final byte commentCharacter,
-               final Listener listener) throws IOException {
+               final CsvListener csvListener) throws IOException {
 
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
-        this.listener = listener;
+        this.csvListener = csvListener;
 
         readComments = commentStrategy != CommentStrategy.NONE;
 
-        stream = new ByteChannelStream(channel, listener);
+        stream = new ByteChannelStream(channel, csvListener);
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",
@@ -34,7 +34,7 @@ final class CsvScanner {
     void scan() throws IOException {
         int d;
         while ((d = stream.get()) != -1) {
-            listener.startOffset(stream.getOffset());
+            csvListener.startOffset(stream.getOffset());
 
             // parse a record
             if (d == commentCharacter && readComments) {
@@ -43,7 +43,7 @@ final class CsvScanner {
                 consumeRecord(d);
             }
 
-            listener.onReadRecord();
+            csvListener.onReadRecord();
         }
     }
 
@@ -74,9 +74,9 @@ final class CsvScanner {
                 }
             } else if (d == CR) {
                 stream.consumeIfNextEq(LF);
-                listener.additionalLine();
+                csvListener.additionalLine();
             } else if (d == LF) {
-                listener.additionalLine();
+                csvListener.additionalLine();
             }
         }
 
@@ -114,7 +114,7 @@ final class CsvScanner {
         }
     }
 
-    public interface Listener {
+    public interface CsvListener {
 
         void onReadBytes(int readCnt);
 

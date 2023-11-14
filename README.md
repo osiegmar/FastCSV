@@ -32,12 +32,14 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ## Features
 
-### API
+### Library specific
 
 - Ultra fast
 - Small footprint
 - Zero runtime dependencies
 - Null-free
+- Works with GraalVM Native Image
+- OSGi capable
 
 ### CSV specific
 
@@ -56,7 +58,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
   helpful for error messages
 - Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation
-- Support for (optional) header lines (get field based on column name)
+- Support for (optional) header records (get field based on field name)
 - Support for skipping empty records
 - Support for commented lines (skipping & reading) and configurable comment character
 
@@ -67,7 +69,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 
 ## Requirements
 
-- current version: Java 11 (Android 13 / API level 33)
+- for 3.x version: Java 11 (Android 13 / API level 33)
 - for 2.x version: Java 8 (Android 8 / API level 26)
 
 > :bulb: Android is not Java and is not officially supported.
@@ -99,8 +101,8 @@ CsvReader.builder()
     .quoteCharacter('"')
     .commentStrategy(CommentStrategy.SKIP)
     .commentCharacter('#')
-    .skipEmptyRecords(true)
-    .errorOnDifferentFieldCount(false);
+    .skipEmptyLines(true)
+    .ignoreDifferentFieldCount(false);
 ```
 
 For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvReaderExample.java)

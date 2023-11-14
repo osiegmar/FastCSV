@@ -1,8 +1,8 @@
 # Format: INPUT EXPECTED [FLAGS]
 # Format of INPUT: SPACE = ␣ // CR = ␍ // LF = ␊
-# Format of EXPECTED: New record = ⏎ // Separated columns = ↷ // Empty field = ◯ // Empty list = ∅
+# Format of EXPECTED: New record = ⏎ // Separated fields = ↷ // Empty field = ◯ // Empty list = ∅
 
-# Simple columns / Single record
+# Simple fields / Single record
 D                       D
 D,D                     D↷D
 ,D                      ◯↷D
@@ -59,7 +59,7 @@ A,B"                    A↷B"
 "A␍B"                   A␍B
 "A␍␊B"                  A␍␊B
 
-# Different column count
+# Different field count
 A␊B,C                   A⏎B↷C
 A,B␊C                   A↷B⏎C
 

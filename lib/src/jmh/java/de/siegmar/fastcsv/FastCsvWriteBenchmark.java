@@ -16,7 +16,7 @@ public class FastCsvWriteBenchmark {
 
     @Benchmark
     public void write(final WriteState state) {
-        state.writer.writeRecord(Constants.RECORD);
+        state.writer.writeRecord(CsvConstants.RECORD);
     }
 
     @State(Scope.Benchmark)

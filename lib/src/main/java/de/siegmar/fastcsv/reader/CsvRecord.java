@@ -31,7 +31,7 @@ public final class CsvRecord {
     /**
      * Returns the original line number (starting with 1). On multi-line records this is the starting
      * line number.
-     * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyRecords(boolean)}.
+     * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)}.
      *
      * @return the original line number
      */
@@ -63,7 +63,7 @@ public final class CsvRecord {
      * Gets the number of fields of this record.
      *
      * @return the number of fields of this record
-     * @see CsvReader.CsvReaderBuilder#errorOnDifferentFieldCount(boolean)
+     * @see CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)
      */
     public int fieldCount() {
         return fields.length;
@@ -83,7 +83,7 @@ public final class CsvRecord {
      * Provides the information if the record is an empty record.
      *
      * @return {@code true} if the record is an empty record
-     * @see CsvReader.CsvReaderBuilder#skipEmptyRecords(boolean)
+     * @see CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)
      */
     public boolean empty() {
         return fields == EMPTY;
