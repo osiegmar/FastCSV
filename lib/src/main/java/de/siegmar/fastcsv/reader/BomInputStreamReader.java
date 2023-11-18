@@ -85,8 +85,12 @@ class BomInputStreamReader extends Reader {
             }
         }
 
-        in.reset();
-        in.skip(bomLen);
+        if (bomLen < n) {
+            in.reset();
+            if (in.skip(bomLen) != bomLen) {
+                throw new IOException("BOM header couldn't be skipped");
+            }
+        }
         return charset;
     }
 
