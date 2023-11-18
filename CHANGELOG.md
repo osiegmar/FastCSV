@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add support for different field count for NamedCsvReader
 - Metadata for OSGi capability
+- Support for optional BOM header when reading CSV files
 
 ### Changed
 - Updated from Java 8 to Java 11

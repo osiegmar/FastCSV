@@ -309,6 +309,14 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             return this;
         }
 
+        /**
+         * Defines if an optional BOM (Byte order mark) header should be detected.
+         *
+         * BOM detection only applies for direct file access.
+         *
+         * @param detectBomHeader if detection should be enabled (default: {@code false})
+         * @return This updated object, so that additional method calls can be chained together.
+         */
         public CsvReaderBuilder detectBomHeader(final boolean detectBomHeader) {
             this.detectBomHeader = detectBomHeader;
             return this;
@@ -329,9 +337,6 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @throws NullPointerException if reader is {@code null}
          */
         public CsvReader build(final Reader reader) {
-            if (detectBomHeader) {
-                throw new IllegalStateException("BOM header detect not available reader input mode");
-            }
             return newReader(Objects.requireNonNull(reader, "reader must not be null"));
         }
 
@@ -342,14 +347,14 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @return a new CsvReader - never {@code null}.
          */
         public CsvReader build(final String data) {
-            if (detectBomHeader) {
-                throw new IllegalStateException("BOM header detect not available in string input mode");
-            }
             return newReader(Objects.requireNonNull(data, "data must not be null"));
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file using UTF-8 as the character set.
+         * Constructs a new {@link CsvReader} for the specified file.
+         * <p>
+         * This is a convinience method for calling {@link #build(Path, Charset)} with
+         * {@link StandardCharsets#UTF_8} as the charset.
          *
          * @param file    the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
@@ -364,20 +369,38 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * Constructs a new {@link CsvReader} for the specified arguments.
          *
          * @param file    the file to read data from.
-         * @param charset the character set to use.
+         * @param charset the character set to use. If BOM header detection is enabled
+         *                (via {@link #detectBomHeader(boolean)}), this acts as a default when no BOM header was found.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
+        @SuppressWarnings("PMD.CloseResource")
         public CsvReader build(final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            final Reader r = detectBomHeader
-                    ? new UnicodeReader(Files.newInputStream(file), charset)
-                    : new InputStreamReader(Files.newInputStream(file), charset);
+            if (!detectBomHeader) {
+                return newReader(new InputStreamReader(Files.newInputStream(file), charset));
+            }
 
-            return newReader(r);
+            final var bomInputStream = new BomInputStream(Files.newInputStream(file));
+            try {
+                return newReader(new InputStreamReader(bomInputStream,
+                    bomInputStream.detectCharset().orElse(charset)));
+            } catch (final IOException e) {
+                closeQuietly(bomInputStream);
+                throw e;
+            }
+        }
+
+        @SuppressWarnings("PMD.EmptyCatchBlock")
+        private void closeQuietly(final Closeable closeable) {
+            try {
+                closeable.close();
+            } catch (final IOException ignore) {
+                // NOP
+            }
         }
 
         private CsvReader newReader(final Reader reader) {

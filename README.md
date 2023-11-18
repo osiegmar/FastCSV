@@ -49,6 +49,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
 - Unicode support
+- BOM support (UTF-8, UTF-16, UTF-32, little-/big-endian)
 
 ### Reader specific
 
