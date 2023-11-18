@@ -311,8 +311,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
         /**
          * Defines if an optional BOM (Byte order mark) header should be detected.
-         *
-         * BOM detection only applies for direct file access.
+         * BOM detection only applies for direct file access and comes with a performance penalty.
          *
          * @param detectBomHeader if detection should be enabled (default: {@code false})
          * @return This updated object, so that additional method calls can be chained together.
@@ -375,32 +374,15 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @throws IOException if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        @SuppressWarnings("PMD.CloseResource")
         public CsvReader build(final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            if (!detectBomHeader) {
-                return newReader(new InputStreamReader(Files.newInputStream(file), charset));
+            if (detectBomHeader) {
+                return newReader(new BomInputStreamReader(Files.newInputStream(file), charset));
             }
 
-            final var bomInputStream = new BomInputStream(Files.newInputStream(file));
-            try {
-                return newReader(new InputStreamReader(bomInputStream,
-                    bomInputStream.detectCharset().orElse(charset)));
-            } catch (final IOException e) {
-                closeQuietly(bomInputStream);
-                throw e;
-            }
-        }
-
-        @SuppressWarnings("PMD.EmptyCatchBlock")
-        private void closeQuietly(final Closeable closeable) {
-            try {
-                closeable.close();
-            } catch (final IOException ignore) {
-                // NOP
-            }
+            return newReader(new InputStreamReader(Files.newInputStream(file), charset));
         }
 
         private CsvReader newReader(final Reader reader) {
