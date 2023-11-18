@@ -230,7 +230,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private boolean skipEmptyRows = true;
+        private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
         private boolean detectBomHeader;
 
