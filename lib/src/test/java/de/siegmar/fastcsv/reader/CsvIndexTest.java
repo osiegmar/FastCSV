@@ -38,11 +38,10 @@ class CsvIndexTest {
             .isEqualTo(defaultBuilder.build());
     }
 
-    @SuppressWarnings("AssertThatObjectIsNullOrNotNull")
     @Test
     void notNull() {
         assertThat(defaultBuilder.build())
-            .isNotEqualTo(null);
+            .isNotNull();
     }
 
     @Test

@@ -2,6 +2,7 @@ package blackbox.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static testutil.CsvRecordAssert.CSV_RECORD;
 
@@ -134,8 +135,13 @@ class CsvReaderTest {
         ",bar\nfaz,baz"
     })
     void differentFieldCountSuccess(final String s) {
-        assertThat(crb.ignoreDifferentFieldCount(true).build(s).stream())
-            .isNotEmpty();
+        assertThatNoException().isThrownBy(() -> readAll(s));
+    }
+
+    @Test
+    void differentFieldCountSuccess2() {
+        crb.ignoreDifferentFieldCount(false);
+        assertThatNoException().isThrownBy(() -> readAll("foo\nbar"));
     }
 
     @Test
