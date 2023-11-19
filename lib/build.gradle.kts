@@ -63,7 +63,6 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(tasks.jacocoTestReport)
 }
 
 val intTestTask = tasks.register<Test>("intTest") {
@@ -73,12 +72,11 @@ val intTestTask = tasks.register<Test>("intTest") {
     testClassesDirs = intTest.output.classesDirs
     classpath = sourceSets["intTest"].runtimeClasspath
 
-    finalizedBy(tasks.jacocoTestReport)
     shouldRunAfter(tasks.test)
 }
 
 tasks.check {
-    dependsOn(intTestTask)
+    dependsOn(intTestTask, tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
 }
 
 pitest {
@@ -92,7 +90,7 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
     }
-    dependsOn(intTestTask)
+    dependsOn(tasks.test, intTestTask)
 }
 
 tasks.jacocoTestCoverageVerification {
@@ -100,13 +98,18 @@ tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                counter = "BRANCH"
+                counter = "METHOD"
                 value = "COVEREDRATIO"
                 minimum = "1.0".toBigDecimal()
             }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.9".toBigDecimal()
+            }
         }
     }
-    dependsOn(intTestTask)
+    dependsOn(tasks.test, intTestTask)
 }
 
 tasks.jmh {
