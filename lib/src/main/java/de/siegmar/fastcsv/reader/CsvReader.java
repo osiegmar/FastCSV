@@ -35,6 +35,7 @@ import de.siegmar.fastcsv.util.Util;
  */
 public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
+    private final RecordHandler recordHandler;
     private final RecordReader recordReader;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
@@ -43,33 +44,38 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     private int firstRecordFieldCount = -1;
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
+        recordHandler = new RecordHandler(fieldModifier);
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+        recordReader = new RecordReader(recordHandler, reader, fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter);
     }
 
-    @SuppressWarnings("PMD.NullAssignment")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "PMD.NullAssignment"})
     CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
+        recordHandler = new RecordHandler(fieldModifier);
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+        recordReader = new RecordReader(recordHandler, data, fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter);
     }
 
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
@@ -84,6 +90,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     /**
      * Constructs a {@link CsvReaderBuilder} to configure and build instances of this class.
+     *
      * @return a new {@link CsvReaderBuilder} instance.
      */
     public static CsvReaderBuilder builder() {
@@ -124,8 +131,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         "PMD.AssignmentInOperand"
     })
     private CsvRecord fetchRow() throws IOException {
-        CsvRecord csvRecord;
-        while ((csvRecord = recordReader.fetchAndRead()) != null) {
+        while (recordReader.fetchAndRead()) {
+            final CsvRecord csvRecord = recordHandler.buildAndReset();
+
             // skip commented records
             if (commentStrategy == CommentStrategy.SKIP && csvRecord.isComment()) {
                 continue;
@@ -149,10 +157,10 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 }
             }
 
-            break;
+            return csvRecord;
         }
 
-        return csvRecord;
+        return null;
     }
 
     @Override
@@ -233,6 +241,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
         private boolean detectBomHeader;
+        private FieldModifier fieldModifier;
 
         private CsvReaderBuilder() {
         }
@@ -301,7 +310,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * different number of fields.
          *
          * @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains
-         *                                   different field count (default: {@code true}).
+         *                                  different field count (default: {@code true}).
          * @return This updated object, so that additional method calls can be chained together.
          */
         public CsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
@@ -318,6 +327,18 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          */
         public CsvReaderBuilder detectBomHeader(final boolean detectBomHeader) {
             this.detectBomHeader = detectBomHeader;
+            return this;
+        }
+
+        /**
+         * Registers an optional field modifier. Used to modify the field values.
+         * By default, no field modifier is used.
+         *
+         * @param fieldModifier the modifier to use.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
+            this.fieldModifier = fieldModifier;
             return this;
         }
 
@@ -342,7 +363,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          *
-         * @param data    the data to read.
+         * @param data the data to read.
          * @return a new CsvReader - never {@code null}.
          */
         public CsvReader build(final String data) {
@@ -355,9 +376,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * This is a convinience method for calling {@link #build(Path, Charset)} with
          * {@link StandardCharsets#UTF_8} as the charset.
          *
-         * @param file    the file to read data from.
+         * @param file the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvReader build(final Path file) throws IOException {
@@ -371,7 +392,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @param charset the character set to use. If BOM header detection is enabled
          *                (via {@link #detectBomHeader(boolean)}), this acts as a default when no BOM header was found.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvReader build(final Path file, final Charset charset) throws IOException {
@@ -387,12 +408,12 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
         private CsvReader newReader(final Reader reader) {
             return new CsvReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount);
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
         private CsvReader newReader(final String data) {
             return new CsvReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount);
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
         @Override
@@ -404,6 +425,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+                .add("fieldModifier=" + fieldModifier)
                 .toString();
         }
 

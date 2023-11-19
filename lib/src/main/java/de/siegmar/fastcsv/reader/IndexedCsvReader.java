@@ -50,6 +50,7 @@ public final class IndexedCsvReader implements Closeable {
     private final char commentCharacter;
     private final int pageSize;
     private final RandomAccessFile raf;
+    private final RecordHandler recordHandler = new RecordHandler(null);
     private final RecordReader recordReader;
     private final CsvIndex csvIndex;
 
@@ -82,7 +83,8 @@ public final class IndexedCsvReader implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        recordReader = new RecordReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
+        recordReader = new RecordReader(recordHandler,
+            new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
             fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
@@ -181,9 +183,8 @@ public final class IndexedCsvReader implements Closeable {
             raf.seek(page.offset());
             recordReader.resetBuffer(page.startingLineNumber());
 
-            CsvRecord csvRecord;
-            for (int i = 0; i < pageSize && (csvRecord = recordReader.fetchAndRead()) != null; i++) {
-                ret.add(csvRecord);
+            for (int i = 0; i < pageSize && recordReader.fetchAndRead(); i++) {
+                ret.add(recordHandler.buildAndReset());
             }
 
             return ret;

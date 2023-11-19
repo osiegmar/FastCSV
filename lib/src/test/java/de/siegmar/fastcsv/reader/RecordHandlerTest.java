@@ -8,7 +8,7 @@ class RecordHandlerTest {
 
     @Test
     void test() {
-        final RecordHandler rh = new RecordHandler(1);
+        final RecordHandler rh = new RecordHandler(1, null);
         rh.add("foo");
         rh.add("bar");
 

@@ -28,7 +28,7 @@ final class RecordReader implements Closeable {
     private static final int STATUS_DATA_FIELD = 1;
     private static final int STATUS_RESET = 0;
 
-    private final RecordHandler recordHandler = new RecordHandler(32);
+    private final RecordHandler recordHandler;
     private final CsvBuffer csvBuffer;
     private final char fsep;
     private final char qChar;
@@ -38,8 +38,9 @@ final class RecordReader implements Closeable {
     private int status;
     private boolean finished;
 
-    RecordReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
-                 final CommentStrategy commentStrategy, final char commentCharacter) {
+    RecordReader(final RecordHandler recordHandler, final Reader reader, final char fieldSeparator,
+                 final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter) {
+        this.recordHandler = recordHandler;
         csvBuffer = new CsvBuffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
@@ -47,8 +48,9 @@ final class RecordReader implements Closeable {
         this.cChar = commentCharacter;
     }
 
-    RecordReader(final String data, final char fieldSeparator, final char quoteCharacter,
-                 final CommentStrategy commentStrategy, final char commentCharacter) {
+    RecordReader(final RecordHandler recordHandler, final String data, final char fieldSeparator,
+                 final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter) {
+        this.recordHandler = recordHandler;
         csvBuffer = new CsvBuffer(data);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
@@ -56,30 +58,34 @@ final class RecordReader implements Closeable {
         this.cChar = commentCharacter;
     }
 
-    CsvRecord fetchAndRead() throws IOException {
+    boolean fetchAndRead() throws IOException {
         if (finished) {
-            return null;
+            return false;
         }
 
+        boolean fetched = true;
         do {
             if (csvBuffer.len == csvBuffer.pos) {
                 // cursor reached current EOD -- need to fetch
                 if (csvBuffer.fetchData()) {
+                    finished = true;
+
                     // reached end of stream
                     if (csvBuffer.begin < csvBuffer.pos || recordHandler.isCommentMode()) {
-                        recordHandler.add(materialize(csvBuffer.buf, csvBuffer.begin,
-                            csvBuffer.pos - csvBuffer.begin, status, qChar));
+                        materialize(csvBuffer.buf, csvBuffer.begin,
+                            csvBuffer.pos - csvBuffer.begin, status, qChar);
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
                         recordHandler.add("");
+                    } else {
+                        fetched = false;
                     }
 
-                    finished = true;
                     break;
                 }
             }
         } while (consume(recordHandler, csvBuffer.buf, csvBuffer.len));
 
-        return recordHandler.buildAndReset();
+        return fetched;
     }
 
     @SuppressWarnings("PMD.EmptyIfStmt")
@@ -125,15 +131,13 @@ final class RecordReader implements Closeable {
                         final char lookAhead = lBuf[lPos++];
 
                         if (lookAhead == CR) {
-                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (lookAhead == LF) {
-                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
                             status = STATUS_RESET;
                             lBegin = lPos;
                             moreDataNeeded = false;
@@ -146,21 +150,18 @@ final class RecordReader implements Closeable {
                         final char c = lBuf[lPos++];
 
                         if (c == fsep) {
-                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
                             lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
                         } else if (c == CR) {
-                            rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus,
-                                qChar));
+                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
-                                rh.add(materialize(lBuf, lBegin, lPos - lBegin - 1,
-                                    lStatus, qChar));
+                                materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
                                 status = STATUS_RESET;
                                 lBegin = lPos;
                                 moreDataNeeded = false;
@@ -209,18 +210,19 @@ final class RecordReader implements Closeable {
         return moreDataNeeded;
     }
 
-    private static String materialize(final char[] lBuf,
-                                      final int lBegin, final int lPos, final int lStatus,
-                                      final char quoteCharacter) {
+    private void materialize(final char[] lBuf,
+                             final int lBegin, final int lPos, final int lStatus,
+                             final char quoteCharacter) {
         if ((lStatus & STATUS_QUOTED_FIELD) == 0) {
             // field without quotes
-            return new String(lBuf, lBegin, lPos);
+            recordHandler.add(lBuf, lBegin, lPos);
+            return;
         }
 
         // field with quotes
         final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
             quoteCharacter);
-        return new String(lBuf, lBegin + 1, lPos - 1 - shift);
+        recordHandler.add(lBuf, lBegin + 1, lPos - 1 - shift);
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,

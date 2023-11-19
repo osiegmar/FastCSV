@@ -2,34 +2,54 @@ package de.siegmar.fastcsv.reader;
 
 final class RecordHandler {
 
+    private static final int INITIAL_FIELDS_SIZE = 32;
+    private final FieldModifier fieldModifier;
+
     private int len;
-    private String[] record;
+    private String[] fields;
     private int idx;
     private int lines = 1;
     private boolean commentMode;
     private long originalLineNumber = 1;
 
-    RecordHandler(final int len) {
-        this.len = len;
-        record = new String[len];
+    RecordHandler(final FieldModifier fieldModifier) {
+        this(INITIAL_FIELDS_SIZE, fieldModifier);
     }
 
-    void add(final String value) {
+    RecordHandler(final int len, final FieldModifier fieldModifier) {
+        this.len = len;
+        fields = new String[len];
+        this.fieldModifier = fieldModifier;
+    }
+
+    @SuppressWarnings({
+        "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment",
+        "PMD.AvoidReassigningParameters"
+    })
+    void add(String value) {
         if (idx == len) {
             extendCapacity();
         }
-        record[idx++] = value;
+        if (fieldModifier != null) {
+            value = fieldModifier.modify(originalLineNumber, idx, commentMode, value);
+        }
+        fields[idx++] = value;
+    }
+
+    void add(final char[] lBuf, final int lBegin, final int lPos) {
+        add(new String(lBuf, lBegin, lPos));
     }
 
     private void extendCapacity() {
         len *= 2;
         final String[] newRecord = new String[len];
-        System.arraycopy(record, 0, newRecord, 0, idx);
-        record = newRecord;
+        System.arraycopy(fields, 0, newRecord, 0, idx);
+        fields = newRecord;
     }
 
     CsvRecord buildAndReset() {
-        final CsvRecord csvRecord = idx > 0 ? build() : null;
+        final CsvRecord csvRecord = build();
         idx = 0;
         originalLineNumber += lines;
         lines = 1;
@@ -38,9 +58,9 @@ final class RecordHandler {
     }
 
     private CsvRecord build() {
-        if (idx > 1 || !record[0].isEmpty()) {
+        if (idx > 1 || !fields[0].isEmpty()) {
             final String[] ret = new String[idx];
-            System.arraycopy(record, 0, ret, 0, idx);
+            System.arraycopy(fields, 0, ret, 0, idx);
             return new CsvRecord(originalLineNumber, ret, commentMode);
         }
 
