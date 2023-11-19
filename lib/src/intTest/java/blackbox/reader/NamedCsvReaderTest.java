@@ -78,6 +78,13 @@ class NamedCsvReaderTest {
             .field("foo").isEqualTo("bar");
     }
 
+    @Test
+    void findFieldByName() {
+        assertThat(parse("foo\nbar").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .findField("foo").hasValue("bar");
+    }
+
     @SuppressWarnings("JoinAssertThatStatements")
     @Test
     void getHeader() {
@@ -124,10 +131,22 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void findNonExistingFieldByName() {
+    void getNonExistingFieldByName() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("Header does not contain a field 'bar'. Valid names are: [foo]");
+    }
+
+    @Test
+    void findNonExistingFieldByName() {
+        assertThat(parse("foo\nfaz").iterator().next().findField("bar"))
+            .isEmpty();
+    }
+
+    @Test
+    void findNonExistingFieldByName2() {
+        assertThat(parse("foo,bar\nfaz").iterator().next().findField("bar"))
+            .isEmpty();
     }
 
     @Test

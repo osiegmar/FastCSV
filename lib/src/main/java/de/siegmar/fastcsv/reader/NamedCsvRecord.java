@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -40,6 +41,7 @@ public final class NamedCsvRecord {
      * @param name field name
      * @return field value, never {@code null}
      * @throws NoSuchElementException if this record has no such field
+     * @see #findField(String)
      */
     public String getField(final String name) {
         final int fieldPos = header.indexOf(name);
@@ -52,6 +54,21 @@ public final class NamedCsvRecord {
                 name, fieldPos + 1, csvRecord.getFieldCount()));
         }
         return csvRecord.getField(fieldPos);
+    }
+
+    /**
+     * Finds a field value by its name.
+     *
+     * @param name field name
+     * @return the field value ({@link Optional#empty()} if record doesn't contain that field),
+     *     never {@code null}
+     */
+    public Optional<String> findField(final String name) {
+        final int fieldPos = header.indexOf(name);
+        if (fieldPos == -1 || fieldPos >= csvRecord.getFieldCount()) {
+            return Optional.empty();
+        }
+        return Optional.of(csvRecord.getField(fieldPos));
     }
 
     /**
