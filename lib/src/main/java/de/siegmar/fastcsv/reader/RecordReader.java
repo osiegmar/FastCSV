@@ -75,7 +75,7 @@ final class RecordReader implements Closeable {
                         materialize(csvBuffer.buf, csvBuffer.begin,
                             csvBuffer.pos - csvBuffer.begin, status, qChar);
                     } else if ((status & STATUS_NEW_FIELD) != 0) {
-                        recordHandler.add("");
+                        recordHandler.addEmpty();
                     } else {
                         fetched = false;
                     }
@@ -215,14 +215,14 @@ final class RecordReader implements Closeable {
                              final char quoteCharacter) {
         if ((lStatus & STATUS_QUOTED_FIELD) == 0) {
             // field without quotes
-            recordHandler.add(lBuf, lBegin, lPos);
+            recordHandler.add(new String(lBuf, lBegin, lPos));
             return;
         }
 
         // field with quotes
         final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos,
             quoteCharacter);
-        recordHandler.add(lBuf, lBegin + 1, lPos - 1 - shift);
+        recordHandler.add(new String(lBuf, lBegin + 1, lPos - 1 - shift));
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,

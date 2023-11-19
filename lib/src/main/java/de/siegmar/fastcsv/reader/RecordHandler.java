@@ -22,23 +22,19 @@ final class RecordHandler {
         this.fieldModifier = fieldModifier;
     }
 
-    @SuppressWarnings({
-        "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment",
-        "PMD.AvoidReassigningParameters"
-    })
-    void add(String value) {
+    void add(final String value) {
         if (idx == len) {
             extendCapacity();
         }
-        if (fieldModifier != null) {
-            value = fieldModifier.modify(originalLineNumber, idx, commentMode, value);
-        }
-        fields[idx++] = value;
+        fields[idx] = fieldModifier != null ? fieldModifier.modify(originalLineNumber, idx, commentMode, value) : value;
+        idx++;
     }
 
-    void add(final char[] lBuf, final int lBegin, final int lPos) {
-        add(new String(lBuf, lBegin, lPos));
+    public void addEmpty() {
+        if (idx == len) {
+            extendCapacity();
+        }
+        fields[idx++] = "";
     }
 
     private void extendCapacity() {

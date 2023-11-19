@@ -2,7 +2,6 @@ package de.siegmar.fastcsv;
 
 import java.io.IOException;
 
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -14,7 +13,7 @@ import de.siegmar.fastcsv.writer.LineDelimiter;
 
 public class FastCsvWriteBenchmark {
 
-    @Benchmark
+//    @Benchmark
     public void write(final WriteState state) {
         state.writer.writeRecord(CsvConstants.RECORD);
     }
