@@ -17,12 +17,13 @@ class BomInputStreamReaderTest {
     @ParameterizedTest
     @MethodSource
     void charset(final String charset, final byte[] data) throws IOException {
-        final var bis = getBis(data);
+        final var bis = new BomInputStreamReader(new ByteArrayInputStream(data), StandardCharsets.UTF_8);
 
         if (charset == null) {
-            assertThat(bis.detectCharset()).isNull();
+            assertThat(bis.detectCharset()).isEmpty();
         } else {
             assertThat(bis.detectCharset())
+                .get()
                 .hasToString(charset);
         }
     }
@@ -52,10 +53,6 @@ class BomInputStreamReaderTest {
             arguments("UTF-32BE", new byte[] {0, 0, (byte) 0xFE, (byte) 0xFF})
         );
         // @formatter:on
-    }
-
-    private static BomInputStreamReader getBis(final byte... data) {
-        return new BomInputStreamReader(new ByteArrayInputStream(data), StandardCharsets.UTF_8);
     }
 
 }

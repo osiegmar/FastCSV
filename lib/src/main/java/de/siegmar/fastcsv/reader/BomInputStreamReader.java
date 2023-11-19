@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.Optional;
 
 class BomInputStreamReader extends Reader {
@@ -22,8 +21,8 @@ class BomInputStreamReader extends Reader {
     private InputStreamReader r;
 
     BomInputStreamReader(final InputStream in, final Charset defaultCharset) {
-        this.in = new BufferedInputStream(Objects.requireNonNull(in));
-        this.defaultCharset = Objects.requireNonNull(defaultCharset);
+        this.in = new BufferedInputStream(in);
+        this.defaultCharset = defaultCharset;
     }
 
     /*
@@ -42,14 +41,14 @@ class BomInputStreamReader extends Reader {
         "checkstyle:NestedIfDepth",
         "PMD.AvoidLiteralsInIfCondition"
     })
-    Charset detectCharset() throws IOException {
+    Optional<Charset> detectCharset() throws IOException {
         in.mark(BOM_SIZE);
         final byte[] buf = in.readNBytes(BOM_SIZE);
         final int n = buf.length;
 
         if (n < 2) {
             in.reset();
-            return null;
+            return Optional.empty();
         }
 
         Charset charset = null;
@@ -91,21 +90,17 @@ class BomInputStreamReader extends Reader {
                 throw new IOException("BOM header couldn't be skipped");
             }
         }
-        return charset;
+
+        return Optional.ofNullable(charset);
     }
 
     @Override
     public int read(final char[] cbuf, final int off, final int len) throws IOException {
         if (r == null) {
-            r = initReader();
+            r = new InputStreamReader(in, detectCharset().orElse(defaultCharset));
         }
 
         return r.read(cbuf, off, len);
-    }
-
-    private InputStreamReader initReader() throws IOException {
-        final var charset = Optional.ofNullable(detectCharset()).orElse(defaultCharset);
-        return new InputStreamReader(in, charset);
     }
 
     @Override
