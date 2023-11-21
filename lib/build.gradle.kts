@@ -110,6 +110,7 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     dependsOn(tasks.test, intTestTask)
+    shouldRunAfter(tasks.jacocoTestReport)
 }
 
 tasks.jmh {

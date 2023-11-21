@@ -193,7 +193,7 @@ class CsvWriterTest {
         final CsvWriter writer = CsvWriter.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
-            .quoteStrategy(QuoteStrategy.REQUIRED)
+            .quoteStrategy(QuoteStrategy.ALWAYS)
             .lineDelimiter(LineDelimiter.CRLF)
             .build(new StringWriter());
 
@@ -266,14 +266,14 @@ class CsvWriterTest {
     void builderToString() {
         assertThat(crw).asString()
             .isEqualTo("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n, bufferSize=8192]");
+                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=8192]");
     }
 
     @Test
     void writerToString() {
         assertThat(crw.build(new StringWriter())).asString()
             .isEqualTo("CsvWriter[fieldSeparator=,, quoteCharacter=\", commentCharacter=#, "
-                + "quoteStrategy=REQUIRED, lineDelimiter='\n']");
+                + "quoteStrategy=null, lineDelimiter='\n']");
     }
 
     private String write(final String... cols) {
