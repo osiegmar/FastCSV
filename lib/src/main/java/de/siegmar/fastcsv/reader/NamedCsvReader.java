@@ -166,6 +166,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         private char commentCharacter = '#';
         private boolean skipComments;
         private boolean ignoreDifferentFieldCount = true;
+        private FieldModifier fieldModifier;
 
         private NamedCsvReaderBuilder() {
         }
@@ -230,6 +231,18 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         }
 
         /**
+         * Registers an optional field modifier. Used to modify the field values.
+         * By default, no field modifier is used.
+         *
+         * @param fieldModifier the modifier to use.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public NamedCsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
+            this.fieldModifier = fieldModifier;
+            return this;
+        }
+
+        /**
          * Constructs a new {@link NamedCsvReader} for the specified file using UTF-8 as the character set.
          *
          * @param file    the file to read data from.
@@ -287,7 +300,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .quoteCharacter(quoteCharacter)
                 .commentCharacter(commentCharacter)
                 .commentStrategy(skipComments ? CommentStrategy.SKIP : CommentStrategy.NONE)
-                .ignoreDifferentFieldCount(ignoreDifferentFieldCount);
+                .ignoreDifferentFieldCount(ignoreDifferentFieldCount)
+                .fieldModifier(fieldModifier);
         }
 
         @Override
@@ -298,6 +312,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipComments=" + skipComments)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+                .add("fieldModifier=" + fieldModifier)
                 .toString();
         }
 

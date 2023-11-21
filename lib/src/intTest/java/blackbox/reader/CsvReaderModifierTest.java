@@ -1,6 +1,7 @@
 package blackbox.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Locale;
 
@@ -10,6 +11,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldModifier;
 import testutil.CsvRecordAssert;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CsvReaderModifierTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
@@ -49,6 +51,16 @@ class CsvReaderModifierTest {
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar", "baz");
+    }
+
+    @Test
+    void noNull() {
+        crb.fieldModifier((originalLineNumber, fieldNo, comment, field) -> null);
+
+        assertThatThrownBy(() -> crb.build("foo").stream().toList())
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageStartingWith("fieldModifier returned illegal null: "
+                + "class blackbox.reader.CsvReaderModifierTest$$Lambda");
     }
 
 }

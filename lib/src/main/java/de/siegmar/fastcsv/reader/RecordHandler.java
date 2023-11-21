@@ -26,8 +26,15 @@ final class RecordHandler {
         if (idx == len) {
             extendCapacity();
         }
-        fields[idx] = fieldModifier != null ? fieldModifier.modify(originalLineNumber, idx, commentMode, value) : value;
-        idx++;
+        if (fieldModifier == null) {
+            fields[idx++] = value;
+        } else {
+            final String modifiedValue = fieldModifier.modify(originalLineNumber, idx, commentMode, value);
+            if (modifiedValue == null) {
+                throw new NullPointerException("fieldModifier returned illegal null: " + fieldModifier.getClass());
+            }
+            fields[idx++] = modifiedValue;
+        }
     }
 
     public void addEmpty() {

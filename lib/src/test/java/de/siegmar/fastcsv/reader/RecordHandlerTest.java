@@ -18,4 +18,16 @@ class RecordHandlerTest {
             .fields().containsExactly("foo", "bar");
     }
 
+    @Test
+    void testEmpty() {
+        final RecordHandler rh = new RecordHandler(1, null);
+        rh.addEmpty();
+        rh.addEmpty();
+
+        assertThat(rh.buildAndReset())
+            .isOriginalLineNumber(1)
+            .isNotComment()
+            .fields().containsExactly("", "");
+    }
+
 }
