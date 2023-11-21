@@ -1,37 +1,85 @@
 package de.siegmar.fastcsv.writer;
 
 /**
- * The strategies that can be used to quote values when writing CSV data.
+ * A quote strategy is used to decide whether to quote fields if quoting is optional (as per RFC 4180).
+ * <p>
+ * If a field contains characters for which the RFC dictates quoting, this QuoteStrategy won't be called for a decision.
  */
-public enum QuoteStrategy {
+public interface QuoteStrategy {
 
     /**
-     * Enclose fields only with quotes if required. That is, if the field contains:
-     * <ul>
-     *     <li>field separator</li>
-     *     <li>quote character</li>
-     *     <li>comment character</li>
-     *     <li>newline character(s) (CR / LF / CRLF)</li>
-     * </ul>
-     *
-     * Empty strings and {@code null} fields will not be enclosed with quotes.
+     * Enclose any field with quotes regardless of its content (even empty and {@code null} fields).
      */
-    REQUIRED,
+    QuoteStrategy ALWAYS = new QuoteStrategy() {
+        @Override
+        public boolean quoteNull(final int lineNo, final int fieldIdx) {
+            return true;
+        }
+
+        @Override
+        public boolean quoteEmpty(final int lineNo, final int fieldIdx) {
+            return true;
+        }
+
+        @Override
+        public boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
+            return true;
+        }
+    };
 
     /**
-     * In addition to fields that require quote enclosing also delimit empty text fields to
-     * differentiate between empty and {@code null} fields.
+     * Enclose any field with quotes if it has content (is not empty or {@code null}).
+     */
+    QuoteStrategy NON_EMPTY = new QuoteStrategy() {
+        @Override
+        public boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
+            return true;
+        }
+    };
+
+    /**
+     * Enclose empty but not @{code null} fields in order to differentiate them.
      * This is required for PostgreSQL CSV imports for example.
      */
-    EMPTY,
+    QuoteStrategy EMPTY = new QuoteStrategy() {
+        @Override
+        public boolean quoteEmpty(final int lineNo, final int fieldIdx) {
+            return true;
+        }
+    };
 
     /**
-     * Enclose any text field with quotes regardless of its content (even empty and {@code null} fields).
+     * Determine if a {@code null} field should be quoted.
+     *
+     * @param lineNo the line number (1-based)
+     * @param fieldIdx    the field index (0-based)
+     * @return {@code true}, if a {@code null} field should be quoted
      */
-    ALWAYS,
+    default boolean quoteNull(final int lineNo, int fieldIdx) {
+        return false;
+    }
 
     /**
-     * Enclose any text field with quotes if it has content, excluding empty and {@code null} fields.
+     * Determine if an empty (not {@code null}) field should be quoted.
+     *
+     * @param lineNo the line number (1-based)
+     * @param fieldIdx    the field index (0-based)
+     * @return {@code true}, if an empty field should be quoted
      */
-    NON_EMPTY
+    default boolean quoteEmpty(final int lineNo, int fieldIdx) {
+        return false;
+    }
+
+    /**
+     * Determine if a data containing field should be quoted.
+     *
+     * @param lineNo the line number (1-based)
+     * @param fieldIdx    the field index (0-based)
+     * @param value       the field value
+     * @return {@code true}, if a data containing field should be quoted
+     */
+    default boolean quoteNonEmpty(final int lineNo, int fieldIdx, String value) {
+        return false;
+    }
+
 }

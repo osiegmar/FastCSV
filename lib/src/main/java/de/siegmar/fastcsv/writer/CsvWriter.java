@@ -40,6 +40,8 @@ public final class CsvWriter implements Closeable {
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
     private final boolean syncWriter;
+    private final char[] emptyFieldValue;
+    private int currentLineNo = 1;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
@@ -55,9 +57,11 @@ public final class CsvWriter implements Closeable {
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
-        this.quoteStrategy = Objects.requireNonNull(quoteStrategy);
+        this.quoteStrategy = quoteStrategy;
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
         this.syncWriter = syncWriter;
+
+        emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
     }
 
     /**
@@ -81,19 +85,19 @@ public final class CsvWriter implements Closeable {
      */
     public CsvWriter writeRecord(final Iterable<String> values) {
         try {
-            boolean firstField = true;
+            int fieldIdx = 0;
             for (final String value : values) {
-                if (!firstField) {
+                if (fieldIdx > 0) {
                     writer.write(fieldSeparator);
                 }
-                writeInternal(value, firstField);
-                firstField = false;
+                writeInternal(value, fieldIdx++);
             }
             endRecord();
-            return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+
+        return this;
     }
 
     /**
@@ -111,57 +115,44 @@ public final class CsvWriter implements Closeable {
                 if (i > 0) {
                     writer.write(fieldSeparator);
                 }
-                writeInternal(values[i], i == 0);
+                writeInternal(values[i], i);
             }
             endRecord();
-            return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+
+        return this;
     }
 
     @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
-    private void writeInternal(final String value, final boolean firstField) throws IOException {
+    private void writeInternal(final String value, final int fieldIdx) throws IOException {
         if (value == null) {
-            if (quoteStrategy == QuoteStrategy.ALWAYS) {
-                writer.write(quoteCharacter);
-                writer.write(quoteCharacter);
-            }
-            return;
-        }
-
-        if (value.isEmpty()) {
-            if (quoteStrategy == QuoteStrategy.ALWAYS
-                || quoteStrategy == QuoteStrategy.EMPTY) {
-                writer.write(quoteCharacter);
-                writer.write(quoteCharacter);
+            if (quoteStrategy != null && quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
+                writer.write(emptyFieldValue);
             }
             return;
         }
 
         final int length = value.length();
-        boolean needsQuotes = quoteStrategy == QuoteStrategy.ALWAYS || quoteStrategy == QuoteStrategy.NON_EMPTY;
-        int nextDelimPos = -1;
 
-        for (int i = 0; i < length; i++) {
-            final char c = value.charAt(i);
-            if (c == quoteCharacter) {
-                needsQuotes = true;
-                nextDelimPos = i;
-                break;
+        if (length == 0) {
+            if (quoteStrategy != null && quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
+                writer.write(emptyFieldValue);
             }
-            if (!needsQuotes && (c == fieldSeparator || c == LF || c == CR
-                || firstField && i == 0 && c == commentCharacter)) {
-                needsQuotes = true;
-            }
+            return;
         }
+
+        final boolean hasDelimiters = hasDelimiters(value, fieldIdx, length);
+        final boolean needsQuotes = hasDelimiters
+            || quoteStrategy != null && quoteStrategy.quoteNonEmpty(currentLineNo, fieldIdx, value);
 
         if (needsQuotes) {
             writer.write(quoteCharacter);
         }
 
-        if (nextDelimPos > -1) {
-            writeEscaped(value, length, nextDelimPos);
+        if (hasDelimiters) {
+            writeEscaped(writer, value, quoteCharacter);
         } else {
             writer.write(value, 0, length);
         }
@@ -171,32 +162,35 @@ public final class CsvWriter implements Closeable {
         }
     }
 
-    @SuppressWarnings({
-        "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment",
-        "PMD.AvoidReassigningParameters"
-    })
-    private void writeEscaped(final String value, final int length, int nextDelimPos)
+    @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
+    private boolean hasDelimiters(final String value, final int fieldIdx, final int length) {
+        for (int i = 0; i < length; i++) {
+            final char c = value.charAt(i);
+            if (c == quoteCharacter || c == fieldSeparator || c == LF || c == CR
+                || c == commentCharacter && fieldIdx == 0 && i == 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void writeEscaped(final Writer w, final String value, final char quoteChar)
         throws IOException {
 
         int startPos = 0;
-        do {
-            final int len = nextDelimPos - startPos + 1;
-            writer.write(value, startPos, len);
-            writer.write(quoteCharacter);
-            startPos += len;
+        while (true) {
+            final int nextDelimPos = value.indexOf(quoteChar, startPos);
 
-            nextDelimPos = -1;
-            for (int i = startPos; i < length; i++) {
-                if (value.charAt(i) == quoteCharacter) {
-                    nextDelimPos = i;
-                    break;
-                }
+            if (nextDelimPos == -1) {
+                w.write(value, startPos, value.length() - startPos);
+                break;
             }
-        } while (nextDelimPos > -1);
 
-        if (length > startPos) {
-            writer.write(value, startPos, length - startPos);
+            final int len = nextDelimPos - startPos + 1;
+            w.write(value, startPos, len);
+            w.write(quoteChar);
+            startPos += len;
         }
     }
 
@@ -219,10 +213,11 @@ public final class CsvWriter implements Closeable {
                 writeCommentInternal(comment);
             }
             endRecord();
-            return this;
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+
+        return this;
     }
 
     private void writeCommentInternal(final String comment) throws IOException {
@@ -261,6 +256,7 @@ public final class CsvWriter implements Closeable {
     }
 
     private void endRecord() throws IOException {
+        ++currentLineNo;
         writer.write(lineDelimiter, 0, lineDelimiter.length());
         if (syncWriter) {
             writer.flush();
@@ -295,7 +291,7 @@ public final class CsvWriter implements Closeable {
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
-        private QuoteStrategy quoteStrategy = QuoteStrategy.REQUIRED;
+        private QuoteStrategy quoteStrategy;
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
         private int bufferSize = DEFAULT_BUFFER_SIZE;
 
@@ -336,10 +332,10 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the strategy that defines when quoting has to be performed
-         * (default: {@link QuoteStrategy#REQUIRED}).
+         * Sets the strategy that defines when optional quoting has to be performed (default: none).
          *
-         * @param quoteStrategy the strategy when fields should be enclosed using the {@code quoteCharacter}.
+         * @param quoteStrategy the strategy when fields should be enclosed using the {@code quoteCharacter},
+         *                      even if not strictly required.
          * @return This updated object, so that additional method calls can be chained together.
          */
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
@@ -481,8 +477,17 @@ public final class CsvWriter implements Closeable {
         }
 
         @Override
-        public void write(final char[] cbuf, final int off, final int len) {
-            throw new UnsupportedOperationException();
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            if (pos + len >= buf.length) {
+                flush();
+                if (len >= buf.length) {
+                    writer.write(cbuf, off, len);
+                    return;
+                }
+            }
+
+            System.arraycopy(cbuf, off, buf, pos, len);
+            pos += len;
         }
 
         @Override
@@ -490,9 +495,7 @@ public final class CsvWriter implements Closeable {
             if (pos + len >= buf.length) {
                 flush();
                 if (len >= buf.length) {
-                    final char[] tmp = new char[len];
-                    str.getChars(off, off + len, tmp, 0);
-                    writer.write(tmp, 0, len);
+                    writer.write(str, off, len);
                     return;
                 }
             }
