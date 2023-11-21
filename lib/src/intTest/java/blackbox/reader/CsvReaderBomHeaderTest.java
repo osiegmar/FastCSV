@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import de.siegmar.fastcsv.reader.CsvReader;
 import testutil.CsvRecordAssert;
 
-class BomHeaderTest {
+class CsvReaderBomHeaderTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder()
         .detectBomHeader(true);
@@ -21,9 +21,10 @@ class BomHeaderTest {
     @MethodSource
     void bom(final Path testFile) throws IOException {
         assertThat(crb.build(testFile).stream())
-            .singleElement(CsvRecordAssert.CSV_RECORD)
-            .fields()
-            .isEqualTo(List.of("foo", "üÜß"));
+            .satisfiesExactly(
+                c -> CsvRecordAssert.assertThat(c).fields().containsExactly("foo", "üÜß"),
+                c -> CsvRecordAssert.assertThat(c).fields().containsExactly("123", "456")
+            );
     }
 
     static List<Path> bom() {

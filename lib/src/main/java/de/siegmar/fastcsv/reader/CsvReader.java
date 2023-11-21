@@ -352,7 +352,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         /**
          * Constructs a new {@link CsvReader} for the specified file.
          * <p>
-         * This is a convinience method for calling {@link #build(Path, Charset)} with
+         * This is a convenience method for calling {@link #build(Path, Charset)} with
          * {@link StandardCharsets#UTF_8} as the charset.
          *
          * @param file    the file to read data from.
