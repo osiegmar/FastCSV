@@ -167,6 +167,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         private boolean skipComments;
         private boolean ignoreDifferentFieldCount = true;
         private boolean detectBomHeader;
+        private FieldModifier fieldModifier;
 
         private NamedCsvReaderBuilder() {
         }
@@ -243,6 +244,18 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         }
 
         /**
+         * Registers an optional field modifier. Used to modify the field values.
+         * By default, no field modifier is used.
+         *
+         * @param fieldModifier the modifier to use.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public NamedCsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
+            this.fieldModifier = fieldModifier;
+            return this;
+        }
+
+        /**
          * Constructs a new {@link NamedCsvReader} for the specified file using UTF-8 as the character set.
          *
          * This is a convenience method for calling {@link #build(Path, Charset)} with
@@ -305,7 +318,8 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .commentCharacter(commentCharacter)
                 .commentStrategy(skipComments ? CommentStrategy.SKIP : CommentStrategy.NONE)
                 .ignoreDifferentFieldCount(ignoreDifferentFieldCount)
-                .detectBomHeader(detectBomHeader);
+                .detectBomHeader(detectBomHeader)
+                .fieldModifier(fieldModifier);
         }
 
         @Override
@@ -317,6 +331,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
                 .add("skipComments=" + skipComments)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
                 .add("detectBomHeader=" + detectBomHeader)
+                .add("fieldModifier=" + fieldModifier)
                 .toString();
         }
 

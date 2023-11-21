@@ -50,6 +50,7 @@ public final class IndexedCsvReader implements Closeable {
     private final char commentCharacter;
     private final int pageSize;
     private final RandomAccessFile raf;
+    private final RecordHandler recordHandler;
     private final RecordReader recordReader;
     private final CsvIndex csvIndex;
 
@@ -57,7 +58,8 @@ public final class IndexedCsvReader implements Closeable {
     IndexedCsvReader(final Path file, final Charset charset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final int pageSize, final CsvIndex csvIndex, final StatusListener statusListener)
+                     final FieldModifier fieldModifier, final int pageSize, final CsvIndex csvIndex,
+                     final StatusListener statusListener)
         throws IOException {
 
         Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
@@ -71,6 +73,7 @@ public final class IndexedCsvReader implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
+        recordHandler = new RecordHandler(fieldModifier);
         this.pageSize = pageSize;
 
         if (csvIndex != null) {
@@ -82,7 +85,8 @@ public final class IndexedCsvReader implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        recordReader = new RecordReader(new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
+        recordReader = new RecordReader(recordHandler,
+            new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
             fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
@@ -181,9 +185,8 @@ public final class IndexedCsvReader implements Closeable {
             raf.seek(page.offset());
             recordReader.resetBuffer(page.startingLineNumber());
 
-            CsvRecord csvRecord;
-            for (int i = 0; i < pageSize && (csvRecord = recordReader.fetchAndRead()) != null; i++) {
-                ret.add(csvRecord);
+            for (int i = 0; i < pageSize && recordReader.fetchAndRead(); i++) {
+                ret.add(recordHandler.buildAndReset());
             }
 
             return ret;
@@ -227,6 +230,7 @@ public final class IndexedCsvReader implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
+        private FieldModifier fieldModifier;
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;
@@ -285,6 +289,18 @@ public final class IndexedCsvReader implements Closeable {
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
             checkControlCharacter(commentCharacter);
             this.commentCharacter = commentCharacter;
+            return this;
+        }
+
+        /**
+         * Registers an optional field modifier. Used to modify the field values.
+         * By default, no field modifier is used.
+         *
+         * @param fieldModifier the modifier to use.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public IndexedCsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
+            this.fieldModifier = fieldModifier;
             return this;
         }
 
@@ -367,7 +383,7 @@ public final class IndexedCsvReader implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, pageSize, csvIndex, sl);
+                commentCharacter, fieldModifier, pageSize, csvIndex, sl);
         }
 
     }

@@ -35,6 +35,7 @@ import de.siegmar.fastcsv.util.Util;
  */
 public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
+    private final RecordHandler recordHandler;
     private final RecordReader recordReader;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
@@ -43,33 +44,38 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     private int firstRecordFieldCount = -1;
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
+        recordHandler = new RecordHandler(fieldModifier);
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+        recordReader = new RecordReader(recordHandler, reader, fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter);
     }
 
-    @SuppressWarnings("PMD.NullAssignment")
+    @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount) {
+              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
+        recordHandler = new RecordHandler(fieldModifier);
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-            commentCharacter);
+        recordReader = new RecordReader(recordHandler, data, fieldSeparator, quoteCharacter,
+            commentStrategy, commentCharacter);
     }
 
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
@@ -124,8 +130,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         "PMD.AssignmentInOperand"
     })
     private CsvRecord fetchRow() throws IOException {
-        CsvRecord csvRecord;
-        while ((csvRecord = recordReader.fetchAndRead()) != null) {
+        while (recordReader.fetchAndRead()) {
+            final CsvRecord csvRecord = recordHandler.buildAndReset();
+
             // skip commented records
             if (commentStrategy == CommentStrategy.SKIP && csvRecord.isComment()) {
                 continue;
@@ -149,10 +156,10 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 }
             }
 
-            break;
+            return csvRecord;
         }
 
-        return csvRecord;
+        return null;
     }
 
     @Override
@@ -233,6 +240,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
         private boolean detectBomHeader;
+        private FieldModifier fieldModifier;
 
         private CsvReaderBuilder() {
         }
@@ -322,6 +330,18 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         }
 
         /**
+         * Registers an optional field modifier. Used to modify the field values.
+         * By default, no field modifier is used.
+         *
+         * @param fieldModifier the modifier to use.
+         * @return This updated object, so that additional method calls can be chained together.
+         */
+        public CsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
+            this.fieldModifier = fieldModifier;
+            return this;
+        }
+
+        /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
@@ -387,12 +407,12 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
         private CsvReader newReader(final Reader reader) {
             return new CsvReader(reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount);
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
         private CsvReader newReader(final String data) {
             return new CsvReader(data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount);
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
         @Override
@@ -404,6 +424,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+                .add("fieldModifier=" + fieldModifier)
                 .toString();
         }
 
