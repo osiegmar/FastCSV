@@ -40,7 +40,7 @@ public final class CsvWriter implements Closeable {
     private final QuoteStrategy quoteStrategy;
     private final String lineDelimiter;
     private final boolean syncWriter;
-    private final String emptyFieldValue;
+    private final char[] emptyFieldValue;
     private int currentLineNo = 1;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
@@ -61,7 +61,7 @@ public final class CsvWriter implements Closeable {
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
         this.syncWriter = syncWriter;
 
-        emptyFieldValue = new String(new char[] {quoteCharacter, quoteCharacter});
+        emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
     }
 
     /**
@@ -152,7 +152,7 @@ public final class CsvWriter implements Closeable {
         }
 
         if (hasDelimiters) {
-            writeEscaped(value, length);
+            writeEscaped(writer, value, quoteCharacter);
         } else {
             writer.write(value, 0, length);
         }
@@ -175,21 +175,21 @@ public final class CsvWriter implements Closeable {
         return false;
     }
 
-    private void writeEscaped(final String value, final int length)
+    private static void writeEscaped(final Writer w, final String value, final char quoteChar)
         throws IOException {
 
         int startPos = 0;
         while (true) {
-            final int nextDelimPos = value.indexOf(quoteCharacter, startPos);
+            final int nextDelimPos = value.indexOf(quoteChar, startPos);
 
             if (nextDelimPos == -1) {
-                writer.write(value, startPos, length - startPos);
+                w.write(value, startPos, value.length() - startPos);
                 break;
             }
 
             final int len = nextDelimPos - startPos + 1;
-            writer.write(value, startPos, len);
-            writer.write(quoteCharacter);
+            w.write(value, startPos, len);
+            w.write(quoteChar);
             startPos += len;
         }
     }
@@ -477,8 +477,17 @@ public final class CsvWriter implements Closeable {
         }
 
         @Override
-        public void write(final char[] cbuf, final int off, final int len) {
-            throw new UnsupportedOperationException();
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            if (pos + len >= buf.length) {
+                flush();
+                if (len >= buf.length) {
+                    writer.write(cbuf, off, len);
+                    return;
+                }
+            }
+
+            System.arraycopy(cbuf, off, buf, pos, len);
+            pos += len;
         }
 
         @Override
@@ -486,9 +495,7 @@ public final class CsvWriter implements Closeable {
             if (pos + len >= buf.length) {
                 flush();
                 if (len >= buf.length) {
-                    final char[] tmp = new char[len];
-                    str.getChars(off, off + len, tmp, 0);
-                    writer.write(tmp, 0, len);
+                    writer.write(str, off, len);
                     return;
                 }
             }

@@ -1,7 +1,6 @@
 package de.siegmar.fastcsv.writer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,9 +30,25 @@ class FastBufferedWriterTest {
     void appendArray() throws IOException {
         final StringBuilder sb = new StringBuilder();
 
+        final String strValue = "ab";
+        final char[] caValue = strValue.toCharArray();
         for (int i = 0; i < 8192; i++) {
-            sb.append("ab");
-            cw.write("ab", 0, 2);
+            sb.append(strValue);
+            cw.write(caValue, 0, caValue.length);
+        }
+        cw.close();
+
+        assertThat(sb).asString().isEqualTo(sw.toString());
+    }
+
+    @Test
+    void appendString() throws IOException {
+        final StringBuilder sb = new StringBuilder();
+
+        final String strValue = "ab";
+        for (int i = 0; i < 8192; i++) {
+            sb.append(strValue);
+            cw.write(strValue, 0, 2);
         }
         cw.close();
 
@@ -46,12 +61,6 @@ class FastBufferedWriterTest {
         cw.write(sb, 0, sb.length());
 
         assertThat(sw).asString().isEqualTo(sb);
-    }
-
-    @Test
-    void unreachable() {
-        assertThatThrownBy(() -> cw.write(new char[0], 0, 0))
-            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     private String buildLargeData() {
