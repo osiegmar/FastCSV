@@ -431,13 +431,9 @@ public final class CsvWriter implements Closeable {
         }
 
         private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
-            if (bufferSize > 0) {
-                return new CsvWriter(new FastBufferedWriter(writer, bufferSize), fieldSeparator, quoteCharacter,
-                    commentCharacter, quoteStrategy, lineDelimiter, syncWriter);
-            }
-
-            return new CsvWriter(writer, fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy,
-                lineDelimiter, false);
+            final Writer writerToUse = bufferSize > 0 ? new FastBufferedWriter(writer, bufferSize) : writer;
+            return new CsvWriter(writerToUse, fieldSeparator, quoteCharacter,
+                commentCharacter, quoteStrategy, lineDelimiter, syncWriter);
         }
 
         @Override
@@ -473,7 +469,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final int c) throws IOException {
             if (pos == buf.length) {
-                flush();
+                flushInternal();
             }
             buf[pos++] = (char) c;
         }
@@ -481,7 +477,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final char[] cbuf, final int off, final int len) throws IOException {
             if (pos + len >= buf.length) {
-                flush();
+                flushInternal();
                 if (len >= buf.length) {
                     writer.write(cbuf, off, len);
                     return;
@@ -495,7 +491,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final String str, final int off, final int len) throws IOException {
             if (pos + len >= buf.length) {
-                flush();
+                flushInternal();
                 if (len >= buf.length) {
                     writer.write(str, off, len);
                     return;
@@ -506,15 +502,20 @@ public final class CsvWriter implements Closeable {
             pos += len;
         }
 
-        @Override
-        public void flush() throws IOException {
+        void flushInternal() throws IOException {
             writer.write(buf, 0, pos);
             pos = 0;
         }
 
         @Override
+        public void flush() throws IOException {
+            flushInternal();
+            writer.flush();
+        }
+
+        @Override
         public void close() throws IOException {
-            flush();
+            flushInternal();
             writer.close();
         }
 

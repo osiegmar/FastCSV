@@ -153,7 +153,7 @@ For more examples see [IndexedCsvReaderExample.java](example/src/main/java/examp
 Iterative writing of some data to a writer
 
 ```java
-CsvWriter.builder().build(new PrintWriter(System.out, true))
+CsvWriter.builder().build(new OutputStreamWriter(System.out))
     .writeRecord("header1", "header2")
     .writeRecord("value1", "value2")
     .writeComment("File created using FastCSV");
