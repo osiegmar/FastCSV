@@ -5,11 +5,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.FieldModifier;
+import de.siegmar.fastcsv.reader.NamedCsvReader;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
 @SuppressWarnings("PMD.SystemPrintln")
 public class CsvReaderExample {
@@ -21,6 +25,8 @@ public class CsvReaderExample {
         iterator();
         advancedConfiguration();
         file();
+        fieldModifier();
+        customFieldModifier();
     }
 
     private static void simple() {
@@ -64,7 +70,7 @@ public class CsvReaderExample {
             .commentStrategy(CommentStrategy.SKIP)
             .commentCharacter('#')
             .skipEmptyLines(true)
-            .ignoreDifferentFieldCount(false)
+            .ignoreDifferentFieldCount(true)
             .build(data)
             .stream()
             .map(csvRecord -> csvRecord.getFields().toString())
@@ -79,6 +85,26 @@ public class CsvReaderExample {
 
         try (CsvReader csv = CsvReader.builder().build(path)) {
             csv.forEach(System.out::println);
+        }
+    }
+
+    private static void fieldModifier() {
+        System.out.print("Trim fields: ");
+        final var csvBuilder = CsvReader.builder()
+            .fieldModifier(FieldModifier.TRIM);
+        for (final CsvRecord csvRecord : csvBuilder.build("  foo,bar  ")) {
+            System.out.println(csvRecord.getFields());
+        }
+    }
+
+    private static void customFieldModifier() {
+        System.out.print("Trim/Upper header via custom field modifier: ");
+        final FieldModifier headerTrimUpperModifier = (originalLineNumber, fieldIdx, comment, quoted, field) ->
+            originalLineNumber == 1 ? field.trim().toUpperCase(Locale.ROOT) : field;
+        final var csvBuilder = NamedCsvReader.builder()
+            .fieldModifier(headerTrimUpperModifier);
+        for (final NamedCsvRecord csvRecord : csvBuilder.build(" h1 , h2 \nfoo,bar")) {
+            System.out.println(csvRecord.getFieldsAsMap());
         }
     }
 
