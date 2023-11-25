@@ -49,7 +49,6 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
 - Unicode support
-- BOM support (UTF-8, UTF-16, UTF-32, little-/big-endian)
 
 ### Reader specific
 
@@ -62,6 +61,7 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 - Support for (optional) header records (get field based on field name)
 - Support for skipping empty records
 - Support for commented lines (skipping & reading) and configurable comment character
+- BOM support (UTF-8, UTF-16 and UTF-32 with little- or big-endian)
 
 ### Writer specific
 
@@ -103,7 +103,9 @@ CsvReader.builder()
     .commentStrategy(CommentStrategy.SKIP)
     .commentCharacter('#')
     .skipEmptyLines(true)
-    .ignoreDifferentFieldCount(false);
+    .ignoreDifferentFieldCount(false)
+    .detectBomHeader(false)
+    .fieldModifier(FieldModifier.TRIM);
 ```
 
 For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvReaderExample.java)
@@ -153,7 +155,8 @@ Iterative writing of some data to a writer
 ```java
 CsvWriter.builder().build(new PrintWriter(System.out, true))
     .writeRecord("header1", "header2")
-    .writeRecord("value1", "value2");
+    .writeRecord("value1", "value2")
+    .writeComment("File created using FastCSV");
 ```
 
 Iterative writing of a CSV file
@@ -172,7 +175,8 @@ Custom settings
 CsvWriter.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
-    .quoteStrategy(QuoteStrategy.REQUIRED)
+    .quoteStrategy(QuoteStrategy.ALWAYS)
+    .commentCharacter('#')
     .lineDelimiter(LineDelimiter.LF);
 ```
 
