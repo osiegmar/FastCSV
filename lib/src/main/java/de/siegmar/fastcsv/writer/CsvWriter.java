@@ -38,10 +38,11 @@ public final class CsvWriter implements Closeable {
     private final char quoteCharacter;
     private final char commentCharacter;
     private final QuoteStrategy quoteStrategy;
-    private final String lineDelimiter;
+    private final LineDelimiter lineDelimiter;
     private final boolean syncWriter;
-    private final char[] emptyFieldValue;
     private int currentLineNo = 1;
+    private final char[] lineDelimiterChars;
+    private final char[] emptyFieldValue;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
@@ -58,10 +59,11 @@ public final class CsvWriter implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
-        this.lineDelimiter = Objects.requireNonNull(lineDelimiter).toString();
+        this.lineDelimiter = Objects.requireNonNull(lineDelimiter);
         this.syncWriter = syncWriter;
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
+        lineDelimiterChars = lineDelimiter.toString().toCharArray();
     }
 
     /**
@@ -230,7 +232,7 @@ public final class CsvWriter implements Closeable {
             if (c == CR) {
                 final int len = i - startPos;
                 writer.write(comment, startPos, len);
-                writer.write(lineDelimiter, 0, lineDelimiter.length());
+                writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
                 writer.write(commentCharacter);
                 startPos += len + 1;
                 lastCharWasCR = true;
@@ -241,7 +243,7 @@ public final class CsvWriter implements Closeable {
                 } else {
                     final int len = i - startPos;
                     writer.write(comment, startPos, len);
-                    writer.write(lineDelimiter, 0, lineDelimiter.length());
+                    writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
                     writer.write(commentCharacter);
                     startPos += len + 1;
                 }
@@ -257,7 +259,7 @@ public final class CsvWriter implements Closeable {
 
     private void endRecord() throws IOException {
         ++currentLineNo;
-        writer.write(lineDelimiter, 0, lineDelimiter.length());
+        writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
         if (syncWriter) {
             writer.flush();
         }

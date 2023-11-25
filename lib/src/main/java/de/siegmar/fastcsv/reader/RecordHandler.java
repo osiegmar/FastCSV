@@ -22,33 +22,31 @@ final class RecordHandler {
         this.fieldModifier = fieldModifier;
     }
 
-    void add(final String value) {
+    @SuppressWarnings({
+        "checkstyle:FinalParameters",
+        "checkstyle:ParameterAssignment",
+        "PMD.AvoidReassigningParameters"
+    })
+    void add(String value, final boolean quoted) {
         if (idx == len) {
             extendCapacity();
         }
-        if (fieldModifier == null) {
-            fields[idx++] = value;
-        } else {
-            final String modifiedValue = fieldModifier.modify(originalLineNumber, idx, commentMode, value);
-            if (modifiedValue == null) {
+
+        if (fieldModifier != null) {
+            value = fieldModifier.modify(originalLineNumber, idx, commentMode, quoted, value);
+            if (value == null) {
                 throw new NullPointerException("fieldModifier returned illegal null: " + fieldModifier.getClass());
             }
-            fields[idx++] = modifiedValue;
         }
-    }
 
-    public void addEmpty() {
-        if (idx == len) {
-            extendCapacity();
-        }
-        fields[idx++] = "";
+        fields[idx++] = value;
     }
 
     private void extendCapacity() {
         len *= 2;
-        final String[] newRecord = new String[len];
-        System.arraycopy(fields, 0, newRecord, 0, idx);
-        fields = newRecord;
+        final String[] newFields = new String[len];
+        System.arraycopy(fields, 0, newFields, 0, idx);
+        fields = newFields;
     }
 
     CsvRecord buildAndReset() {
@@ -61,13 +59,14 @@ final class RecordHandler {
     }
 
     private CsvRecord build() {
-        if (idx > 1 || !fields[0].isEmpty()) {
-            final String[] ret = new String[idx];
-            System.arraycopy(fields, 0, ret, 0, idx);
-            return new CsvRecord(originalLineNumber, ret, commentMode);
+        if (idx <= 1 && fields[0].isEmpty()) {
+            // empty record
+            return new CsvRecord(originalLineNumber, commentMode);
         }
 
-        return new CsvRecord(originalLineNumber, commentMode);
+        final String[] ret = new String[idx];
+        System.arraycopy(fields, 0, ret, 0, idx);
+        return new CsvRecord(originalLineNumber, ret, commentMode);
     }
 
     public void enableCommentMode() {
