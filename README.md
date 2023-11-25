@@ -113,7 +113,17 @@ For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvR
 Iterative reading of some CSV data with a header
 
 ```java
-NamedCsvReader.builder().build("header 1,header 2\nfield 1,field 2")
+CsvReader csvReader = CsvReader.builder().build("header 1,header 2\nfield 1,field 2");
+NamedCsvReader.from(csvReader)
+    .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
+```
+
+Iterative reading of some CSV data with a custom header
+
+```java
+List<String> header = List.of("header 1", "header 2");
+CsvReader csvReader = CsvReader.builder().build("field 1,field 2");
+NamedCsvReader.from(csvReader)
     .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
 ```
 

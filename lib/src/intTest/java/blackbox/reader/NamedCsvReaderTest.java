@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import testutil.NamedCsvRecordAssert;
@@ -27,7 +28,7 @@ import testutil.NamedCsvRecordAssert;
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 class NamedCsvReaderTest {
 
-    private final NamedCsvReader.NamedCsvReaderBuilder crb = NamedCsvReader.builder();
+    private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
     @Test
     void empty() {
@@ -46,16 +47,9 @@ class NamedCsvReaderTest {
 
     @Test
     void readerToString() {
-        assertThat(crb.build("h1\nd1")).asString()
+        assertThat(NamedCsvReader.from(crb.build("h1\nd1"))).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
                 + "commentStrategy=NONE, skipEmptyLines=true, ignoreDifferentFieldCount=true]]");
-    }
-
-    @Test
-    void duplicateHeader() {
-        assertThatThrownBy(() -> parse("a,b,a").getHeader())
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Duplicate header field 'a' found");
     }
 
     @Test
@@ -169,11 +163,22 @@ class NamedCsvReaderTest {
             .isEqualTo("{headerA=fieldA, headerB=fieldB, headerC=fieldC}");
     }
 
+    @Test
+    void customHeader() {
+        final List<String> myHeader = List.of("h1", "h2");
+
+        final NamedCsvReader csvReader = NamedCsvReader.from(CsvReader.builder().build("foo,bar"), myHeader);
+        assertThat(csvReader.stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .fields()
+            .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
+    }
+
     // line numbering
 
     @Test
     void lineNumbering() {
-        final Stream<NamedCsvRecord> stream = crb
+        final Stream<NamedCsvRecord> stream = NamedCsvReader.from(crb
             .build(
                 "h1,h2\n"
                     + "a,line 2\n"
@@ -181,7 +186,7 @@ class NamedCsvReaderTest {
                     + "c,line 4\r\n"
                     + "d,\"line 5\rwith\r\nand\n\"\n"
                     + "e,line 9"
-            ).stream();
+            )).stream();
 
         assertThat(stream)
             .satisfiesExactly(
@@ -209,19 +214,19 @@ class NamedCsvReaderTest {
 
         CloseStatusReader csr = supp.get();
 
-        try (NamedCsvReader reader = crb.build(csr)) {
+        try (NamedCsvReader reader = NamedCsvReader.from(crb.build(csr))) {
             reader.stream().forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (CloseableIterator<NamedCsvRecord> it = crb.build(csr).iterator()) {
+        try (CloseableIterator<NamedCsvRecord> it = NamedCsvReader.from(crb.build(csr)).iterator()) {
             it.forEachRemaining(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (Stream<NamedCsvRecord> stream = crb.build(csr).stream()) {
+        try (Stream<NamedCsvRecord> stream = NamedCsvReader.from(crb.build(csr)).stream()) {
             stream.forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
@@ -237,7 +242,7 @@ class NamedCsvReaderTest {
     @Test
     void spliterator() {
         final Spliterator<NamedCsvRecord> spliterator =
-            crb.build("a,b,c\n1,2,3\n4,5,6").spliterator();
+            NamedCsvReader.from(crb.build("a,b,c\n1,2,3\n4,5,6")).spliterator();
 
         assertThat(spliterator.trySplit()).isNull();
         assertThat(spliterator.estimateSize()).isEqualTo(Long.MAX_VALUE);
@@ -256,8 +261,8 @@ class NamedCsvReaderTest {
 
     @Test
     void closeException() {
-        final NamedCsvReader csvReader = crb
-            .build(new UncloseableReader(new StringReader("foo")));
+        final NamedCsvReader csvReader = NamedCsvReader.from(crb
+            .build(new UncloseableReader(new StringReader("foo"))));
 
         assertThatThrownBy(() -> csvReader.stream().close())
             .isInstanceOf(UncheckedIOException.class)
@@ -267,7 +272,7 @@ class NamedCsvReaderTest {
     // test helpers
 
     private NamedCsvReader parse(final String data) {
-        return crb.build(data);
+        return NamedCsvReader.from(crb.build(data));
     }
 
     private List<NamedCsvRecord> readAll(final String data) {

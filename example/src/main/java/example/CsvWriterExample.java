@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -61,8 +62,8 @@ public class CsvWriterExample {
         final StringWriter out = new StringWriter();
 
         try (
-            NamedCsvReader reader = NamedCsvReader.builder().build(
-                "firstname,lastname,age\njohn,smith,30");
+            NamedCsvReader reader = NamedCsvReader.from(CsvReader.builder().build(
+                "firstname,lastname,age\njohn,smith,30"));
             CsvWriter writer = CsvWriter.builder().build(out)
         ) {
             // transform firstname,lastname,age => name,age
