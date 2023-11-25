@@ -1,8 +1,10 @@
 package example;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
@@ -12,6 +14,7 @@ public class NamedCsvReaderExample {
     public static void main(final String[] args) {
         header();
         advancedConfiguration();
+        customFieldModifier();
     }
 
     private static void header() {
@@ -35,6 +38,17 @@ public class NamedCsvReaderExample {
             .collect(Collectors.joining(" || "));
 
         System.out.println("Parsed via advanced config: " + parsedData);
+    }
+
+    private static void customFieldModifier() {
+        System.out.print("Trim/Upper header via custom field modifier: ");
+        final FieldModifier headerTrimUpperModifier = (originalLineNumber, fieldIdx, comment, quoted, field) ->
+            originalLineNumber == 1 ? field.trim().toUpperCase(Locale.ROOT) : field;
+        final var csvBuilder = NamedCsvReader.builder()
+            .fieldModifier(headerTrimUpperModifier);
+        for (final NamedCsvRecord csvRecord : csvBuilder.build(" h1 , h2 \nfoo,bar")) {
+            System.out.println(csvRecord.getFieldsAsMap());
+        }
     }
 
 }
