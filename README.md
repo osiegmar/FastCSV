@@ -17,6 +17,7 @@
 ------
 
 The primary use cases of FastCSV are:
+
 - in big data applications: read and write data on a massive scale
 - in small data applications: a lightweight library without any further dependencies
 
@@ -28,7 +29,8 @@ A selected benchmark from the
 ![Benchmark](benchmark.png "Benchmark")
 
 While maintaining high performance, FastCSV is a strict RFC 4180 CSV writer but also able
-to read garbled CSV data (to some degree). See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for details.
+to read garbled CSV data (to some degree). See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for
+details.
 
 ## Features
 
@@ -44,8 +46,8 @@ to read garbled CSV data (to some degree). See [JavaCsvComparison](https://githu
 ### CSV specific
 
 - Compliant to [RFC 4180](https://tools.ietf.org/html/rfc4180) – including:
-  - Newline and field separator characters in fields
-  - Quote escaping
+    - Newline and field separator characters in fields
+    - Quote escaping
 - Configurable field separator
 - Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
 - Unicode support

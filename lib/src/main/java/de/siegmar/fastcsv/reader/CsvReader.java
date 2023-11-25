@@ -90,6 +90,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
     /**
      * Constructs a {@link CsvReaderBuilder} to configure and build instances of this class.
+     *
      * @return a new {@link CsvReaderBuilder} instance.
      */
     public static CsvReaderBuilder builder() {
@@ -309,7 +310,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * different number of fields.
          *
          * @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains
-         *                                   different field count (default: {@code true}).
+         *                                  different field count (default: {@code true}).
          * @return This updated object, so that additional method calls can be chained together.
          */
         public CsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
@@ -362,7 +363,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          *
-         * @param data    the data to read.
+         * @param data the data to read.
          * @return a new CsvReader - never {@code null}.
          */
         public CsvReader build(final String data) {
@@ -375,9 +376,9 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * This is a convenience method for calling {@link #build(Path, Charset)} with
          * {@link StandardCharsets#UTF_8} as the charset.
          *
-         * @param file    the file to read data from.
+         * @param file the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvReader build(final Path file) throws IOException {
@@ -391,7 +392,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
          * @param charset the character set to use. If BOM header detection is enabled
          *                (via {@link #detectBomHeader(boolean)}), this acts as a default when no BOM header was found.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
-         * @throws IOException if an I/O error occurs.
+         * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvReader build(final Path file, final Charset charset) throws IOException {

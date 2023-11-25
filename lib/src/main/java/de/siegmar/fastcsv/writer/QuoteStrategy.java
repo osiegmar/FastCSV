@@ -51,8 +51,8 @@ public interface QuoteStrategy {
     /**
      * Determine if a {@code null} field should be quoted.
      *
-     * @param lineNo the line number (1-based)
-     * @param fieldIdx    the field index (0-based)
+     * @param lineNo   the line number (1-based)
+     * @param fieldIdx the field index (0-based)
      * @return {@code true}, if a {@code null} field should be quoted
      */
     default boolean quoteNull(final int lineNo, int fieldIdx) {
@@ -62,8 +62,8 @@ public interface QuoteStrategy {
     /**
      * Determine if an empty (not {@code null}) field should be quoted.
      *
-     * @param lineNo the line number (1-based)
-     * @param fieldIdx    the field index (0-based)
+     * @param lineNo   the line number (1-based)
+     * @param fieldIdx the field index (0-based)
      * @return {@code true}, if an empty field should be quoted
      */
     default boolean quoteEmpty(final int lineNo, int fieldIdx) {
@@ -73,9 +73,9 @@ public interface QuoteStrategy {
     /**
      * Determine if a data containing field should be quoted.
      *
-     * @param lineNo the line number (1-based)
-     * @param fieldIdx    the field index (0-based)
-     * @param value       the field value
+     * @param lineNo   the line number (1-based)
+     * @param fieldIdx the field index (0-based)
+     * @param value    the field value
      * @return {@code true}, if a data containing field should be quoted
      */
     default boolean quoteNonEmpty(final int lineNo, int fieldIdx, String value) {
