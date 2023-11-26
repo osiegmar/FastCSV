@@ -18,6 +18,7 @@ public class CsvRecord {
      *
      * @see #getOriginalLineNumber()
      */
+    @SuppressWarnings("checkstyle:VisibilityModifier")
     final long originalLineNumber;
 
     /**
@@ -26,6 +27,7 @@ public class CsvRecord {
      * @see #getField(int)
      * @see #getFields()
      */
+    @SuppressWarnings("checkstyle:VisibilityModifier")
     final String[] fields;
 
     /**
@@ -33,6 +35,7 @@ public class CsvRecord {
      *
      * @see #isComment()
      */
+    @SuppressWarnings("checkstyle:VisibilityModifier")
     final boolean comment;
 
     CsvRecord(final long originalLineNumber, final boolean comment) {
