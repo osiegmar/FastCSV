@@ -1,8 +1,11 @@
 package de.siegmar.fastcsv.reader;
 
 import java.text.MessageFormat;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -12,87 +15,137 @@ import java.util.StringJoiner;
 /**
  * Name (header) based CSV-record.
  */
-public final class NamedCsvRecord {
+@SuppressWarnings("PMD.ArrayIsStoredDirectly")
+public final class NamedCsvRecord extends CsvRecord {
 
-    private final long originalLineNumber;
-    private final List<String> header;
-    private final CsvRecord csvRecord;
+    private final String[] header;
 
-    NamedCsvRecord(final List<String> header, final CsvRecord csvRecord) {
-        this.originalLineNumber = csvRecord.getOriginalLineNumber();
+    NamedCsvRecord(final String[] header, final CsvRecord csvRecord) {
+        super(csvRecord);
         this.header = header;
-        this.csvRecord = csvRecord;
     }
 
     /**
-     * Returns the original line number (starting with 1). On multi-line records this is the starting
-     * line number.
-     * Empty lines (and maybe commented lines) have been skipped.
-     *
-     * @return the original line number
-     */
-    public long getOriginalLineNumber() {
-        return originalLineNumber;
-    }
-
-    /**
-     * Gets a field value by its name.
+     * Gets a field value by its name (first occurrence if duplicates exists).
      *
      * @param name field name
      * @return field value, never {@code null}
      * @throws NoSuchElementException if this record has no such field
+     * @throws NullPointerException   if name is {@code null}
      * @see #findField(String)
+     * @see #findFields(String)
      */
     public String getField(final String name) {
-        final int fieldPos = header.indexOf(name);
+        final int fieldPos = findHeader(name);
         if (fieldPos == -1) {
             throw new NoSuchElementException(MessageFormat.format(
-                "Header does not contain a field ''{0}''. Valid names are: {1}", name, header));
-        } else if (fieldPos >= csvRecord.getFieldCount()) {
+                "Header does not contain a field ''{0}''. Valid names are: {1}", name, Arrays.toString(header)));
+        } else if (fieldPos >= fields.length) {
             throw new NoSuchElementException(MessageFormat.format(
                 "Field ''{0}'' is on position {1}, but current record only contains {2} fields",
-                name, fieldPos + 1, csvRecord.getFieldCount()));
+                name, fieldPos + 1, fields.length));
         }
-        return csvRecord.getField(fieldPos);
+        return fields[fieldPos];
+    }
+
+    private int findHeader(final String name) {
+        for (int i = 0; i < header.length; i++) {
+            final String h = header[i];
+            if (name.equals(h)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /**
-     * Finds a field value by its name.
+     * Finds a field value by its name (first occurrence if duplicates exists).
      *
      * @param name field name
-     * @return the field value ({@link Optional#empty()} if record doesn't contain that field),
-     *     never {@code null}
+     * @return the field value ({@link Optional#empty()} if record doesn't contain that field), never {@code null}
+     * @throws NullPointerException if name is {@code null}
+     * @see #findFields(String)
      */
     public Optional<String> findField(final String name) {
-        final int fieldPos = header.indexOf(name);
-        if (fieldPos == -1 || fieldPos >= csvRecord.getFieldCount()) {
+        final int fieldPos = findHeader(name);
+        if (fieldPos == -1 || fieldPos >= fields.length) {
             return Optional.empty();
         }
-        return Optional.of(csvRecord.getField(fieldPos));
+        return Optional.of(fields[fieldPos]);
     }
 
     /**
-     * Builds an unmodifiable and ordered map of header names and field values of this record.
+     * Builds a list of field values found by its name.
+     *
+     * @param name field name
+     * @return the field values (empty list if record doesn't contain that field), never {@code null}
+     * @throws NullPointerException if name is {@code null}
+     */
+    public List<String> findFields(final String name) {
+        final List<String> ret = new ArrayList<>();
+        final int bound = header.length;
+        for (int i = 0; i < bound; i++) {
+            if (name.equals(header[i])) {
+                ret.add(fields[i]);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Builds an ordered map of header names and field values (first occurrence if duplicates exists)
+     * of this record.
      * <p>
-     * The map will contain only keys for existing fields of this record –
+     * The map will contain only entries for fields that have a key and a value –
      * no map entry will have a {@code null} key or value.
      *
-     * @return an unmodifiable map of header names and field values of this record
+     * @return an ordered map of header names and field values of this record, never {@code null}
      */
     public Map<String, String> getFieldsAsMap() {
-        final int size = Math.min(header.size(), csvRecord.getFieldCount());
-        final Map<String, String> fieldMap = new LinkedHashMap<>(size);
-        for (int i = 0; i < size; i++) {
-            fieldMap.put(header.get(i), csvRecord.getField(i));
+        final int bound = commonSize();
+        final Map<String, String> map = new LinkedHashMap<>(bound);
+        for (int i = 0; i < bound; i++) {
+            map.putIfAbsent(header[i], fields[i]);
         }
-        return Collections.unmodifiableMap(fieldMap);
+        return map;
+    }
+
+    /**
+     * Builds an unordered map of header names and field values of this record.
+     * <p>
+     * The map will contain only entries for fields that have a key and a value –
+     * no map entry will have a {@code null} key or value.
+     *
+     * @return an unordered map of header names and field values of this record, never {@code null}
+     */
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    public Map<String, List<String>> getFieldsAsMapList() {
+        final int bound = commonSize();
+        final Map<String, List<String>> map = new HashMap<>(bound);
+        for (int i = 0; i < bound; i++) {
+            final String key = header[i];
+            List<String> val = map.get(key);
+            if (val == null) {
+                val = new LinkedList<>();
+                map.put(key, val);
+            }
+            val.add(fields[i]);
+        }
+        return map;
+    }
+
+    private int commonSize() {
+        return Math.min(header.length, fields.length);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", NamedCsvRecord.class.getSimpleName() + "[", "]")
             .add("originalLineNumber=" + originalLineNumber)
-            .add("fields=" + getFieldsAsMap())
+            .add("fields=" + Arrays.toString(fields))
+            .add("comment=" + comment)
+            .add("header=" + Arrays.toString(header))
             .toString();
     }
 

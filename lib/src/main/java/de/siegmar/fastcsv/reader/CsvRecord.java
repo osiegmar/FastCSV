@@ -9,13 +9,31 @@ import java.util.StringJoiner;
  * Index based CSV-record.
  */
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
-public final class CsvRecord {
+public class CsvRecord {
 
     private static final String[] EMPTY = {""};
 
-    private final long originalLineNumber;
-    private final String[] fields;
-    private final boolean comment;
+    /**
+     * The original line number (starting with 1).
+     *
+     * @see #getOriginalLineNumber()
+     */
+    final long originalLineNumber;
+
+    /**
+     * The fields this record is composed of.
+     *
+     * @see #getField(int)
+     * @see #getFields()
+     */
+    final String[] fields;
+
+    /**
+     * If the record is a commented record.
+     *
+     * @see #isComment()
+     */
+    final boolean comment;
 
     CsvRecord(final long originalLineNumber, final boolean comment) {
         this(originalLineNumber, EMPTY, comment);
@@ -26,6 +44,12 @@ public final class CsvRecord {
         this.originalLineNumber = originalLineNumber;
         this.fields = fields;
         this.comment = comment;
+    }
+
+    CsvRecord(final CsvRecord original) {
+        originalLineNumber = original.originalLineNumber;
+        fields = original.fields;
+        comment = original.comment;
     }
 
     /**

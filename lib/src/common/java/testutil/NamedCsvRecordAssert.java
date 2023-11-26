@@ -1,8 +1,11 @@
 package testutil;
 
+import java.util.List;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactory;
+import org.assertj.core.api.ListAssert;
 import org.assertj.core.api.MapAssert;
 import org.assertj.core.api.OptionalAssert;
 import org.assertj.core.api.StringAssert;
@@ -37,6 +40,11 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return new MapAssert<>(actual.getFieldsAsMap());
     }
 
+    public MapAssert<String, List<String>> allFields() {
+        isNotNull();
+        return new MapAssert<>(actual.getFieldsAsMapList());
+    }
+
     public StringAssert field(final String name) {
         isNotNull();
         return new StringAssert(actual.getField(name));
@@ -45,6 +53,11 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
     public OptionalAssert<String> findField(final String name) {
         isNotNull();
         return Assertions.assertThat(actual.findField(name));
+    }
+
+    public ListAssert<String> findFields(final String name) {
+        isNotNull();
+        return Assertions.assertThat(actual.findFields(name));
     }
 
 }

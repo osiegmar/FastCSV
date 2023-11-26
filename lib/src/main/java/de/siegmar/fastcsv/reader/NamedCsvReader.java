@@ -3,6 +3,7 @@ package de.siegmar.fastcsv.reader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,14 +30,14 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     private final CloseableIterator<CsvRecord> csvIterator;
     private final CloseableIterator<NamedCsvRecord> namedCsvIterator;
 
-    private List<String> header;
+    private String[] header;
 
     private NamedCsvReader(final CsvReader csvReader, final List<String> header) {
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
         namedCsvIterator = new NamedCsvRecordIterator(csvIterator);
         if (header != null) {
-            this.header = List.copyOf(header);
+            this.header = header.toArray(new String[0]);
         }
     }
 
@@ -47,21 +48,22 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
      * @return a new instance of this class.
      */
     public static NamedCsvReader from(final CsvReader csvReader) {
-        return new NamedCsvReader(Objects.requireNonNull(csvReader, "csvReader must not be null"), null);
+        Objects.requireNonNull(csvReader, "csvReader must not be null");
+        return new NamedCsvReader(csvReader, null);
     }
 
     /**
      * Builds a name based CSV reader based on a regular CsvReader.
      *
      * @param csvReader the reader this name based reader should work on.
-     * @param header    a custom header name list.
+     * @param header    a custom header name list. May contain duplicates.
      * @return a new instance of this class.
+     * @throws NullPointerException if csvReader, header or a header element is {@code null}
      */
     public static NamedCsvReader from(final CsvReader csvReader, final List<String> header) {
-        return new NamedCsvReader(
-            Objects.requireNonNull(csvReader, "csvReader must not be null"),
-            Objects.requireNonNull(header, "header must not be null")
-        );
+        Objects.requireNonNull(csvReader, "csvReader must not be null");
+        Objects.requireNonNull(header, "header must not be null");
+        return new NamedCsvReader(csvReader, header);
     }
 
     /**
@@ -73,13 +75,13 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         if (header == null) {
             header = initialize();
         }
-        return header;
+        return Collections.unmodifiableList(Arrays.asList(header));
     }
 
-    private List<String> initialize() {
+    private String[] initialize() {
         return csvIterator.hasNext()
-            ? csvIterator.next().getFields()
-            : Collections.emptyList();
+            ? csvIterator.next().fields
+            : new String[] {};
     }
 
     @Override

@@ -79,6 +79,13 @@ class NamedCsvReaderTest {
             .findField("foo").hasValue("bar");
     }
 
+    @Test
+    void findFieldsByName() {
+        assertThat(parse("foo,xoo,foo\nbar,moo,baz").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .findFields("foo").containsExactly("bar", "baz");
+    }
+
     @SuppressWarnings("JoinAssertThatStatements")
     @Test
     void getHeader() {
@@ -145,22 +152,29 @@ class NamedCsvReaderTest {
 
     @Test
     void toStringWithHeader() {
-        assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
+        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("NamedCsvRecord["
-                + "originalLineNumber=2, "
-                + "fields={headerA=fieldA, headerB=fieldB, headerC=fieldC}]");
+            .isEqualTo("NamedCsvRecord[originalLineNumber=2, "
+                + "fields=[fieldA, fieldB, fieldC], "
+                + "comment=false, "
+                + "header=[headerA, headerB, headerA]]");
     }
 
     @Test
     void fieldMap() {
-        assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
+        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement(NAMED_CSV_RECORD)
             .fields()
-            .containsExactly(entry("headerA", "fieldA"), entry("headerB", "fieldB"), entry("headerC", "fieldC"))
-            .asString()
-            .isEqualTo("{headerA=fieldA, headerB=fieldB, headerC=fieldC}");
+            .containsExactly(entry("headerA", "fieldA"), entry("headerB", "fieldB"));
+    }
+
+    @Test
+    void allFieldsMap() {
+        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .allFields()
+            .containsOnly(entry("headerA", List.of("fieldA", "fieldC")), entry("headerB", List.of("fieldB")));
     }
 
     @Test
