@@ -33,6 +33,9 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     private String[] header;
 
     private NamedCsvReader(final CsvReader csvReader, final List<String> header) {
+        if (csvReader.getCommentStrategy() == CommentStrategy.READ) {
+            throw new IllegalStateException("Can't read from a CsvReader with commentStrategy set to READ");
+        }
         this.csvReader = csvReader;
         csvIterator = csvReader.iterator();
         namedCsvIterator = new NamedCsvRecordIterator(csvIterator);

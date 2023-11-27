@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -186,6 +187,37 @@ class NamedCsvReaderTest {
             .singleElement(NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
+    }
+
+    // comments
+
+    @Test
+    void commentStrategyNone() {
+        final var csvReader = NamedCsvReader.from(CsvReader.builder().build("#foo\nbar\n123"));
+        assertThat(csvReader.stream())
+            .satisfiesExactly(
+                c -> NamedCsvRecordAssert.assertThat(c).fields().containsExactly(entry("#foo", "bar")),
+                c -> NamedCsvRecordAssert.assertThat(c).fields().containsExactly(entry("#foo", "123"))
+            );
+    }
+
+    @Test
+    void commentStrategySkip() {
+        final var csvReader = NamedCsvReader.from(CsvReader.builder()
+            .commentStrategy(CommentStrategy.SKIP)
+            .build("#foo\nbar\n123"));
+        assertThat(csvReader.stream())
+            .satisfiesExactly(
+                c -> NamedCsvRecordAssert.assertThat(c).fields().containsExactly(entry("bar", "123"))
+            );
+    }
+
+    @Test
+    void commentStrategyRead() {
+        final CsvReader csvReader = CsvReader.builder().commentStrategy(CommentStrategy.READ).build("");
+        assertThatThrownBy(() -> NamedCsvReader.from(csvReader))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Can't read from a CsvReader with commentStrategy set to READ");
     }
 
     // line numbering

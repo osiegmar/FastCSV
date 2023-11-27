@@ -78,6 +78,10 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             commentStrategy, commentCharacter);
     }
 
+    CommentStrategy getCommentStrategy() {
+        return commentStrategy;
+    }
+
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
