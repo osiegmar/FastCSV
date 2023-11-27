@@ -10,7 +10,7 @@ import java.util.Locale;
  *     .fieldModifier(FieldModifier.TRIM.andThen(FieldModifier.upper(Locale.ENGLISH)))
  *     .build("  foo   ,   bar")
  *     .stream()
- *     .toList();
+ *     .collect(Collectors.toList());
  *
  * // fields would be: "FOO" and "BAR"
  *}
