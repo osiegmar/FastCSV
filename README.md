@@ -155,10 +155,12 @@ For more examples see [IndexedCsvReaderExample.java](example/src/main/java/examp
 Iterative writing of some data to a writer
 
 ```java
-CsvWriter.builder().build(new OutputStreamWriter(System.out))
+var sw = new StringWriter();
+CsvWriter.builder().build(sw)
     .writeRecord("header1", "header2")
-    .writeRecord("value1", "value2")
-    .writeComment("File created using FastCSV");
+    .writeRecord("value1", "value2");
+
+System.out.println(sw);
 ```
 
 Iterative writing of a CSV file
