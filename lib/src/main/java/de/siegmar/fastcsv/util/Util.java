@@ -3,7 +3,7 @@ package de.siegmar.fastcsv.util;
 /**
  * Internal utility class.
  * <p>
- * Do <strong>not</strong> part of the API!
+ * It is <strong>not</strong> a part of the API!
  */
 public final class Util {
 
