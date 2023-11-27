@@ -39,14 +39,14 @@ public final class CsvWriter implements Closeable {
     private final char commentCharacter;
     private final QuoteStrategy quoteStrategy;
     private final LineDelimiter lineDelimiter;
-    private final boolean syncWriter;
+    private final boolean flushWriter;
     private int currentLineNo = 1;
     private final char[] lineDelimiterChars;
     private final char[] emptyFieldValue;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
-              final boolean syncWriter) {
+              final boolean flushWriter) {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
@@ -60,7 +60,7 @@ public final class CsvWriter implements Closeable {
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter);
-        this.syncWriter = syncWriter;
+        this.flushWriter = flushWriter;
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
@@ -260,7 +260,7 @@ public final class CsvWriter implements Closeable {
     private void endRecord() throws IOException {
         ++currentLineNo;
         writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
-        if (syncWriter) {
+        if (flushWriter) {
             writer.flush();
         }
     }
@@ -376,12 +376,10 @@ public final class CsvWriter implements Closeable {
         /**
          * Constructs a {@link CsvWriter} for the specified Writer.
          * <p>
-         * This library uses built-in buffering but writes its internal buffer to the given
-         * {@code writer} on every {@link CsvWriter#writeRecord(String...)} or
-         * {@link CsvWriter#writeRecord(Iterable)} call. Therefore, you probably want to pass in a
-         * {@link java.io.BufferedWriter} to retain good performance.
-         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing
-         * files.
+         * This library uses built-in buffering (unless {@link #bufferSize(int)} is used to disable it) but writes
+         * its internal buffer to the given {@code writer} at the end of every record write operation. Therefore,
+         * you probably want to pass in a {@link java.io.BufferedWriter} to retain good performance.
+         * Use {@link #build(Path, Charset, OpenOption...)} for optimal performance when writing files!
          *
          * @param writer the Writer to use for writing CSV data.
          * @return a new CsvWriter instance - never {@code null}.
@@ -430,10 +428,14 @@ public final class CsvWriter implements Closeable {
                 charset), false);
         }
 
-        private CsvWriter newWriter(final Writer writer, final boolean syncWriter) {
-            final Writer writerToUse = bufferSize > 0 ? new FastBufferedWriter(writer, bufferSize) : writer;
-            return new CsvWriter(writerToUse, fieldSeparator, quoteCharacter,
-                commentCharacter, quoteStrategy, lineDelimiter, syncWriter);
+        private CsvWriter newWriter(final Writer writer, final boolean flushWriter) {
+            if (bufferSize > 0) {
+                return new CsvWriter(new FastBufferedWriter(writer, bufferSize), fieldSeparator, quoteCharacter,
+                    commentCharacter, quoteStrategy, lineDelimiter, flushWriter);
+            }
+
+            return new CsvWriter(writer, fieldSeparator, quoteCharacter,
+                commentCharacter, quoteStrategy, lineDelimiter, false);
         }
 
         @Override
@@ -469,7 +471,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final int c) throws IOException {
             if (pos == buf.length) {
-                flushInternal();
+                flush();
             }
             buf[pos++] = (char) c;
         }
@@ -477,7 +479,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final char[] cbuf, final int off, final int len) throws IOException {
             if (pos + len >= buf.length) {
-                flushInternal();
+                flush();
                 if (len >= buf.length) {
                     writer.write(cbuf, off, len);
                     return;
@@ -491,7 +493,7 @@ public final class CsvWriter implements Closeable {
         @Override
         public void write(final String str, final int off, final int len) throws IOException {
             if (pos + len >= buf.length) {
-                flushInternal();
+                flush();
                 if (len >= buf.length) {
                     writer.write(str, off, len);
                     return;
@@ -502,20 +504,15 @@ public final class CsvWriter implements Closeable {
             pos += len;
         }
 
-        void flushInternal() throws IOException {
+        @Override
+        public void flush() throws IOException {
             writer.write(buf, 0, pos);
             pos = 0;
         }
 
         @Override
-        public void flush() throws IOException {
-            flushInternal();
-            writer.flush();
-        }
-
-        @Override
         public void close() throws IOException {
-            flushInternal();
+            flush();
             writer.close();
         }
 
