@@ -23,7 +23,7 @@ final class ByteChannelStream {
 
         this.channel = channel;
         this.csvListener = csvListener;
-        nextByte = loadData() ? byteBuf.get() : -1;
+        nextByte = loadData() ? (char) byteBuf.get() : -1;
     }
 
     int get() throws IOException {
@@ -56,7 +56,7 @@ final class ByteChannelStream {
     }
 
     private int fetchNextByte() throws IOException {
-        return buf.hasRemaining() || loadData() ? byteBuf.get() : -1;
+        return buf.hasRemaining() || loadData() ? (char) byteBuf.get() : -1;
     }
 
     private boolean loadData() throws IOException {
