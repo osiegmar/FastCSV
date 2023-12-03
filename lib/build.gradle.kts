@@ -51,7 +51,7 @@ configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.
 dependencies {
     commonImplementation("org.assertj:assertj-core:3.24.2")
 
-    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation(platform("org.junit:junit-bom:5.10.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -80,7 +80,7 @@ tasks.check {
 }
 
 pitest {
-    junit5PluginVersion = "1.2.0"
+    junit5PluginVersion = "1.2.1"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
 }

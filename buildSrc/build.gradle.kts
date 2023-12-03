@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:5.2.1")
+    implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.0.1")
 }
