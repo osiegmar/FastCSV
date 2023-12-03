@@ -145,7 +145,7 @@ class CsvScannerTest {
         final var listener = new CollectingListener();
 
         try (var channel = Channels.newChannel(new ByteArrayInputStream(data))) {
-            new CsvScanner(channel, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+            new CsvScanner(channel, 0, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
                 listener).scan();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

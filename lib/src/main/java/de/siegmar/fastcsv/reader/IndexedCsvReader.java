@@ -14,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -55,7 +56,7 @@ public final class IndexedCsvReader implements Closeable {
     private final CsvIndex csvIndex;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    IndexedCsvReader(final Path file, final Charset charset,
+    IndexedCsvReader(final Path file, final Charset defaultCharset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
                      final FieldModifier fieldModifier, final int pageSize, final CsvIndex csvIndex,
@@ -68,7 +69,6 @@ public final class IndexedCsvReader implements Closeable {
             fieldSeparator, quoteCharacter, commentCharacter);
 
         this.file = file;
-        this.charset = charset;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
@@ -76,12 +76,24 @@ public final class IndexedCsvReader implements Closeable {
         recordHandler = new RecordHandler(fieldModifier);
         this.pageSize = pageSize;
 
+        // Detect potential BOM and use the detected charset
+        final Optional<BomHeader> optionalBomHeader = detectBom(file, statusListener);
+        final int bomHeaderLength;
+        if (optionalBomHeader.isEmpty()) {
+            charset = defaultCharset;
+            bomHeaderLength = 0;
+        } else {
+            final var bomHeader = optionalBomHeader.get();
+            charset = bomHeader.getCharset();
+            bomHeaderLength = bomHeader.getLength();
+        }
+
         if (csvIndex != null) {
-            this.csvIndex = validatePrebuiltIndex(file,
+            this.csvIndex = validatePrebuiltIndex(file, bomHeaderLength,
                 (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter,
                 csvIndex);
         } else {
-            this.csvIndex = buildIndex(statusListener);
+            this.csvIndex = buildIndex(bomHeaderLength, statusListener);
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
@@ -90,11 +102,22 @@ public final class IndexedCsvReader implements Closeable {
             fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
 
-    private static CsvIndex validatePrebuiltIndex(final Path file, final byte fieldSeparator, final byte quoteCharacter,
-                                                  final CommentStrategy commentStrategy, final byte commentCharacter,
-                                                  final CsvIndex csvIndex)
+    private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
+        throws IOException {
+        try {
+            return BomDetector.detectCharset(file);
+        } catch (final IOException e) {
+            statusListener.onError(e);
+            throw e;
+        }
+    }
+
+    private static CsvIndex validatePrebuiltIndex(final Path file, final int bomHeaderLength, final byte fieldSeparator,
+                                                  final byte quoteCharacter, final CommentStrategy commentStrategy,
+                                                  final byte commentCharacter, final CsvIndex csvIndex)
         throws IOException {
         final var expectedSignature = new StringJoiner(", ")
+            .add("bomHeaderLength=" + bomHeaderLength)
             .add("fileSize=" + Files.size(file))
             .add("fieldSeparator=" + fieldSeparator)
             .add("quoteCharacter=" + quoteCharacter)
@@ -102,6 +125,7 @@ public final class IndexedCsvReader implements Closeable {
             .add("commentCharacter=" + commentCharacter)
             .toString();
         final var actualSignature = new StringJoiner(", ")
+            .add("bomHeaderLength=" + csvIndex.getBomHeaderLength())
             .add("fileSize=" + csvIndex.getFileSize())
             .add("fieldSeparator=" + csvIndex.getFieldSeparator())
             .add("quoteCharacter=" + csvIndex.getQuoteCharacter())
@@ -117,13 +141,14 @@ public final class IndexedCsvReader implements Closeable {
     }
 
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
-    private CsvIndex buildIndex(final StatusListener statusListener) throws IOException {
+    private CsvIndex buildIndex(final int bomHeaderLength, final StatusListener statusListener) throws IOException {
         final var listener = new ScannerListener(statusListener);
 
         try (var channel = Files.newByteChannel(file, StandardOpenOption.READ)) {
             statusListener.onInit(channel.size());
 
             new CsvScanner(channel,
+                bomHeaderLength,
                 (byte) fieldSeparator,
                 (byte) quoteCharacter,
                 commentStrategy,
@@ -131,7 +156,7 @@ public final class IndexedCsvReader implements Closeable {
                 listener
             ).scan();
 
-            final var idx = new CsvIndex(channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
+            final var idx = new CsvIndex(bomHeaderLength, channel.size(), (byte) fieldSeparator, (byte) quoteCharacter,
                 commentStrategy, (byte) commentCharacter,
                 listener.recordCounter.get(), listener.pageOffsets);
 

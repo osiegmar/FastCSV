@@ -16,6 +16,7 @@ class CsvIndexTest {
     private final List<CsvIndex.CsvPage> defaultPages = List.of(defaultPage);
 
     private final CsvIndexBuilder defaultBuilder = builder()
+        .bomHeaderLength(0)
         .fileSize(5)
         .fieldSeparator(',')
         .quoteCharacter('"')
@@ -127,6 +128,7 @@ class CsvIndexTest {
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     static class CsvIndexBuilder {
 
+        private int bomHeaderLength;
         private long fileSize;
         private char fieldSeparator;
         private char quoteCharacter;
@@ -134,6 +136,11 @@ class CsvIndexTest {
         private char commentCharacter;
         private long recordCount;
         private List<CsvIndex.CsvPage> pages;
+
+        CsvIndexBuilder bomHeaderLength(final int bomHeaderLength) {
+            this.bomHeaderLength = bomHeaderLength;
+            return this;
+        }
 
         CsvIndexBuilder fileSize(final long fileSize) {
             this.fileSize = fileSize;
@@ -171,7 +178,7 @@ class CsvIndexTest {
         }
 
         CsvIndex build() {
-            return new CsvIndex(fileSize, (byte) fieldSeparator, (byte) quoteCharacter,
+            return new CsvIndex(bomHeaderLength, fileSize, (byte) fieldSeparator, (byte) quoteCharacter,
                 commentStrategy, (byte) commentCharacter,
                 recordCount, pages);
         }

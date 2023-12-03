@@ -74,8 +74,8 @@ class IndexedCsvReaderTest {
         assertThat(singlePageBuilder().build(file)).asString()
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
                     + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, pageSize=1, "
-                    + "index=CsvIndex[fileSize=3, fieldSeparator=44, quoteCharacter=34, commentStrategy=NONE, "
-                    + "commentCharacter=35, recordCount=1, pageCount=1]]",
+                    + "index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, "
+                    + "commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]",
                 file);
     }
 
@@ -207,7 +207,7 @@ class IndexedCsvReaderTest {
         }
 
         @Test
-        void nonExistingFileWithListener() throws IOException {
+        void nonExistingFileWithListener() {
             final var statusListener = new CollectingStatusListener();
 
             assertThatThrownBy(() -> singlePageBuilder()
@@ -261,9 +261,9 @@ class IndexedCsvReaderTest {
 
             assertThatThrownBy(() -> builder.index(index).fieldSeparator(';').build(file))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Index does not match! Expected: fileSize=3, fieldSeparator=59, quoteCharacter=34, "
-                    + "commentStrategy=NONE, commentCharacter=35; Actual: fileSize=3, fieldSeparator=44, "
-                    + "quoteCharacter=34, commentStrategy=NONE, commentCharacter=35");
+                .hasMessage("Index does not match! Expected: bomHeaderLength=0, fileSize=3, fieldSeparator=59, "
+                    + "quoteCharacter=34, commentStrategy=NONE, commentCharacter=35; Actual: bomHeaderLength=0, "
+                    + "fileSize=3, fieldSeparator=44, quoteCharacter=34, commentStrategy=NONE, commentCharacter=35");
         }
 
     }

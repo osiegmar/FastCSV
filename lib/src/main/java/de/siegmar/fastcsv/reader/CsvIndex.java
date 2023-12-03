@@ -13,6 +13,11 @@ public final class CsvIndex implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * The length of an optional BOM header.
+     */
+    private final int bomHeaderLength;
+
+    /**
      * The CSV file size this index was built for.
      */
     private final long fileSize;
@@ -47,9 +52,11 @@ public final class CsvIndex implements Serializable {
      */
     private final List<CsvPage> pages;
 
-    CsvIndex(final long fileSize, final byte fieldSeparator, final byte quoteCharacter,
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    CsvIndex(final int bomHeaderLength, final long fileSize, final byte fieldSeparator, final byte quoteCharacter,
              final CommentStrategy commentStrategy, final byte commentCharacter,
              final long recordCounter, final List<CsvPage> pages) {
+        this.bomHeaderLength = bomHeaderLength;
         this.fileSize = fileSize;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
@@ -57,6 +64,10 @@ public final class CsvIndex implements Serializable {
         this.commentCharacter = commentCharacter;
         this.recordCounter = recordCounter;
         this.pages = Objects.requireNonNull(pages);
+    }
+
+    int getBomHeaderLength() {
+        return bomHeaderLength;
     }
 
     long getFileSize() {
@@ -101,6 +112,7 @@ public final class CsvIndex implements Serializable {
         return pages.get(pageNumber);
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -110,7 +122,8 @@ public final class CsvIndex implements Serializable {
             return false;
         }
         final CsvIndex csvIndex = (CsvIndex) o;
-        return fileSize == csvIndex.fileSize
+        return bomHeaderLength == csvIndex.bomHeaderLength
+            && fileSize == csvIndex.fileSize
             && fieldSeparator == csvIndex.fieldSeparator
             && quoteCharacter == csvIndex.quoteCharacter
             && commentStrategy == csvIndex.commentStrategy
@@ -121,13 +134,14 @@ public final class CsvIndex implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileSize, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            pages, recordCounter);
+        return Objects.hash(bomHeaderLength, fileSize, fieldSeparator, quoteCharacter, commentStrategy,
+            commentCharacter, pages, recordCounter);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", CsvIndex.class.getSimpleName() + "[", "]")
+            .add("bomHeaderLength=" + bomHeaderLength)
             .add("fileSize=" + fileSize)
             .add("fieldSeparator=" + fieldSeparator)
             .add("quoteCharacter=" + quoteCharacter)

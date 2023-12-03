@@ -15,8 +15,8 @@ final class CsvScanner {
     private final ByteChannelStream stream;
     private final boolean readComments;
 
-    CsvScanner(final ReadableByteChannel channel, final byte fieldSeparator, final byte quoteCharacter,
-               final CommentStrategy commentStrategy, final byte commentCharacter,
+    CsvScanner(final ReadableByteChannel channel, final int bomHeaderLength, final byte fieldSeparator,
+               final byte quoteCharacter, final CommentStrategy commentStrategy, final byte commentCharacter,
                final CsvListener csvListener) throws IOException {
 
         this.fieldSeparator = fieldSeparator;
@@ -27,6 +27,12 @@ final class CsvScanner {
         readComments = commentStrategy != CommentStrategy.NONE;
 
         stream = new ByteChannelStream(channel, csvListener);
+
+        if (bomHeaderLength > 0) {
+            for (int i = 0; i < bomHeaderLength; i++) {
+                stream.get();
+            }
+        }
     }
 
     @SuppressWarnings({"PMD.AssignmentInOperand", "checkstyle:CyclomaticComplexity",

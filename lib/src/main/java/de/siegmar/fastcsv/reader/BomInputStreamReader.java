@@ -6,14 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 class BomInputStreamReader extends Reader {
-
-    private static final Charset UTF32LE = Charset.forName("UTF-32LE");
-    private static final Charset UTF32BE = Charset.forName("UTF-32BE");
-    private static final int BOM_SIZE = 4;
 
     private final InputStream in;
     private final Charset defaultCharset;
@@ -25,82 +20,40 @@ class BomInputStreamReader extends Reader {
         this.defaultCharset = defaultCharset;
     }
 
-    /*
-     * Optimized code to detect these BOM headers:
-     *
-     * UTF-8      : EF BB BF
-     * UTF-16 (BE): FE FF
-     * UTF-16 (LE): FF FE
-     * UTF-32 (BE): 00 00 FE FF
-     * UTF-32 (LE): FF FE 00 00
-     */
-    @SuppressWarnings({
-        "checkstyle:MagicNumber",
-        "checkstyle:CyclomaticComplexity",
-        "checkstyle:BooleanExpressionComplexity",
-        "checkstyle:NestedIfDepth",
-        "PMD.AvoidLiteralsInIfCondition"
-    })
-    Optional<Charset> detectCharset() throws IOException {
-        in.mark(BOM_SIZE);
-        final byte[] buf = in.readNBytes(BOM_SIZE);
-        final int n = buf.length;
-
-        if (n < 2) {
-            in.reset();
-            return Optional.empty();
-        }
-
-        Charset charset = null;
-        int bomLen = 0;
-
-        if (buf[0] == (byte) 0xEF) {
-            if (n > 2 && buf[1] == (byte) 0xBB && buf[2] == (byte) 0xBF) {
-                charset = StandardCharsets.UTF_8;
-                bomLen = 3;
-            }
-        } else if (buf[0] == (byte) 0xFE) {
-            if (buf[1] == (byte) 0xFF) {
-                charset = StandardCharsets.UTF_16BE;
-                bomLen = 2;
-            }
-        } else if (buf[0] == (byte) 0xFF) {
-            if (buf[1] == (byte) 0xFE) {
-                if (n > 3 && buf[2] == (byte) 0x00 && buf[3] == (byte) 0x00) {
-                    charset = UTF32LE;
-                    bomLen = 4;
-                } else {
-                    charset = StandardCharsets.UTF_16LE;
-                    bomLen = 2;
-                }
-            }
-        } else if (buf[0] == (byte) 0x00) {
-            if (n > 3
-                && buf[1] == (byte) 0x00
-                && buf[2] == (byte) 0xFE
-                && buf[3] == (byte) 0xFF) {
-                bomLen = 4;
-                charset = UTF32BE;
-            }
-        }
-
-        if (bomLen < n) {
-            in.reset();
-            if (in.skip(bomLen) != bomLen) {
-                throw new IOException("BOM header couldn't be skipped");
-            }
-        }
-
-        return Optional.ofNullable(charset);
-    }
-
     @Override
     public int read(final char[] cbuf, final int off, final int len) throws IOException {
         if (r == null) {
-            r = new InputStreamReader(in, detectCharset().orElse(defaultCharset));
+            r = new InputStreamReader(in, detectCharset(in).orElse(defaultCharset));
         }
 
         return r.read(cbuf, off, len);
+    }
+
+    private static Optional<Charset> detectCharset(final InputStream in) throws IOException {
+        // Read potential BOM header
+        final var optionalBomHeader = BomDetector.detectCharset(peakHeader(in));
+
+        // No BOM header found
+        if (optionalBomHeader.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // Skip BOM header
+        final var bomHeader = optionalBomHeader.get();
+        final int bomLength = bomHeader.getLength();
+        if (in.skip(bomLength) != bomLength) {
+            throw new IOException("Couldn't skip BOM header");
+        }
+
+        // Return charset
+        return Optional.of(bomHeader.getCharset());
+    }
+
+    private static byte[] peakHeader(final InputStream in) throws IOException {
+        in.mark(BomDetector.POTENTIAL_BOM_SIZE);
+        final byte[] read = in.readNBytes(BomDetector.POTENTIAL_BOM_SIZE);
+        in.reset();
+        return read;
     }
 
     @Override

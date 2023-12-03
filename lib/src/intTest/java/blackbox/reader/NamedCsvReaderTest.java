@@ -140,6 +140,13 @@ class NamedCsvReaderTest {
     }
 
     @Test
+    void getNonExistingFieldByName2() {
+        assertThatThrownBy(() -> parse("foo,bar\nfaz").iterator().next().getField("bar"))
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("Field 'bar' is on position 2, but current record only contains 1 fields");
+    }
+
+    @Test
     void findNonExistingFieldByName() {
         assertThat(parse("foo\nfaz").iterator().next().findField("bar"))
             .isEmpty();
