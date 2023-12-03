@@ -109,17 +109,17 @@ class CsvReaderTest {
 
         assertThat(crb.build("\n\na").iterator()).toIterable()
             .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1).fields().containsExactly(""),
-                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2).fields().containsExactly(""),
-                item3 -> CsvRecordAssert.assertThat(item3).isOriginalLineNumber(3).fields().containsExactly("a"));
+                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(1).fields().containsExactly(""),
+                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(2).fields().containsExactly(""),
+                item3 -> CsvRecordAssert.assertThat(item3).isStartingLineNumber(3).fields().containsExactly("a"));
     }
 
     @Test
     void skippedRecords() {
         assertThat(crb.build("\n\nfoo\n\nbar\n\n").stream())
             .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(3).fields().containsExactly("foo"),
-                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(5).fields().containsExactly("bar")
+                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(3).fields().containsExactly("foo"),
+                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(5).fields().containsExactly("bar")
             );
     }
 
@@ -186,15 +186,15 @@ class CsvReaderTest {
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1)
+                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(1)
                     .fields().containsExactly("line 1"),
-                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2)
+                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(2)
                     .fields().containsExactly("line 2"),
-                item3 -> CsvRecordAssert.assertThat(item3).isOriginalLineNumber(3)
+                item3 -> CsvRecordAssert.assertThat(item3).isStartingLineNumber(3)
                     .fields().containsExactly("line 3"),
-                item4 -> CsvRecordAssert.assertThat(item4).isOriginalLineNumber(4)
+                item4 -> CsvRecordAssert.assertThat(item4).isStartingLineNumber(4)
                     .fields().containsExactly("line 4\rwith\r\nand\n"),
-                item5 -> CsvRecordAssert.assertThat(item5).isOriginalLineNumber(9)
+                item5 -> CsvRecordAssert.assertThat(item5).isStartingLineNumber(9)
                     .fields().containsExactly("line 9")
             );
     }
@@ -209,9 +209,9 @@ class CsvReaderTest {
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isOriginalLineNumber(1)
+                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(1)
                     .fields().containsExactly("comment \"1\""),
-                item2 -> CsvRecordAssert.assertThat(item2).isOriginalLineNumber(2)
+                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(2)
                     .fields().containsExactly("a", "#b", "c")
             );
     }
@@ -223,7 +223,7 @@ class CsvReaderTest {
         assertThat(crb.build("fieldA,fieldB\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("CsvRecord[originalLineNumber=1, fields=[fieldA, fieldB], comment=false]");
+            .isEqualTo("CsvRecord[startingLineNumber=1, fields=[fieldA, fieldB], comment=false]");
     }
 
     // refill buffer while parsing an unquoted field containing a quote character

@@ -56,7 +56,7 @@ details.
 
 - Support reading of some non-compliant (real world) data
 - Preserving line break character(s) within fields
-- Preserving the original line number (even with skipped and multi line records) –
+- Preserving the starting line number (even with skipped and multi line records) –
   helpful for error messages
 - Auto-detection of line delimiters (can also be mixed)
 - Configurable data validation

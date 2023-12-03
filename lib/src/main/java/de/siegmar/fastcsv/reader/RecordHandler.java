@@ -10,7 +10,7 @@ final class RecordHandler {
     private int idx;
     private int lines = 1;
     private boolean commentMode;
-    private long originalLineNumber = 1;
+    private long startingLineNumber = 1;
 
     RecordHandler(final FieldModifier fieldModifier) {
         this(INITIAL_FIELDS_SIZE, fieldModifier);
@@ -33,7 +33,7 @@ final class RecordHandler {
         }
 
         if (fieldModifier != null) {
-            value = fieldModifier.modify(originalLineNumber, idx, commentMode, quoted, value);
+            value = fieldModifier.modify(startingLineNumber, idx, commentMode, quoted, value);
             if (value == null) {
                 throw new NullPointerException("fieldModifier returned illegal null: " + fieldModifier.getClass());
             }
@@ -52,7 +52,7 @@ final class RecordHandler {
     CsvRecord buildAndReset() {
         final CsvRecord csvRecord = build();
         idx = 0;
-        originalLineNumber += lines;
+        startingLineNumber += lines;
         lines = 1;
         commentMode = false;
         return csvRecord;
@@ -61,12 +61,12 @@ final class RecordHandler {
     private CsvRecord build() {
         if (idx <= 1 && fields[0].isEmpty()) {
             // empty record
-            return new CsvRecord(originalLineNumber, commentMode);
+            return new CsvRecord(startingLineNumber, commentMode);
         }
 
         final String[] ret = new String[idx];
         System.arraycopy(fields, 0, ret, 0, idx);
-        return new CsvRecord(originalLineNumber, ret, commentMode);
+        return new CsvRecord(startingLineNumber, ret, commentMode);
     }
 
     public void enableCommentMode() {
@@ -81,8 +81,8 @@ final class RecordHandler {
         lines++;
     }
 
-    public void setOriginalLineNumber(final long originalLineNumber) {
-        this.originalLineNumber = originalLineNumber;
+    public void setStartingLineNumber(final long startingLineNumber) {
+        this.startingLineNumber = startingLineNumber;
     }
 
 }

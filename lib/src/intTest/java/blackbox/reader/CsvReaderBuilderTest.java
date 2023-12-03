@@ -41,7 +41,7 @@ class CsvReaderBuilderTest {
             .build("foo,bar;baz").iterator();
         assertThat(it).toIterable()
             .singleElement(CSV_RECORD)
-            .isOriginalLineNumber(1)
+            .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo,bar", "baz");
     }
@@ -52,7 +52,7 @@ class CsvReaderBuilderTest {
             .build("_foo \", __ bar_,foo \" bar").iterator();
         assertThat(it).toIterable()
             .singleElement(CSV_RECORD)
-            .isOriginalLineNumber(1)
+            .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo \", _ bar", "foo \" bar");
     }
@@ -64,11 +64,11 @@ class CsvReaderBuilderTest {
         assertThat(it).toIterable()
             .satisfiesExactly(
                 item1 -> CsvRecordAssert.assertThat(item1)
-                    .isOriginalLineNumber(1)
+                    .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("#foo"),
                 item2 -> CsvRecordAssert.assertThat(item2)
-                    .isOriginalLineNumber(3)
+                    .isStartingLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz"));
     }
@@ -85,7 +85,7 @@ class CsvReaderBuilderTest {
     void string() {
         assertThat(crb.build(DATA).stream())
             .singleElement(CSV_RECORD)
-            .isOriginalLineNumber(1)
+            .isStartingLineNumber(1)
             .isNotComment()
             .fields().isEqualTo(EXPECTED);
     }
@@ -98,7 +98,7 @@ class CsvReaderBuilderTest {
         try (Stream<CsvRecord> stream = crb.build(file).stream()) {
             assertThat(stream)
                 .singleElement(CSV_RECORD)
-                .isOriginalLineNumber(1)
+                .isStartingLineNumber(1)
                 .isNotComment()
                 .fields().isEqualTo(EXPECTED);
         }

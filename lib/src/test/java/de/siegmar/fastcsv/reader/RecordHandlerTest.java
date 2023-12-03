@@ -13,7 +13,7 @@ class RecordHandlerTest {
         rh.add("bar", false);
 
         assertThat(rh.buildAndReset())
-            .isOriginalLineNumber(1)
+            .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo", "bar");
     }

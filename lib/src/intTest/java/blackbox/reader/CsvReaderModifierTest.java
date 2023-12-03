@@ -38,7 +38,7 @@ class CsvReaderModifierTest {
 
     @Test
     void combination() {
-        final FieldModifier addSpaces = (originalLineNumber, fieldNo, comment, quotedValue, field) ->
+        final FieldModifier addSpaces = (startingLineNumber, fieldNo, comment, quotedValue, field) ->
             " " + field + " ";
 
         crb.fieldModifier(addSpaces
@@ -55,7 +55,7 @@ class CsvReaderModifierTest {
 
     @Test
     void noNull() {
-        crb.fieldModifier((originalLineNumber, fieldNo, comment, quotedValue, field) -> null);
+        crb.fieldModifier((startingLineNumber, fieldNo, comment, quotedValue, field) -> null);
 
         assertThatThrownBy(() -> crb.build("foo").stream().toList())
             .isInstanceOf(NullPointerException.class)

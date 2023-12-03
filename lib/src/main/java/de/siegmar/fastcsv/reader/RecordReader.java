@@ -250,8 +250,8 @@ final class RecordReader implements Closeable {
         return shift;
     }
 
-    void resetBuffer(final long originalLineNumber) {
-        recordHandler.setOriginalLineNumber(originalLineNumber);
+    void resetBuffer(final long startingLineNumber) {
+        recordHandler.setStartingLineNumber(startingLineNumber);
         csvBuffer.reset();
     }
 

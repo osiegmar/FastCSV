@@ -142,7 +142,7 @@ public final class NamedCsvRecord extends CsvRecord {
     @Override
     public String toString() {
         return new StringJoiner(", ", NamedCsvRecord.class.getSimpleName() + "[", "]")
-            .add("originalLineNumber=" + originalLineNumber)
+            .add("startingLineNumber=" + startingLineNumber)
             .add("fields=" + Arrays.toString(fields))
             .add("comment=" + comment)
             .add("header=" + Arrays.toString(header))

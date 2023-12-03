@@ -25,11 +25,11 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return new NamedCsvRecordAssert(actual);
     }
 
-    public NamedCsvRecordAssert isOriginalLineNumber(final long originalLineNumber) {
+    public NamedCsvRecordAssert isStartingLineNumber(final long startingLineNumber) {
         isNotNull();
-        if (actual.getOriginalLineNumber() != originalLineNumber) {
-            failWithMessage("Expected original line number to be <%d> but was <%d>",
-                originalLineNumber, actual.getOriginalLineNumber());
+        if (actual.getStartingLineNumber() != startingLineNumber) {
+            failWithMessage("Expected starting line number to be <%d> but was <%d>",
+                startingLineNumber, actual.getStartingLineNumber());
         }
 
         return this;

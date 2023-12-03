@@ -157,7 +157,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 } else if (fieldCount != firstRecordFieldCount) {
                     throw new MalformedCsvException(
                         String.format("Record %d has %d fields, but first record had %d fields",
-                            csvRecord.getOriginalLineNumber(), fieldCount, firstRecordFieldCount));
+                            csvRecord.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
                 }
             }
 
@@ -213,7 +213,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             } catch (final IOException e) {
                 if (fetchedRecord != null) {
                     throw new UncheckedIOException("IOException when reading record that started in line "
-                        + (fetchedRecord.getOriginalLineNumber() + 1), e);
+                        + (fetchedRecord.getStartingLineNumber() + 1), e);
                 } else {
                     throw new UncheckedIOException("IOException when reading first record", e);
                 }

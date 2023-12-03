@@ -163,7 +163,7 @@ class NamedCsvReaderTest {
         assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
-            .isEqualTo("NamedCsvRecord[originalLineNumber=2, "
+            .isEqualTo("NamedCsvRecord[startingLineNumber=2, "
                 + "fields=[fieldA, fieldB, fieldC], "
                 + "comment=false, "
                 + "header=[headerA, headerB, headerA]]");
@@ -243,15 +243,15 @@ class NamedCsvReaderTest {
 
         assertThat(stream)
             .satisfiesExactly(
-                item1 -> NamedCsvRecordAssert.assertThat(item1).isOriginalLineNumber(2)
+                item1 -> NamedCsvRecordAssert.assertThat(item1).isStartingLineNumber(2)
                     .fields().containsOnly(entry("h1", "a"), entry("h2", "line 2")),
-                item2 -> NamedCsvRecordAssert.assertThat(item2).isOriginalLineNumber(3)
+                item2 -> NamedCsvRecordAssert.assertThat(item2).isStartingLineNumber(3)
                     .fields().containsOnly(entry("h1", "b"), entry("h2", "line 3")),
-                item3 -> NamedCsvRecordAssert.assertThat(item3).isOriginalLineNumber(4)
+                item3 -> NamedCsvRecordAssert.assertThat(item3).isStartingLineNumber(4)
                     .fields().containsOnly(entry("h1", "c"), entry("h2", "line 4")),
-                item4 -> NamedCsvRecordAssert.assertThat(item4).isOriginalLineNumber(5)
+                item4 -> NamedCsvRecordAssert.assertThat(item4).isStartingLineNumber(5)
                     .fields().containsOnly(entry("h1", "d"), entry("h2", "line 5\rwith\r\nand\n")),
-                item5 -> NamedCsvRecordAssert.assertThat(item5).isOriginalLineNumber(9)
+                item5 -> NamedCsvRecordAssert.assertThat(item5).isStartingLineNumber(9)
                     .fields().containsOnly(entry("h1", "e"), entry("h2", "line 9"))
             );
     }

@@ -38,8 +38,8 @@ public class NamedCsvReaderExample {
 
     private static void customFieldModifier() {
         System.out.print("Trim/Upper header via custom field modifier: ");
-        final FieldModifier headerTrimUpperModifier = (originalLineNumber, fieldIdx, comment, quoted, field) ->
-            originalLineNumber == 1 ? field.trim().toUpperCase(Locale.ROOT) : field;
+        final FieldModifier headerTrimUpperModifier = (startingLineNumber, fieldIdx, comment, quoted, field) ->
+            startingLineNumber == 1 ? field.trim().toUpperCase(Locale.ROOT) : field;
         final CsvReader csvReader = CsvReader.builder()
             .fieldModifier(headerTrimUpperModifier)
             .build(" h1 , h2 \nfoo,bar");

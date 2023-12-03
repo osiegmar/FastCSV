@@ -282,19 +282,19 @@ class IndexedCsvReaderTest {
             try (csv) {
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(1)
+                    .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(2)
+                    .isStartingLineNumber(2)
                     .isComment()
                     .fields().containsExactly("a,b,c");
 
                 assertThat(csv.readPage(2))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(3)
+                    .isStartingLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
             }
@@ -311,19 +311,19 @@ class IndexedCsvReaderTest {
             try (csv) {
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(1)
+                    .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(2)
+                    .isStartingLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("#a", "b", "c");
 
                 assertThat(csv.readPage(2))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(3)
+                    .isStartingLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
             }
@@ -393,7 +393,7 @@ class IndexedCsvReaderTest {
 
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(1)
+                    .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012");
             }
@@ -413,13 +413,13 @@ class IndexedCsvReaderTest {
 
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(1)
+                    .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012", TEST_STRING);
 
                 assertThat(csv.readPage(1))
                     .singleElement(CSV_RECORD)
-                    .isOriginalLineNumber(2)
+                    .isStartingLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("345", "bar");
             }
@@ -455,27 +455,27 @@ class IndexedCsvReaderTest {
                 assertThat(csv.readPage(0))
                     .satisfiesExactly(
                         item1 -> CsvRecordAssert.assertThat(item1)
-                            .isOriginalLineNumber(1)
+                            .isStartingLineNumber(1)
                             .fields().containsExactly("1"),
                         item2 -> CsvRecordAssert.assertThat(item2)
-                            .isOriginalLineNumber(2)
+                            .isStartingLineNumber(2)
                             .fields().containsExactly("2a", "2b")
                     );
 
                 assertThat(csv.readPage(1))
                     .satisfiesExactly(
                         item1 -> CsvRecordAssert.assertThat(item1)
-                            .isOriginalLineNumber(3)
+                            .isStartingLineNumber(3)
                             .fields().containsExactly("3\nfoo"),
                         item2 -> CsvRecordAssert.assertThat(item2)
-                            .isOriginalLineNumber(5)
+                            .isStartingLineNumber(5)
                             .fields().containsExactly("4")
                     );
 
                 assertThat(csv.readPage(2))
                     .satisfiesExactly(
                         item1 -> CsvRecordAssert.assertThat(item1)
-                            .isOriginalLineNumber(6)
+                            .isStartingLineNumber(6)
                             .fields().containsExactly("5")
                     );
             }

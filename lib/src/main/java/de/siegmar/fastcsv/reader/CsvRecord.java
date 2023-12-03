@@ -14,12 +14,12 @@ public class CsvRecord {
     private static final String[] EMPTY = {""};
 
     /**
-     * The original line number (starting with 1).
+     * The starting line number (starting with 1).
      *
-     * @see #getOriginalLineNumber()
+     * @see #getStartingLineNumber()
      */
     @SuppressWarnings("checkstyle:VisibilityModifier")
-    final long originalLineNumber;
+    final long startingLineNumber;
 
     /**
      * The fields this record is composed of.
@@ -38,32 +38,32 @@ public class CsvRecord {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     final boolean comment;
 
-    CsvRecord(final long originalLineNumber, final boolean comment) {
-        this(originalLineNumber, EMPTY, comment);
+    CsvRecord(final long startingLineNumber, final boolean comment) {
+        this(startingLineNumber, EMPTY, comment);
     }
 
-    CsvRecord(final long originalLineNumber, final String[] fields,
+    CsvRecord(final long startingLineNumber, final String[] fields,
               final boolean comment) {
-        this.originalLineNumber = originalLineNumber;
+        this.startingLineNumber = startingLineNumber;
         this.fields = fields;
         this.comment = comment;
     }
 
     CsvRecord(final CsvRecord original) {
-        originalLineNumber = original.originalLineNumber;
+        startingLineNumber = original.startingLineNumber;
         fields = original.fields;
         comment = original.comment;
     }
 
     /**
-     * Returns the original line number (starting with 1). On multi-line records this is the starting
+     * Returns the starting line number (starting with 1). On multi-line records this is the starting
      * line number.
      * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)}.
      *
-     * @return the original line number
+     * @return the starting line number
      */
-    public long getOriginalLineNumber() {
-        return originalLineNumber;
+    public long getStartingLineNumber() {
+        return startingLineNumber;
     }
 
     /**
@@ -119,7 +119,7 @@ public class CsvRecord {
     @Override
     public String toString() {
         return new StringJoiner(", ", CsvRecord.class.getSimpleName() + "[", "]")
-            .add("originalLineNumber=" + originalLineNumber)
+            .add("startingLineNumber=" + startingLineNumber)
             .add("fields=" + Arrays.toString(fields))
             .add("comment=" + comment)
             .toString();
