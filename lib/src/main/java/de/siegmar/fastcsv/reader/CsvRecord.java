@@ -6,7 +6,14 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * Index based CSV-record.
+ * Represents an immutable CSV record with unnamed (indexed) fields.
+ * <p>
+ * The field values are never {@code null}. Empty fields are represented as empty strings.
+ * <p>
+ * CSV records are created by {@link CsvReader} or {@link IndexedCsvReader}.
+ *
+ * @see CsvReader
+ * @see IndexedCsvReader
  */
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
 public class CsvRecord {
@@ -56,18 +63,34 @@ public class CsvRecord {
     }
 
     /**
-     * Returns the starting line number (starting with 1). On multi-line records this is the starting
-     * line number.
-     * Empty lines could be skipped via {@link CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)}.
+     * Provides the line number at which this record originated, starting from 1.
+     * <p>
+     * This information is particularly valuable in scenarios involving CSV files containing empty lines as well as
+     * multi-line or commented records, where the record number may deviate from the line number.
+     * <p>
+     * Example:
+     * <pre>
+     * 1 foo,bar
+     * 2 foo,"multi
+     * 3 line bar"
+     * 4                    (empty, potentially skipped)
+     * 5 #commented record  (potentially skipped)
+     * 6 "latest
+     * 7 record"
+     * </pre>
+     * The last record (containing the multi-line field "latest\nrecord") would have a starting line number of 6,
+     * no matter if empty lines or commented records are skipped or not.
+     * <p>
+     * A starting offset of 1 is used to be consistent with the line numbers shown of most text editors.
      *
-     * @return the starting line number
+     * @return the starting line number of this record, starting from 1
      */
     public long getStartingLineNumber() {
         return startingLineNumber;
     }
 
     /**
-     * Gets a field value by its index (starting with 0).
+     * Retrieves the value of a field based on its index, with indexing starting from 0.
      *
      * @param index index of the field to return
      * @return field value, never {@code null}
@@ -78,7 +101,7 @@ public class CsvRecord {
     }
 
     /**
-     * Gets all fields of this record as an unmodifiable list.
+     * Retrieves all fields of this record as an unmodifiable list.
      *
      * @return all fields of this record, never {@code null}
      */
@@ -87,7 +110,7 @@ public class CsvRecord {
     }
 
     /**
-     * Gets the number of fields of this record.
+     * Obtains the count of fields in this record.
      *
      * @return the number of fields of this record
      * @see CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)
@@ -97,7 +120,7 @@ public class CsvRecord {
     }
 
     /**
-     * Provides the information if the record is a commented record.
+     * Indicates whether the record is a commented record.
      *
      * @return {@code true} if the record is a commented record
      * @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
@@ -107,7 +130,8 @@ public class CsvRecord {
     }
 
     /**
-     * Provides the information if the record is an empty record.
+     * Indicates whether the record is considered empty, signifying that it contains only a single field with an empty
+     * string.
      *
      * @return {@code true} if the record is an empty record
      * @see CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)
