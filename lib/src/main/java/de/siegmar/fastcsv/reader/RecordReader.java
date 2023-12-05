@@ -264,7 +264,7 @@ final class RecordReader implements Closeable {
     private static class CsvBuffer implements Closeable {
         private static final int READ_SIZE = 8192;
         private static final int BUFFER_SIZE = READ_SIZE;
-        private static final int MAX_BUFFER_SIZE = 8 * 1024 * 1024;
+        private static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         char[] buf;
         int len;

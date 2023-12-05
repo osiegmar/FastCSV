@@ -246,7 +246,7 @@ class CsvReaderTest {
 
     @Test
     void bufferExceed() {
-        final char[] buf = new char[8 * 1024 * 1024];
+        final char[] buf = new char[16 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
 
@@ -257,14 +257,14 @@ class CsvReaderTest {
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).iterator().next())
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("IOException when reading first record")
-            .rootCause().hasMessage("Maximum buffer size 8388608 is not enough to read data of a single field. "
+            .rootCause().hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
                 + "Typically, this happens if quotation started but did not end within this buffer's "
-                + "maximum boundary.");
+                + "maximum boundary.", buf.length);
     }
 
     @Test
     void bufferExceedSubsequentRecord() {
-        final char[] buf = new char[8 * 1024 * 1024];
+        final char[] buf = new char[16 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
@@ -275,9 +275,9 @@ class CsvReaderTest {
         assertThatThrownBy(iterator::next)
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("IOException when reading record that started in line 2")
-            .rootCause().hasMessage("Maximum buffer size 8388608 is not enough to read data of a single field. "
+            .rootCause().hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
                 + "Typically, this happens if quotation started but did not end within this buffer's "
-                + "maximum boundary.");
+                + "maximum boundary.", buf.length);
     }
 
     // API
