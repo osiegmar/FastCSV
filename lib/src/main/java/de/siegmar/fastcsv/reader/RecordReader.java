@@ -325,12 +325,10 @@ final class RecordReader implements Closeable {
             return false;
         }
 
-        private static char[] extendAndRelocate(final char[] buf, final int begin)
-            throws IOException {
-
+        private static char[] extendAndRelocate(final char[] buf, final int begin) {
             final int newBufferSize = buf.length * 2;
             if (newBufferSize > MAX_BUFFER_SIZE) {
-                throw new IOException("Maximum buffer size " + MAX_BUFFER_SIZE + " is not enough "
+                throw new CsvParseException("Maximum buffer size " + MAX_BUFFER_SIZE + " is not enough "
                     + "to read data of a single field. Typically, this happens if quotation "
                     + "started but did not end within this buffer's maximum boundary.");
             }

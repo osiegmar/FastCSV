@@ -3,7 +3,7 @@ package de.siegmar.fastcsv.reader;
 /**
  * Exception to be thrown when malformed csv data is read.
  */
-public class MalformedCsvException extends RuntimeException {
+public class CsvParseException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class MalformedCsvException extends RuntimeException {
      *
      * @param message the cause for this exception
      */
-    public MalformedCsvException(final String message) {
+    public CsvParseException(final String message) {
         super(message);
     }
 

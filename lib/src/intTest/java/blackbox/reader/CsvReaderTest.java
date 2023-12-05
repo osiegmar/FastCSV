@@ -26,9 +26,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
-import de.siegmar.fastcsv.reader.MalformedCsvException;
 import testutil.CsvRecordAssert;
 
 @SuppressWarnings({
@@ -149,7 +149,7 @@ class CsvReaderTest {
         crb.ignoreDifferentFieldCount(false);
 
         assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
-            .isInstanceOf(MalformedCsvException.class)
+            .isInstanceOf(CsvParseException.class)
             .hasMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
@@ -242,6 +242,18 @@ class CsvReaderTest {
             .endsWith("a\"b\"c", "d", "XX");
     }
 
+    // fields exceed
+
+    @Test
+    void fieldsExceed() {
+        final char[] buf = new char[16 * 1024];
+        Arrays.fill(buf, ',');
+
+        assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Maximum number of fields exceeded: %s", buf.length);
+    }
+
     // buffer exceed
 
     @Test
@@ -255,9 +267,8 @@ class CsvReaderTest {
         buf[buf.length - 1] = (byte) 'X';
 
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).iterator().next())
-            .isInstanceOf(UncheckedIOException.class)
-            .hasMessage("IOException when reading first record")
-            .rootCause().hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
                 + "Typically, this happens if quotation started but did not end within this buffer's "
                 + "maximum boundary.", buf.length);
     }
@@ -273,9 +284,8 @@ class CsvReaderTest {
         iterator.next();
 
         assertThatThrownBy(iterator::next)
-            .isInstanceOf(UncheckedIOException.class)
-            .hasMessage("IOException when reading record that started in line 2")
-            .rootCause().hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
                 + "Typically, this happens if quotation started but did not end within this buffer's "
                 + "maximum boundary.", buf.length);
     }

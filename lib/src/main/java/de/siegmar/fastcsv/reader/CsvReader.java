@@ -155,7 +155,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
                 if (firstRecordFieldCount == -1) {
                     firstRecordFieldCount = fieldCount;
                 } else if (fieldCount != firstRecordFieldCount) {
-                    throw new MalformedCsvException(
+                    throw new CsvParseException(
                         String.format("Record %d has %d fields, but first record had %d fields",
                             csvRecord.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
                 }
@@ -310,7 +310,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         }
 
         /**
-         * Defines if an {@link MalformedCsvException} should be thrown if records do contain a
+         * Defines if an {@link CsvParseException} should be thrown if records do contain a
          * different number of fields.
          *
          * @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains

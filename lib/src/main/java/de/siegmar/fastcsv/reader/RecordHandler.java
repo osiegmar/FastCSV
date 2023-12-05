@@ -3,6 +3,7 @@ package de.siegmar.fastcsv.reader;
 final class RecordHandler {
 
     private static final int INITIAL_FIELDS_SIZE = 32;
+    private static final int MAX_FIELDS_SIZE = 16 * 1024;
     private final FieldModifier fieldModifier;
 
     private int len;
@@ -44,6 +45,9 @@ final class RecordHandler {
 
     private void extendCapacity() {
         len *= 2;
+        if (len > MAX_FIELDS_SIZE) {
+            throw new CsvParseException("Maximum number of fields exceeded: " + MAX_FIELDS_SIZE);
+        }
         final String[] newFields = new String[len];
         System.arraycopy(fields, 0, newFields, 0, idx);
         fields = newFields;

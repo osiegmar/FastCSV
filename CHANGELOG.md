@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated naming (rows/lines -> records, columns -> fields, differentiate between lines and records)
 - Rename `errorOnDifferentFieldCount()` to `ignoreDifferentFieldCount()`
 - Raised the maximum field size to 16 MiB to match SUPER data type capabilities of Amazon Redshift
+- Throw `CsvParseException` instead of `IOException` when maximum field size is exceeded
+- Limit the maximum field count per record to 16,384 to avoid OutOfMemoryErrors
 
 ## [2.2.2] - 2023-05-13
 ### Added
