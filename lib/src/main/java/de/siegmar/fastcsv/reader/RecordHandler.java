@@ -1,13 +1,18 @@
 package de.siegmar.fastcsv.reader;
 
+import java.text.MessageFormat;
+
+import de.siegmar.fastcsv.util.Limits;
+
 final class RecordHandler {
 
     private static final int INITIAL_FIELDS_SIZE = 32;
-    private static final int MAX_FIELDS_SIZE = 16 * 1024;
+
     private final FieldModifier fieldModifier;
 
     private int len;
     private String[] fields;
+    private int recordSize;
     private int idx;
     private int lines = 1;
     private boolean commentMode;
@@ -41,12 +46,18 @@ final class RecordHandler {
         }
 
         fields[idx++] = value;
+        recordSize += value.length();
+        if (recordSize > Limits.MAX_RECORD_SIZE) {
+            throw new CsvParseException(MessageFormat.format(
+                "Record starting at line {0} has surpassed the maximum limit of {1} characters.",
+                startingLineNumber, Limits.MAX_RECORD_SIZE));
+        }
     }
 
     private void extendCapacity() {
         len *= 2;
-        if (len > MAX_FIELDS_SIZE) {
-            throw new CsvParseException("Maximum number of fields exceeded: " + MAX_FIELDS_SIZE);
+        if (len > Limits.MAX_FIELD_COUNT) {
+            throw new CsvParseException("Maximum number of fields exceeded: " + Limits.MAX_FIELD_COUNT);
         }
         final String[] newFields = new String[len];
         System.arraycopy(fields, 0, newFields, 0, idx);
@@ -59,6 +70,7 @@ final class RecordHandler {
         startingLineNumber += lines;
         lines = 1;
         commentMode = false;
+        recordSize = 0;
         return csvRecord;
     }
 

@@ -6,6 +6,9 @@ import static de.siegmar.fastcsv.util.Util.LF;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.text.MessageFormat;
+
+import de.siegmar.fastcsv.util.Limits;
 
 /*
  * This class contains ugly, performance optimized code - be warned!
@@ -264,7 +267,6 @@ final class RecordReader implements Closeable {
     private static class CsvBuffer implements Closeable {
         private static final int READ_SIZE = 8192;
         private static final int BUFFER_SIZE = READ_SIZE;
-        private static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         char[] buf;
         int len;
@@ -327,10 +329,12 @@ final class RecordReader implements Closeable {
 
         private static char[] extendAndRelocate(final char[] buf, final int begin) {
             final int newBufferSize = buf.length * 2;
-            if (newBufferSize > MAX_BUFFER_SIZE) {
-                throw new CsvParseException("Maximum buffer size " + MAX_BUFFER_SIZE + " is not enough "
-                    + "to read data of a single field. Typically, this happens if quotation "
-                    + "started but did not end within this buffer's maximum boundary.");
+            if (newBufferSize > Limits.MAX_FIELD_SIZE) {
+                throw new CsvParseException(MessageFormat.format("The maximum buffer size of {0} is "
+                        + "insufficient to read the data of a single field. "
+                        + "This issue typically arises when a quotation begins but does not conclude within the "
+                        + "confines of this buffer's maximum limit.",
+                    Limits.MAX_FIELD_SIZE));
             }
             final char[] newBuf = new char[newBufferSize];
             System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);

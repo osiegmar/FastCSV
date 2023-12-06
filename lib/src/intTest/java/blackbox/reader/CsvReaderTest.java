@@ -242,10 +242,10 @@ class CsvReaderTest {
             .endsWith("a\"b\"c", "d", "XX");
     }
 
-    // fields exceed
+    // field count exceed
 
     @Test
-    void fieldsExceed() {
+    void fieldCountExceed() {
         final char[] buf = new char[16 * 1024];
         Arrays.fill(buf, ',');
 
@@ -268,9 +268,7 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).iterator().next())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
-                + "Typically, this happens if quotation started but did not end within this buffer's "
-                + "maximum boundary.", buf.length);
+            .hasMessageContaining("is insufficient to read the data of a single field");
     }
 
     @Test
@@ -285,9 +283,24 @@ class CsvReaderTest {
 
         assertThatThrownBy(iterator::next)
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Maximum buffer size %s is not enough to read data of a single field. "
-                + "Typically, this happens if quotation started but did not end within this buffer's "
-                + "maximum boundary.", buf.length);
+            .hasMessageContaining("is insufficient to read the data of a single field");
+    }
+
+    // record size exceed
+
+    @Test
+    void recordSizeExceed() {
+        final int records = 10;
+        final int fieldSize = 8 * 1024 * 1024;
+        final char[] buf = new char[records * fieldSize];
+        Arrays.fill(buf, 'X');
+        for (int i = 1; i < records; i++) {
+            buf[i * fieldSize] = ',';
+        }
+
+        assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Record starting at line 1 has surpassed the maximum limit of 67.108.864 characters.");
     }
 
     // API
