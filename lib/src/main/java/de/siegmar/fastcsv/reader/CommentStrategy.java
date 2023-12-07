@@ -1,23 +1,23 @@
 package de.siegmar.fastcsv.reader;
 
 /**
- * This strategy is used for handling comments in (non RFC conforming) CSV data.
+ * This is an enumeration that defines the strategies for handling comments in CSV data that does not conform to RFC.
  */
 public enum CommentStrategy {
 
     /**
-     * Don't detect comments - handle everything as regular cell content.
+     * This strategy does not detect comments. It treats everything as regular fields.
      */
     NONE,
 
     /**
-     * Detect comments but do not return commented lines.
+     * This strategy detects comments but does not return the commented lines.
      */
     SKIP,
 
     /**
-     * Detect and return the commented lines (entire line as one field).
-     * The comment character itself will be stripped.
+     * This strategy detects and returns the commented lines. The entire line is treated as one field.
+     * The comment character itself is removed.
      */
     READ
 

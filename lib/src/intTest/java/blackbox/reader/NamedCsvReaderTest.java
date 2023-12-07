@@ -143,7 +143,7 @@ class NamedCsvReaderTest {
     void getNonExistingFieldByName2() {
         assertThatThrownBy(() -> parse("foo,bar\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
-            .hasMessage("Field 'bar' is on position 2, but current record only contains 1 fields");
+            .hasMessage("Field 'bar' is on index 2, but current record only contains 1 fields");
     }
 
     @Test

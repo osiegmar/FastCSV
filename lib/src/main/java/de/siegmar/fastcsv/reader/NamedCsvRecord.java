@@ -47,32 +47,30 @@ public final class NamedCsvRecord extends CsvRecord {
      * @see #findFields(String)
      */
     public String getField(final String name) {
-        final int fieldPos = findHeader(name);
+        final int fieldIdx = findHeaderIndex(name);
 
-        // Check if the field position is valid
-        if (fieldPos == -1) {
+        // Check if the field index is valid
+        if (fieldIdx == -1) {
             throw new NoSuchElementException(MessageFormat.format(
                 "Header does not contain a field ''{0}''. Valid names are: {1}", name, Arrays.toString(header)));
         }
-        if (fieldPos >= fields.length) {
+        if (fieldIdx >= fields.length) {
             throw new NoSuchElementException(MessageFormat.format(
-                "Field ''{0}'' is on position {1}, but current record only contains {2} fields",
-                name, fieldPos + 1, fields.length));
+                "Field ''{0}'' is on index {1}, but current record only contains {2} fields",
+                name, fieldIdx + 1, fields.length));
         }
 
         // Return the value of the field
-        return fields[fieldPos];
+        return fields[fieldIdx];
     }
 
-    // Finds the position of the first occurrence of the given header name (case-sensitive); returns -1 if not found
-    private int findHeader(final String name) {
+    // Finds the index of the first occurrence of the given header name (case-sensitive); returns -1 if not found
+    private int findHeaderIndex(final String name) {
         for (int i = 0; i < header.length; i++) {
-            final String h = header[i];
-            if (name.equals(h)) {
+            if (name.equals(header[i])) {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -89,15 +87,15 @@ public final class NamedCsvRecord extends CsvRecord {
      * @see #findFields(String)
      */
     public Optional<String> findField(final String name) {
-        final int fieldPos = findHeader(name);
+        final int fieldIdx = findHeaderIndex(name);
 
-        // Check if the field position is valid
-        if (fieldPos == -1 || fieldPos >= fields.length) {
+        // Check if the field index is valid
+        if (fieldIdx == -1 || fieldIdx >= fields.length) {
             return Optional.empty();
         }
 
         // Return the value of the field wrapped in an Optional
-        return Optional.of(fields[fieldPos]);
+        return Optional.of(fields[fieldIdx]);
     }
 
     /**
@@ -108,8 +106,8 @@ public final class NamedCsvRecord extends CsvRecord {
      * @throws NullPointerException if name is {@code null}
      */
     public List<String> findFields(final String name) {
-        final List<String> ret = new ArrayList<>();
         final int bound = header.length;
+        final List<String> ret = new ArrayList<>(bound);
         for (int i = 0; i < bound; i++) {
             if (name.equals(header[i])) {
                 ret.add(fields[i]);
