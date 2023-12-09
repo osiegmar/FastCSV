@@ -198,6 +198,8 @@ public final class CsvWriter implements Closeable {
 
     /**
      * Writes a comment line and new line character(s) at the end.
+     * <p>
+     * Note that comments are not part of the CSV standard and may not be supported by all readers.
      *
      * @param comment the comment to write. The comment character
      *                (configured by {@link CsvWriterBuilder#commentCharacter(char)}) is automatically prepended.
