@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldModifier;
 import testutil.CsvRecordAssert;
@@ -58,9 +59,12 @@ class CsvReaderModifierTest {
         crb.fieldModifier((startingLineNumber, fieldNo, comment, quotedValue, field) -> null);
 
         assertThatThrownBy(() -> crb.build("foo").stream().toList())
-            .isInstanceOf(NullPointerException.class)
-            .hasMessageStartingWith("fieldModifier returned illegal null: "
-                + "class blackbox.reader.CsvReaderModifierTest$$Lambda");
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading first record")
+            .rootCause()
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageStartingWith("fieldModifier returned illegal null: "
+                    + "class blackbox.reader.CsvReaderModifierTest$$Lambda");
     }
 
 }

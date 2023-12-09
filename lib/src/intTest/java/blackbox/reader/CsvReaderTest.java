@@ -150,7 +150,9 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record 2 has 2 fields, but first record had 1 fields");
+            .hasMessage("Exception when reading record that started in line 2")
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
     // field by index
@@ -251,7 +253,9 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Maximum number of fields exceeded: %s", buf.length);
+            .hasMessage("Exception when reading first record")
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Maximum number of fields exceeded: %d", buf.length);
     }
 
     // buffer exceed
@@ -268,7 +272,10 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).iterator().next())
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("is insufficient to read the data of a single field");
+            .hasMessageContaining("Exception when reading first record")
+            .rootCause()
+                .isInstanceOf(CsvParseException.class)
+                .hasMessageContaining("is insufficient to read the data of a single field");
     }
 
     @Test
@@ -283,7 +290,10 @@ class CsvReaderTest {
 
         assertThatThrownBy(iterator::next)
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("is insufficient to read the data of a single field");
+            .hasMessage("Exception when reading record that started in line 2")
+            .rootCause()
+                .isInstanceOf(CsvParseException.class)
+                .hasMessageContaining("is insufficient to read the data of a single field");
     }
 
     // record size exceed
@@ -300,7 +310,9 @@ class CsvReaderTest {
 
         assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record starting at line 1 has surpassed the maximum limit of 67.108.864 characters.");
+            .hasMessage("Exception when reading first record")
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of 67.108.864 characters");
     }
 
     // API
@@ -378,7 +390,9 @@ class CsvReaderTest {
     void unreadable() {
         assertThatThrownBy(() -> crb.build(new UnreadableReader()).iterator().next())
             .isInstanceOf(UncheckedIOException.class)
-            .hasMessage("IOException when reading first record");
+            .hasMessage("Exception when reading first record")
+            .hasRootCauseInstanceOf(IOException.class)
+            .hasRootCauseMessage("Cannot read");
     }
 
     // test helpers

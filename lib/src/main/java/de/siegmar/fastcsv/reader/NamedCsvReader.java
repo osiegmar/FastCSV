@@ -87,6 +87,20 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
             : new String[] {};
     }
 
+    /**
+     * Returns an iterator over elements of type {@link NamedCsvRecord}.
+     * <p>
+     * The returned iterator is not thread-safe.
+     * Don't forget to close the returned iterator when you're done.
+     * Alternatively, use {@link #stream()}.
+     * <br>
+     * This method is idempotent.
+     *
+     * @return an iterator over the named CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #stream()
+     */
     @Override
     public CloseableIterator<NamedCsvRecord> iterator() {
         if (header == null) {
@@ -95,18 +109,37 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
         return namedCsvIterator;
     }
 
+    /**
+     * Returns a {@link Spliterator} over elements of type {@link NamedCsvRecord}.
+     * <p>
+     * The returned spliterator is not thread-safe.
+     * Don't forget to invoke {@link #close()} when you're done.
+     * Alternatively, use {@link #stream()}.
+     * <br>
+     * This method is idempotent.
+     *
+     * @return a spliterator over the named CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #stream()
+     */
     @Override
     public Spliterator<NamedCsvRecord> spliterator() {
         return new CsvRecordSpliterator<>(iterator());
     }
 
     /**
-     * Creates a new sequential {@link Stream} from this instance.
+     * Returns a sequential {@link Stream} with this reader as its source.
      * <p>
-     * A close handler is registered by this method in order to close the underlying resources.
+     * The returned stream is not thread-safe.
      * Don't forget to close the returned stream when you're done.
+     * <br>
+     * This method is idempotent.
      *
-     * @return a new sequential {@link Stream}.
+     * @return a sequential stream of named CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #iterator()
      */
     public Stream<NamedCsvRecord> stream() {
         return StreamSupport.stream(spliterator(), false).onClose(() -> {

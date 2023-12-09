@@ -49,7 +49,7 @@ final class RecordHandler {
         recordSize += value.length();
         if (recordSize > Limits.MAX_RECORD_SIZE) {
             throw new CsvParseException(MessageFormat.format(
-                "Record starting at line {0} has surpassed the maximum limit of {1} characters.",
+                "Record starting at line {0} has surpassed the maximum limit of {1} characters",
                 startingLineNumber, Limits.MAX_RECORD_SIZE));
         }
     }

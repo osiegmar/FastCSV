@@ -101,23 +101,56 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         return new CsvReaderBuilder();
     }
 
+    /**
+     * Returns an iterator over elements of type {@link CsvRecord}.
+     * <p>
+     * The returned iterator is not thread-safe.
+     * Don't forget to close the returned iterator when you're done.
+     * Alternatively, use {@link #stream()}.
+     * <br>
+     * This method is idempotent.
+     *
+     * @return an iterator over the CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #stream()
+     */
     @Override
     public CloseableIterator<CsvRecord> iterator() {
         return csvRecordIterator;
     }
 
+    /**
+     * Returns a {@link Spliterator} over elements of type {@link CsvRecord}.
+     * <p>
+     * The returned spliterator is not thread-safe.
+     * Don't forget to invoke {@link #close()} when you're done.
+     * Alternatively, use {@link #stream()}.
+     * <br>
+     * This method is idempotent.
+     *
+     * @return a spliterator over the CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #stream()
+     */
     @Override
     public Spliterator<CsvRecord> spliterator() {
         return new CsvRecordSpliterator<>(csvRecordIterator);
     }
 
     /**
-     * Creates a new sequential {@link Stream} from this instance.
+     * Returns a sequential {@code Stream} with this reader as its source.
      * <p>
-     * A close handler is registered by this method in order to close the underlying resources.
+     * The returned stream is not thread-safe.
      * Don't forget to close the returned stream when you're done.
+     * <br>
+     * This method is idempotent.
      *
-     * @return a new sequential {@link Stream}.
+     * @return a sequential {@code Stream} over the CSV records.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if any other problem occurs when parsing the CSV data.
+     * @see #iterator()
      */
     public Stream<CsvRecord> stream() {
         return StreamSupport.stream(spliterator(), false)
@@ -207,18 +240,24 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             return fetchedRecord;
         }
 
+        @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
         private void fetch() {
             try {
                 fetchedRecord = fetchRow();
             } catch (final IOException e) {
-                if (fetchedRecord == null) {
-                    throw new UncheckedIOException("IOException when reading first record", e);
-                }
-
-                throw new UncheckedIOException("IOException when reading record that started in line "
-                    + (fetchedRecord.getStartingLineNumber() + 1), e);
+                throw new UncheckedIOException(buildExceptionMessage(), e);
+            } catch (final Throwable t) {
+                throw new CsvParseException(buildExceptionMessage(), t);
             }
+
             fetched = true;
+        }
+
+        private String buildExceptionMessage() {
+            return (fetchedRecord == null)
+                ? "Exception when reading first record"
+                : String.format("Exception when reading record that started in line %d",
+                    fetchedRecord.getStartingLineNumber() + 1);
         }
 
         @Override

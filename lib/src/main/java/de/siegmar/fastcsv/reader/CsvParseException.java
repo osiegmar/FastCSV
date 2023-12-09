@@ -16,4 +16,14 @@ public class CsvParseException extends RuntimeException {
         super(message);
     }
 
+    /**
+     * Construct exception with message and cause.
+     *
+     * @param message the cause for this exception
+     * @param cause the cause for this exception
+     */
+    public CsvParseException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
 }
