@@ -48,8 +48,16 @@ class NamedCsvReaderTest {
 
     @Test
     void readerToString() {
-        assertThat(NamedCsvReader.from(crb.build("h1\nd1"))).asString()
+        final NamedCsvReader csvReader = NamedCsvReader.from(crb.build("h1\nd1"));
+
+        assertThat(csvReader).asString()
             .isEqualTo("NamedCsvReader[header=null, csvReader=CsvReader["
+                + "commentStrategy=NONE, skipEmptyLines=true, ignoreDifferentFieldCount=true]]");
+
+        csvReader.getHeader();
+
+        assertThat(csvReader).asString()
+            .isEqualTo("NamedCsvReader[header=[h1], csvReader=CsvReader["
                 + "commentStrategy=NONE, skipEmptyLines=true, ignoreDifferentFieldCount=true]]");
     }
 

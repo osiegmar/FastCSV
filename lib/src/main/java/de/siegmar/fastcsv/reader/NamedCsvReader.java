@@ -159,7 +159,7 @@ public final class NamedCsvReader implements Iterable<NamedCsvRecord>, Closeable
     @Override
     public String toString() {
         return new StringJoiner(", ", NamedCsvReader.class.getSimpleName() + "[", "]")
-            .add("header=" + header)
+            .add("header=" + Arrays.toString(header))
             .add("csvReader=" + csvReader)
             .toString();
     }
