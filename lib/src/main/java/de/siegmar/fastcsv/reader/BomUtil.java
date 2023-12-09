@@ -12,19 +12,30 @@ import java.util.Optional;
 @SuppressWarnings("checkstyle:MagicNumber")
 final class BomUtil {
 
-    public static final int POTENTIAL_BOM_SIZE = 4;
+    /**
+     * The maximum number of bytes a BOM header can have.
+     */
+    static final int POTENTIAL_BOM_SIZE = 4;
 
     private BomUtil() {
     }
 
-    /*
-     * Optimized code to detect these BOM headers:
+    /**
+     * Detects the character encoding of a byte array based on the presence of a Byte Order Mark (BOM) header.
+     * The method supports the following BOM headers:
+     * <ul>
+     *   <li>UTF-8    : EF BB BF</li>
+     *   <li>UTF-16 BE: FE FF</li>
+     *   <li>UTF-16 LE: FF FE</li>
+     *   <li>UTF-32 BE: 00 00 FE FF</li>
+     *   <li>UTF-32 LE: FF FE 00 00</li>
+     * </ul>
+     * <p>
+     * See <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>
      *
-     * UTF-8      : EF BB BF
-     * UTF-16 (BE): FE FF
-     * UTF-16 (LE): FF FE
-     * UTF-32 (BE): 00 00 FE FF
-     * UTF-32 (LE): FF FE 00 00
+     * @param buf the byte array to detect the character encoding from
+     * @return an Optional containing the detected BomHeader if a BOM header is found,
+     *     or an empty Optional if no BOM header is found
      */
     @SuppressWarnings({
         "checkstyle:CyclomaticComplexity",
@@ -37,6 +48,7 @@ final class BomUtil {
         final int n = buf.length;
 
         if (n < 2) {
+            // Not enough bytes to be a BOM header
             return Optional.empty();
         }
 
@@ -68,6 +80,14 @@ final class BomUtil {
         return Optional.empty();
     }
 
+    /**
+     * Detects the character encoding of a file based on the presence of a Byte Order Mark (BOM) header.
+     *
+     * @param file the file to detect the character encoding from
+     * @return an Optional containing the detected BomHeader if a BOM header is found,
+     *     or an empty Optional if no BOM header is found
+     * @throws IOException if an I/O error occurs reading the file
+     */
     static Optional<BomHeader> detectCharset(final Path file)
         throws IOException {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
@@ -75,6 +95,15 @@ final class BomUtil {
         }
     }
 
+    /**
+     * Opens a Reader for the given file, skipping a BOM header if present.
+     * If no BOM header is present, the defaultCharset is used.
+     *
+     * @param file           the file to open a Reader for
+     * @param defaultCharset the default charset to use if no BOM header is present
+     * @return a Reader for the given file
+     * @throws IOException if an I/O error occurs opening the file
+     */
     static Reader openReader(final Path file, final Charset defaultCharset) throws IOException {
         final var bomHeader = detectCharset(file);
         final var in = Files.newInputStream(file);
