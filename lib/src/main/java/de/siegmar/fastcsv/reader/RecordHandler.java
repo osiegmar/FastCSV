@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.text.MessageFormat;
-
 import de.siegmar.fastcsv.util.Limits;
 
 final class RecordHandler {
@@ -48,8 +46,8 @@ final class RecordHandler {
         fields[idx++] = value;
         recordSize += value.length();
         if (recordSize > Limits.MAX_RECORD_SIZE) {
-            throw new CsvParseException(MessageFormat.format(
-                "Record starting at line {0} has surpassed the maximum limit of {1} characters",
+            throw new CsvParseException(String.format(
+                "Record starting at line %d has surpassed the maximum limit of %d characters",
                 startingLineNumber, Limits.MAX_RECORD_SIZE));
         }
     }

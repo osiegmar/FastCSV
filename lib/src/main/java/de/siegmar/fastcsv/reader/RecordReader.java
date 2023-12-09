@@ -6,7 +6,6 @@ import static de.siegmar.fastcsv.util.Util.LF;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
-import java.text.MessageFormat;
 
 import de.siegmar.fastcsv.util.Limits;
 
@@ -330,7 +329,7 @@ final class RecordReader implements Closeable {
         private static char[] extendAndRelocate(final char[] buf, final int begin) {
             final int newBufferSize = buf.length * 2;
             if (newBufferSize > Limits.MAX_FIELD_SIZE) {
-                throw new CsvParseException(MessageFormat.format("The maximum buffer size of {0} is "
+                throw new CsvParseException(String.format("The maximum buffer size of %d is "
                         + "insufficient to read the data of a single field. "
                         + "This issue typically arises when a quotation begins but does not conclude within the "
                         + "confines of this buffer's maximum limit.",

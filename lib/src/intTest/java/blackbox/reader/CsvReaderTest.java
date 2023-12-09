@@ -312,7 +312,7 @@ class CsvReaderTest {
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of 67.108.864 characters");
+            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of 67108864 characters");
     }
 
     // API

@@ -1,6 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,13 +50,13 @@ public final class NamedCsvRecord extends CsvRecord {
 
         // Check if the field index is valid
         if (fieldIdx == -1) {
-            throw new NoSuchElementException(MessageFormat.format(
-                "Header does not contain a field ''{0}''. Valid names are: {1}", name, Arrays.toString(header)));
+            throw new NoSuchElementException(String.format(
+                "Header does not contain a field '%s'. Valid names are: %s", name, Arrays.toString(header)));
         }
         if (fieldIdx >= fields.length) {
-            throw new NoSuchElementException(MessageFormat.format(
-                "Field ''{0}'' is on index {1}, but current record only contains {2} fields",
-                name, fieldIdx + 1, fields.length));
+            throw new NoSuchElementException(String.format(
+                "Field '%s' is on index %d, but current record only contains %d fields",
+                name, fieldIdx, fields.length));
         }
 
         // Return the value of the field
