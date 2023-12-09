@@ -105,7 +105,7 @@ public final class IndexedCsvReader implements Closeable {
     private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
         throws IOException {
         try {
-            return BomDetector.detectCharset(file);
+            return BomUtil.detectCharset(file);
         } catch (final IOException e) {
             statusListener.onError(e);
             throw e;

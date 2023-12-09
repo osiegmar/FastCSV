@@ -1,17 +1,20 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 @SuppressWarnings("checkstyle:MagicNumber")
-final class BomDetector {
+final class BomUtil {
 
     public static final int POTENTIAL_BOM_SIZE = 4;
 
-    private BomDetector() {
+    private BomUtil() {
     }
 
     /*
@@ -68,8 +71,25 @@ final class BomDetector {
     static Optional<BomHeader> detectCharset(final Path file)
         throws IOException {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
-            return detectCharset(in.readNBytes(BomDetector.POTENTIAL_BOM_SIZE));
+            return detectCharset(in.readNBytes(BomUtil.POTENTIAL_BOM_SIZE));
         }
+    }
+
+    static Reader openReader(final Path file, final Charset defaultCharset) throws IOException {
+        final var bomHeader = detectCharset(file);
+        final var in = Files.newInputStream(file);
+
+        // No BOM header found
+        if (bomHeader.isEmpty()) {
+            return new InputStreamReader(in, defaultCharset);
+        }
+
+        // Return reader with skipped BOM header
+        final int bomLength = bomHeader.get().getLength();
+        if (in.skip(bomLength) != bomLength) {
+            throw new IOException("Failed to skip BOM header");
+        }
+        return new InputStreamReader(in, bomHeader.get().getCharset());
     }
 
 }

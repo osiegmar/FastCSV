@@ -9,15 +9,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class BomDetectorTest {
+class BomUtilTest {
 
     @ParameterizedTest
     @MethodSource
     void charset(final String charset, final int len, final byte[] data) {
         if (charset == null) {
-            assertThat(BomDetector.detectCharset(data)).isEmpty();
+            assertThat(BomUtil.detectCharset(data)).isEmpty();
         } else {
-            assertThat(BomDetector.detectCharset(data))
+            assertThat(BomUtil.detectCharset(data))
                 .get()
                 .satisfies(
                     bh -> assertThat(bh.getCharset()).hasToString(charset),

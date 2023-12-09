@@ -363,7 +363,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
 
         /**
          * Defines if an optional BOM (Byte order mark) header should be detected.
-         * BOM detection only applies for direct file access and comes with a performance penalty.
+         * BOM detection only applies for direct file access.
          * <p>
          * Supported BOMs are: UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE.
          *
@@ -444,11 +444,11 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            if (detectBomHeader) {
-                return newReader(new BomInputStreamReader(Files.newInputStream(file), charset));
-            }
+            final Reader reader = detectBomHeader
+                ? BomUtil.openReader(file, charset)
+                : new InputStreamReader(Files.newInputStream(file), charset);
 
-            return newReader(new InputStreamReader(Files.newInputStream(file), charset));
+            return newReader(reader);
         }
 
         private CsvReader newReader(final Reader reader) {
