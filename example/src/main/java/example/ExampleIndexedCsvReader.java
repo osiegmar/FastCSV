@@ -3,6 +3,7 @@ package example;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +21,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 public class ExampleIndexedCsvReader {
 
     public static void main(final String[] args) throws Exception {
-        final int secondsToWrite = 3;
-        final Path tmpFile = prepareTestFile(secondsToWrite);
+        final Path tmpFile = prepareTestFile(Duration.ofSeconds(3));
 
         simple(tmpFile);
         reuseIndex(tmpFile);
@@ -29,14 +29,14 @@ public class ExampleIndexedCsvReader {
         advancedConfiguration(tmpFile);
     }
 
-    private static Path prepareTestFile(final long secondsToWrite) throws IOException {
+    private static Path prepareTestFile(final Duration timeToWrite) throws IOException {
         final Path tmpFile = createTmpFile();
 
         int record = 1;
-        final long writeDuration = System.currentTimeMillis() + (secondsToWrite * 1000);
+        final long writeUntil = System.currentTimeMillis() + timeToWrite.toMillis();
 
         try (CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
-            for (; System.currentTimeMillis() < writeDuration; record++) {
+            for (; System.currentTimeMillis() < writeUntil; record++) {
                 csv.writeRecord("record " + record, "containing standard ASCII, unicode letters öäü and emojis 😎");
             }
         }
