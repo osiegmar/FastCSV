@@ -8,6 +8,8 @@
         My custom rules
     </description>
 
+    <exclude-pattern>.*Example.*</exclude-pattern>
+
     <rule ref="category/java/bestpractices.xml">
         <exclude name="JUnitAssertionsShouldIncludeMessage"/>
         <exclude name="JUnitTestContainsTooManyAsserts"/>

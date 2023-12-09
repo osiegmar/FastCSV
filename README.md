@@ -79,12 +79,12 @@ details.
 > Although some basic checks are included in the continuous integration pipeline in order to
 > verify that the library *should* work with Android.
 
-## CsvReader Examples
+## CsvReader examples
 
 Iterative reading of some CSV data from a string
 
 ```java
-CsvReader.builder().build("foo1,bar1\r\nfoo2,bar2")
+CsvReader.builder().build("foo1,bar1\nfoo2,bar2")
     .forEach(System.out::println);
 ```
 
@@ -110,9 +110,7 @@ CsvReader.builder()
     .fieldModifier(FieldModifier.TRIM);
 ```
 
-For more examples see [CsvReaderExample.java](example/src/main/java/example/CsvReaderExample.java)
-
-## NamedCsvReader Examples
+## NamedCsvReader examples
 
 Iterative reading of some CSV data with a header
 
@@ -131,9 +129,7 @@ NamedCsvReader.from(csvReader)
     .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
 ```
 
-For more examples see [NamedCsvReaderExample.java](example/src/main/java/example/NamedCsvReaderExample.java)
-
-## IndexedCsvReader Examples
+## IndexedCsvReader examples
 
 Indexed reading of a CSV file
 
@@ -148,9 +144,7 @@ try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
 }
 ```
 
-For more examples see [IndexedCsvReaderExample.java](example/src/main/java/example/IndexedCsvReaderExample.java)
-
-## CsvWriter Examples
+## CsvWriter examples
 
 Iterative writing of some data to a writer
 
@@ -184,8 +178,9 @@ CsvWriter.builder()
     .lineDelimiter(LineDelimiter.LF);
 ```
 
-For more examples see
-[CsvWriterExample.java](example/src/main/java/example/CsvWriterExample.java).
+## More examples
+
+For more examples see [example/src/main/java/example/](example/src/main/java/example/).
 
 ## Upgrading from an older version
 
