@@ -14,8 +14,10 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-@SuppressWarnings("PMD.SystemPrintln")
-public class IndexedCsvReaderExample {
+/**
+ * Example for reading CSV data from a file using an index (non-streaming).
+ */
+public class ExampleIndexedCsvReader {
 
     public static void main(final String[] args) throws Exception {
         final int secondsToWrite = 3;
@@ -47,16 +49,8 @@ public class IndexedCsvReaderExample {
 
     private static Path createTmpFile() throws IOException {
         final Path tmpFile = Files.createTempFile("FastCSV", ".csv");
+        tmpFile.toFile().deleteOnExit();
         System.out.printf("# Prepare temporary test file %s%n", tmpFile);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Files.deleteIfExists(tmpFile);
-            } catch (final IOException e) {
-                e.printStackTrace(System.err);
-            }
-        }));
-
         return tmpFile;
     }
 
