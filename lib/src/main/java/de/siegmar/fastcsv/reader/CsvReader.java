@@ -364,6 +364,8 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         /**
          * Defines if an optional BOM (Byte order mark) header should be detected.
          * BOM detection only applies for direct file access and comes with a performance penalty.
+         * <p>
+         * Supported BOMs are: UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE.
          *
          * @param detectBomHeader if detection should be enabled (default: {@code false})
          * @return This updated object, so that additional method calls can be chained together.
