@@ -239,9 +239,8 @@ final class RecordReader implements Closeable {
                     shift++;
                     escape = true;
                     continue;
-                } else {
-                    escape = false;
                 }
+                escape = false;
             }
 
             if (shift > 0) {
