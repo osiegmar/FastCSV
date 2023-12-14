@@ -24,7 +24,7 @@ import de.siegmar.fastcsv.util.Util;
 /**
  * CSV reader implementation for indexed based access.
  * <p>
- * If no prebuild index passed in (via {@link IndexedCsvReaderBuilder#index(CsvIndex)} the constructor will initiate
+ * If no prebuild index passed in (via {@link IndexedCsvReaderBuilder#index(CsvIndex)}) the constructor will initiate
  * indexing the file.
  * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
  * The current status can be monitored via {@link IndexedCsvReaderBuilder#statusListener(StatusListener)}.
