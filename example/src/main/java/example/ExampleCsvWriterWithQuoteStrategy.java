@@ -39,7 +39,7 @@ public class ExampleCsvWriterWithQuoteStrategy {
             .build(pw)
             .writeRecord("value1", "", null, "value,4");
 
-        pw.close();
+        pw.flush();
     }
 
     // A quote strategy can be used to force quote fields that would otherwise not be quoted.
