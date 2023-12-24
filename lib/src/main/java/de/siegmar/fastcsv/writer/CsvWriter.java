@@ -181,19 +181,18 @@ public final class CsvWriter implements Closeable {
         throws IOException {
 
         int startPos = 0;
-        while (true) {
-            final int nextDelimPos = value.indexOf(quoteChar, startPos);
+        int nextDelimPos = value.indexOf(quoteChar, startPos);
 
-            if (nextDelimPos == -1) {
-                w.write(value, startPos, value.length() - startPos);
-                break;
-            }
-
-            final int len = nextDelimPos - startPos + 1;
-            w.write(value, startPos, len);
+        while (nextDelimPos != -1) {
+            // Write up to and including the delimiter
+            w.write(value, startPos, nextDelimPos - startPos + 1);
             w.write(quoteChar);
-            startPos += len;
+            startPos = nextDelimPos + 1;
+            nextDelimPos = value.indexOf(quoteChar, startPos);
         }
+
+        // Write the rest of the string
+        w.write(value, startPos, value.length() - startPos);
     }
 
     /**
@@ -229,7 +228,7 @@ public final class CsvWriter implements Closeable {
 
         int startPos = 0;
         boolean lastCharWasCR = false;
-        for (int i = 0; i < comment.length(); i++) {
+        for (int i = 0; i < length; i++) {
             final char c = comment.charAt(i);
             if (c == CR) {
                 final int len = i - startPos;
