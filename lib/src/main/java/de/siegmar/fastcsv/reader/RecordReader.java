@@ -60,34 +60,37 @@ final class RecordReader implements Closeable {
         this.cChar = commentCharacter;
     }
 
+    @SuppressWarnings("checkstyle:ReturnCount")
     boolean fetchAndRead() throws IOException {
         if (finished) {
+            // no more data available
             return false;
         }
 
-        boolean fetched = true;
         do {
-            if (csvBuffer.len == csvBuffer.pos) {
-                // cursor reached current EOD -- need to fetch
-                if (csvBuffer.fetchData()) {
-                    finished = true;
+            if (csvBuffer.len == csvBuffer.pos && !csvBuffer.fetchData()) {
+                // buffer is processed and no more data available
+                finished = true;
 
-                    // reached end of stream
-                    if (csvBuffer.begin < csvBuffer.pos || recordHandler.isCommentMode()) {
-                        materialize(csvBuffer.buf, csvBuffer.begin,
-                            csvBuffer.pos - csvBuffer.begin, status, qChar);
-                    } else if ((status & STATUS_NEW_FIELD) != 0) {
-                        recordHandler.add("", false);
-                    } else {
-                        fetched = false;
-                    }
-
-                    break;
+                if (csvBuffer.begin < csvBuffer.pos) {
+                    // we have unconsumed data in the buffer
+                    materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos - csvBuffer.begin, status, qChar);
+                    return true;
                 }
+
+                if ((status & STATUS_NEW_FIELD) != 0 || (status & STATUS_COMMENTED_RECORD) != 0) {
+                    // last character was a field separator or comment character
+                    recordHandler.add("", false);
+                    return true;
+                }
+
+                // no data left in buffer
+                return false;
             }
         } while (consume(recordHandler, csvBuffer.buf, csvBuffer.len));
 
-        return fetched;
+        // we read data (and passed it to the record handler)
+        return true;
     }
 
     @SuppressWarnings("PMD.EmptyIfStmt")
@@ -287,12 +290,12 @@ final class RecordReader implements Closeable {
         /**
          * Reads data from the underlying reader and manages the local buffer.
          *
-         * @return {@code true}, if EOD reached.
+         * @return {@code true}, if data was fetched, {@code false} if the end of the stream was reached
          * @throws IOException if a read error occurs
          */
         private boolean fetchData() throws IOException {
             if (reader == null) {
-                return true;
+                return false;
             }
 
             if (begin < pos) {
@@ -319,10 +322,10 @@ final class RecordReader implements Closeable {
 
             final int cnt = reader.read(buf, pos, READ_SIZE);
             if (cnt == -1) {
-                return true;
+                return false;
             }
             len = pos + cnt;
-            return false;
+            return true;
         }
 
         private static char[] extendAndRelocate(final char[] buf, final int begin) {

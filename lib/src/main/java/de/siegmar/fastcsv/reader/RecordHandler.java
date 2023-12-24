@@ -87,10 +87,6 @@ final class RecordHandler {
         commentMode = true;
     }
 
-    public boolean isCommentMode() {
-        return commentMode;
-    }
-
     public void incLines() {
         lines++;
     }
