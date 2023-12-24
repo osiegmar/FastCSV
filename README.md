@@ -72,8 +72,8 @@ See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for detai
 
 ## Requirements
 
-- for 3.x version: Java 11 (Android 13 / API level 33)
-- for 2.x version: Java 8 (Android 8 / API level 26)
+- for 3.x version: Java ⩾ 11 (Android 13 / API level 33)
+- for 2.x version: Java ⩾ 8 (Android 8 / API level 26)
 
 > :bulb: Android is not Java and is not officially supported.
 > Nevertheless, some basic checks are included in the continuous integration pipeline to
