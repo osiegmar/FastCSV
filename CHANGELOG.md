@@ -6,19 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2023-??-??
 ### Added
+- IndexedCsvReader for random access to CSV files
+- FieldModifier for modifying fields while reading CSV files
+- Allow custom quote strategies for CsvWriter
 - Add support for different field count for NamedCsvReader
-- Metadata for OSGi capability
 - Support for optional BOM header when reading CSV files
 - Method `NamedCsvRecord.findField` for optional field access
+- Metadata for OSGi capability
 
 ### Changed
 - Updated from Java 8 to Java 11
 - Updated naming (rows/lines -> records, columns -> fields, differentiate between lines and records)
 - Rename `errorOnDifferentFieldCount()` to `ignoreDifferentFieldCount()`
-- Raised the maximum field size to 16 MiB to match SUPER data type capabilities of Amazon Redshift
 - Throw `CsvParseException` instead of `IOException` when maximum field size is exceeded
+- NamedCsvRecord extends CsvRecord and provides more access methods
+- Raised the maximum field size to 16 MiB to match SUPER data type capabilities of Amazon Redshift
 - Limit the maximum field count per record to 16,384 to avoid OutOfMemoryErrors
 - Limit the maximum record size to four times the maximum field size to avoid OutOfMemoryErrors
+- Several performance improvements
+- Improved documentation and error messages
 
 ## [2.2.2] - 2023-05-13
 ### Added
