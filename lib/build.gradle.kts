@@ -142,7 +142,7 @@ publishing {
 
             pom {
                 name = "FastCSV"
-                description = "Ultra fast and simple RFC 4180 compliant CSV library."
+                description = "Lightning-fast, dependency-free CSV library that conforms to RFC standards."
                 url = "https://github.com/osiegmar/FastCSV"
                 licenses {
                     license {

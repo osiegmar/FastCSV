@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  FastCSV is an ultra-fast, dependency-free and RFC-compliant CSV library for Java.
+  FastCSV is a lightning-fast, dependency-free CSV library for Java that conforms to RFC standards.
 </p>
 
 <p align="center">
@@ -16,10 +16,10 @@
 
 ------
 
-The primary use cases of FastCSV are:
+The primary use cases of FastCSV include:
 
-- in big data applications: read and write data on a massive scale
-- in small data applications: a lightweight library without any further dependencies
+- In *big data* applications: efficiently reading and writing data on a massive scale.
+- In *small data* applications: serving as a lightweight library without additional dependencies.
 
 ## Benchmark & Compatibility
 
@@ -28,9 +28,9 @@ A selected benchmark from the
 
 ![Benchmark](benchmark.png "Benchmark")
 
-While maintaining high performance, FastCSV is a strict RFC 4180 CSV writer but also able
-to read garbled CSV data (to some degree). See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for
-details.
+While maintaining high performance, FastCSV serves as a strict RFC 4180 CSV writer while
+also exhibiting the ability to read somewhat garbled CSV data.
+See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for details.
 
 ## Features
 
@@ -76,7 +76,7 @@ details.
 - for 2.x version: Java 8 (Android 8 / API level 26)
 
 > :bulb: Android is not Java and is not officially supported.
-> Although some basic checks are included in the continuous integration pipeline in order to
+> Nevertheless, some basic checks are included in the continuous integration pipeline to
 > verify that the library *should* work with Android.
 
 ## CsvReader examples
@@ -91,7 +91,7 @@ CsvReader.builder().build("foo1,bar1\nfoo2,bar2")
 Iterative reading of a CSV file
 
 ```java
-try (CsvReader csv = CsvReader.builder().build(path)) {
+try (CsvReader csv = CsvReader.builder().build(file)) {
     csv.forEach(System.out::println);
 }
 ```
@@ -160,7 +160,7 @@ System.out.println(sw);
 Iterative writing of a CSV file
 
 ```java
-try (CsvWriter csv = CsvWriter.builder().build(path)) {
+try (CsvWriter csv = CsvWriter.builder().build(file)) {
     csv
         .writeRecord("header1", "header2")
         .writeRecord("value1", "value2");
