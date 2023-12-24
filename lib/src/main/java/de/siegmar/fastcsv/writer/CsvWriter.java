@@ -227,35 +227,33 @@ public final class CsvWriter implements Closeable {
         final int length = comment.length();
 
         int startPos = 0;
-        boolean lastCharWasCR = false;
+        int lastChar = 0;
         for (int i = 0; i < length; i++) {
             final char c = comment.charAt(i);
             if (c == CR) {
-                final int len = i - startPos;
-                writer.write(comment, startPos, len);
-                writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
-                writer.write(commentCharacter);
-                startPos += len + 1;
-                lastCharWasCR = true;
+                writeFragment(comment, i, startPos);
+                startPos = i + 1;
             } else if (c == LF) {
-                if (lastCharWasCR) {
-                    lastCharWasCR = false;
-                    startPos++;
-                } else {
-                    final int len = i - startPos;
-                    writer.write(comment, startPos, len);
-                    writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
-                    writer.write(commentCharacter);
-                    startPos += len + 1;
+                if (lastChar != CR) {
+                    writeFragment(comment, i, startPos);
                 }
-            } else {
-                lastCharWasCR = false;
+                startPos = i + 1;
             }
+
+            lastChar = c;
         }
 
         if (length > startPos) {
             writer.write(comment, startPos, length - startPos);
         }
+    }
+
+    private void writeFragment(final String comment, final int i, final int startPos) throws IOException {
+        if (i > startPos) {
+            writer.write(comment, startPos, i - startPos);
+        }
+        writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
+        writer.write(commentCharacter);
     }
 
     private void endRecord() throws IOException {
