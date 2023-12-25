@@ -210,7 +210,7 @@ public final class IndexedCsvReader implements Closeable {
             raf.seek(page.offset());
             recordReader.resetBuffer(page.startingLineNumber());
 
-            for (int i = 0; i < pageSize && recordReader.fetchAndRead(); i++) {
+            for (int i = 0; i < pageSize && recordReader.read(); i++) {
                 ret.add(recordHandler.buildAndReset());
             }
 

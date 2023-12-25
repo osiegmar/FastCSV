@@ -167,8 +167,8 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         "PMD.AvoidBranchingStatementAsLastInLoop",
         "PMD.AssignmentInOperand"
     })
-    private CsvRecord fetchRow() throws IOException {
-        while (recordReader.fetchAndRead()) {
+    private CsvRecord fetchRecord() throws IOException {
+        while (recordReader.read()) {
             final CsvRecord csvRecord = recordHandler.buildAndReset();
 
             // skip commented records
@@ -243,7 +243,7 @@ public final class CsvReader implements Iterable<CsvRecord>, Closeable {
         @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
         private void fetch() {
             try {
-                fetchedRecord = fetchRow();
+                fetchedRecord = fetchRecord();
             } catch (final IOException e) {
                 throw new UncheckedIOException(buildExceptionMessage(), e);
             } catch (final Throwable t) {

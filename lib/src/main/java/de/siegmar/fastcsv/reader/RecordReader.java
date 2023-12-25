@@ -61,7 +61,7 @@ final class RecordReader implements Closeable {
     }
 
     @SuppressWarnings("checkstyle:ReturnCount")
-    boolean fetchAndRead() throws IOException {
+    boolean read() throws IOException {
         if (finished) {
             // no more data available
             return false;
