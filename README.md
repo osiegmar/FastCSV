@@ -34,14 +34,17 @@ See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for detai
 
 ## Features
 
-### Library specific
+As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with a wide range of features:
 
-- Ultra fast
-- Small footprint
-- Zero runtime dependencies
-- Null-free
-- Works with GraalVM Native Image
-- OSGi capable
+- Crafted with natural intelligence, :heart:, and AI assistance :sparkles:
+- Enables ultra-fast reading and writing of CSV data
+- Has zero runtime dependencies
+- Maintains a small footprint
+- Provides a null-free and developer-friendly API
+- Compatible with GraalVM Native Image
+- Delivered as an OSGi-compliant bundle
+- Actively developed and maintained
+- Well-tested and documented
 
 ### CSV specific
 
@@ -49,26 +52,26 @@ See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for detai
     - Newline and field separator characters in fields
     - Quote escaping
 - Configurable field separator
-- Support for line endings CRLF (Windows), CR (old macOS) and LF (Unix)
-- Unicode support
+- Supports line endings `CRLF` (Windows), `LF` (Unix) and `CR` (old macOS)
+- Supports unicode characters
 
 ### Reader specific
 
-- Support reading of some non-compliant (real world) data
-- Preserving line break character(s) within fields
-- Preserving the starting line number (even with skipped and multi line records) –
-  helpful for error messages
-- Auto-detection of line delimiters (can also be mixed)
+- Supports reading of some non-compliant (real-world) data
+- Preserves line break character(s) within fields
+- Preserves the starting line number (even with skipped and multi-line records) – helpful for error messages
+- Auto-detection of line delimiters (`CRLF`, `LF`, or `CR` – can also be mixed)
 - Configurable data validation
-- Support for (optional) header records (get field based on field name)
-- Support for skipping empty records
-- Support for commented lines (skipping & reading) and configurable comment character
-- BOM support (UTF-8, UTF-16 and UTF-32 with little- or big-endian)
+- Supports (optional) header records (get field based on field name)
+- Supports skipping empty records
+- Supports commented lines (skipping & reading) with configurable comment character
+- Configurable field modifiers (e.g., to trim fields)
+- BOM support (UTF-8, UTF-16 LE/BE, UTF-32 LE/BE)
 
 ### Writer specific
 
-- Support for multiple quote strategies to differentiate between empty and null
-- Support for writing comments with proper quotation if needed
+- Supports flexible quoting strategies (e.g., to differentiate between empty and null)
+- Supports writing comments
 
 ## Requirements
 
