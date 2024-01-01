@@ -1,52 +1,39 @@
 package de.siegmar.fastcsv.reader;
 
-import java.util.Locale;
-
 /**
- * Implementations of this class are used to modify fields before they get stored in {@link CsvRecord}.
- * <p>
- * {@snippet :
- * var fields = CsvReader.builder()
- *     .fieldModifier(FieldModifier.TRIM.andThen(FieldModifier.upper(Locale.ENGLISH)))
- *     .build("  foo   ,   bar")
- *     .stream()
- *     .collect(Collectors.toList());
+ * Implementations of this class are used to modify fields before they are passed to the {@link CsvCallbackHandler}
+ * and finally stored in a record.
  *
- * // fields would be: "FOO" and "BAR"
- *}
- *
- * @see de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#fieldModifier(FieldModifier)
+ * @see SimpleFieldModifier
+ * @see FieldModifiers
+ * @see CsvReader.CsvReaderBuilder#fieldModifier(FieldModifier)
  */
 public interface FieldModifier {
 
     /**
-     * Modifier that modifies the field value with {@link String#trim()}.
-     */
-    FieldModifier TRIM = (startingLineNumber, fieldIdx, comment, quoted, field) -> field.trim();
-
-    /**
-     * Modifier that modifies the field value with {@link String#strip()}.
-     */
-    FieldModifier STRIP = (startingLineNumber, fieldIdx, comment, quoted, field) -> field.strip();
-
-    /**
-     * Builds modifier that modifies the field value with {@link String#toLowerCase(Locale)}.
+     * Gets called for every single field (that is not a comment).
+     * Default implementation returns the field as is.
      *
-     * @param locale use the case transformation rules for this locale
-     * @return a new field modifier that converts the input to lower case.
+     * @param startingLineNumber the starting line number (starting with 1)
+     * @param fieldIdx           the field index (starting with 0)
+     * @param quoted             {@code true} if the field was enclosed by the defined quote characters
+     * @param field              the field value, never {@code null}
+     * @return the modified field value (must not be {@code null})
      */
-    static FieldModifier lower(final Locale locale) {
-        return (startingLineNumber, fieldIdx, comment, quoted, field) -> field.toLowerCase(locale);
+    default String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted, final String field) {
+        return field;
     }
 
     /**
-     * Builds modifier that modifies the field value with {@link String#toUpperCase(Locale)}.
+     * Gets called for every comment.
+     * Default implementation returns the field as is.
      *
-     * @param locale use the case transformation rules for this locale
-     * @return a new field modifier that converts the input to upper case.
+     * @param startingLineNumber the starting line number (starting with 1)
+     * @param field              the field value (comment), never {@code null}
+     * @return the modified field value (must not be {@code null})
      */
-    static FieldModifier upper(final Locale locale) {
-        return (startingLineNumber, fieldIdx, comment, quoted, field) -> field.toUpperCase(locale);
+    default String modifyComment(final long startingLineNumber, final String field) {
+        return field;
     }
 
     /**
@@ -56,21 +43,20 @@ public interface FieldModifier {
      * @return a composed field modifier that first applies this modifier and then applies the after modifier
      */
     default FieldModifier andThen(final FieldModifier after) {
-        return (startingLineNumber, fieldIdx, comment, quoted, field) ->
-            after.modify(startingLineNumber, fieldIdx, comment, quoted,
-                modify(startingLineNumber, fieldIdx, comment, quoted, field));
-    }
+        return new FieldModifier() {
+            @Override
+            public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,
+                                 final String field) {
+                return after.modify(startingLineNumber, fieldIdx, quoted,
+                    FieldModifier.this.modify(startingLineNumber, fieldIdx, quoted, field));
+            }
 
-    /**
-     * The actual modify method. Gets called for every single field.
-     *
-     * @param startingLineNumber the starting line number (starting with 1)
-     * @param fieldIdx           the field index (starting with 0)
-     * @param comment            {@code true} if the field is actually a comment record
-     * @param quoted             {@code true} if the field was enclosed by the defined quote characters
-     * @param field              the field value, never {@code null}
-     * @return the modified field value (must not be {@code null})
-     */
-    String modify(long startingLineNumber, int fieldIdx, boolean comment, boolean quoted, String field);
+            @Override
+            public String modifyComment(final long startingLineNumber, final String field) {
+                return after.modifyComment(startingLineNumber,
+                    FieldModifier.this.modifyComment(startingLineNumber, field));
+            }
+        };
+    }
 
 }

@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 @SuppressWarnings("PMD.CloseResource")
@@ -32,7 +33,7 @@ class CsvReaderLargerDataTest {
 
     @Test
     void largerData() {
-        final CsvReader reader = CsvReader.builder()
+        final CsvReader<CsvRecord> reader = CsvReader.builder()
             .build(new StringReader(createSampleCSV()));
 
         assertThat(reader.stream())

@@ -13,7 +13,7 @@
   - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning)
   - `getOriginalLineNumber` is now `getStartingLineNumber`
   - `MalformedCsvException` is now `CsvParseException` and is thrown instead of `IOException` for non-IO related errors
-  - `NamedCsvReader` now needs an `CsvReader` as input (`NamedCsvReader.builder().from(csvReader)`) to reduce duplication of code
+  - `NamedCsvReader` replaced by `CsvReader` with `CsvCallbackHandlers`
   - Limit the maximum field count per record to 16,384 to avoid OutOfMemoryErrors
   - Limit the maximum record size to four times the maximum field size to avoid OutOfMemoryErrors
 

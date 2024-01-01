@@ -22,14 +22,14 @@ public class ExampleCsvReaderWithFileInput {
         final Path tmpFile = prepareTestFile();
 
         System.out.println("Reading data via for-each loop:");
-        try (CsvReader csv = CsvReader.builder().build(tmpFile)) {
+        try (CsvReader<CsvRecord> csv = CsvReader.builder().build(tmpFile)) {
             for (final CsvRecord csvRecord : csv) {
                 System.out.println(csvRecord.getFields());
             }
         }
 
         System.out.println("Reading data via forEach lambda:");
-        try (CsvReader csv = CsvReader.builder().build(tmpFile)) {
+        try (CsvReader<CsvRecord> csv = CsvReader.builder().build(tmpFile)) {
             csv.forEach(System.out::println);
         }
 

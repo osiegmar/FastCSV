@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import de.siegmar.fastcsv.reader.FieldModifier;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import testutil.CsvRecordAssert;
 
@@ -23,7 +23,7 @@ class IndexedCsvReaderModifierTest {
 
     @Test
     void trim() throws IOException {
-        crb.fieldModifier(FieldModifier.TRIM);
+        crb.fieldModifier(FieldModifiers.TRIM);
 
         final var file = Files.writeString(tmpDir.resolve("indexed_field_modifier_test.csv"),
             "foo  ,  bar",

@@ -9,24 +9,26 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
+import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.CsvRecord;
 
 public class FastCsvReadBenchmark {
 
     @Benchmark
-    public CsvRecord read(final ReadState state) {
+    public String[] read(final ReadState state) {
         return state.it.next();
     }
 
     @State(Scope.Benchmark)
     public static class ReadState {
 
-        private CloseableIterator<CsvRecord> it;
+        private CloseableIterator<String[]> it;
 
         @Setup
         public void setup() {
-            it = CsvReader.builder().build(new InfiniteDataReader(CsvConstants.DATA)).iterator();
+            it = CsvReader.builder()
+                .build(new InfiniteDataReader(CsvConstants.DATA), CsvCallbackHandlers.ofStringArray())
+                .iterator();
         }
 
         @TearDown

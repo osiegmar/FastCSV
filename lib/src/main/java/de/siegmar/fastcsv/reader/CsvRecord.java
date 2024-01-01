@@ -18,8 +18,6 @@ import java.util.StringJoiner;
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
 public class CsvRecord {
 
-    private static final String[] EMPTY = {""};
-
     /**
      * The starting line number (starting with 1).
      *
@@ -45,21 +43,11 @@ public class CsvRecord {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     final boolean comment;
 
-    CsvRecord(final long startingLineNumber, final boolean comment) {
-        this(startingLineNumber, EMPTY, comment);
-    }
-
     CsvRecord(final long startingLineNumber, final String[] fields,
               final boolean comment) {
         this.startingLineNumber = startingLineNumber;
         this.fields = fields;
         this.comment = comment;
-    }
-
-    CsvRecord(final CsvRecord original) {
-        startingLineNumber = original.startingLineNumber;
-        fields = original.fields;
-        comment = original.comment;
     }
 
     /**
@@ -91,6 +79,11 @@ public class CsvRecord {
 
     /**
      * Retrieves the value of a field based on its index, with indexing starting from 0.
+     * <p>
+     * There is always at least one field, even if the line was empty.
+     * <p>
+     * If this records holds a comment, the comment is returned by calling this method with index 0. The comment
+     * character is not included in the returned value.
      *
      * @param index index of the field to return
      * @return field value, never {@code null}
@@ -102,6 +95,9 @@ public class CsvRecord {
 
     /**
      * Retrieves all fields of this record as an unmodifiable list.
+     * <p>
+     * The returned list has a minimum size of 1, even if the line was empty.
+     * For empty lines the first field is an empty string.
      *
      * @return all fields of this record, never {@code null}
      */
@@ -111,6 +107,8 @@ public class CsvRecord {
 
     /**
      * Obtains the count of fields in this record.
+     * <p>
+     * The minimum number of fields is 1, even if the line was empty.
      *
      * @return the number of fields of this record
      * @see CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)
@@ -121,23 +119,14 @@ public class CsvRecord {
 
     /**
      * Indicates whether the record is a commented record.
+     * <p>
+     * Retrieve the comment by calling {@link #getField(int)} with index 0.
      *
      * @return {@code true} if the record is a commented record
      * @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
      */
     public boolean isComment() {
         return comment;
-    }
-
-    /**
-     * Indicates whether the record is considered empty, signifying that it contains only a single field with an empty
-     * string.
-     *
-     * @return {@code true} if the record is an empty record
-     * @see CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)
-     */
-    public boolean isEmpty() {
-        return fields == EMPTY;
     }
 
     @Override

@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
-import de.siegmar.fastcsv.writer.QuoteStrategy;
+import de.siegmar.fastcsv.writer.QuoteStrategies;
 
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 class CsvWriterTest {
@@ -70,7 +70,7 @@ class CsvWriterTest {
 
     @Test
     void emptyQuote() {
-        crw.quoteStrategy(QuoteStrategy.EMPTY);
+        crw.quoteStrategy(QuoteStrategies.EMPTY);
         assertThat(write("foo", null, "bar")).isEqualTo("foo,,bar\n");
         assertThat(write("foo", "", "bar")).isEqualTo("foo,\"\",bar\n");
         assertThat(write("foo", ",", "bar")).isEqualTo("foo,\",\",bar\n");
@@ -104,14 +104,14 @@ class CsvWriterTest {
 
     @Test
     void alwaysQuoteText() {
-        crw.quoteStrategy(QuoteStrategy.ALWAYS);
+        crw.quoteStrategy(QuoteStrategies.ALWAYS);
         assertThat(write("a", "b,c", "d\ne", "f\"g", "", null))
             .isEqualTo("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",\"\",\"\"\n");
     }
 
     @Test
     void alwaysQuoteTextIgnoreEmpty() {
-        crw.quoteStrategy(QuoteStrategy.NON_EMPTY);
+        crw.quoteStrategy(QuoteStrategies.NON_EMPTY);
         assertThat(write("a", "b,c", "d\ne", "f\"g", "", null))
             .isEqualTo("\"a\",\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
     }
@@ -193,7 +193,7 @@ class CsvWriterTest {
         final CsvWriter writer = CsvWriter.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
-            .quoteStrategy(QuoteStrategy.ALWAYS)
+            .quoteStrategy(QuoteStrategies.ALWAYS)
             .lineDelimiter(LineDelimiter.CRLF)
             .build(new StringWriter());
 

@@ -1,6 +1,5 @@
 package example;
 
-import java.io.IOException;
 import java.io.StringWriter;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -10,7 +9,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
  */
 public class ExampleCsvWriterWithComments {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         final StringWriter sw = new StringWriter();
         CsvWriter.builder().build(sw)
             .writeComment("A comment can be placed")

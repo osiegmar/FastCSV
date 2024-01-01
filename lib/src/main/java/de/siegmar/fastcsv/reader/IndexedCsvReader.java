@@ -51,7 +51,7 @@ public final class IndexedCsvReader implements Closeable {
     private final char commentCharacter;
     private final int pageSize;
     private final RandomAccessFile raf;
-    private final RecordHandler recordHandler;
+    private final CsvRecordHandler csvRecordHandler;
     private final RecordReader recordReader;
     private final CsvIndex csvIndex;
 
@@ -73,7 +73,7 @@ public final class IndexedCsvReader implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
-        recordHandler = new RecordHandler(fieldModifier);
+        csvRecordHandler = new CsvRecordHandler();
         this.pageSize = pageSize;
 
         // Detect potential BOM and use the detected charset
@@ -97,7 +97,7 @@ public final class IndexedCsvReader implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        recordReader = new RecordReader(recordHandler,
+        recordReader = new RecordReader(csvRecordHandler, fieldModifier,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
             fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
     }
@@ -208,10 +208,10 @@ public final class IndexedCsvReader implements Closeable {
         final List<CsvRecord> ret = new ArrayList<>(pageSize);
         synchronized (raf) {
             raf.seek(page.offset());
-            recordReader.resetBuffer(page.startingLineNumber());
+            recordReader.reset(page.startingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && recordReader.read(); i++) {
-                ret.add(recordHandler.buildAndReset());
+                ret.add(csvRecordHandler.buildRecord());
             }
 
             return ret;
@@ -267,7 +267,8 @@ public final class IndexedCsvReader implements Closeable {
          * Sets the {@code fieldSeparator} used when reading CSV data.
          *
          * @param fieldSeparator the field separator character (default: {@code ,} - comma).
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder fieldSeparator(final char fieldSeparator) {
             checkControlCharacter(fieldSeparator);
@@ -280,7 +281,8 @@ public final class IndexedCsvReader implements Closeable {
          *
          * @param quoteCharacter the character used to enclose fields
          *                       (default: {@code "} - double quotes).
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             checkControlCharacter(quoteCharacter);
@@ -293,7 +295,8 @@ public final class IndexedCsvReader implements Closeable {
          * (default: {@link CommentStrategy#NONE} as comments are not defined in RFC 4180).
          *
          * @param commentStrategy the strategy for handling comments.
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          * @throws IllegalArgumentException if {@link CommentStrategy#SKIP} is passed, as this is not supported
          * @see #commentCharacter(char)
          */
@@ -308,7 +311,8 @@ public final class IndexedCsvReader implements Closeable {
          * Sets the {@code commentCharacter} used to comment lines.
          *
          * @param commentCharacter the character used to comment lines (default: {@code #} - hash)
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          * @see #commentStrategy(CommentStrategy)
          */
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
@@ -322,7 +326,8 @@ public final class IndexedCsvReader implements Closeable {
          * By default, no field modifier is used.
          *
          * @param fieldModifier the modifier to use.
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
             this.fieldModifier = fieldModifier;
@@ -333,7 +338,8 @@ public final class IndexedCsvReader implements Closeable {
          * Sets the {@code statusListener} to listen for indexer status updates.
          *
          * @param statusListener the status listener.
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder statusListener(final StatusListener statusListener) {
             this.statusListener = statusListener;
@@ -344,7 +350,8 @@ public final class IndexedCsvReader implements Closeable {
          * Sets a prebuilt index that should be used for accessing the file.
          *
          * @param csvIndex a prebuilt index
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder index(final CsvIndex csvIndex) {
             this.csvIndex = csvIndex;
@@ -356,7 +363,8 @@ public final class IndexedCsvReader implements Closeable {
          * (default: {@value DEFAULT_PAGE_SIZE}).
          *
          * @param pageSize the maximum size of pages.
-         * @return This updated object, so that additional method calls can be chained together.
+         * @return This updated object, allowing additional method calls to be chained together.
+
          */
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
             Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE,

@@ -105,8 +105,22 @@ class CsvReaderBuilderTest {
     }
 
     @Test
+    void pathCharset(@TempDir final Path tempDir) throws IOException {
+        final Path file = tempDir.resolve("fastcsv.csv");
+        Files.write(file, DATA.getBytes(UTF_8));
+
+        try (Stream<CsvRecord> stream = crb.build(file, UTF_8).stream()) {
+            assertThat(stream)
+                .singleElement(CSV_RECORD)
+                .isStartingLineNumber(1)
+                .isNotComment()
+                .fields().isEqualTo(EXPECTED);
+        }
+    }
+
+    @Test
     void chained() {
-        final CsvReader reader = CsvReader.builder()
+        final CsvReader<CsvRecord> reader = CsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)

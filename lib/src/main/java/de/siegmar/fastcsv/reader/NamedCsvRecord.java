@@ -2,6 +2,7 @@ package de.siegmar.fastcsv.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -15,10 +16,7 @@ import java.util.StringJoiner;
  * Represents an immutable CSV record with named (and indexed) fields.
  * <p>
  * The field values are never {@code null}. Empty fields are represented as empty strings.
- * <p>
- * Named CSV records are created by {@link NamedCsvReader}.
  *
- * @see NamedCsvReader
  * @see CsvReader
  */
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
@@ -26,9 +24,28 @@ public final class NamedCsvRecord extends CsvRecord {
 
     private final String[] header;
 
-    NamedCsvRecord(final String[] header, final CsvRecord csvRecord) {
-        super(csvRecord);
+    @SuppressWarnings("PMD.UseVarargs")
+    NamedCsvRecord(final long startingLineNumber, final String[] fields, final boolean comment,
+                   final String[] header) {
+        super(startingLineNumber, fields, comment);
         this.header = header;
+    }
+
+    /**
+     * Retrieves the header names of this record.
+     * <p>
+     * The header names are returned in the order they appear in the CSV file.
+     * <p>
+     * Note that the header names are not necessarily unique.
+     * If you need to collect all fields with the same name (duplicate header), use {@link #getFieldsAsMapList()}.
+     * <p>
+     * Note that records for commented lines ({@link #isComment()}) do not have an empty header.
+     * To retrieve the comment value, user {@link #getField(int)} with index 0.
+     *
+     * @return the header names, never {@code null}
+     */
+    public List<String> getHeader() {
+        return Collections.unmodifiableList(Arrays.asList(header));
     }
 
     /**

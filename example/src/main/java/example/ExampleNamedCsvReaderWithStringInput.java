@@ -1,7 +1,7 @@
 package example;
 
+import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvReader;
 
 /**
  * Example for reading CSV data with a header.
@@ -12,7 +12,7 @@ public class ExampleNamedCsvReaderWithStringInput {
 
     public static void main(final String[] args) {
         System.out.println("Field 'header2' of each record:");
-        NamedCsvReader.from(CsvReader.builder().build(DATA))
+        CsvReader.builder().build(DATA, CsvCallbackHandlers.ofNamedCsvRecord())
             .forEach(rec -> System.out.println(rec.getField("header2")));
     }
 

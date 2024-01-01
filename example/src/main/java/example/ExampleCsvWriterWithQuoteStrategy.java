@@ -1,10 +1,10 @@
 package example;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.QuoteStrategies;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 
 /**
@@ -12,24 +12,24 @@ import de.siegmar.fastcsv.writer.QuoteStrategy;
  */
 public class ExampleCsvWriterWithQuoteStrategy {
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         final PrintWriter pw = new PrintWriter(System.out, false, StandardCharsets.UTF_8);
 
         pw.println("Quote always");
         CsvWriter.builder()
-            .quoteStrategy(QuoteStrategy.ALWAYS)
+            .quoteStrategy(QuoteStrategies.ALWAYS)
             .build(pw)
             .writeRecord("value1", "", null, "value,4");
 
         pw.println("Quote non-empty");
         CsvWriter.builder()
-            .quoteStrategy(QuoteStrategy.NON_EMPTY)
+            .quoteStrategy(QuoteStrategies.NON_EMPTY)
             .build(pw)
             .writeRecord("value1", "", null, "value,4");
 
         pw.println("Quote empty");
         CsvWriter.builder()
-            .quoteStrategy(QuoteStrategy.EMPTY)
+            .quoteStrategy(QuoteStrategies.EMPTY)
             .build(pw)
             .writeRecord("value1", "", null, "value,4");
 

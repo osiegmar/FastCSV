@@ -45,6 +45,11 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return new MapAssert<>(actual.getFieldsAsMapList());
     }
 
+    public StringAssert field(final int index) {
+        isNotNull();
+        return new StringAssert(actual.getField(index));
+    }
+
     public StringAssert field(final String name) {
         isNotNull();
         return new StringAssert(actual.getField(name));
@@ -58,6 +63,29 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
     public ListAssert<String> findFields(final String name) {
         isNotNull();
         return Assertions.assertThat(actual.findFields(name));
+    }
+
+    public NamedCsvRecordAssert isComment(final boolean comment) {
+        isNotNull();
+        if (actual.isComment() != comment) {
+            failWithMessage("Expected comment to be <%b> but was <%b>",
+                comment, actual.isComment());
+        }
+
+        return this;
+    }
+
+    public NamedCsvRecordAssert isComment() {
+        return isComment(true);
+    }
+
+    public NamedCsvRecordAssert isNotComment() {
+        return isComment(false);
+    }
+
+    public ListAssert<String> header() {
+        isNotNull();
+        return Assertions.assertThat(actual.getHeader());
     }
 
 }

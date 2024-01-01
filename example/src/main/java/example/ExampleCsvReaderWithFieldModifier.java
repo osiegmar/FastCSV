@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldModifier;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 
 /**
  * Example for reading CSV data from a String while using a field modifier.
@@ -27,20 +28,24 @@ public class ExampleCsvReaderWithFieldModifier {
     }
 
     private static CsvReader.CsvReaderBuilder builderWithTrim() {
-        return CsvReader.builder().fieldModifier(FieldModifier.TRIM);
+        return CsvReader.builder().fieldModifier(FieldModifiers.TRIM);
     }
 
     private static CsvReader.CsvReaderBuilder builderWithTrimAndLowerCase() {
-        final FieldModifier modifier = FieldModifier.TRIM.andThen(FieldModifier.lower(Locale.ENGLISH));
+        final FieldModifier modifier = FieldModifiers.TRIM.andThen(FieldModifiers.lower(Locale.ENGLISH));
         return CsvReader.builder().fieldModifier(modifier);
     }
 
     private static CsvReader.CsvReaderBuilder builderWithCustomModifier() {
-        final FieldModifier modifier = (startingLineNumber, fieldIdx, comment, quoted, field) -> {
-            if (startingLineNumber == 1) {
-                return field.trim().toLowerCase(Locale.ENGLISH);
+        final FieldModifier modifier = new FieldModifier() {
+            @Override
+            public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,
+                                 final String field) {
+                if (startingLineNumber == 1) {
+                    return field.trim().toLowerCase(Locale.ENGLISH);
+                }
+                return field;
             }
-            return field;
         };
 
         return CsvReader.builder().fieldModifier(modifier);

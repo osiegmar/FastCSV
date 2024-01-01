@@ -8,54 +8,13 @@ package de.siegmar.fastcsv.writer;
 public interface QuoteStrategy {
 
     /**
-     * Enclose any field with quotes regardless of its content (even empty and {@code null} fields).
-     */
-    QuoteStrategy ALWAYS = new QuoteStrategy() {
-        @Override
-        public boolean quoteNull(final int lineNo, final int fieldIdx) {
-            return true;
-        }
-
-        @Override
-        public boolean quoteEmpty(final int lineNo, final int fieldIdx) {
-            return true;
-        }
-
-        @Override
-        public boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
-            return true;
-        }
-    };
-
-    /**
-     * Enclose any field with quotes if it has content (is not empty or {@code null}).
-     */
-    QuoteStrategy NON_EMPTY = new QuoteStrategy() {
-        @Override
-        public boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
-            return true;
-        }
-    };
-
-    /**
-     * Enclose empty but not @{code null} fields in order to differentiate them.
-     * This is required for PostgreSQL CSV imports for example.
-     */
-    QuoteStrategy EMPTY = new QuoteStrategy() {
-        @Override
-        public boolean quoteEmpty(final int lineNo, final int fieldIdx) {
-            return true;
-        }
-    };
-
-    /**
      * Determine if a {@code null} field should be quoted.
      *
      * @param lineNo   the line number (1-based)
      * @param fieldIdx the field index (0-based)
      * @return {@code true}, if a {@code null} field should be quoted
      */
-    default boolean quoteNull(final int lineNo, int fieldIdx) {
+    default boolean quoteNull(final int lineNo, final int fieldIdx) {
         return false;
     }
 
@@ -66,7 +25,7 @@ public interface QuoteStrategy {
      * @param fieldIdx the field index (0-based)
      * @return {@code true}, if an empty field should be quoted
      */
-    default boolean quoteEmpty(final int lineNo, int fieldIdx) {
+    default boolean quoteEmpty(final int lineNo, final int fieldIdx) {
         return false;
     }
 
@@ -78,7 +37,7 @@ public interface QuoteStrategy {
      * @param value    the field value
      * @return {@code true}, if a data containing field should be quoted
      */
-    default boolean quoteNonEmpty(final int lineNo, int fieldIdx, String value) {
+    default boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
         return false;
     }
 

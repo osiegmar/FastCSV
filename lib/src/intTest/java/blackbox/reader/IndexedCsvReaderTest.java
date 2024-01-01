@@ -17,8 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
@@ -385,11 +383,9 @@ class IndexedCsvReaderTest {
             try (var csv = buildSinglePage("012")) {
                 final CsvIndex index = csv.index();
 
-                assertThat(index.pageCount())
-                    .isEqualTo(1);
+                assertThat(index.pageCount()).isOne();
 
-                assertThat(index.recordCount())
-                    .isEqualTo(1L);
+                assertThat(index.recordCount()).isOne();
 
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
@@ -431,7 +427,7 @@ class IndexedCsvReaderTest {
     class MultipleRecordsPerPage {
 
         @Test
-        void start0EndInfinite() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+        void start0EndInfinite() throws IOException {
             assertThat(readRecords(0, 100))
                 .flatMap(CsvRecord::getFields)
                 .containsExactly("1", "2", "3", "4", "5");

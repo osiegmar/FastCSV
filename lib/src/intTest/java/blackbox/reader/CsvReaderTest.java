@@ -326,7 +326,7 @@ class CsvReaderTest {
             () -> new CloseStatusReader(new StringReader("foo,bar"));
 
         CloseStatusReader csr = supp.get();
-        try (CsvReader reader = crb.build(csr)) {
+        try (CsvReader<CsvRecord> reader = crb.build(csr)) {
             reader.stream().forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
@@ -393,6 +393,11 @@ class CsvReaderTest {
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(IOException.class)
             .hasRootCauseMessage("Cannot read");
+    }
+
+    @Test
+    void fieldCount() {
+        assertThat(crb.build("foo,bar").iterator().next().getFieldCount()).isEqualTo(2);
     }
 
     // test helpers

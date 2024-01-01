@@ -22,6 +22,7 @@ public class ExampleCsvReaderWithFaultyData {
             .build(DATA)
             .forEach(System.out::println);
 
+        System.out.println("Reading data while not ignoring different field counts:");
         try {
             CsvReader.builder()
                 .ignoreDifferentFieldCount(false)

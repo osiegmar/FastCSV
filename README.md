@@ -63,9 +63,10 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 - Auto-detection of line delimiters (`CRLF`, `LF`, or `CR` – can also be mixed)
 - Configurable data validation
 - Supports (optional) header records (get field based on field name)
-- Supports skipping empty records
+- Supports skipping empty lines
 - Supports commented lines (skipping & reading) with configurable comment character
 - Configurable field modifiers (e.g., to trim fields)
+- Flexible callback handlers (e.g., to directly map to domain objects)
 - BOM support (UTF-8, UTF-16 LE/BE, UTF-32 LE/BE)
 
 ### Writer specific
@@ -84,19 +85,33 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 
 ## CsvReader examples
 
-Iterative reading of some CSV data from a string
+### Iterative reading of some CSV data from a string
 
 ```java
 CsvReader.builder().build("foo1,bar1\nfoo2,bar2")
     .forEach(System.out::println);
 ```
 
-Iterative reading of a CSV file
+### Iterative reading of a CSV file
 
 ```java
-try (CsvReader csv = CsvReader.builder().build(file)) {
+try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
     csv.forEach(System.out::println);
 }
+```
+
+### Iterative reading of some CSV data with a header
+
+```java
+CsvReader.builder().build("header 1,header 2\nfield 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord())
+    .forEach(rec -> System.out.println(rec.getField("header2")));
+```
+
+### Iterative reading of some CSV data with a custom header
+
+```java
+CsvReader.builder().build("field 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord("header 1", "header 2"))
+    .forEach(rec -> System.out.println(rec.getField("header2")));
 ```
 
 ### Custom settings
@@ -113,28 +128,9 @@ CsvReader.builder()
     .fieldModifier(FieldModifier.TRIM);
 ```
 
-## NamedCsvReader examples
-
-Iterative reading of some CSV data with a header
-
-```java
-CsvReader csvReader = CsvReader.builder().build("header 1,header 2\nfield 1,field 2");
-NamedCsvReader.from(csvReader)
-    .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
-```
-
-Iterative reading of some CSV data with a custom header
-
-```java
-List<String> header = List.of("header 1", "header 2");
-CsvReader csvReader = CsvReader.builder().build("field 1,field 2");
-NamedCsvReader.from(csvReader)
-    .forEach(csvRecord -> System.out.println(csvRecord.getField("header 2")));
-```
-
 ## IndexedCsvReader examples
 
-Indexed reading of a CSV file
+### Indexed reading of a CSV file
 
 ```java
 try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
@@ -149,7 +145,7 @@ try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
 
 ## CsvWriter examples
 
-Iterative writing of some data to a writer
+### Iterative writing of some data to a writer
 
 ```java
 var sw = new StringWriter();
@@ -160,7 +156,7 @@ CsvWriter.builder().build(sw)
 System.out.println(sw);
 ```
 
-Iterative writing of a CSV file
+### Iterative writing of a CSV file
 
 ```java
 try (CsvWriter csv = CsvWriter.builder().build(file)) {
@@ -170,7 +166,7 @@ try (CsvWriter csv = CsvWriter.builder().build(file)) {
 }
 ```
 
-Custom settings
+### Custom settings
 
 ```java
 CsvWriter.builder()
@@ -183,7 +179,7 @@ CsvWriter.builder()
 
 ## More examples
 
-For more examples see [example/src/main/java/example/](example/src/main/java/example/).
+For more examples see [example/src/main/java/example/](example/src/main/java/example).
 
 ## Upgrading from an older version
 
