@@ -4,8 +4,8 @@ package de.siegmar.fastcsv.reader;
  * Implementations of this class are used to modify fields before they are passed to the {@link CsvCallbackHandler}
  * and finally stored in a record.
  *
- * @see SimpleFieldModifier
  * @see FieldModifiers
+ * @see SimpleFieldModifier
  * @see CsvReader.CsvReaderBuilder#fieldModifier(FieldModifier)
  */
 public interface FieldModifier {

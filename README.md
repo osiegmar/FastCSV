@@ -125,7 +125,7 @@ CsvReader.builder()
     .skipEmptyLines(true)
     .ignoreDifferentFieldCount(false)
     .detectBomHeader(false)
-    .fieldModifier(FieldModifier.TRIM);
+    .fieldModifier(FieldModifiers.TRIM);
 ```
 
 ## IndexedCsvReader examples
@@ -172,7 +172,7 @@ try (CsvWriter csv = CsvWriter.builder().build(file)) {
 CsvWriter.builder()
     .fieldSeparator(',')
     .quoteCharacter('"')
-    .quoteStrategy(QuoteStrategy.ALWAYS)
+    .quoteStrategy(QuoteStrategies.ALWAYS)
     .commentCharacter('#')
     .lineDelimiter(LineDelimiter.LF);
 ```

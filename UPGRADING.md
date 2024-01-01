@@ -5,8 +5,8 @@
 - Rows are now called Records (aligned to RFC 4180)
 - Changes on the writer side:
   - `writeRow()` is now `writeRecord()` in `CsvWriter`
-  - `QuoteStrategy` changed from an enum to an interface
-  - `QuoteStretegy#REQUIRED` is removed as it is now the default (no quote strategy is needed)
+  - `QuoteStrategy` changed from an enum to an interface (see `QuoteStrategies` for the default implementations)
+  - The `REQUIRED` quote strategy is removed as it is now the default (no quote strategy is needed)
 - Changes on the reader side:
   - `CsvRow` is now `CsvRecord`
   - `skipEmptyRows` is now `skipEmptyLines`
