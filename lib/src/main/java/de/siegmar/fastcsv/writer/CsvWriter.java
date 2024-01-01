@@ -143,15 +143,15 @@ public final class CsvWriter implements Closeable {
             return;
         }
 
-        final boolean hasDelimiters = hasDelimiters(value, fieldIdx, length);
-        final boolean needsQuotes = hasDelimiters
+        final boolean needsEscape = containsControlCharacter(value, fieldIdx, length);
+        final boolean needsQuotes = needsEscape
             || quoteStrategy != null && quoteStrategy.quoteNonEmpty(currentLineNo, fieldIdx, value);
 
         if (needsQuotes) {
             writer.write(quoteCharacter);
         }
 
-        if (hasDelimiters) {
+        if (needsEscape) {
             writeEscaped(writer, value, quoteCharacter);
         } else {
             writer.write(value, 0, length);
@@ -162,12 +162,28 @@ public final class CsvWriter implements Closeable {
         }
     }
 
-    @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
-    private boolean hasDelimiters(final String value, final int fieldIdx, final int length) {
+    @SuppressWarnings({
+        "checkstyle:BooleanExpressionComplexity",
+        "checkstyle:ReturnCount",
+        "checkstyle:MagicNumber",
+        "PMD.AvoidLiteralsInIfCondition"
+    })
+    private boolean containsControlCharacter(final String value, final int fieldIdx, final int length) {
+        if (fieldIdx == 0 && value.charAt(0) == commentCharacter) {
+            return true;
+        }
+
+        // For longer values, indexOf is faster than iterating over the string
+        if (length > 20) {
+            return value.indexOf(quoteCharacter) != -1
+                || value.indexOf(fieldSeparator) != -1
+                || value.indexOf(LF) != -1
+                || value.indexOf(CR) != -1;
+        }
+
         for (int i = 0; i < length; i++) {
             final char c = value.charAt(i);
-            if (c == quoteCharacter || c == fieldSeparator || c == LF || c == CR
-                || c == commentCharacter && fieldIdx == 0 && i == 0) {
+            if (c == quoteCharacter || c == fieldSeparator || c == LF || c == CR) {
                 return true;
             }
         }
