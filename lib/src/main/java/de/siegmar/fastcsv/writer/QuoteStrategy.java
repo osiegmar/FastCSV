@@ -4,7 +4,7 @@ package de.siegmar.fastcsv.writer;
  * A quote strategy is used to decide whether to quote fields if quoting is optional (as per RFC 4180).
  * <p>
  * If a field contains characters for which the RFC dictates quoting, this QuoteStrategy won't be called for a decision.
- * <p>
+ *
  * @see QuoteStrategies
  */
 public interface QuoteStrategy {
