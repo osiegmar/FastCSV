@@ -89,9 +89,6 @@ public final class CsvWriter implements Closeable {
         try {
             int fieldIdx = 0;
             for (final String value : values) {
-                if (fieldIdx > 0) {
-                    writer.write(fieldSeparator);
-                }
                 writeInternal(value, fieldIdx++);
             }
             endRecord();
@@ -114,9 +111,6 @@ public final class CsvWriter implements Closeable {
     public CsvWriter writeRecord(final String... values) {
         try {
             for (int i = 0; i < values.length; i++) {
-                if (i > 0) {
-                    writer.write(fieldSeparator);
-                }
                 writeInternal(values[i], i);
             }
             endRecord();
@@ -129,6 +123,10 @@ public final class CsvWriter implements Closeable {
 
     @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
     private void writeInternal(final String value, final int fieldIdx) throws IOException {
+        if (fieldIdx > 0) {
+            writer.write(fieldSeparator);
+        }
+
         if (value == null) {
             if (quoteStrategy != null && quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue);
