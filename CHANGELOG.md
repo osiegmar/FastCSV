@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2023-??-??
+## [Unreleased] - 2024-01-??
 ### Added
 - `IndexedCsvReader` for random access to CSV files
 - `FieldModifier` for modifying fields while reading CSV files
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CsvCallbackHandlers` for more flexible usage of CsvReader
 - Support for optional BOM header when reading CSV files
 - Method `NamedCsvRecord.findField` for optional field access
+- Allow READ comment strategy for CSV data with a header
 - Metadata for OSGi capability
 
 ### Changed
@@ -24,10 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Throw `CsvParseException` instead of `IOException` when maximum field size is exceeded
 - `NamedCsvRecord` extends `CsvRecord` and provides more access methods
 - Raised the maximum field size to 16 MiB to match SUPER data type capabilities of Amazon Redshift
-- Limit the maximum field count per record to 16,384 to avoid OutOfMemoryErrors
-- Limit the maximum record size to four times the maximum field size to avoid OutOfMemoryErrors
+- Limit the maximum field count per record to 16,384 to prevent OutOfMemoryErrors
+- Limit the maximum record size to 64 MiB to prevent OutOfMemoryErrors
 - Several performance improvements
 - Improved documentation and error messages
+
+### Fixed
+- Do not throw an exception when reading comments while enabling different field count checking
 
 ## [2.2.2] - 2023-05-13
 ### Added

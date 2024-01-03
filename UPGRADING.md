@@ -1,21 +1,76 @@
 # Migrating from 2.x to 3.x
 
+This document only describes the **breaking** changes. For a full list of changes, including new features,
+see the [changelog](CHANGELOG.md).
+
+## Requirement changes
+
 - The minimum Java version is now 11 (compared to 8 in earlier versions)
 - This also raised the required Android API level from version 26 (Android 8) to 33 (Android 13)
-- Rows are now called Records (aligned to RFC 4180)
-- Changes on the writer side:
-  - `writeRow()` is now `writeRecord()` in `CsvWriter`
-  - `QuoteStrategy` changed from an enum to an interface (see `QuoteStrategies` for the default implementations)
-  - The `REQUIRED` quote strategy is removed as it is now the default (no quote strategy is needed)
-- Changes on the reader side:
-  - `CsvRow` is now `CsvRecord`
+
+## New limitations
+
+- The maximum number of fields per record is now limited to 16,384 to avoid `OutOfMemoryErrors` caused
+  by excessive field counts.
+- The maximum record size is now limited to (64 MiB) to prevent `OutOfMemoryErrors`.
+
+## Naming changes
+
+### Rows are now called Records (aligned to RFC 4180)
+
+**Reading CSV records:**
+
+```java
+try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
+    csv.forEach(System.out::println);
+}
+```
+
+**Write CSV records:**
+
+```java
+try (CsvWriter csv = CsvWriter.builder().build(file)) {
+    csv
+        .writeRecord("header1", "header2")
+        .writeRecord("value1", "value2");
+}
+```
+
+### Method names
+
+- In `CsvReaderBuilder`:
   - `skipEmptyRows` is now `skipEmptyLines`
-  - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning)
+  - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning!)
+- In `CsvRecord` (former `CsvRow`):
   - `getOriginalLineNumber` is now `getStartingLineNumber`
-  - `MalformedCsvException` is now `CsvParseException` and is thrown instead of `IOException` for non-IO related errors
-  - `NamedCsvReader` replaced by `CsvReader` with `CsvCallbackHandlers`
-  - Limit the maximum field count per record to 16,384 to avoid OutOfMemoryErrors
-  - Limit the maximum record size to four times the maximum field size to avoid OutOfMemoryErrors
+
+## NamedCsvReader removed/replaced
+
+A distinct `NamedCsvReader` is no longer needed as the `CsvReader` now supports callbacks for header and record
+processing.
+
+```java
+CsvReader.builder().build("header 1,header 2\nfield 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord())
+    .forEach(rec -> System.out.println(rec.getField("header2")));
+```
+
+## Extended/Refactored quote strategies
+
+- `QuoteStrategy` changed from an enum to an interface (see `QuoteStrategies` for the default implementations)
+- The `REQUIRED` quote strategy is removed as it is the default (no quote strategy is needed)
+
+**Example to enable always quoting:**
+
+```java
+CsvWriter.builder()
+    .quoteStrategy(QuoteStrategies.ALWAYS);
+```
+
+## Exception changes
+
+`MalformedCsvException` is now `CsvParseException` and is thrown instead of `IOException` for non-IO related errors.
+
+------
 
 See the https://github.com/osiegmar/FastCSV/tree/main/example/src/main/java/example for more examples.
 
