@@ -297,6 +297,14 @@ public final class CsvWriter implements Closeable {
     /**
      * This builder is used to create configured instances of {@link CsvWriter}. The default
      * configuration of this class complies with RFC 4180.
+     * <ul>
+     *     <li>field separator: {@code ,} (comma)</li>
+     *     <li>quote character: {@code "} (double quote)</li>
+     *     <li>comment character: {@code #} (hash/number)</li>
+     *     <li>quote strategy: {@code null} (only required quoting)</li>
+     *     <li>line delimiter: {@link LineDelimiter#CRLF}</li>
+     *     <li>buffer size: 8,192 bytes</li>
+     * </ul>
      */
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvWriterBuilder {

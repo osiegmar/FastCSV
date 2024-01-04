@@ -317,7 +317,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     /**
      * This builder is used to create configured instances of {@link CsvReader}. The default
-     * configuration of this class complies with RFC 4180.
+     * configuration of this class complies with RFC 4180:
+     * <ul>
+     *     <li>Field separator: {@code ,} (comma)</li>
+     *     <li>Quote character: {@code "} (double quotes)</li>
+     *     <li>Comment strategy: {@link CommentStrategy#NONE} (as RFC doesn't handle comments)</li>
+     *     <li>Comment character: {@code #} (hash) (in case comment strategy is enabled)</li>
+     *     <li>Skip empty lines: {@code true}</li>
+     *     <li>Ignore different field count: {@code true}</li>
+     *     <li>Detect BOM header: {@code false}</li>
+     * </ul>
      * <p>
      * The line delimiter (line-feed, carriage-return or the combination of both) is detected
      * automatically and thus not configurable.
