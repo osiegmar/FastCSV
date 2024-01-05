@@ -16,12 +16,13 @@ public class FastCsvWriteBenchmark {
 
     @Benchmark
     public void write(final WriteState state) {
-        state.writer.writeRecord(CsvConstants.RECORD);
+        state.writer.writeRecord(state.rowSupplier.get());
     }
 
     @State(Scope.Benchmark)
     public static class WriteState {
 
+        private final RowSupplier rowSupplier = new RowSupplier(CsvConstants.RECORDS);
         private CsvWriter writer;
 
         @Setup

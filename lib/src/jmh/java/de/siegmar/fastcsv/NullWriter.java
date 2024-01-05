@@ -10,51 +10,28 @@ import org.openjdk.jmh.infra.Blackhole;
  */
 public class NullWriter extends Writer {
 
-    private static final int BUFFER_SIZE = 8192;
-
     private final Blackhole bh;
-    private final char[] buf = new char[BUFFER_SIZE];
-    private int pos;
 
-    NullWriter(final Blackhole bh) {
+    /**
+     * Initializes a new instance of the {@link NullWriter} class.
+     *
+     * @param bh the black hole to send all data to
+     */
+    public NullWriter(final Blackhole bh) {
         this.bh = bh;
     }
 
     @Override
-    public void write(final int c) {
-        if (pos == buf.length) {
-            flush();
-        }
-        buf[pos++] = (char) c;
-    }
-
-    @Override
     public void write(final char[] cbuf, final int off, final int len) {
-        if (len + pos > buf.length) {
-            flush();
-        }
-        System.arraycopy(cbuf, off, buf, pos, len);
-        pos += len;
-    }
-
-    @Override
-    public void write(final String str, final int off, final int len) {
-        if (len + pos > buf.length) {
-            flush();
-        }
-        str.getChars(off, off + len, buf, pos);
-        pos += len;
+        bh.consume(Arrays.copyOfRange(cbuf, off, off + len));
     }
 
     @Override
     public void flush() {
-        bh.consume(Arrays.copyOf(buf, pos));
-        pos = 0;
     }
 
     @Override
     public void close() {
-        flush();
     }
 
 }
