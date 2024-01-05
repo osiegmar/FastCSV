@@ -43,7 +43,7 @@ class GenericDataTest {
             .skipEmptyLines(skipEmptyLines)
             .commentCharacter(';')
             .commentStrategy(commentStrategy)
-            .build(data)
+            .ofCsvRecord(data)
             .stream()
             .map(CsvRecord::getFields)
             .collect(Collectors.toList());

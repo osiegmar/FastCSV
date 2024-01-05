@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated from Java 8 to Java 11
 - Updated naming (rows/lines -> records, columns -> fields, differentiate between lines and records)
 - `NamedCsvReader` replaced by `CsvReader` with `CsvCallbackHandlers`
+- `build` methods in `CsvReaderBuilder` with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
 - Rename `errorOnDifferentFieldCount()` to `ignoreDifferentFieldCount()`
 - Rename `isEmpty()` to `isEmptyLine` in `CsvRecord`
 - `QuoteStrategy` is now an interface – defaults are provided by `QuoteStrategies`

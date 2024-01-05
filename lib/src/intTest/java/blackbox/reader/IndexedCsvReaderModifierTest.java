@@ -29,7 +29,7 @@ class IndexedCsvReaderModifierTest {
             "foo  ,  bar",
             StandardCharsets.UTF_8);
 
-        final var build = crb.build(file);
+        final var build = crb.ofCsvRecord(file);
         try (build) {
             assertThat(build.readPage(0))
                 .singleElement(CsvRecordAssert.CSV_RECORD)

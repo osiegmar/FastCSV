@@ -20,7 +20,7 @@ class CsvReaderBomHeaderTest {
     @ParameterizedTest
     @MethodSource
     void bom(final Path testFile) throws IOException {
-        assertThat(crb.build(testFile).stream())
+        assertThat(crb.ofCsvRecord(testFile).stream())
             .satisfiesExactly(
                 c -> CsvRecordAssert.assertThat(c).fields().containsExactly("foo", "üÜß"),
                 c -> CsvRecordAssert.assertThat(c).fields().containsExactly("123", "456")

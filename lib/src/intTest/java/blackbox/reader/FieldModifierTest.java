@@ -30,7 +30,7 @@ class FieldModifierTest {
             .fieldModifier(new FieldModifier() {
             });
 
-        assertThat(crb.build("foo\n#bar").stream())
+        assertThat(crb.ofCsvRecord("foo\n#bar").stream())
             .satisfiesExactly(
                 item -> CsvRecordAssert.assertThat(item).fields().containsExactly("foo"),
                 item -> CsvRecordAssert.assertThat(item).isComment().fields().containsExactly("bar")
@@ -41,7 +41,7 @@ class FieldModifierTest {
     void trim() {
         crb.fieldModifier(FieldModifiers.TRIM);
 
-        assertThat(crb.build("foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.ofCsvRecord("foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar\u2000", "baz");
@@ -51,7 +51,7 @@ class FieldModifierTest {
     void strip() {
         crb.fieldModifier(FieldModifiers.STRIP);
 
-        assertThat(crb.build("foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.ofCsvRecord("foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar", "baz");
@@ -69,7 +69,7 @@ class FieldModifierTest {
                 .andThen(FieldModifiers.TRIM)
             );
 
-        assertThat(crb.build("FOO, bar , BAZ  \n# foo ").stream())
+        assertThat(crb.ofCsvRecord("FOO, bar , BAZ  \n# foo ").stream())
             .satisfiesExactly(
                 item -> CsvRecordAssert.assertThat(item).fields().containsExactly("foo", "bar", "baz"),
                 item -> CsvRecordAssert.assertThat(item).isComment().fields().containsExactly(" foo ")
@@ -83,7 +83,7 @@ class FieldModifierTest {
             .commentStrategy(CommentStrategy.READ)
             .fieldModifier(new NullFieldModifier());
 
-        assertThatThrownBy(() -> crb.build(value).stream().collect(Collectors.toList()))
+        assertThatThrownBy(() -> crb.ofCsvRecord(value).stream().collect(Collectors.toList()))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .rootCause()

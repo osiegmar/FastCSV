@@ -47,7 +47,7 @@ import de.siegmar.fastcsv.util.Util;
  */
 public final class CsvReader<T> implements Iterable<T>, Closeable {
 
-    private final CsvCallbackHandler<T> recordHandler;
+    private final CsvCallbackHandler<T> callbackHandler;
     private final RecordReader recordReader;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
@@ -57,36 +57,36 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private int firstRecordFieldCount = -1;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvReader(final Reader reader, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter,
+    CsvReader(final CsvCallbackHandler<T> callbackHandler, final Reader reader, final char fieldSeparator,
+              final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
-              final CsvCallbackHandler<T> recordHandler, final FieldModifier fieldModifier) {
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.recordHandler = recordHandler;
+        this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(recordHandler, fieldModifier, reader, fieldSeparator, quoteCharacter,
+        recordReader = new RecordReader(callbackHandler, fieldModifier, reader, fieldSeparator, quoteCharacter,
             commentStrategy, commentCharacter);
     }
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvReader(final String data, final char fieldSeparator, final char quoteCharacter,
-              final CommentStrategy commentStrategy, final char commentCharacter,
+    CsvReader(final CsvCallbackHandler<T> callbackHandler, final String data, final char fieldSeparator,
+              final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
-              final CsvCallbackHandler<T> recordHandler, final FieldModifier fieldModifier) {
+              final FieldModifier fieldModifier) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.recordHandler = recordHandler;
+        this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
 
-        recordReader = new RecordReader(recordHandler, fieldModifier, data, fieldSeparator, quoteCharacter,
+        recordReader = new RecordReader(callbackHandler, fieldModifier, data, fieldSeparator, quoteCharacter,
             commentStrategy, commentCharacter);
     }
 
@@ -177,14 +177,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     })
     private T fetchRecord() throws IOException {
         while (recordReader.read()) {
-            final T csvRecord = recordHandler.buildRecord();
+            final T csvRecord = callbackHandler.buildRecord();
 
             if (csvRecord == null) {
                 // data was consumed (e.g. header for named records)
                 continue;
             }
 
-            if (recordHandler.isComment()) {
+            if (callbackHandler.isComment()) {
                 if (commentStrategy == CommentStrategy.SKIP) {
                     // skip commented records
                     continue;
@@ -194,12 +194,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             }
 
             // skip empty lines
-            if (recordHandler.isEmptyLine()) {
+            if (callbackHandler.isEmptyLine()) {
                 if (skipEmptyLines) {
                     continue;
                 }
             } else if (!ignoreDifferentFieldCount) {
-                final int fieldCount = recordHandler.getFieldCount();
+                final int fieldCount = callbackHandler.getFieldCount();
 
                 // check the field count consistency on every record
                 if (firstRecordFieldCount == -1) {
@@ -214,7 +214,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return csvRecord;
         }
 
-        recordHandler.terminate();
+        callbackHandler.terminate();
 
         return null;
     }
@@ -455,7 +455,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * {@snippet :
          * var fields = CsvReader.builder()
          *     .fieldModifier(FieldModifiers.TRIM.andThen(FieldModifiers.upper(Locale.ENGLISH)))
-         *     .build("  foo   ,   bar")
+         *     .ofCsvRecord("  foo   ,   bar")
          *     .stream()
          *     .collect(Collectors.toList());
          *
@@ -476,88 +476,96 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /**
          * Constructs a new {@link CsvReader} that uses {@link CsvRecord} as record type.
          * <p>
-         * This is a convenience method for calling {@code build(reader, CsvCallbackHandlers.ofCsvRecord())}.
+         * This is a convenience method for calling {@code of(reader, CsvCallbackHandlers.ofCsvRecord())}.
          *
          * @param reader the data source to read from.
          * @return a new CsvReader of CsvRecord - never {@code null}.
          * @throws NullPointerException if reader is {@code null}
          */
-        public CsvReader<CsvRecord> build(final Reader reader) {
-            return build(reader, CsvCallbackHandlers.ofCsvRecord());
+        public CsvReader<CsvRecord> ofCsvRecord(final Reader reader) {
+            return build(CsvCallbackHandlers.ofCsvRecord(), reader);
         }
 
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          * <p>
-         * This library uses built-in buffering, so you do not need to pass in a buffered Reader
-         * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
-         * better if you do not.
-         * <p>
-         * Use {@link #build(Path, Charset)} for optimal performance when
-         * reading files and {@link #build(String)} when reading Strings.
-         *
-         * @param <T>           the type of the CSV record.
-         * @param reader        the data source to read from.
-         * @param recordHandler the record handler to use. Do not reuse a handler after it has been used!
-         * @return a new CsvReader - never {@code null}.
-         * @throws NullPointerException if reader is {@code null}
-         */
-        public <T> CsvReader<T> build(final Reader reader, final CsvCallbackHandler<T> recordHandler) {
-            return newReader(Objects.requireNonNull(reader, "reader must not be null"), recordHandler);
-        }
-
-        /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
-         * <p>
-         * This is a convenience method for calling {@code build(data, CsvCallbackHandlers.ofCsvRecord())}.
+         * This is a convenience method for calling {@code of(data, CsvCallbackHandlers.ofCsvRecord())}.
          *
          * @param data the data to read.
          * @return a new CsvReader of CsvRecord - never {@code null}.
          */
-        public CsvReader<CsvRecord> build(final String data) {
-            return build(data, CsvCallbackHandlers.ofCsvRecord());
-        }
-
-        /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
-         *
-         * @param <T>           the type of the CSV record.
-         * @param data          the data to read.
-         * @param recordHandler the record handler to use. Do not reuse a handler after it has been used!
-         * @return a new CsvReader - never {@code null}.
-         */
-        public <T> CsvReader<T> build(final String data, final CsvCallbackHandler<T> recordHandler) {
-            return newReader(Objects.requireNonNull(data, "data must not be null"), recordHandler);
+        public CsvReader<CsvRecord> ofCsvRecord(final String data) {
+            return build(CsvCallbackHandlers.ofCsvRecord(), data);
         }
 
         /**
          * Constructs a new {@link CsvReader} for the specified file.
          * <p>
-         * This is a convenience method for calling {@code build(file, CsvCallbackHandlers.ofCsvRecord())}.
+         * This is a convenience method for calling {@code of(file, CsvCallbackHandlers.ofCsvRecord())}.
          *
          * @param file the file to read data from.
          * @return a new CsvReader of CsvRecord - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file is {@code null}
          */
-        public CsvReader<CsvRecord> build(final Path file) throws IOException {
-            return build(file, CsvCallbackHandlers.ofCsvRecord());
+        public CsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
+            return build(CsvCallbackHandlers.ofCsvRecord(), file);
         }
 
         /**
          * Constructs a new {@link CsvReader} for the specified file.
          * <p>
-         * This is a convenience method for calling {@code build(file, StandardCharsets.UTF_8, recordHandler)}.
+         * This is a convenience method for calling {@code of(file, charset, CsvCallbackHandlers.ofCsvRecord())}.
          *
-         * @param <T>           the type of the CSV record.
-         * @param file          the file to read data from.
-         * @param recordHandler the record handler to use. Do not reuse a handler after it has been used!
-         * @return a new CsvReader - never {@code null}. Don't forget to close it!
+         * @param file    the file to read data from.
+         * @param charset the character set to use. If BOM header detection is enabled
+         *                (via {@link #detectBomHeader(boolean)}), this acts as a default
+         *                when no BOM header was found.
+         * @return a new CsvReader of CsvRecord - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public <T> CsvReader<T> build(final Path file, final CsvCallbackHandler<T> recordHandler) throws IOException {
-            return build(file, StandardCharsets.UTF_8, recordHandler);
+        public CsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
+            return build(CsvCallbackHandlers.ofCsvRecord(), file, charset);
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} that uses {@link CsvRecord} as record type.
+         * <p>
+         * This is a convenience method for calling {@code of(reader, CsvCallbackHandlers.ofNamedCsvRecord())}.
+         *
+         * @param reader the data source to read from.
+         * @return a new CsvReader of CsvRecord - never {@code null}.
+         * @throws NullPointerException if reader is {@code null}
+         */
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Reader reader) {
+            return build(CsvCallbackHandlers.ofNamedCsvRecord(), reader);
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified arguments.
+         * <p>
+         * This is a convenience method for calling {@code of(data, CsvCallbackHandlers.ofNamedCsvRecord())}.
+         *
+         * @param data the data to read.
+         * @return a new CsvReader of CsvRecord - never {@code null}.
+         */
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final String data) {
+            return build(CsvCallbackHandlers.ofNamedCsvRecord(), data);
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified file.
+         * <p>
+         * This is a convenience method for calling {@code of(file, CsvCallbackHandlers.ofNamedCsvRecord())}.
+         *
+         * @param file the file to read data from.
+         * @return a new CsvReader of CsvRecord - never {@code null}. Don't forget to close it!
+         * @throws IOException          if an I/O error occurs.
+         * @throws NullPointerException if file is {@code null}
+         */
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file) throws IOException {
+            return build(CsvCallbackHandlers.ofNamedCsvRecord(), file);
         }
 
         /**
@@ -573,45 +581,95 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvReader<CsvRecord> build(final Path file, final Charset charset) throws IOException {
-            return build(file, charset, CsvCallbackHandlers.ofCsvRecord());
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset) throws IOException {
+            return build(CsvCallbackHandlers.ofNamedCsvRecord(), file, charset);
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified arguments.
+         * <p>
+         * This library uses built-in buffering, so you do not need to pass in a buffered Reader
+         * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
+         * better if you do not.
+         * <p>
+         * Use {@link #build(CsvCallbackHandler, Path)} for optimal performance when
+         * reading files and {@link #build(CsvCallbackHandler, String)} when reading Strings.
+         *
+         * @param <T>             the type of the CSV record.
+         * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+         * @param reader          the data source to read from.
+         * @return a new CsvReader - never {@code null}.
+         * @throws NullPointerException if reader is {@code null}
+         */
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
+            return newReader(callbackHandler, Objects.requireNonNull(reader, "reader must not be null"));
         }
 
         /**
          * Constructs a new {@link CsvReader} for the specified arguments.
          *
-         * @param <T>           the type of the CSV record.
-         * @param file          the file to read data from.
-         * @param charset       the character set to use. If BOM header detection is enabled
-         *                      (via {@link #detectBomHeader(boolean)}), this acts as a default
-         *                      when no BOM header was found.
-         * @param recordHandler the record handler to use. Do not reuse a handler after it has been used!
+         * @param <T>             the type of the CSV record.
+         * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+         * @param data            the data to read.
+         * @return a new CsvReader - never {@code null}.
+         * @throws NullPointerException if data is {@code null}
+         */
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
+            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
+            Objects.requireNonNull(data, "data must not be null");
+            return newReader(callbackHandler, data);
+        }
+
+        /**
+         * Constructs a new {@link CsvReader} for the specified file.
+         * <p>
+         * This is a convenience method for calling {@code of(file, StandardCharsets.UTF_8, callbackHandler)}.
+         *
+         * @param <T>             the type of the CSV record.
+         * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+         * @param file            the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public <T> CsvReader<T> build(final Path file, final Charset charset, final CsvCallbackHandler<T> recordHandler)
-            throws IOException {
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file) throws IOException {
+            return build(callbackHandler, file, StandardCharsets.UTF_8);
+        }
 
+        /**
+         * Constructs a new {@link CsvReader} for the specified arguments.
+         *
+         * @param <T>             the type of the CSV record.
+         * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+         * @param file            the file to read data from.
+         * @param charset         the character set to use. If BOM header detection is enabled
+         *                        (via {@link #detectBomHeader(boolean)}), this acts as a default
+         *                        when no BOM header was found.
+         * @return a new CsvReader - never {@code null}. Don't forget to close it!
+         * @throws IOException          if an I/O error occurs.
+         * @throws NullPointerException if file or charset is {@code null}
+         */
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
+                                      final Path file, final Charset charset) throws IOException {
+            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
-            Objects.requireNonNull(recordHandler, "recordHandler must not be null");
 
             final Reader reader = detectBomHeader
                 ? BomUtil.openReader(file, charset)
                 : new InputStreamReader(Files.newInputStream(file), charset);
 
-            return newReader(reader, recordHandler);
+            return newReader(callbackHandler, reader);
         }
 
-        private <T> CsvReader<T> newReader(final Reader reader, final CsvCallbackHandler<T> recordHandler) {
-            return new CsvReader<>(reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, recordHandler, fieldModifier);
+        private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
+            return new CsvReader<>(callbackHandler, reader, fieldSeparator, quoteCharacter, commentStrategy,
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
-        private <T> CsvReader<T> newReader(final String data, final CsvCallbackHandler<T> recordHandler) {
-            return new CsvReader<>(data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, recordHandler, fieldModifier);
+        private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final String data) {
+            return new CsvReader<>(callbackHandler, data, fieldSeparator, quoteCharacter, commentStrategy,
+                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
         }
 
         @Override

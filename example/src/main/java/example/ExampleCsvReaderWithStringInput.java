@@ -1,7 +1,5 @@
 package example;
 
-import java.util.Iterator;
-
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 
@@ -14,22 +12,22 @@ public class ExampleCsvReaderWithStringInput {
 
     public static void main(final String[] args) {
         System.out.println("Reading data via for-each loop:");
-        for (final CsvRecord csvRecord : CsvReader.builder().build(DATA)) {
+        for (final CsvRecord csvRecord : CsvReader.builder().ofCsvRecord(DATA)) {
             System.out.println(csvRecord.getFields());
         }
 
         System.out.println("Reading data via forEach lambda:");
-        CsvReader.builder().build(DATA)
+        CsvReader.builder().ofCsvRecord(DATA)
             .forEach(System.out::println);
 
         System.out.println("Reading data via stream:");
-        CsvReader.builder().build(DATA).stream()
+        CsvReader.builder().ofCsvRecord(DATA).stream()
             .map(rec -> rec.getField(1))
             .forEach(System.out::println);
 
         System.out.println("Reading data via iterator:");
-        for (final Iterator<CsvRecord> iterator = CsvReader.builder().build(DATA).iterator(); iterator.hasNext();) {
-            final CsvRecord csvRecord = iterator.next();
+        for (final var it = CsvReader.builder().ofCsvRecord(DATA).iterator(); it.hasNext();) {
+            final CsvRecord csvRecord = it.next();
             System.out.println(csvRecord.getFields());
         }
     }

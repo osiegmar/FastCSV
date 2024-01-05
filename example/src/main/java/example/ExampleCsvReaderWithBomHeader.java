@@ -16,7 +16,7 @@ public class ExampleCsvReaderWithBomHeader {
     public static void main(final String[] args) throws IOException {
         final Path testFile = prepareTestFile();
         final CsvReader.CsvReaderBuilder builder = CsvReader.builder().detectBomHeader(true);
-        try (Stream<CsvRecord> stream = builder.build(testFile).stream()) {
+        try (Stream<CsvRecord> stream = builder.ofCsvRecord(testFile).stream()) {
             stream.forEach(System.out::println);
         }
     }

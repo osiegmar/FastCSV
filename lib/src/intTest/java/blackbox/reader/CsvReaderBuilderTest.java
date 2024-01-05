@@ -31,14 +31,14 @@ class CsvReaderBuilderTest {
 
     @Test
     void nullInput() {
-        assertThatThrownBy(() -> crb.build((String) null))
+        assertThatThrownBy(() -> crb.ofCsvRecord((String) null))
             .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void fieldSeparator() {
         final Iterator<CsvRecord> it = crb.fieldSeparator(';')
-            .build("foo,bar;baz").iterator();
+            .ofCsvRecord("foo,bar;baz").iterator();
         assertThat(it).toIterable()
             .singleElement(CSV_RECORD)
             .isStartingLineNumber(1)
@@ -49,7 +49,7 @@ class CsvReaderBuilderTest {
     @Test
     void quoteCharacter() {
         final Iterator<CsvRecord> it = crb.quoteCharacter('_')
-            .build("_foo \", __ bar_,foo \" bar").iterator();
+            .ofCsvRecord("_foo \", __ bar_,foo \" bar").iterator();
         assertThat(it).toIterable()
             .singleElement(CSV_RECORD)
             .isStartingLineNumber(1)
@@ -60,7 +60,7 @@ class CsvReaderBuilderTest {
     @Test
     void commentSkip() {
         final Iterator<CsvRecord> it = crb.commentCharacter(';').commentStrategy(CommentStrategy.SKIP)
-            .build("#foo\n;bar\nbaz").iterator();
+            .ofCsvRecord("#foo\n;bar\nbaz").iterator();
         assertThat(it).toIterable()
             .satisfiesExactly(
                 item1 -> CsvRecordAssert.assertThat(item1)
@@ -83,7 +83,7 @@ class CsvReaderBuilderTest {
 
     @Test
     void string() {
-        assertThat(crb.build(DATA).stream())
+        assertThat(crb.ofCsvRecord(DATA).stream())
             .singleElement(CSV_RECORD)
             .isStartingLineNumber(1)
             .isNotComment()
@@ -95,7 +95,7 @@ class CsvReaderBuilderTest {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
 
-        try (Stream<CsvRecord> stream = crb.build(file).stream()) {
+        try (Stream<CsvRecord> stream = crb.ofCsvRecord(file).stream()) {
             assertThat(stream)
                 .singleElement(CSV_RECORD)
                 .isStartingLineNumber(1)
@@ -109,7 +109,7 @@ class CsvReaderBuilderTest {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.write(file, DATA.getBytes(UTF_8));
 
-        try (Stream<CsvRecord> stream = crb.build(file, UTF_8).stream()) {
+        try (Stream<CsvRecord> stream = crb.ofCsvRecord(file, UTF_8).stream()) {
             assertThat(stream)
                 .singleElement(CSV_RECORD)
                 .isStartingLineNumber(1)
@@ -127,7 +127,7 @@ class CsvReaderBuilderTest {
             .commentCharacter('#')
             .skipEmptyLines(true)
             .ignoreDifferentFieldCount(false)
-            .build("foo");
+            .ofCsvRecord("foo");
 
         assertThat(reader).isNotNull();
     }

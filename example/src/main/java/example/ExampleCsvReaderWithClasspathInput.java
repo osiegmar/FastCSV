@@ -15,7 +15,7 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 public class ExampleCsvReaderWithClasspathInput {
 
     public static void main(final String[] args) throws IOException {
-        try (CsvReader<CsvRecord> csv = CsvReader.builder().build(getReader("/example.csv"))) {
+        try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(getReader("/example.csv"))) {
             for (final CsvRecord csvRecord : csv) {
                 System.out.println(csvRecord.getFields());
             }

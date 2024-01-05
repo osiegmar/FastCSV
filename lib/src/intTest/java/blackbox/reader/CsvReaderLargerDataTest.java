@@ -34,7 +34,7 @@ class CsvReaderLargerDataTest {
     @Test
     void largerData() {
         final CsvReader<CsvRecord> reader = CsvReader.builder()
-            .build(new StringReader(createSampleCSV()));
+            .ofCsvRecord(new StringReader(createSampleCSV()));
 
         assertThat(reader.stream())
             .hasSize(TEST_RECORDS)

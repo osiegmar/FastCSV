@@ -43,44 +43,44 @@ class CsvReaderTest {
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
     void configBuilder(final char c) {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(c).build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("fieldSeparator must not be a newline char");
 
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(c).build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("quoteCharacter must not be a newline char");
 
-        assertThatThrownBy(() -> CsvReader.builder().commentCharacter(c).build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().commentCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("commentCharacter must not be a newline char");
     }
 
     @Test
     void configReader() {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').quoteCharacter(',').build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').quoteCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=#)");
 
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').commentCharacter(',').build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').commentCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
 
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(',').commentCharacter(',').build("foo"))
+        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(',').commentCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=,)");
     }
 
     @Test
     void empty() {
-        assertThat(crb.build("").iterator())
+        assertThat(crb.ofCsvRecord("").iterator())
             .isExhausted()
             .satisfies(it -> assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class));
     }
 
     @Test
     void immutableResponse() {
-        final List<String> fields = crb.build("foo").iterator().next().getFields();
+        final List<String> fields = crb.ofCsvRecord("foo").iterator().next().getFields();
         assertThatThrownBy(() -> fields.add("bar"))
             .isInstanceOf(UnsupportedOperationException.class);
     }
@@ -89,7 +89,7 @@ class CsvReaderTest {
 
     @Test
     void readerToString() {
-        assertThat(crb.build(""))
+        assertThat(crb.ofCsvRecord(""))
             .asString()
             .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
                 + "ignoreDifferentFieldCount=true]");
@@ -100,14 +100,14 @@ class CsvReaderTest {
     @Test
     void singleRecordNoSkipEmpty() {
         crb.skipEmptyLines(false);
-        assertThat(crb.build("").iterator()).isExhausted();
+        assertThat(crb.ofCsvRecord("").iterator()).isExhausted();
     }
 
     @Test
     void multipleRecordsNoSkipEmpty() {
         crb.skipEmptyLines(false);
 
-        assertThat(crb.build("\n\na").iterator()).toIterable()
+        assertThat(crb.ofCsvRecord("\n\na").iterator()).toIterable()
             .satisfiesExactly(
                 item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(1).fields().containsExactly(""),
                 item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(2).fields().containsExactly(""),
@@ -116,7 +116,7 @@ class CsvReaderTest {
 
     @Test
     void skippedRecords() {
-        assertThat(crb.build("\n\nfoo\n\nbar\n\n").stream())
+        assertThat(crb.ofCsvRecord("\n\nfoo\n\nbar\n\n").stream())
             .satisfiesExactly(
                 item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(3).fields().containsExactly("foo"),
                 item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(5).fields().containsExactly("bar")
@@ -160,7 +160,7 @@ class CsvReaderTest {
     @Test
     @SuppressWarnings("CheckReturnValue")
     void getNonExistingFieldByIndex() {
-        assertThat(crb.build("foo").stream())
+        assertThat(crb.ofCsvRecord("foo").stream())
             .singleElement()
             .satisfies(item -> assertThatThrownBy(() -> spotbugs(item.getField(1)))
                 .isInstanceOf(IndexOutOfBoundsException.class));
@@ -177,7 +177,7 @@ class CsvReaderTest {
     void lineNumbering() {
         final Stream<CsvRecord> stream = crb
             .commentStrategy(CommentStrategy.SKIP)
-            .build(
+            .ofCsvRecord(
                 "line 1\n"
                     + "line 2\r"
                     + "line 3\r\n"
@@ -207,7 +207,7 @@ class CsvReaderTest {
     void comment() {
         final Stream<CsvRecord> stream = crb
             .commentStrategy(CommentStrategy.READ)
-            .build("#comment \"1\"\na,#b,c").stream();
+            .ofCsvRecord("#comment \"1\"\na,#b,c").stream();
 
         assertThat(stream)
             .satisfiesExactly(
@@ -222,7 +222,7 @@ class CsvReaderTest {
 
     @Test
     void toStringWithoutHeader() {
-        assertThat(crb.build("fieldA,fieldB\n").stream())
+        assertThat(crb.ofCsvRecord("fieldA,fieldB\n").stream())
             .singleElement()
             .asString()
             .isEqualTo("CsvRecord[startingLineNumber=1, fields=[fieldA, fieldB], comment=false]");
@@ -238,7 +238,7 @@ class CsvReaderTest {
         Arrays.fill(buf, 'X');
         System.arraycopy(extra, 0, buf, 8190, extra.length);
 
-        assertThat(crb.build(new CharArrayReader(buf)).stream())
+        assertThat(crb.ofCsvRecord(new CharArrayReader(buf)).stream())
             .singleElement(CSV_RECORD)
             .fields().hasSize(4)
             .endsWith("a\"b\"c", "d", "XX");
@@ -251,7 +251,7 @@ class CsvReaderTest {
         final char[] buf = new char[16 * 1024];
         Arrays.fill(buf, ',');
 
-        assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
+        assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
@@ -266,11 +266,11 @@ class CsvReaderTest {
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
 
-        crb.build(new CharArrayReader(buf)).iterator().next();
+        crb.ofCsvRecord(new CharArrayReader(buf)).iterator().next();
 
         buf[buf.length - 1] = (byte) 'X';
 
-        assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).iterator().next())
+        assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).iterator().next())
             .isInstanceOf(CsvParseException.class)
             .hasMessageContaining("Exception when reading first record")
             .rootCause()
@@ -285,7 +285,7 @@ class CsvReaderTest {
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
 
-        final CloseableIterator<CsvRecord> iterator = crb.build(new CharArrayReader(buf)).iterator();
+        final CloseableIterator<CsvRecord> iterator = crb.ofCsvRecord(new CharArrayReader(buf)).iterator();
         iterator.next();
 
         assertThatThrownBy(iterator::next)
@@ -308,7 +308,7 @@ class CsvReaderTest {
             buf[i * fieldSize] = ',';
         }
 
-        assertThatThrownBy(() -> crb.build(new CharArrayReader(buf)).stream().count())
+        assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
@@ -326,19 +326,19 @@ class CsvReaderTest {
             () -> new CloseStatusReader(new StringReader("foo,bar"));
 
         CloseStatusReader csr = supp.get();
-        try (CsvReader<CsvRecord> reader = crb.build(csr)) {
+        try (CsvReader<CsvRecord> reader = crb.ofCsvRecord(csr)) {
             reader.stream().forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (CloseableIterator<CsvRecord> it = crb.build(csr).iterator()) {
+        try (CloseableIterator<CsvRecord> it = crb.ofCsvRecord(csr).iterator()) {
             it.forEachRemaining(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
 
         csr = supp.get();
-        try (Stream<CsvRecord> stream = crb.build(csr).stream()) {
+        try (Stream<CsvRecord> stream = crb.ofCsvRecord(csr).stream()) {
             stream.forEach(consumer);
         }
         assertThat(csr.isClosed()).isTrue();
@@ -346,14 +346,14 @@ class CsvReaderTest {
 
     @Test
     void closeStringNoException() {
-        assertThatCode(() -> crb.build("foo").close())
+        assertThatCode(() -> crb.ofCsvRecord("foo").close())
             .doesNotThrowAnyException();
     }
 
     @Test
     void spliterator() {
         final Spliterator<CsvRecord> spliterator =
-            crb.build("a,b,c\n1,2,3").spliterator();
+            crb.ofCsvRecord("a,b,c\n1,2,3").spliterator();
 
         assertThat(spliterator.trySplit()).isNull();
         assertThat(spliterator.estimateSize()).isEqualTo(Long.MAX_VALUE);
@@ -373,7 +373,7 @@ class CsvReaderTest {
 
     @Test
     void parallelDistinct() {
-        assertThat(crb.build("foo\nfoo").stream().parallel().distinct().count())
+        assertThat(crb.ofCsvRecord("foo\nfoo").stream().parallel().distinct().count())
             .isEqualTo(2);
     }
 
@@ -381,14 +381,14 @@ class CsvReaderTest {
 
     @Test
     void closeException() {
-        assertThatThrownBy(() -> crb.build(new UncloseableReader(new StringReader("foo"))).stream().close())
+        assertThatThrownBy(() -> crb.ofCsvRecord(new UncloseableReader(new StringReader("foo"))).stream().close())
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("java.io.IOException: Cannot close");
     }
 
     @Test
     void unreadable() {
-        assertThatThrownBy(() -> crb.build(new UnreadableReader()).iterator().next())
+        assertThatThrownBy(() -> crb.ofCsvRecord(new UnreadableReader()).iterator().next())
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(IOException.class)
@@ -397,13 +397,13 @@ class CsvReaderTest {
 
     @Test
     void fieldCount() {
-        assertThat(crb.build("foo,bar").iterator().next().getFieldCount()).isEqualTo(2);
+        assertThat(crb.ofCsvRecord("foo,bar").iterator().next().getFieldCount()).isEqualTo(2);
     }
 
     // test helpers
 
     private List<CsvRecord> readAll(final String data) {
-        return crb.build(data).stream().collect(Collectors.toList());
+        return crb.ofCsvRecord(data).stream().collect(Collectors.toList());
     }
 
 }

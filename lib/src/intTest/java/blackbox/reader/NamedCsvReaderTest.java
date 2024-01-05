@@ -1,14 +1,21 @@
 package blackbox.reader;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.MapEntry.entry;
 import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
@@ -106,8 +113,8 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader() {
-        final var recordHandler = CsvCallbackHandlers.ofNamedCsvRecord("h1", "h2");
-        final var csvReader = CsvReader.builder().build("foo,bar", recordHandler);
+        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord("h1", "h2");
+        final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
             .singleElement(NAMED_CSV_RECORD)
             .fields()
@@ -116,8 +123,8 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader2() {
-        final var recordHandler = CsvCallbackHandlers.ofNamedCsvRecord(List.of("h1", "h2"));
-        final var csvReader = CsvReader.builder().build("foo,bar", recordHandler);
+        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord(List.of("h1", "h2"));
+        final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
             .singleElement(NAMED_CSV_RECORD)
             .fields()
@@ -129,7 +136,7 @@ class NamedCsvReaderTest {
     @Test
     void commentStrategyNone() {
         final var csvReader = CsvReader.builder()
-            .build("#foo\nbar\n123", CsvCallbackHandlers.ofNamedCsvRecord());
+            .ofNamedCsvRecord("#foo\nbar\n123");
         assertThat(csvReader.stream())
             .satisfiesExactly(
                 c -> NamedCsvRecordAssert.assertThat(c).fields().containsExactly(entry("#foo", "bar")),
@@ -141,7 +148,7 @@ class NamedCsvReaderTest {
     void commentStrategySkip() {
         final var csvReader = CsvReader.builder()
             .commentStrategy(CommentStrategy.SKIP)
-            .build("#foo\nbar\n123", CsvCallbackHandlers.ofNamedCsvRecord());
+            .ofNamedCsvRecord("#foo\nbar\n123");
         assertThat(csvReader.stream())
             .satisfiesExactly(
                 c -> NamedCsvRecordAssert.assertThat(c).fields().containsExactly(entry("bar", "123"))
@@ -152,7 +159,7 @@ class NamedCsvReaderTest {
     void commentStrategyRead() {
         final var csvReader = CsvReader.builder()
             .commentStrategy(CommentStrategy.READ)
-            .build("#comment1\nhead1\n#comment2\nvalue1", CsvCallbackHandlers.ofNamedCsvRecord());
+            .ofNamedCsvRecord("#comment1\nhead1\n#comment2\nvalue1");
         assertThat(csvReader.stream())
             .satisfiesExactly(
                 c -> NamedCsvRecordAssert.assertThat(c).isComment().field(0).isEqualTo("comment1"),
@@ -161,10 +168,58 @@ class NamedCsvReaderTest {
             );
     }
 
+    // Builder methods
+
+    @Test
+    void string() {
+        assertThat(CsvReader.builder().ofNamedCsvRecord("h1,h2\nv1,v2").stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .isStartingLineNumber(2)
+            .isNotComment()
+            .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+    }
+
+    @Test
+    void reader() {
+        assertThat(CsvReader.builder().ofNamedCsvRecord(new StringReader("h1,h2\nv1,v2")).stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .isStartingLineNumber(2)
+            .isNotComment()
+            .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+    }
+
+    @Test
+    void path(@TempDir final Path tempDir) throws IOException {
+        final Path file = tempDir.resolve("fastcsv.csv");
+        Files.write(file, "h1,h2\nv1,v2".getBytes(UTF_8));
+
+        try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file).stream()) {
+            assertThat(stream)
+                .singleElement(NAMED_CSV_RECORD)
+                .isStartingLineNumber(2)
+                .isNotComment()
+                .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+        }
+    }
+
+    @Test
+    void pathCharset(@TempDir final Path tempDir) throws IOException {
+        final Path file = tempDir.resolve("fastcsv.csv");
+        Files.write(file, "h1,h2\nv1,v2".getBytes(UTF_8));
+
+        try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file, UTF_8).stream()) {
+            assertThat(stream)
+                .singleElement(NAMED_CSV_RECORD)
+                .isStartingLineNumber(2)
+                .isNotComment()
+                .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+        }
+    }
+
     // test helpers
 
     private CsvReader<NamedCsvRecord> parse(final String data) {
-        return CsvReader.builder().build(data, CsvCallbackHandlers.ofNamedCsvRecord());
+        return CsvReader.builder().build(CsvCallbackHandlers.ofNamedCsvRecord(), data);
     }
 
 }

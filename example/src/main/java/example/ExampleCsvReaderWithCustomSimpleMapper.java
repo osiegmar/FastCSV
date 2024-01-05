@@ -17,7 +17,7 @@ public class ExampleCsvReaderWithCustomSimpleMapper {
         );
 
         System.out.println("Mapping data with simple mapper callback handler:");
-        for (final Person person : CsvReader.builder().build(DATA, mapper)) {
+        for (final Person person : CsvReader.builder().build(mapper, DATA)) {
             System.out.println(person);
         }
     }

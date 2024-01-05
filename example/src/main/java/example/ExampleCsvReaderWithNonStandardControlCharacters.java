@@ -13,7 +13,7 @@ public class ExampleCsvReaderWithNonStandardControlCharacters {
         CsvReader.builder()
             .fieldSeparator(';')
             .quoteCharacter('\'')
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(System.out::println);
     }
 

@@ -13,19 +13,19 @@ public class ExampleCsvReaderWithComments {
     public static void main(final String[] args) {
         System.out.println("Reading data with no special treatment for comments:");
         CsvReader.builder()
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(System.out::println);
 
         System.out.println("Reading data while skipping comments:");
         CsvReader.builder()
             .commentStrategy(CommentStrategy.SKIP)
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(System.out::println);
 
         System.out.println("Reading data while reading comments:");
         CsvReader.builder()
             .commentStrategy(CommentStrategy.READ)
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(rec -> {
                 if (rec.isComment()) {
                     System.out.println("Comment: " + rec.getField(0));

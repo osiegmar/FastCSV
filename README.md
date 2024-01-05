@@ -88,14 +88,14 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 ### Iterative reading of some CSV data from a string
 
 ```java
-CsvReader.builder().build("foo1,bar1\nfoo2,bar2")
+CsvReader.builder().ofCsvRecord("foo1,bar1\nfoo2,bar2")
     .forEach(System.out::println);
 ```
 
 ### Iterative reading of a CSV file
 
 ```java
-try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
+try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
     csv.forEach(System.out::println);
 }
 ```
@@ -103,14 +103,17 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
 ### Iterative reading of some CSV data with a header
 
 ```java
-CsvReader.builder().build("header 1,header 2\nfield 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord())
+CsvReader.builder().ofNamedCsvRecord("header 1,header 2\nfield 1,field 2")
     .forEach(rec -> System.out.println(rec.getField("header2")));
 ```
 
 ### Iterative reading of some CSV data with a custom header
 
 ```java
-CsvReader.builder().build("field 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord("header 1", "header 2"))
+CsvCallbackHandler<NamedCsvRecord> callbackHandler =
+    CsvCallbackHandlers.ofNamedCsvRecord("header1", "header2");
+
+CsvReader.builder().build(callbackHandler, "field 1,field 2")
     .forEach(rec -> System.out.println(rec.getField("header2")));
 ```
 
@@ -133,7 +136,7 @@ CsvReader.builder()
 ### Indexed reading of a CSV file
 
 ```java
-try (IndexedCsvReader csv = IndexedCsvReader.builder().build(file)) {
+try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
     CsvIndex index = csv.index();
 
     System.out.println("Items of last page:");

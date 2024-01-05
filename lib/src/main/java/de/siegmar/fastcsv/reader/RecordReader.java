@@ -30,7 +30,7 @@ final class RecordReader implements Closeable {
     private static final int STATUS_DATA_FIELD = 1;
     private static final int STATUS_RESET = 0;
 
-    private final CsvCallbackHandler<?> recordHandler;
+    private final CsvCallbackHandler<?> callbackHandler;
     private final FieldModifier fieldModifier;
     private final CsvBuffer csvBuffer;
     private final char fsep;
@@ -44,10 +44,10 @@ final class RecordReader implements Closeable {
     private int status;
     private boolean finished;
 
-    RecordReader(final CsvCallbackHandler<?> recordHandler, final FieldModifier fieldModifier, final Reader reader,
+    RecordReader(final CsvCallbackHandler<?> callbackHandler, final FieldModifier fieldModifier, final Reader reader,
                  final char fieldSeparator, final char quoteCharacter, final CommentStrategy commentStrategy,
                  final char commentCharacter) {
-        this.recordHandler = recordHandler;
+        this.callbackHandler = callbackHandler;
         this.fieldModifier = fieldModifier;
         csvBuffer = new CsvBuffer(reader);
         this.fsep = fieldSeparator;
@@ -56,10 +56,10 @@ final class RecordReader implements Closeable {
         this.cChar = commentCharacter;
     }
 
-    RecordReader(final CsvCallbackHandler<?> recordHandler, final FieldModifier fieldModifier, final String data,
+    RecordReader(final CsvCallbackHandler<?> callbackHandler, final FieldModifier fieldModifier, final String data,
                  final char fieldSeparator, final char quoteCharacter, final CommentStrategy commentStrategy,
                  final char commentCharacter) {
-        this.recordHandler = recordHandler;
+        this.callbackHandler = callbackHandler;
         this.fieldModifier = fieldModifier;
         csvBuffer = new CsvBuffer(data);
         this.fsep = fieldSeparator;
@@ -78,7 +78,7 @@ final class RecordReader implements Closeable {
         startingLineNumber += lines;
         lines = 1;
         fieldIdx = 0;
-        recordHandler.beginRecord(startingLineNumber);
+        callbackHandler.beginRecord(startingLineNumber);
 
         do {
             if (csvBuffer.len == csvBuffer.pos && !csvBuffer.fetchData()) {
@@ -237,15 +237,15 @@ final class RecordReader implements Closeable {
             // field with quotes
             final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, quoteCharacter);
             final String str = new String(lBuf, lBegin + 1, lPos - 1 - shift);
-            recordHandler.addField(fieldModifier != null ? modify(str, true) : str, true);
+            callbackHandler.addField(fieldModifier != null ? modify(str, true) : str, true);
         } else {
             // field without quotes
             final String str = new String(lBuf, lBegin, lPos);
 
             if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
-                recordHandler.setComment(fieldModifier != null ? modifyComment(str) : str);
+                callbackHandler.setComment(fieldModifier != null ? modifyComment(str) : str);
             } else {
-                recordHandler.addField(fieldModifier != null ? modify(str, false) : str, false);
+                callbackHandler.addField(fieldModifier != null ? modify(str, false) : str, false);
             }
         }
 

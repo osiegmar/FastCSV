@@ -21,7 +21,7 @@ see the [changelog](CHANGELOG.md).
 **Reading CSV records:**
 
 ```java
-try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
+try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
     csv.forEach(System.out::println);
 }
 ```
@@ -41,6 +41,7 @@ try (CsvWriter csv = CsvWriter.builder().build(file)) {
 - In `CsvReaderBuilder`:
   - `skipEmptyRows` is now `skipEmptyLines`
   - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning!)
+  - `build` methods with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
 - In `CsvRecord` (former `CsvRow`):
   - `getOriginalLineNumber` is now `getStartingLineNumber`
 
@@ -50,7 +51,17 @@ A distinct `NamedCsvReader` is no longer needed as the `CsvReader` now supports 
 processing.
 
 ```java
-CsvReader.builder().build("header 1,header 2\nfield 1,field 2", CsvCallbackHandlers.ofNamedCsvRecord())
+CsvReader.builder().ofNamedCsvRecord("header 1,header 2\nfield 1,field 2")
+    .forEach(rec -> System.out.println(rec.getField("header2")));
+```
+
+or with a custom header:
+
+```java
+CsvCallbackHandler<NamedCsvRecord> callbackHandler =
+    CsvCallbackHandlers.ofNamedCsvRecord("header1", "header2");
+
+CsvReader.builder().build(callbackHandler, "field 1,field 2")
     .forEach(rec -> System.out.println(rec.getField("header2")));
 ```
 

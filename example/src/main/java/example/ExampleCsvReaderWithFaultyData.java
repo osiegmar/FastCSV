@@ -13,20 +13,20 @@ public class ExampleCsvReaderWithFaultyData {
     public static void main(final String[] args) {
         System.out.println("Reading data with lenient (default) settings:");
         CsvReader.builder()
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(System.out::println);
 
         System.out.println("Reading data while not skipping empty lines:");
         CsvReader.builder()
             .skipEmptyLines(false)
-            .build(DATA)
+            .ofCsvRecord(DATA)
             .forEach(System.out::println);
 
         System.out.println("Reading data while not ignoring different field counts:");
         try {
             CsvReader.builder()
                 .ignoreDifferentFieldCount(false)
-                .build(DATA)
+                .ofCsvRecord(DATA)
                 .forEach(System.out::println);
         } catch (final CsvParseException e) {
             System.out.println(e.getMessage());

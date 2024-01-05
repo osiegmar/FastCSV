@@ -57,9 +57,9 @@ public class ExampleIndexedCsvReader {
     private static void simple(final Path file) throws IOException {
         System.out.println("# Simple read");
 
-        final IndexedCsvReader csv = IndexedCsvReader.builder()
+        final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
             .pageSize(5)
-            .build(file);
+            .ofCsvRecord(file);
 
         try (csv) {
             final CsvIndex index = csv.index();
@@ -79,17 +79,17 @@ public class ExampleIndexedCsvReader {
 
         final CsvIndex csvIndex = IndexedCsvReader.builder()
             .pageSize(5)
-            .build(file)
+            .ofCsvRecord(file)
             .index();
 
         System.out.printf("Indexed %,d records%n", csvIndex.recordCount());
 
         // Store index for the given file somewhere, and use it later ...
 
-        final IndexedCsvReader csv = IndexedCsvReader.builder()
+        final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
             .pageSize(5)
             .index(csvIndex)
-            .build(file);
+            .ofCsvRecord(file);
 
         try (csv) {
             System.out.println("Show records of last page");
@@ -118,9 +118,9 @@ public class ExampleIndexedCsvReader {
             },
             0, 250, TimeUnit.MILLISECONDS);
 
-        final IndexedCsvReader csv = IndexedCsvReader.builder()
+        final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
             .statusListener(statusListener)
-            .build(file);
+            .ofCsvRecord(file);
 
         try (csv) {
             System.out.printf("Indexed %,d records%n", csv.index().recordCount());
@@ -130,13 +130,13 @@ public class ExampleIndexedCsvReader {
     }
 
     private static void advancedConfiguration(final Path file) throws IOException {
-        final IndexedCsvReader csv = IndexedCsvReader.builder()
+        final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
             .fieldSeparator(',')
             .quoteCharacter('"')
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
             .pageSize(5)
-            .build(file);
+            .ofCsvRecord(file);
 
         try (csv) {
             final List<CsvRecord> csvRecords = csv.readPage(2);

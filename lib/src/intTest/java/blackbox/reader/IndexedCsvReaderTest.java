@@ -1,9 +1,11 @@
 package blackbox.reader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static testutil.CsvRecordAssert.CSV_RECORD;
+import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvIndex;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
@@ -69,7 +72,7 @@ class IndexedCsvReaderTest {
     void readerToString() throws IOException {
         final Path file = prepareTestFile(TEST_STRING);
 
-        assertThat(singlePageBuilder().build(file)).asString()
+        assertThat(singlePageBuilder().ofCsvRecord(file)).asString()
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
                     + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, pageSize=1, "
                     + "index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, "
@@ -103,8 +106,42 @@ class IndexedCsvReaderTest {
         }
     }
 
-    private IndexedCsvReader buildSinglePage(final String data) throws IOException {
-        return singlePageBuilder().build(prepareTestFile(data));
+    @Test
+    void explicitCharset() throws IOException {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), UTF_8)) {
+            final CsvIndex index = csv.index();
+
+            assertThat(index.pageCount())
+                .isEqualTo(3);
+        }
+    }
+
+    @Test
+    void namedCsv() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord();
+
+        try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
+            final CsvIndex index = csv.index();
+
+            assertThat(index.pageCount())
+                .isEqualTo(2);
+
+            assertThat(index.recordCount())
+                .isEqualTo(3L);
+
+            assertThat(csv.readPage(0))
+                .singleElement(NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+
+            assertThat(csv.readPage(1))
+                .singleElement(NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v2"));
+        }
+    }
+
+    private IndexedCsvReader<CsvRecord> buildSinglePage(final String data) throws IOException {
+        return singlePageBuilder().ofCsvRecord(prepareTestFile(data));
     }
 
     private static IndexedCsvReader.IndexedCsvReaderBuilder singlePageBuilder() {
@@ -173,17 +210,17 @@ class IndexedCsvReaderTest {
             final String expectedMessage =
                 "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)";
 
-            softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator('"').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator('"').ofCsvRecord(emptyFile))
                 .as("fieldSeparator")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, "\"", "\"", "#");
 
-            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter('#').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter('#').ofCsvRecord(emptyFile))
                 .as("quoteCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "#", "#");
 
-            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter(',').build(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter(',').ofCsvRecord(emptyFile))
                 .as("commentCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "\"", ",");
@@ -191,7 +228,7 @@ class IndexedCsvReaderTest {
 
         @Test
         void nullFile() {
-            assertThatThrownBy(() -> singlePageBuilder().build(null))
+            assertThatThrownBy(() -> singlePageBuilder().ofCsvRecord(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("file must not be null");
         }
@@ -199,7 +236,7 @@ class IndexedCsvReaderTest {
         @Test
         void nonExistingFile() {
             assertThatThrownBy(() -> singlePageBuilder()
-                .build(Path.of(NON_EXISTENT_FILENAME)))
+                .ofCsvRecord(Path.of(NON_EXISTENT_FILENAME)))
                 .isInstanceOf(NoSuchFileException.class)
                 .hasMessage(NON_EXISTENT_FILENAME);
         }
@@ -210,7 +247,7 @@ class IndexedCsvReaderTest {
 
             assertThatThrownBy(() -> singlePageBuilder()
                 .statusListener(statusListener)
-                .build(Path.of(NON_EXISTENT_FILENAME)));
+                .ofCsvRecord(Path.of(NON_EXISTENT_FILENAME)));
 
             assertThat(statusListener.getThrowable())
                 .isInstanceOf(NoSuchFileException.class)
@@ -234,7 +271,7 @@ class IndexedCsvReaderTest {
         @ParameterizedTest
         @NullSource
         void nullCharset(final Charset charset) {
-            assertThatThrownBy(() -> singlePageBuilder().build(Paths.get("/tmp"), charset))
+            assertThatThrownBy(() -> singlePageBuilder().ofCsvRecord(Paths.get("/tmp"), charset))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("charset must not be null");
         }
@@ -254,10 +291,10 @@ class IndexedCsvReaderTest {
                 IndexedCsvReader.builder();
 
             final CsvIndex index = builder
-                .build(file)
+                .ofCsvRecord(file)
                 .index();
 
-            assertThatThrownBy(() -> builder.index(index).fieldSeparator(';').build(file))
+            assertThatThrownBy(() -> builder.index(index).fieldSeparator(';').ofCsvRecord(file))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Index does not match! Expected: bomHeaderLength=0, fileSize=3, fieldSeparator=59, "
                     + "quoteCharacter=34, commentStrategy=NONE, commentCharacter=35; Actual: bomHeaderLength=0, "
@@ -275,7 +312,7 @@ class IndexedCsvReaderTest {
 
             final var csv = singlePageBuilder()
                 .commentStrategy(CommentStrategy.READ)
-                .build(file);
+                .ofCsvRecord(file);
 
             try (csv) {
                 assertThat(csv.readPage(0))
@@ -302,9 +339,9 @@ class IndexedCsvReaderTest {
         void noneComment() throws IOException {
             final Path file = prepareTestFile("foo\n#a,b,c\nbaz");
 
-            final IndexedCsvReader csv = singlePageBuilder()
+            final IndexedCsvReader<CsvRecord> csv = singlePageBuilder()
                 .commentStrategy(CommentStrategy.NONE)
-                .build(file);
+                .ofCsvRecord(file);
 
             try (csv) {
                 assertThat(csv.readPage(0))
@@ -345,7 +382,7 @@ class IndexedCsvReaderTest {
 
             final IndexedCsvReader csv = singlePageBuilder()
                 .statusListener(statusListener)
-                .build(prepareTestFile("foo\nbar"));
+                .ofCsvRecord(prepareTestFile("foo\nbar"));
 
             try (csv) {
                 assertThat(statusListener.getFileSize()).isEqualTo(7L);
@@ -364,7 +401,7 @@ class IndexedCsvReaderTest {
 
             final IndexedCsvReader csv = singlePageBuilder()
                 .statusListener(statusListener)
-                .build(prepareTestFile(""));
+                .ofCsvRecord(prepareTestFile(""));
 
             try (csv) {
                 assertThat(statusListener).asString()
@@ -435,9 +472,9 @@ class IndexedCsvReaderTest {
 
         @Test
         void start1End2() throws IOException {
-            final IndexedCsvReader csv = IndexedCsvReader.builder()
+            final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
                 .pageSize(2)
-                .build(prepareTestFile("1\n2a,2b\n\"3\nfoo\"\n4\n5"));
+                .ofCsvRecord(prepareTestFile("1\n2a,2b\n\"3\nfoo\"\n4\n5"));
 
             try (csv) {
                 final CsvIndex index = csv.index();
@@ -479,7 +516,7 @@ class IndexedCsvReaderTest {
 
         private List<CsvRecord> readRecords(final int page, final int pageSize) throws IOException {
             return IndexedCsvReader.builder().pageSize(pageSize)
-                .build(prepareTestFile("1\n2\n3\n4\n5"))
+                .ofCsvRecord(prepareTestFile("1\n2\n3\n4\n5"))
                 .readPage(page);
         }
 
@@ -493,8 +530,8 @@ class IndexedCsvReaderTest {
             final Path file = prepareTestFile(TEST_STRING);
 
             final CsvIndex expectedIndex;
-            try (IndexedCsvReader expectedCsv = singlePageBuilder()
-                .build(file)) {
+            try (IndexedCsvReader<CsvRecord> expectedCsv = singlePageBuilder()
+                .ofCsvRecord(file)) {
 
                 assertThat(expectedCsv.readPage(0))
                     .singleElement()
@@ -511,9 +548,9 @@ class IndexedCsvReaderTest {
                 .hasSameHashCodeAs(expectedIndex)
                 .isEqualTo(expectedIndex);
 
-            try (IndexedCsvReader actualCsv = singlePageBuilder()
+            try (IndexedCsvReader<CsvRecord> actualCsv = singlePageBuilder()
                 .index(actualIndex)
-                .build(file)) {
+                .ofCsvRecord(file)) {
 
                 assertThat(actualCsv.readPage(0))
                     .singleElement()
