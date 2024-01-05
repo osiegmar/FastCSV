@@ -27,7 +27,7 @@ import de.siegmar.fastcsv.util.Util;
  * <p>
  * Example use:
  * {@snippet :
- * try (CsvReader<CsvRecord> csv = CsvReader.builder().build(file)) {
+ * try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
  *     for (CsvRecord csvRecord : csv) {
  *         // ...
  *     }
@@ -36,7 +36,7 @@ import de.siegmar.fastcsv.util.Util;
  * <p>
  * Example for named records:
  * {@snippet :
- * try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().build(file, CsvCallbackHandlers.ofNamedCsvRecord())) {
+ * try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().ofNamedCsvRecord(file)) {
  *     for (NamedCsvRecord csvRecord : csv) {
  *         // ...
  *     }
