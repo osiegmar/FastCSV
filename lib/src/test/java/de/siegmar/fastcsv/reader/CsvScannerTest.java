@@ -161,7 +161,7 @@ class CsvScannerTest {
             .replace("$", newLine);
     }
 
-    @SuppressWarnings("PMD.AssignmentInOperand")
+    @SuppressWarnings("PMD.AvoidReassigningLoopVariables")
     private static List<Integer> indexesOf(final String str, final String newLine) {
         final List<Integer> indexes = new ArrayList<>();
 

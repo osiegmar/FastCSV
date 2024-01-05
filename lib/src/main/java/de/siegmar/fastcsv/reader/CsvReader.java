@@ -298,13 +298,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         public T next() {
             if (!fetched) {
                 fetchedRecord = fetch();
-                fetched = true;
             }
             if (fetchedRecord == null) {
                 throw new NoSuchElementException();
             }
-            fetched = false;
 
+            fetched = false;
             return fetchedRecord;
         }
 

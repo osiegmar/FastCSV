@@ -17,9 +17,6 @@
         <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
         <exclude name="JUnitTestsShouldIncludeAssert"/>
     </rule>
-    <rule ref="category/java/errorprone.xml">
-        <exclude name="DataflowAnomalyAnalysis"/>
-    </rule>
     <rule ref="category/java/performance.xml" />
 
 </ruleset>

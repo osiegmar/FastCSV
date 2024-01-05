@@ -22,6 +22,10 @@ java {
     withSourcesJar()
 }
 
+tasks.compileJava {
+    options.release.set(11)
+}
+
 tasks.javadoc {
     options.jFlags = listOf("-Duser.language=en")
 }
