@@ -179,13 +179,13 @@ CsvWriter.builder()
     .lineDelimiter(LineDelimiter.LF);
 ```
 
-## More examples
+## Further reading
 
-For more examples see [example/src/main/java/example/](example/src/main/java/example).
-
-## Upgrading from an older version
-
-Please see [UPGRADING.md](UPGRADING.md) for a list of breaking changes in version 3 and how to upgrade.
+- [Examples](example/src/main/java/example)
+- [JavaDoc](https://javadoc.io/doc/de.siegmar/fastcsv)
+- [How to upgrade](UPGRADING.md)
+- [Changelog](CHANGELOG.md)
+- [Design & Architecture](doc/architecture.md)
 
 ---
 
