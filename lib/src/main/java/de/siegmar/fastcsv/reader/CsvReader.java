@@ -431,6 +431,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          *
          * @param data the data to read.
          * @return a new CsvReader of CsvRecord - never {@code null}.
+         * @throws NullPointerException if data is {@code null}
          */
         public CsvReader<CsvRecord> ofCsvRecord(final String data) {
             return build(new CsvRecordHandler(), data);
@@ -491,6 +492,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          *
          * @param data the data to read.
          * @return a new CsvReader of CsvRecord - never {@code null}.
+         * @throws NullPointerException if data is {@code null}
          */
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final String data) {
             return build(new NamedCsvRecordHandler(), data);
@@ -543,7 +545,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
          * @param reader          the data source to read from.
          * @return a new CsvReader - never {@code null}.
-         * @throws NullPointerException if reader is {@code null}
+         * @throws NullPointerException if callbackHandler or reader is {@code null}
          */
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
@@ -562,7 +564,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
          * @param data            the data to read.
          * @return a new CsvReader - never {@code null}.
-         * @throws NullPointerException if data is {@code null}
+         * @throws NullPointerException if callbackHandler or data is {@code null}
          */
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
@@ -584,7 +586,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @param file            the file to read data from.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if file or charset is {@code null}
+         * @throws NullPointerException if callbackHandler or file is {@code null}
          */
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file) throws IOException {
             return build(callbackHandler, file, StandardCharsets.UTF_8);
@@ -601,7 +603,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          *                        when no BOM header was found.
          * @return a new CsvReader - never {@code null}. Don't forget to close it!
          * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if file or charset is {@code null}
+         * @throws NullPointerException if callbackHandler, file or charset is {@code null}
          */
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                       final Path file, final Charset charset) throws IOException {
