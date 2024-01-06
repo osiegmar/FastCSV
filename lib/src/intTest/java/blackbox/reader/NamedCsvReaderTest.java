@@ -192,7 +192,7 @@ class NamedCsvReaderTest {
     @Test
     void path(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
-        Files.write(file, "h1,h2\nv1,v2".getBytes(UTF_8));
+        Files.writeString(file, "h1,h2\nv1,v2");
 
         try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file).stream()) {
             assertThat(stream)
@@ -206,7 +206,7 @@ class NamedCsvReaderTest {
     @Test
     void pathCharset(@TempDir final Path tempDir) throws IOException {
         final Path file = tempDir.resolve("fastcsv.csv");
-        Files.write(file, "h1,h2\nv1,v2".getBytes(UTF_8));
+        Files.writeString(file, "h1,h2\nv1,v2");
 
         try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file, UTF_8).stream()) {
             assertThat(stream)

@@ -177,13 +177,14 @@ class CsvReaderTest {
     void lineNumbering() {
         final Stream<CsvRecord> stream = crb
             .commentStrategy(CommentStrategy.SKIP)
-            .ofCsvRecord(
-                "line 1\n"
-                    + "line 2\r"
-                    + "line 3\r\n"
-                    + "\"line 4\rwith\r\nand\n\"\n"
-                    + "#line 8\n"
-                    + "line 9"
+            .ofCsvRecord("""
+                line 1
+                line 2\rline 3\r
+                "line 4\rwith\r
+                and
+                "
+                #line 8
+                line 9"""
             ).stream();
 
         assertThat(stream)

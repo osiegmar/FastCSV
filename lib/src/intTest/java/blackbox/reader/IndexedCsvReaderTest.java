@@ -380,7 +380,7 @@ class IndexedCsvReaderTest {
         void finalStatus() throws IOException {
             final var statusListener = new CollectingStatusListener();
 
-            final IndexedCsvReader csv = singlePageBuilder()
+            final IndexedCsvReader<CsvRecord> csv = singlePageBuilder()
                 .statusListener(statusListener)
                 .ofCsvRecord(prepareTestFile("foo\nbar"));
 
@@ -399,7 +399,7 @@ class IndexedCsvReaderTest {
         void emptyFileStatus() throws IOException {
             final var statusListener = new CollectingStatusListener();
 
-            final IndexedCsvReader csv = singlePageBuilder()
+            final IndexedCsvReader<CsvRecord> csv = singlePageBuilder()
                 .statusListener(statusListener)
                 .ofCsvRecord(prepareTestFile(""));
 

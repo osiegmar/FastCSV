@@ -44,19 +44,12 @@ class CsvScannerTest {
     void genericData(final String line, final List<String> attributes, final String newLine, final int lineNo) {
         CommentStrategy commentStrategy = CommentStrategy.READ;
         for (final String attribute : attributes) {
-            switch (attribute) {
-                case "COMMENT_NONE":
-                    commentStrategy = CommentStrategy.NONE;
-                    break;
-                case "COMMENT_READ":
-                    commentStrategy = CommentStrategy.READ;
-                    break;
-                case "COMMENT_SKIP":
-                    commentStrategy = CommentStrategy.SKIP;
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown attribute: " + attributes);
-            }
+            commentStrategy = switch (attribute) {
+                case "COMMENT_NONE" -> CommentStrategy.NONE;
+                case "COMMENT_READ" -> CommentStrategy.READ;
+                case "COMMENT_SKIP" -> CommentStrategy.SKIP;
+                default -> throw new IllegalStateException("Unknown attribute: " + attributes);
+            };
         }
 
         final List<Integer> actual = scan(line, newLine, commentStrategy);
