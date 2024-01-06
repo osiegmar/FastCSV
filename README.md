@@ -127,8 +127,7 @@ CsvReader.builder()
     .commentCharacter('#')
     .skipEmptyLines(true)
     .ignoreDifferentFieldCount(false)
-    .detectBomHeader(false)
-    .fieldModifier(FieldModifiers.TRIM);
+    .detectBomHeader(false);
 ```
 
 ## IndexedCsvReader examples
