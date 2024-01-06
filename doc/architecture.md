@@ -80,6 +80,8 @@ Serving as the interface between the `CsvReader` and the `CsvParser`, the `CsvCa
 processing and materializing fields. It initiates the materialization of records as soon as all fields of a record are
 parsed. Leveraging the `FieldModifier`, the `CsvCallbackHandler` can optionally modify fields, such as trimming or
 altering case, before their materialization.
+One implementation of the `CsvCallbackHandler` is the `CsvRecordCallbackHandler` which materializes records as
+`CsvRecord` objects.
 
 #### FieldModifier
 
@@ -87,8 +89,8 @@ The `FieldModifier` is employed to modify fields, providing capabilities such as
 
 #### CsvRecord
 
-The `CsvRecord` represents a single CSV record, providing access to its fields. It is the default implementation of the
-`CsvCallbackHandler` interface.
+The `CsvRecord` represents a single CSV record, providing access to its fields.
+It is built by the `CsvRecordCallbackHandler`.
 
 ### Logic
 
