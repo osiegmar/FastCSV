@@ -54,7 +54,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final int pageSize;
     private final RandomAccessFile raf;
     private final CsvCallbackHandler<T> csvRecordHandler;
-    private final RecordReader recordReader;
+    private final CsvParser csvParser;
     private final CsvIndex csvIndex;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
@@ -100,9 +100,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        recordReader = new RecordReader(csvRecordHandler, fieldModifier,
-            new InputStreamReader(new RandomAccessFileInputStream(raf), charset),
-            fieldSeparator, quoteCharacter, commentStrategy, commentCharacter);
+        csvParser = new CsvParser(fieldModifier, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+            csvRecordHandler, new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
     private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
@@ -211,9 +210,9 @@ public final class IndexedCsvReader<T> implements Closeable {
         final List<T> ret = new ArrayList<>(pageSize);
         synchronized (raf) {
             raf.seek(page.offset());
-            recordReader.reset(page.startingLineNumber() - 1);
+            csvParser.reset(page.startingLineNumber() - 1);
 
-            for (int i = 0; i < pageSize && recordReader.read(); i++) {
+            for (int i = 0; i < pageSize && csvParser.parse(); i++) {
                 final T rec = csvRecordHandler.buildRecord();
                 if (rec != null) {
                     ret.add(rec);
@@ -226,7 +225,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
     @Override
     public void close() throws IOException {
-        recordReader.close();
+        csvParser.close();
     }
 
     @Override

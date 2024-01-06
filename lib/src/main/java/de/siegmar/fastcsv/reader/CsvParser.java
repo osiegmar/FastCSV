@@ -2,12 +2,15 @@ package de.siegmar.fastcsv.reader;
 
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
+import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
 import de.siegmar.fastcsv.util.Limits;
+import de.siegmar.fastcsv.util.Preconditions;
+import de.siegmar.fastcsv.util.Util;
 
 /*
  * This class contains ugly, performance optimized code - be warned!
@@ -20,7 +23,7 @@ import de.siegmar.fastcsv.util.Limits;
     "checkstyle:NestedIfDepth",
     "PMD.UnusedAssignment"
 })
-final class RecordReader implements Closeable {
+final class CsvParser implements Closeable {
 
     private static final int STATUS_LAST_CHAR_WAS_CR = 32;
     private static final int STATUS_COMMENTED_RECORD = 16;
@@ -30,13 +33,14 @@ final class RecordReader implements Closeable {
     private static final int STATUS_DATA_FIELD = 1;
     private static final int STATUS_RESET = 0;
 
-    private final CsvCallbackHandler<?> callbackHandler;
     private final FieldModifier fieldModifier;
-    private final CsvBuffer csvBuffer;
     private final char fsep;
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
+    private final CsvCallbackHandler<?> callbackHandler;
+    private final CsvBuffer csvBuffer;
+
     private long startingLineNumber;
     private int lines = 1;
     private int fieldIdx;
@@ -44,32 +48,48 @@ final class RecordReader implements Closeable {
     private int status;
     private boolean finished;
 
-    RecordReader(final CsvCallbackHandler<?> callbackHandler, final FieldModifier fieldModifier, final Reader reader,
-                 final char fieldSeparator, final char quoteCharacter, final CommentStrategy commentStrategy,
-                 final char commentCharacter) {
-        this.callbackHandler = callbackHandler;
+    CsvParser(final FieldModifier fieldModifier, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter,
+              final CsvCallbackHandler<?> callbackHandler, final Reader reader) {
+
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+
         this.fieldModifier = fieldModifier;
-        csvBuffer = new CsvBuffer(reader);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.callbackHandler = callbackHandler;
+        csvBuffer = new CsvBuffer(reader);
     }
 
-    RecordReader(final CsvCallbackHandler<?> callbackHandler, final FieldModifier fieldModifier, final String data,
-                 final char fieldSeparator, final char quoteCharacter, final CommentStrategy commentStrategy,
-                 final char commentCharacter) {
-        this.callbackHandler = callbackHandler;
+    CsvParser(final FieldModifier fieldModifier, final char fieldSeparator, final char quoteCharacter,
+              final CommentStrategy commentStrategy, final char commentCharacter,
+              final CsvCallbackHandler<?> callbackHandler, final String data) {
+
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+
         this.fieldModifier = fieldModifier;
-        csvBuffer = new CsvBuffer(data);
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.callbackHandler = callbackHandler;
+        csvBuffer = new CsvBuffer(data);
+    }
+
+    private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
+        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
+        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+            "Control characters must differ"
+                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+            fieldSeparator, quoteCharacter, commentCharacter);
     }
 
     @SuppressWarnings("checkstyle:ReturnCount")
-    boolean read() throws IOException {
+    boolean parse() throws IOException {
         if (finished) {
             // no more data available
             return false;

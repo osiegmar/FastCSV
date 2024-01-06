@@ -105,7 +105,7 @@ public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandle
         }
 
         if (idx != 0) {
-            // Can't happen with the current implementation of RecordReader
+            // Can't happen with the current implementation of CsvParser
             throw new IllegalStateException("Comment must be the first and only field in a record");
         }
 

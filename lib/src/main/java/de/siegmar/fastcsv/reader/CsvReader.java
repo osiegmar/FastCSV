@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import static de.siegmar.fastcsv.util.Util.containsDupe;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,9 +16,6 @@ import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import de.siegmar.fastcsv.util.Preconditions;
-import de.siegmar.fastcsv.util.Util;
 
 /**
  * This is the main class for reading CSV data.
@@ -47,8 +42,8 @@ import de.siegmar.fastcsv.util.Util;
  */
 public final class CsvReader<T> implements Iterable<T>, Closeable {
 
+    private final CsvParser csvParser;
     private final CsvCallbackHandler<T> callbackHandler;
-    private final RecordReader recordReader;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
     private final boolean ignoreDifferentFieldCount;
@@ -57,47 +52,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private int firstRecordFieldCount = -1;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvReader(final CsvCallbackHandler<T> callbackHandler, final Reader reader, final char fieldSeparator,
-              final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
-              final FieldModifier fieldModifier) {
+    CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler,
+              final CommentStrategy commentStrategy, final boolean skipEmptyLines,
+              final boolean ignoreDifferentFieldCount) {
 
-        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
-
+        this.csvParser = csvParser;
         this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
         this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
-
-        recordReader = new RecordReader(callbackHandler, fieldModifier, reader, fieldSeparator, quoteCharacter,
-            commentStrategy, commentCharacter);
-    }
-
-    @SuppressWarnings("checkstyle:ParameterNumber")
-    CsvReader(final CsvCallbackHandler<T> callbackHandler, final String data, final char fieldSeparator,
-              final char quoteCharacter, final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean skipEmptyLines, final boolean ignoreDifferentFieldCount,
-              final FieldModifier fieldModifier) {
-
-        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
-
-        this.callbackHandler = callbackHandler;
-        this.commentStrategy = commentStrategy;
-        this.skipEmptyLines = skipEmptyLines;
-        this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
-
-        recordReader = new RecordReader(callbackHandler, fieldModifier, data, fieldSeparator, quoteCharacter,
-            commentStrategy, commentCharacter);
-    }
-
-    private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
-        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
-        Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
-        Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
-        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ"
-                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-            fieldSeparator, quoteCharacter, commentCharacter);
     }
 
     /**
@@ -176,7 +139,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         "PMD.AssignmentInOperand"
     })
     private T fetchRecord() throws IOException {
-        while (recordReader.read()) {
+        while (csvParser.parse()) {
             final T csvRecord = callbackHandler.buildRecord();
 
             if (csvRecord == null) {
@@ -207,7 +170,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 } else if (fieldCount != firstRecordFieldCount) {
                     throw new CsvParseException(
                         String.format("Record %d has %d fields, but first record had %d fields",
-                            recordReader.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+                            csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
                 }
             }
 
@@ -221,7 +184,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     @Override
     public void close() throws IOException {
-        recordReader.close();
+        csvParser.close();
     }
 
     @Override
@@ -245,10 +208,10 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     private String buildExceptionMessage() {
-        return (recordReader.getStartingLineNumber() == 1)
+        return (csvParser.getStartingLineNumber() == 1)
             ? "Exception when reading first record"
             : String.format("Exception when reading record that started in line %d",
-            recordReader.getStartingLineNumber());
+            csvParser.getStartingLineNumber());
     }
 
     private class CsvSpliterator implements Spliterator<T> {
@@ -602,7 +565,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @throws NullPointerException if reader is {@code null}
          */
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
-            return newReader(callbackHandler, Objects.requireNonNull(reader, "reader must not be null"));
+            Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
+            Objects.requireNonNull(reader, "reader must not be null");
+
+            final CsvParser csvParser = new CsvParser(fieldModifier, fieldSeparator, quoteCharacter, commentStrategy,
+                commentCharacter, callbackHandler, reader);
+
+            return newReader(callbackHandler, csvParser);
         }
 
         /**
@@ -617,7 +586,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(data, "data must not be null");
-            return newReader(callbackHandler, data);
+
+            final CsvParser csvParser = new CsvParser(fieldModifier, fieldSeparator, quoteCharacter, commentStrategy,
+                commentCharacter, callbackHandler, data);
+
+            return newReader(callbackHandler, csvParser);
         }
 
         /**
@@ -659,17 +632,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 ? BomUtil.openReader(file, charset)
                 : new InputStreamReader(Files.newInputStream(file), charset);
 
-            return newReader(callbackHandler, reader);
+            return build(callbackHandler, reader);
         }
 
-        private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
-            return new CsvReader<>(callbackHandler, reader, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
-        }
-
-        private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final String data) {
-            return new CsvReader<>(callbackHandler, data, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, skipEmptyLines, ignoreDifferentFieldCount, fieldModifier);
+        private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final CsvParser csvParser) {
+            return new CsvReader<>(csvParser, callbackHandler,
+                commentStrategy, skipEmptyLines, ignoreDifferentFieldCount);
         }
 
         @Override
