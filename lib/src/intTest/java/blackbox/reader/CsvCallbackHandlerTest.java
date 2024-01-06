@@ -6,9 +6,12 @@ import static org.assertj.core.api.Assertions.entry;
 import org.junit.jupiter.api.Test;
 
 import de.siegmar.fastcsv.reader.CsvCallbackHandler;
-import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
+import de.siegmar.fastcsv.reader.StringArrayHandler;
 import testutil.CsvRecordAssert;
 import testutil.NamedCsvRecordAssert;
 
@@ -17,7 +20,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void csvRecord() {
-        final CsvCallbackHandler<CsvRecord> rh = CsvCallbackHandlers.ofCsvRecord();
+        final CsvCallbackHandler<CsvRecord> rh = new CsvRecordHandler();
         process(rh);
 
         CsvRecordAssert.assertThat(rh.buildRecord())
@@ -28,16 +31,16 @@ class CsvCallbackHandlerTest {
 
     @Test
     void namedCsvRecord() {
-        final CsvCallbackHandler<NamedCsvRecord> rh = CsvCallbackHandlers.ofNamedCsvRecord();
+        final CsvCallbackHandler<NamedCsvRecord> rh = new NamedCsvRecordHandler();
 
         rh.beginRecord(1);
-        rh.addField("head1", false);
-        rh.addField("head2", false);
+        addField(rh, "head1");
+        addField(rh, "head2");
         rh.buildRecord();
 
         rh.beginRecord(2);
-        rh.addField("foo", false);
-        rh.addField("bar", false);
+        addField(rh, "foo");
+        addField(rh, "bar");
 
         NamedCsvRecordAssert.assertThat(rh.buildRecord())
             .isStartingLineNumber(2)
@@ -46,7 +49,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void stringArray() {
-        final CsvCallbackHandler<String[]> rh = CsvCallbackHandlers.ofStringArray();
+        final CsvCallbackHandler<String[]> rh = new StringArrayHandler();
         process(rh);
 
         assertThat(rh.buildRecord())
@@ -54,8 +57,19 @@ class CsvCallbackHandlerTest {
     }
 
     @Test
+    void stringArrayFieldModifier() {
+        final CsvCallbackHandler<String[]> rh = new StringArrayHandler(FieldModifiers.TRIM);
+        rh.beginRecord(1);
+        addField(rh, " foo");
+        addField(rh, "bar ");
+
+        assertThat(rh.buildRecord())
+            .containsExactly("foo", "bar");
+    }
+
+    @Test
     void simpleMapper() {
-        final CsvCallbackHandler<String[]> rh = CsvCallbackHandlers
+        final CsvCallbackHandler<String[]> rh = CsvCallbackHandler
             .forSimpleMapper(fields -> new String[]{fields[1], fields[0]});
         process(rh);
 
@@ -65,8 +79,12 @@ class CsvCallbackHandlerTest {
 
     private static void process(final CsvCallbackHandler<?> rh) {
         rh.beginRecord(1);
-        rh.addField("foo", false);
-        rh.addField("bar", false);
+        addField(rh, "foo");
+        addField(rh, "bar");
+    }
+
+    private static void addField(final CsvCallbackHandler<?> rh, final String value) {
+        rh.addField(value.toCharArray(), 0, value.length(), false);
     }
 
 }

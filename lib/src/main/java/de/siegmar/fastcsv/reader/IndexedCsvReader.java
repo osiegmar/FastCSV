@@ -61,7 +61,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     IndexedCsvReader(final Path file, final Charset defaultCharset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final FieldModifier fieldModifier, final int pageSize,
+                     final int pageSize,
                      final CsvCallbackHandler<T> csvRecordHandler, final CsvIndex csvIndex,
                      final StatusListener statusListener)
         throws IOException {
@@ -100,7 +100,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        csvParser = new CsvParser(fieldModifier, fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+        csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
             csvRecordHandler, new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
@@ -260,7 +260,6 @@ public final class IndexedCsvReader<T> implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private FieldModifier fieldModifier;
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;
@@ -323,18 +322,6 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
 
         /**
-         * Registers an optional field modifier. Used to modify the field values.
-         * By default, no field modifier is used.
-         *
-         * @param fieldModifier the modifier to use.
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
-        public IndexedCsvReaderBuilder fieldModifier(final FieldModifier fieldModifier) {
-            this.fieldModifier = fieldModifier;
-            return this;
-        }
-
-        /**
          * Sets the {@code statusListener} to listen for indexer status updates.
          *
          * @param statusListener the status listener.
@@ -389,7 +376,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * as the character set.
          * <p>
          * Convenience method for {@link #build(CsvCallbackHandler, Path, Charset)} with
-         * {@link CsvCallbackHandlers#ofCsvRecord()} as the callback handler and
+         * {@link CsvRecordHandler} as the callback handler and
          * {@link StandardCharsets#UTF_8} as the charset.
          *
          * @param file the file to read data from.
@@ -398,14 +385,14 @@ public final class IndexedCsvReader<T> implements Closeable {
          * @throws NullPointerException if file or charset is {@code null}
          */
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
-            return build(CsvCallbackHandlers.ofCsvRecord(), file, StandardCharsets.UTF_8);
+            return build(new CsvRecordHandler(), file, StandardCharsets.UTF_8);
         }
 
         /**
          * Constructs a new {@link IndexedCsvReader} of {@link CsvRecord} for the specified arguments.
          * <p>
          * Convenience method for {@link #build(CsvCallbackHandler, Path, Charset)} with
-         * {@link CsvCallbackHandlers#ofCsvRecord()} as the callback handler.
+         * {@link CsvRecordHandler} as the callback handler.
          *
          * @param file    the file to read data from.
          * @param charset the character set to use.
@@ -414,7 +401,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * @throws NullPointerException if file or charset is {@code null}
          */
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
-            return build(CsvCallbackHandlers.ofCsvRecord(), file, charset);
+            return build(new CsvRecordHandler(), file, charset);
         }
 
         /**
@@ -457,7 +444,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, fieldModifier, pageSize, callbackHandler, csvIndex, sl);
+                commentCharacter, pageSize, callbackHandler, csvIndex, sl);
         }
 
     }

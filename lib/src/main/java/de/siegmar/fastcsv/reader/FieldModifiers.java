@@ -4,8 +4,24 @@ import java.util.Locale;
 
 /**
  * Provides some common {@link FieldModifier} implementations.
+ * <p>
+ * Example usage:
+ * {@snippet :
+ * var modifier = FieldModifiers.TRIM.andThen(FieldModifiers.upper(Locale.ENGLISH));
+ * var fields = CsvReader.builder()
+ *     .build(new CsvRecordHandler(modifier, "  foo   ,   bar"))
+ *     .stream()
+ *     .collect(Collectors.toList());
+ *
+ * // fields would be: "FOO" and "BAR"
+ *}
  */
 public final class FieldModifiers {
+
+    /**
+     * Modifier that does not modify anything.
+     */
+    public static final FieldModifier NOP = (SimpleFieldModifier) field -> field;
 
     /**
      * Modifier that modifies the field value with {@link String#trim()}.

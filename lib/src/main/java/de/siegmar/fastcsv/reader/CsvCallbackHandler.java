@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.Objects;
+
 /**
  * This interface defines the methods that are called during the CSV reading process.
  * <p>
@@ -9,9 +11,26 @@ package de.siegmar.fastcsv.reader;
  * CsvCallbackHandler implementations are stateful and must not be reused.
  *
  * @param <T> the type of the record that is built from the CSV data
- * @see CsvCallbackHandlers
  */
 public interface CsvCallbackHandler<T> {
+
+    /**
+     * Constructs a callback handler for the given {@link SimpleCsvMapper}.
+     *
+     * @param <T> the type of the resulting records
+     * @param mapper the mapper
+     * @return a callback handler that returns a mapped record for each record
+     * @throws NullPointerException if {@code mapper} is {@code null}
+     */
+    static <T> CsvCallbackHandler<T> forSimpleMapper(final SimpleCsvMapper<T> mapper) {
+        Objects.requireNonNull(mapper, "mapper must not be null");
+        return new AbstractCsvCallbackHandler<>() {
+            @Override
+            protected T buildRecord(final String[] fields) {
+                return mapper.build(fields);
+            }
+        };
+    }
 
     /**
      * Called at the beginning of each record.
@@ -26,16 +45,14 @@ public interface CsvCallbackHandler<T> {
     /**
      * Called for each field in the record.
      * <p>
-     * If a field modifier is registered with
-     * {@link de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#fieldModifier(FieldModifier)},
-     * it will be applied to the value before this method is called.
-     * <p>
      * A record can either be a comment or a regular record.
      *
-     * @param value  the value of the field, never {@code null}
+     * @param buf    the internal buffer that contains the field value (among other data)
+     * @param offset the offset of the field value in the buffer
+     * @param len    the length of the field value
      * @param quoted {@code true} if the field was quoted
      */
-    void addField(String value, boolean quoted);
+    void addField(char[] buf, int offset, int len, boolean quoted);
 
     /**
      * Called for each comment line.
@@ -49,9 +66,11 @@ public interface CsvCallbackHandler<T> {
      * There can only be one invocation of this method per record.
      * A record can either be a comment or a regular record.
      *
-     * @param value the value of the comment
+     * @param buf    the internal buffer that contains the field value (among other data)
+     * @param offset the offset of the field value in the buffer
+     * @param len    the length of the field value
      */
-    void setComment(String value);
+    void setComment(char[] buf, int offset, int len);
 
     /**
      * Determines whether the current CSV record is actually a comment.

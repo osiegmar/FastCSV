@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import de.siegmar.fastcsv.reader.CsvRecordHandler;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import testutil.CsvRecordAssert;
@@ -23,13 +24,11 @@ class IndexedCsvReaderModifierTest {
 
     @Test
     void trim() throws IOException {
-        crb.fieldModifier(FieldModifiers.TRIM);
-
         final var file = Files.writeString(tmpDir.resolve("indexed_field_modifier_test.csv"),
             "foo  ,  bar",
             StandardCharsets.UTF_8);
 
-        final var build = crb.ofCsvRecord(file);
+        final var build = crb.build(new CsvRecordHandler(FieldModifiers.TRIM), file);
         try (build) {
             assertThat(build.readPage(0))
                 .singleElement(CsvRecordAssert.CSV_RECORD)

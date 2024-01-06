@@ -33,10 +33,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvIndex;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
+import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 import testutil.CsvRecordAssert;
 
 @ExtendWith(SoftAssertionsExtension.class)
@@ -119,7 +119,7 @@ class IndexedCsvReaderTest {
     @Test
     void namedCsv() throws IOException {
         final var icrb = IndexedCsvReader.builder().pageSize(2);
-        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord();
+        final var cbh = new NamedCsvRecordHandler();
 
         try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
             final CsvIndex index = csv.index();

@@ -33,7 +33,6 @@ final class CsvParser implements Closeable {
     private static final int STATUS_DATA_FIELD = 1;
     private static final int STATUS_RESET = 0;
 
-    private final FieldModifier fieldModifier;
     private final char fsep;
     private final char qChar;
     private final CommentStrategy cStrat;
@@ -43,18 +42,16 @@ final class CsvParser implements Closeable {
 
     private long startingLineNumber;
     private int lines = 1;
-    private int fieldIdx;
 
     private int status;
     private boolean finished;
 
-    CsvParser(final FieldModifier fieldModifier, final char fieldSeparator, final char quoteCharacter,
+    CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
               final CsvCallbackHandler<?> callbackHandler, final Reader reader) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.fieldModifier = fieldModifier;
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
@@ -63,13 +60,12 @@ final class CsvParser implements Closeable {
         csvBuffer = new CsvBuffer(reader);
     }
 
-    CsvParser(final FieldModifier fieldModifier, final char fieldSeparator, final char quoteCharacter,
+    CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
               final CsvCallbackHandler<?> callbackHandler, final String data) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.fieldModifier = fieldModifier;
         this.fsep = fieldSeparator;
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
@@ -97,7 +93,6 @@ final class CsvParser implements Closeable {
 
         startingLineNumber += lines;
         lines = 1;
-        fieldIdx = 0;
         callbackHandler.beginRecord(startingLineNumber);
 
         do {
@@ -256,42 +251,18 @@ final class CsvParser implements Closeable {
         if ((lStatus & STATUS_QUOTED_FIELD) != 0) {
             // field with quotes
             final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, quoteCharacter);
-            final String str = new String(lBuf, lBegin + 1, lPos - 1 - shift);
-            callbackHandler.addField(fieldModifier != null ? modify(str, true) : str, true);
-        } else {
-            // field without quotes
-            final String str = new String(lBuf, lBegin, lPos);
-
-            if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
-                callbackHandler.setComment(fieldModifier != null ? modifyComment(str) : str);
-            } else {
-                callbackHandler.addField(fieldModifier != null ? modify(str, false) : str, false);
-            }
+            callbackHandler.addField(lBuf, lBegin + 1, lPos - 1 - shift, true);
+            return;
         }
 
-        fieldIdx++;
-    }
-
-    private String modify(final String value, final boolean quoted) {
-        final String modifiedValue = fieldModifier.modify(startingLineNumber, fieldIdx, quoted, value);
-        if (modifiedValue != null) {
-            return modifiedValue;
+        if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
+            // commented line
+            callbackHandler.setComment(lBuf, lBegin, lPos);
+            return;
         }
 
-        throw new NullPointerException(String.format(
-            "Field modifier %s returned null for field '%s' at field index %d of line %d",
-            fieldModifier.getClass(), value, fieldIdx, startingLineNumber));
-    }
-
-    private String modifyComment(final String value) {
-        final String modifiedValue = fieldModifier.modifyComment(startingLineNumber, value);
-        if (modifiedValue != null) {
-            return modifiedValue;
-        }
-
-        throw new NullPointerException(String.format(
-            "Field modifier %s returned null for field '%s' at field index %d of line %d",
-            fieldModifier.getClass(), value, fieldIdx, startingLineNumber));
+        // field without quotes
+        callbackHandler.addField(lBuf, lBegin, lPos, false);
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,

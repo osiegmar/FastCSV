@@ -18,9 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvCallbackHandlers;
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 import testutil.NamedCsvRecordAssert;
 
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
@@ -113,7 +114,7 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader() {
-        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord("h1", "h2");
+        final var cbh = new NamedCsvRecordHandler("h1", "h2");
         final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
             .singleElement(NAMED_CSV_RECORD)
@@ -123,7 +124,7 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader2() {
-        final var cbh = CsvCallbackHandlers.ofNamedCsvRecord(List.of("h1", "h2"));
+        final var cbh = new NamedCsvRecordHandler(List.of("h1", "h2"));
         final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
             .singleElement(NAMED_CSV_RECORD)
@@ -216,10 +217,45 @@ class NamedCsvReaderTest {
         }
     }
 
+    // With field modifier
+
+    @Test
+    void fieldModifier() {
+        final var csvReader = CsvReader.builder()
+            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM), "h1 , h2 \n v1 , v2");
+        assertThat(csvReader.stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .isStartingLineNumber(2)
+            .isNotComment()
+            .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+    }
+
+    @Test
+    void fieldModifierPredefinedHeader() {
+        final var csvReader = CsvReader.builder()
+            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, "h1", "h2"), "v1 , v2");
+        assertThat(csvReader.stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .isStartingLineNumber(1)
+            .isNotComment()
+            .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+    }
+
+    @Test
+    void fieldModifierPredefinedHeaderList() {
+        final var csvReader = CsvReader.builder()
+            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, List.of("h1", "h2")), "v1 , v2");
+        assertThat(csvReader.stream())
+            .singleElement(NAMED_CSV_RECORD)
+            .isStartingLineNumber(1)
+            .isNotComment()
+            .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
+    }
+
     // test helpers
 
     private CsvReader<NamedCsvRecord> parse(final String data) {
-        return CsvReader.builder().build(CsvCallbackHandlers.ofNamedCsvRecord(), data);
+        return CsvReader.builder().ofNamedCsvRecord(data);
     }
 
 }

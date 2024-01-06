@@ -111,7 +111,7 @@ CsvReader.builder().ofNamedCsvRecord("header 1,header 2\nfield 1,field 2")
 
 ```java
 CsvCallbackHandler<NamedCsvRecord> callbackHandler =
-    CsvCallbackHandlers.ofNamedCsvRecord("header1", "header2");
+    new NamedCsvRecordHandler("header1", "header2");
 
 CsvReader.builder().build(callbackHandler, "field 1,field 2")
     .forEach(rec -> System.out.println(rec.getField("header2")));

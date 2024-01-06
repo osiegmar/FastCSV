@@ -4,7 +4,7 @@ package de.siegmar.fastcsv.reader;
  * Simple mapper callback handler.
  *
  * @param <T> the type of the mapped object
- * @see CsvCallbackHandlers#forSimpleMapper(SimpleCsvMapper)
+ * @see CsvCallbackHandler#forSimpleMapper(SimpleCsvMapper)
  */
 @FunctionalInterface
 public interface SimpleCsvMapper<T> {
