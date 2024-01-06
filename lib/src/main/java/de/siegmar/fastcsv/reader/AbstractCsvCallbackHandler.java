@@ -249,6 +249,9 @@ public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandle
 
     /**
      * Builds a record from the given compact fields array.
+     * <p>
+     * In contrast to the class property {@link #fields}, the given {@code compactFields} argument does only contain
+     * the fields of the current record (copied by {@link #buildRecord()}).
      *
      * @param compactFields the compact fields array
      * @return the record
