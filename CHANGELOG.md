@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NamedCsvReader` replaced by `CsvReader.builder().ofNamedCsvRecord()`
 - `build` methods in `CsvReaderBuilder` with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
 - Rename `errorOnDifferentFieldCount()` to `ignoreDifferentFieldCount()`
-- Rename `isEmpty()` to `isEmptyLine` in `CsvRecord`
 - `QuoteStrategy` is now an interface – defaults are provided by `QuoteStrategies`
 - Throw `CsvParseException` instead of `IOException` when maximum field size is exceeded
 - `NamedCsvRecord` extends `CsvRecord` and provides more access methods
@@ -30,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Limit the maximum record size to 64 MiB to prevent OutOfMemoryErrors
 - Several performance improvements
 - Improved documentation and error messages
+
+### Removed
+- Removed `isEmpty()` in `CsvRecord` as it was formerly only used for skipping empty records
 
 ### Fixed
 - Do not throw an exception when reading comments while enabling different field count checking
