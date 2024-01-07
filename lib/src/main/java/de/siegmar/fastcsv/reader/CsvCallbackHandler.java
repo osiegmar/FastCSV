@@ -8,6 +8,9 @@ import java.util.Objects;
  * Implementations highly affect the behavior of the {@link CsvReader}. With great power comes great responsibility.
  * Don't mess up the CSV reading process!
  * <p>
+ * Even if you need custom handling, you typically don't need to implement this interface directly.
+ * Check out {@link #forSimpleMapper(SimpleCsvMapper)} and {@link AbstractBaseCsvCallbackHandler} first.
+ * <p>
  * CsvCallbackHandler implementations are stateful and must not be reused.
  *
  * @param <T> the type of the record that is built from the CSV data
