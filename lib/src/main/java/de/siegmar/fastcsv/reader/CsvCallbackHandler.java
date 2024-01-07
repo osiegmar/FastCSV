@@ -17,7 +17,7 @@ public interface CsvCallbackHandler<T> {
     /**
      * Constructs a callback handler for the given {@link SimpleCsvMapper}.
      *
-     * @param <T> the type of the resulting records
+     * @param <T>    the type of the resulting records
      * @param mapper the mapper
      * @return a callback handler that returns a mapped record for each record
      * @throws NullPointerException if {@code mapper} is {@code null}
@@ -73,46 +73,12 @@ public interface CsvCallbackHandler<T> {
     void setComment(char[] buf, int offset, int len);
 
     /**
-     * Determines whether the current CSV record is actually a comment.
-     * <p>
-     * This causes {@link CsvReader} to skip the record if
-     * {@link de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)}
-     * is set to {@link CommentStrategy#SKIP}.
-     *
-     * @return {@code true} if the current record is a comment
-     */
-    boolean isComment();
-
-    /**
-     * Determines whether the current CSV record is actually an empty line.
-     * <p>
-     * This causes {@link CsvReader} to skip the record if
-     * {@link de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)} is set to {@code true}.
-     *
-     * @return {@code true} if the current line is empty
-     */
-    boolean isEmptyLine();
-
-    /**
-     * Returns the number of fields in the current record.
-     * <p>
-     * The {@link CsvReader} will throw an exception if the number of fields differs from record to record
-     * (unless {@link de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)}
-     * is set to {@code true}).
-     *
-     * @return the number of fields in the current record
-     */
-    int getFieldCount();
-
-    /**
      * Called at the end of each CSV record in order to build an object representation of the record.
-     * <p>
-     * If this method returns {@code null}, the {@link CsvReader} will continue with the next record.
-     * This can be used to skip records or to use the data for merging purposes (e.g. the header or).
      *
-     * @return the representation of the CSV record or {@code null} to skip the record
+     * @return a wrapper for the record that contains information necessary for the {@link CsvReader} in order to
+     *     determine how to process the record. Must not be {@code null}.
      */
-    T buildRecord();
+    RecordWrapper<T> buildRecord();
 
     /**
      * Called at the end of the CSV reading process.

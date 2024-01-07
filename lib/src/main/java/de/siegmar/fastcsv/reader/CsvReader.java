@@ -140,14 +140,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     })
     private T fetchRecord() throws IOException {
         while (csvParser.parse()) {
-            final T csvRecord = callbackHandler.buildRecord();
+            final RecordWrapper<T> recordWrapper = callbackHandler.buildRecord();
+            final T csvRecord = recordWrapper.wrappedRecord();
 
             if (csvRecord == null) {
                 // data was consumed (e.g. header for named records)
                 continue;
             }
 
-            if (callbackHandler.isComment()) {
+            if (recordWrapper.comment()) {
                 if (commentStrategy == CommentStrategy.SKIP) {
                     // skip commented records
                     continue;
@@ -157,12 +158,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             }
 
             // skip empty lines
-            if (callbackHandler.isEmptyLine()) {
+            if (recordWrapper.emptyLine()) {
                 if (skipEmptyLines) {
                     continue;
                 }
             } else if (!ignoreDifferentFieldCount) {
-                final int fieldCount = callbackHandler.getFieldCount();
+                final int fieldCount = recordWrapper.fieldCount();
 
                 // check the field count consistency on every record
                 if (firstRecordFieldCount == -1) {

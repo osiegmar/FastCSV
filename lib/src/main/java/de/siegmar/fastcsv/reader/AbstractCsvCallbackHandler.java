@@ -9,7 +9,7 @@ import de.siegmar.fastcsv.util.Limits;
  *
  * @param <T> the type of the resulting records
  */
-public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
+abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
 
     private static final int INITIAL_FIELDS_SIZE = 32;
 
@@ -103,16 +103,15 @@ public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandle
      *
      * @param value  the field value
      * @param quoted {@code true} if the field was quoted
-     * @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
+     * @throws CsvParseException if the addition exceeds the maximum fields count.
      */
     protected void addField(final String value, final boolean quoted) {
-        recordSize += value.length();
-
         if (idx == fields.length) {
             extendCapacity();
         }
 
         fields[idx++] = value;
+        recordSize += value.length();
     }
 
     /**
@@ -213,38 +212,15 @@ public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandle
 
     /**
      * {@inheritDoc}
+     * <p>
+     * This method creates a compact copy of the internal fields array and passes it to
+     * {@link #buildRecord(String[])}.
      */
     @Override
-    public boolean isComment() {
-        return comment;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isEmptyLine() {
-        return recordSize == 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getFieldCount() {
-        return idx;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * This method creates a compact copy of the internal fields array and passes it to {@link #buildRecord(String[])}.
-     */
-    @Override
-    public T buildRecord() {
+    public RecordWrapper<T> buildRecord() {
         final String[] ret = new String[idx];
         System.arraycopy(fields, 0, ret, 0, idx);
-        return buildRecord(ret);
+        return new RecordWrapper<>(comment, recordSize == 0, idx, buildRecord(ret));
     }
 
     /**
@@ -256,7 +232,7 @@ public abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandle
      * @param compactFields the compact fields array
      * @return the record
      */
-    @SuppressWarnings("PMD.UseVarargs")
+    @SuppressWarnings({"PMD.UseVarargs", "checkstyle:HiddenField"})
     protected abstract T buildRecord(String[] compactFields);
 
 }
