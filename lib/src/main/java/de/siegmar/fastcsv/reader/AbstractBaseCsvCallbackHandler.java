@@ -2,6 +2,8 @@ package de.siegmar.fastcsv.reader;
 
 /**
  * Base class for {@link CsvCallbackHandler} implementations that handles their own field storage and record building.
+ * <p>
+ * This implementation is stateful and must not be reused.
  *
  * @param <T> the type of the record
  */

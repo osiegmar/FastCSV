@@ -6,6 +6,8 @@ import de.siegmar.fastcsv.util.Limits;
 
 /**
  * Abstract base class for {@link CsvCallbackHandler} implementations.
+ * <p>
+ * This implementation is stateful and must not be reused.
  *
  * @param <T> the type of the resulting records
  */

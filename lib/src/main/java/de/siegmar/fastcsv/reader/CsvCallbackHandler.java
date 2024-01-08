@@ -10,8 +10,6 @@ import java.util.Objects;
  * <p>
  * Even if you need custom handling, you typically don't need to implement this interface directly.
  * Check out {@link #forSimpleMapper(SimpleCsvMapper)} and {@link AbstractBaseCsvCallbackHandler} first.
- * <p>
- * CsvCallbackHandler implementations are stateful and must not be reused.
  *
  * @param <T> the type of the record that is built from the CSV data
  */
@@ -19,6 +17,8 @@ public interface CsvCallbackHandler<T> {
 
     /**
      * Constructs a callback handler for the given {@link SimpleCsvMapper}.
+     * <p>
+     * The returned callback handler is stateful and must not be reused.
      *
      * @param <T>    the type of the resulting records
      * @param mapper the mapper

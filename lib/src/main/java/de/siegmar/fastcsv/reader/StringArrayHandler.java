@@ -2,6 +2,8 @@ package de.siegmar.fastcsv.reader;
 
 /**
  * A {@link CsvCallbackHandler} implementation that returns the fields of each record as an array of Strings.
+ * <p>
+ * This implementation is stateful and must not be reused.
  */
 public final class StringArrayHandler extends AbstractCsvCallbackHandler<String[]> {
 

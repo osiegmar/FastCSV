@@ -5,6 +5,8 @@ import java.util.Objects;
 
 /**
  * A callback handler that returns a {@link NamedCsvRecord} for each record.
+ * <p>
+ * This implementation is stateful and must not be reused.
  */
 public final class NamedCsvRecordHandler extends AbstractCsvCallbackHandler<NamedCsvRecord> {
 

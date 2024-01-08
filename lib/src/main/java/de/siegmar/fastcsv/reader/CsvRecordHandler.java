@@ -2,6 +2,8 @@ package de.siegmar.fastcsv.reader;
 
 /**
  * A {@link CsvCallbackHandler} implementation that returns a {@link CsvRecord} for each record.
+ * <p>
+ * This implementation is stateful and must not be reused.
  */
 public final class CsvRecordHandler extends AbstractCsvCallbackHandler<CsvRecord> {
 
