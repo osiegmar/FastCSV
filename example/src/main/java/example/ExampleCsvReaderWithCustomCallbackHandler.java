@@ -1,17 +1,20 @@
 package example;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Locale;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import ch.randelshofer.fastdoubleparser.JavaDoubleParser;
 import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.reader.RecordWrapper;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
@@ -21,6 +24,24 @@ import de.siegmar.fastcsv.writer.CsvWriter;
  * You should only go this route if you need to squeeze out every bit of performance and I/O or post-processing is not
  * the bottleneck. The standard implementation ({@link de.siegmar.fastcsv.reader.CsvRecordHandler}) is already
  * very fast and should be sufficient for most use cases.
+ * <p>
+ * A comparison with 1 bn records (86 GiB) has shown the following results:
+ * <table>
+ *     <tr>
+ *         <td>Standard stream-based Mapper (with standard Java Parser)</td>
+ *         <td>11m 48s (1.41 M records/s) – baseline</td>
+ *     </tr>
+ *     <tr>
+ *         <td>Standard stream-based Mapper (with FastNumberParser)</td>
+ *         <td>4m 25s (3.77 M record/s) – 63% faster than baseline</td>
+ *     </tr>
+ *     <tr>
+ *         <td>Custom Mapper (with FastNumberParser)</td>
+ *         <td>3m 2s (5.49 M records/s) – 74% faster than baseline</td>
+ *     </tr>
+ * </table>
+ * <p>
+ * As you can see, the biggest impact on performance has the number parser.
  */
 public class ExampleCsvReaderWithCustomCallbackHandler {
 
@@ -35,25 +56,60 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
     private static final Random RND = new Random();
 
     public static void main(final String[] args) throws IOException {
-        System.out.println("Mapping data with custom callback handler:");
-
         // prepare a large fake dataset with temperature measurements
         final Path testFile = produceLargeFakeDataset();
 
+        System.out.println("Mapping data with stream handler:");
+        read(() -> streamMapper(testFile, mapWithStandardDoubleParser()));
+
+        System.out.println("Mapping data with stream handler (and FastNumberParser):");
+        read(() -> streamMapper(testFile, mapWithFastNumberParser()));
+
+        System.out.println("Mapping data with custom callback handler (and FastNumberParser):");
+        read(() -> customMapper(testFile));
+    }
+
+    private static void read(final Supplier<Stream<Measurement>> streamSupplier) {
         final LocalDateTime start = LocalDateTime.now();
-
-        try (CsvReader<Measurement> csv = CsvReader.builder().build(new MeasurementCallbackHandler(), testFile)) {
-            System.out.println("Youngest measurements:");
-
-            // Show the 3 youngest measurements
-            csv.stream()
-                .sorted((m1, m2) -> Long.compare(m2.timestamp, m1.timestamp))
-                .limit(3)
-                .forEach(System.out::println);
+        try (Stream<Measurement> stream = streamSupplier.get()) {
+            System.out.printf("Duration to map %,d records: %s%n%n",
+                stream.count(), Duration.between(start, LocalDateTime.now()));
         }
+    }
 
-        System.out.printf("Duration to map %,d records: %s%n",
-            RECORDS_TO_PRODUCE, Duration.between(start, LocalDateTime.now()));
+    private static Stream<Measurement> customMapper(final Path testFile) {
+        try {
+            return CsvReader.builder().build(new MeasurementCallbackHandler(), testFile).stream();
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Stream<Measurement> streamMapper(final Path testFile,
+                                                    final Function<NamedCsvRecord, Measurement> mapper) {
+        try {
+            return CsvReader.builder().ofNamedCsvRecord(testFile).stream().map(mapper);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Function<NamedCsvRecord, Measurement> mapWithStandardDoubleParser() {
+        return record -> new Measurement(
+            Long.parseLong(record.getField("ID").substring(3)),
+            Long.parseLong(record.getField("Timestamp")),
+            Double.parseDouble(record.getField("Latitude")),
+            Double.parseDouble(record.getField("Longitude")),
+            Double.parseDouble(record.getField("Temperature")));
+    }
+
+    private static Function<NamedCsvRecord, Measurement> mapWithFastNumberParser() {
+        return record -> new Measurement(
+            FastNumberParser.parseLong(record.getField("ID").substring(3)),
+            FastNumberParser.parseLong(record.getField("Timestamp")),
+            FastNumberParser.parseDouble(record.getField("Latitude")),
+            FastNumberParser.parseDouble(record.getField("Longitude")),
+            FastNumberParser.parseDouble(record.getField("Temperature")));
     }
 
     /**
@@ -81,6 +137,8 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
         final long currentTime = System.currentTimeMillis();
         final long yearInMillis = Duration.ofDays(365).toMillis();
 
+        System.out.printf("Creating file %s with %,d records...%n", tmpFile, RECORDS_TO_PRODUCE);
+
         try (CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
             csv.writeRecord("ID", "Timestamp", "Longitude", "Latitude", "TemperatureUnit", "Temperature");
 
@@ -92,15 +150,15 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
                 final double temperature = RND.nextDouble() * 150 - 90;
 
                 csv.writeRecord(measuringStationId,
-                    String.valueOf(timestamp),
-                    String.valueOf(latitude),
-                    String.valueOf(longitude),
+                    Long.toString(timestamp),
+                    Double.toString(latitude),
+                    Double.toString(longitude),
                     "Celcius",
-                    String.valueOf(temperature));
+                    Double.toString(temperature));
             }
         }
 
-        System.out.printf("File %s with %,d records and %,d bytes created%n",
+        System.out.printf("File %s with %,d records and %,d bytes created%n%n",
             tmpFile, ExampleCsvReaderWithCustomCallbackHandler.RECORDS_TO_PRODUCE, Files.size(tmpFile));
 
         return tmpFile;
@@ -136,16 +194,15 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
 
             switch (fieldIdx) {
                 case 0 -> id = materializeId(buf, offset, len);
-                case 1 -> timestamp = parseLong(buf, offset, len);
-                case 2 -> latitude = parseDouble(buf, offset, len);
-                case 3 -> longitude = parseDouble(buf, offset, len);
+                case 1 -> timestamp = FastNumberParser.parseLong(buf, offset, len);
+                case 2 -> latitude = FastNumberParser.parseDouble(buf, offset, len);
+                case 3 -> longitude = FastNumberParser.parseDouble(buf, offset, len);
                 case 4 -> {
                     // Skip temperature unit
                 }
-                case 5 -> temperature = parseDouble(buf, offset, len);
-                default ->
-                    throw new IllegalStateException("Unexpected column: %d, starting line: %d"
-                        .formatted(fieldIdx, getStartingLineNumber()));
+                case 5 -> temperature = FastNumberParser.parseDouble(buf, offset, len);
+                default -> throw new IllegalStateException("Unexpected column: %d, starting line: %d"
+                    .formatted(fieldIdx, getStartingLineNumber()));
             }
         }
 
@@ -155,19 +212,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
                 throw new IllegalStateException("ID too short: %d, starting line: %d"
                     .formatted(len, getStartingLineNumber()));
             }
-            return parseLong(buf, offset + prefixLength, len - prefixLength);
-        }
-
-        private static long parseLong(final char[] buf, final int offset, final int len) {
-            return Long.parseLong(new String(buf, offset, len));
-        }
-
-        private static double parseDouble(final char[] buf, final int offset, final int len) {
-            //return Double.parseDouble(new String(buf, offset, len));
-
-            // Use JavaDoubleParser instead of Double.parseDouble() for way better performance
-            // see https://github.com/wrandelshofer/FastDoubleParser
-            return JavaDoubleParser.parseDouble(buf, offset, len);
+            return FastNumberParser.parseLong(buf, offset + prefixLength, len - prefixLength);
         }
 
         @Override
@@ -188,22 +233,36 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
     }
 
     private record Measurement(long id, long timestamp, double latitude, double longitude, double temperature) {
+    }
 
-        private static final String GOOGLE_MAPS_URL_TEMPLATE = "https://www.google.com/maps/place/%f,%f/@%f,%f,4z";
+    // Use JavaDoubleParser instead of Double.parseDouble() for way better performance
+    // see https://github.com/wrandelshofer/FastDoubleParser
+    private final static class FastNumberParser {
 
-        double fahrenheit() {
-            return temperature * 1.8 + 32;
+        private static long parseLong(final String str) {
+            long result = 0;
+            for (int i = 0; i < str.length(); i++) {
+                result = result * 10 + str.charAt(i) - '0';
+            }
+
+            return result;
         }
 
-        // Wondering where this place would be? 😉
-        String mapLocation() {
-            return String.format(Locale.US, GOOGLE_MAPS_URL_TEMPLATE, latitude, longitude, latitude, longitude);
+        private static long parseLong(final char[] buf, final int offset, final int len) {
+            long result = 0;
+            for (int i = 0; i < len; i++) {
+                result = result * 10 + buf[offset + i] - '0';
+            }
+
+            return result;
         }
 
-        @Override
-        public String toString() {
-            return "Measured %.1f°C (%.1f°F) on station %d at %s - see: %s".formatted(
-                temperature, fahrenheit(), id, Instant.ofEpochMilli(timestamp), mapLocation());
+        private static double parseDouble(final String str) {
+            return JavaDoubleParser.parseDouble(str);
+        }
+
+        private static double parseDouble(final char[] buf, final int offset, final int len) {
+            return JavaDoubleParser.parseDouble(buf, offset, len);
         }
 
     }
