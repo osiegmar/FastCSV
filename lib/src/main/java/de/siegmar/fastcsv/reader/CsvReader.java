@@ -246,7 +246,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         @Override
         public int characteristics() {
-            return ORDERED | DISTINCT | NONNULL | IMMUTABLE;
+            return ORDERED | NONNULL;
         }
 
     }
