@@ -1,17 +1,10 @@
-package blackbox.reader;
+package de.siegmar.fastcsv.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import org.junit.jupiter.api.Test;
 
-import de.siegmar.fastcsv.reader.CsvCallbackHandler;
-import de.siegmar.fastcsv.reader.CsvRecord;
-import de.siegmar.fastcsv.reader.CsvRecordHandler;
-import de.siegmar.fastcsv.reader.FieldModifiers;
-import de.siegmar.fastcsv.reader.NamedCsvRecord;
-import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
-import de.siegmar.fastcsv.reader.StringArrayHandler;
 import testutil.CsvRecordAssert;
 import testutil.NamedCsvRecordAssert;
 

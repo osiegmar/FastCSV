@@ -10,12 +10,12 @@ package de.siegmar.fastcsv.reader;
 public interface SimpleCsvMapper<T> {
 
     /**
-     * Constructs a record of type {@code T} from the given fields.
+     * Maps the given fields to an object of type {@code T}.
      *
      * @param fields the fields
      * @return a record of type {@code T}
      */
     @SuppressWarnings("PMD.UseVarargs")
-    T build(String[] fields);
+    T map(String[] fields);
 
 }

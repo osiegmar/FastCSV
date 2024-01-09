@@ -82,17 +82,17 @@ public final class NamedCsvRecordHandler extends AbstractCsvCallbackHandler<Name
     }
 
     @Override
-    protected NamedCsvRecord buildRecord(final String[] fields) {
+    protected RecordWrapper<NamedCsvRecord> buildRecord() {
         if (comment) {
-            return new NamedCsvRecord(startingLineNumber, fields, true, EMPTY_HEADER);
+            return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER));
         }
 
         if (header == null) {
-            setHeader(fields);
+            setHeader(compactFields());
             return null;
         }
 
-        return new NamedCsvRecord(startingLineNumber, fields, false, header);
+        return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), false, header));
     }
 
 }

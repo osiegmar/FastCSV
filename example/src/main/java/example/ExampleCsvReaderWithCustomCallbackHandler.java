@@ -12,6 +12,7 @@ import java.util.Random;
 import ch.randelshofer.fastdoubleparser.JavaDoubleParser;
 import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.RecordWrapper;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 /**
@@ -170,7 +171,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
         }
 
         @Override
-        public Measurement build() {
+        protected RecordWrapper<Measurement> buildRecord() {
             if (recordCount++ == 0) {
                 // Skip header
                 return null;
@@ -181,7 +182,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
                     .formatted(getFieldCount(), getStartingLineNumber()));
             }
 
-            return new Measurement(id, timestamp, latitude, longitude, temperature);
+            return wrapRecord(new Measurement(id, timestamp, latitude, longitude, temperature));
         }
 
     }
@@ -204,6 +205,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
             return "Measured %.1f°C (%.1f°F) on station %d at %s - see: %s".formatted(
                 temperature, fahrenheit(), id, Instant.ofEpochMilli(timestamp), mapLocation());
         }
+
     }
 
 }

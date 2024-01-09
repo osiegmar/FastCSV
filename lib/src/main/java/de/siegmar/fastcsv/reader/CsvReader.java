@@ -140,47 +140,54 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     })
     private T fetchRecord() throws IOException {
         while (csvParser.parse()) {
-            final RecordWrapper<T> recordWrapper = callbackHandler.buildRecord();
-            final T csvRecord = recordWrapper.wrappedRecord();
+            final T csvRecord = processRecord();
 
-            if (csvRecord == null) {
-                // data was consumed (e.g. header for named records)
-                continue;
-            }
-
-            if (recordWrapper.comment()) {
-                if (commentStrategy == CommentStrategy.SKIP) {
-                    // skip commented records
-                    continue;
-                }
-
+            if (csvRecord != null) {
                 return csvRecord;
             }
-
-            // skip empty lines
-            if (recordWrapper.emptyLine()) {
-                if (skipEmptyLines) {
-                    continue;
-                }
-            } else if (!ignoreDifferentFieldCount) {
-                final int fieldCount = recordWrapper.fieldCount();
-
-                // check the field count consistency on every record
-                if (firstRecordFieldCount == -1) {
-                    firstRecordFieldCount = fieldCount;
-                } else if (fieldCount != firstRecordFieldCount) {
-                    throw new CsvParseException(
-                        String.format("Record %d has %d fields, but first record had %d fields",
-                            csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
-                }
-            }
-
-            return csvRecord;
         }
 
         callbackHandler.terminate();
 
         return null;
+    }
+
+    @SuppressWarnings("checkstyle:ReturnCount")
+    private T processRecord() {
+        final RecordWrapper<T> recordWrapper = callbackHandler.buildRecord();
+
+        // handle consumed records (e.g. header for named records)
+        if (recordWrapper == null) {
+            return null;
+        }
+
+        // handle comment lines
+        if (recordWrapper.comment()) {
+            return commentStrategy == CommentStrategy.SKIP ? null : recordWrapper.wrappedRecord();
+        }
+
+        // handle empty lines
+        if (recordWrapper.emptyLine()) {
+            return skipEmptyLines ? null : recordWrapper.wrappedRecord();
+        }
+
+        // check field count consistency
+        if (!ignoreDifferentFieldCount) {
+            checkFieldCountConsistency(recordWrapper.fieldCount());
+        }
+
+        return recordWrapper.wrappedRecord();
+    }
+
+    private void checkFieldCountConsistency(final int fieldCount) {
+        // check the field count consistency on every record
+        if (firstRecordFieldCount == -1) {
+            firstRecordFieldCount = fieldCount;
+        } else if (fieldCount != firstRecordFieldCount) {
+            throw new CsvParseException(
+                String.format("Record %d has %d fields, but first record had %d fields",
+                    csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+        }
     }
 
     @Override

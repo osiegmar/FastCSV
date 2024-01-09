@@ -11,7 +11,7 @@ import de.siegmar.fastcsv.util.Limits;
  *
  * @param <T> the type of the resulting records
  */
-abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
+abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private static final int INITIAL_FIELDS_SIZE = 32;
 
@@ -40,7 +40,7 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
     /**
      * The current index in the internal fields array.
      */
-    protected int idx;
+    protected int fieldIdx;
 
     /**
      * Whether the current record is a comment.
@@ -76,9 +76,9 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
      */
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
-    public void beginRecord(final long startingLineNumber) {
+    protected void beginRecord(final long startingLineNumber) {
         this.startingLineNumber = startingLineNumber;
-        idx = 0;
+        fieldIdx = 0;
         recordSize = 0;
         comment = false;
     }
@@ -91,7 +91,7 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
      * @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
      */
     @Override
-    public void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
+    protected void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
         if (recordSize + len > Limits.MAX_RECORD_SIZE) {
             throw new CsvParseException(maxRecordSizeExceededMessage(startingLineNumber));
         }
@@ -108,11 +108,11 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
      * @throws CsvParseException if the addition exceeds the maximum fields count.
      */
     protected void addField(final String value, final boolean quoted) {
-        if (idx == fields.length) {
+        if (fieldIdx == fields.length) {
             extendCapacity();
         }
 
-        fields[idx++] = value;
+        fields[fieldIdx++] = value;
         recordSize += value.length();
     }
 
@@ -124,7 +124,7 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
      * @return the modified field value
      */
     protected String modifyField(final String value, final boolean quoted) {
-        return fieldModifier.modify(startingLineNumber, idx, quoted, value);
+        return fieldModifier.modify(startingLineNumber, fieldIdx, quoted, value);
     }
 
     /**
@@ -152,8 +152,8 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
      * @throws CsvParseException if the addition exceeds the limit of record size.
      */
     @Override
-    public void setComment(final char[] buf, final int offset, final int len) {
-        if (idx != 0) {
+    protected void setComment(final char[] buf, final int offset, final int len) {
+        if (fieldIdx != 0) {
             // Can't happen with the current implementation of CsvParser
             throw new IllegalStateException("Comment must be the first and only field in a record");
         }
@@ -177,7 +177,7 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
     protected void setComment(final String value) {
         recordSize += value.length();
         comment = true;
-        fields[idx++] = value;
+        fields[fieldIdx++] = value;
     }
 
     /**
@@ -208,33 +208,33 @@ abstract class AbstractCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
             throw new CsvParseException("Maximum number of fields exceeded: " + Limits.MAX_FIELD_COUNT);
         }
         final String[] newFields = new String[newLen];
-        System.arraycopy(fields, 0, newFields, 0, idx);
+        System.arraycopy(fields, 0, newFields, 0, fieldIdx);
         fields = newFields;
     }
 
     /**
-     * {@inheritDoc}
+     * Builds a compact fields array (a copy of the internal fields array with the length of the current record).
      * <p>
-     * This method creates a compact copy of the internal fields array and passes it to
-     * {@link #buildRecord(String[])}.
+     * In contrast to the class property {@link #fields}, the returned array does only contain the fields of the
+     * current record.
+     *
+     * @return the compact fields array
      */
-    @Override
-    public RecordWrapper<T> buildRecord() {
-        final String[] ret = new String[idx];
-        System.arraycopy(fields, 0, ret, 0, idx);
-        return new RecordWrapper<>(comment, recordSize == 0, idx, buildRecord(ret));
+    protected String[] compactFields() {
+        final String[] ret = new String[fieldIdx];
+        System.arraycopy(fields, 0, ret, 0, fieldIdx);
+        return ret;
     }
 
     /**
-     * Builds a record from the given compact fields array.
-     * <p>
-     * In contrast to the class property {@link #fields}, the given {@code compactFields} argument does only contain
-     * the fields of the current record (copied by {@link #buildRecord()}).
+     * Builds a record wrapper for the given record.
      *
-     * @param compactFields the compact fields array
-     * @return the record
+     * @param rec the record, must not be {@code null}
+     * @return the record wrapper
+     * @throws NullPointerException if {@code rec} is {@code null}
      */
-    @SuppressWarnings({"PMD.UseVarargs", "checkstyle:HiddenField"})
-    protected abstract T buildRecord(String[] compactFields);
+    protected RecordWrapper<T> buildWrapper(final T rec) {
+        return new RecordWrapper<>(comment, recordSize == 0, fieldIdx, rec);
+    }
 
 }

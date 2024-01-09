@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.Objects;
+
 /**
  * Base class for {@link CsvCallbackHandler} implementations that handles their own field storage and record building.
  * <p>
@@ -7,7 +9,7 @@ package de.siegmar.fastcsv.reader;
  *
  * @param <T> the type of the record
  */
-public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHandler<T> {
+public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private long startingLineNumber;
     private boolean comment;
@@ -27,7 +29,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      *
      * @return the starting line number of the current record
      */
-    public long getStartingLineNumber() {
+    protected long getStartingLineNumber() {
         return startingLineNumber;
     }
 
@@ -36,7 +38,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      *
      * @return {@code true} if the current record is a comment
      */
-    public boolean isComment() {
+    protected boolean isComment() {
         return comment;
     }
 
@@ -45,7 +47,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      *
      * @return {@code true} if the current record is an empty line
      */
-    public boolean isEmptyLine() {
+    protected boolean isEmptyLine() {
         return emptyLine;
     }
 
@@ -54,7 +56,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      *
      * @return the number of fields in the current record
      */
-    public int getFieldCount() {
+    protected int getFieldCount() {
         return fieldCount;
     }
 
@@ -64,7 +66,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      */
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
-    public final void beginRecord(final long startingLineNumber) {
+    protected final void beginRecord(final long startingLineNumber) {
         this.startingLineNumber = startingLineNumber;
         fieldCount = 0;
         comment = false;
@@ -90,7 +92,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      * {@link #emptyLine} flag and before incrementing the {@link #fieldCount}.
      */
     @Override
-    public final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
+    protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
         emptyLine = emptyLine && len == 0;
         handleField(fieldCount++, buf, offset, len, quoted);
     }
@@ -99,6 +101,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      * Handles a field.
      * <p>
      * This method is called for each field in the record.
+     * <p>
+     * See {@link CsvCallbackHandler#addField(char[], int, int, boolean)} for more details on the parameters.
      *
      * @param fieldIdx the index of the field in the record (starting with 0)
      * @param buf      the internal buffer that contains the field value (among other data)
@@ -117,7 +121,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      * and {@link #emptyLine} flag and before incrementing the {@link #fieldCount}.
      */
     @Override
-    public final void setComment(final char[] buf, final int offset, final int len) {
+    protected final void setComment(final char[] buf, final int offset, final int len) {
         comment = true;
         emptyLine = false;
         handleComment(buf, offset, len);
@@ -128,6 +132,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
      * Handles a comment.
      * <p>
      * This method is called for each comment line.
+     * <p>
+     * See {@link CsvCallbackHandler#setComment(char[], int, int)} for more details on the parameters.
      *
      * @param buf    the internal buffer that contains the field value (among other data)
      * @param offset the offset of the field value in the buffer
@@ -137,21 +143,16 @@ public abstract class AbstractBaseCsvCallbackHandler<T> implements CsvCallbackHa
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation creates a {@link RecordWrapper} with the current {@link #comment}, {@link #emptyLine} and
-     * {@link #fieldCount} and delegates the creation of the actual record to {@link #build()}.
-     */
-    @Override
-    public final RecordWrapper<T> buildRecord() {
-        return new RecordWrapper<>(comment, emptyLine, fieldCount, build());
-    }
-
-    /**
-     * Builds the record.
+     * Builds a wrapper for the record that contains information necessary for the {@link CsvReader} in order to
+     * determine how to process the record.
      *
-     * @return the record, or {@code null} if the record is to be skipped
+     * @param record the actual record to be returned by the {@link CsvReader}, must not be {@code null}
+     * @return the wrapper for the actual record
+     * @throws NullPointerException if {@code null} is passed for {@code record}
      */
-    protected abstract T build();
+    protected RecordWrapper<T> wrapRecord(final T record) {
+        return new RecordWrapper<>(comment, emptyLine, fieldCount,
+            Objects.requireNonNull(record, "record must not be null"));
+    }
 
 }

@@ -25,8 +25,8 @@ public final class StringArrayHandler extends AbstractCsvCallbackHandler<String[
     }
 
     @Override
-    protected String[] buildRecord(final String[] fields) {
-        return fields;
+    protected RecordWrapper<String[]> buildRecord() {
+        return buildWrapper(compactFields());
     }
 
 }

@@ -1,4 +1,4 @@
-package blackbox.reader;
+package de.siegmar.fastcsv.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,18 +9,14 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
-import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvReader;
-
 class BaseCsvCallbackHandlerTest {
 
     @Test
     void onlyAbstract() {
         final var handler = new AbstractBaseCsvCallbackHandler<String>() {
             @Override
-            protected String build() {
-                return "ignored";
+            protected RecordWrapper<String> buildRecord() {
+                return wrapRecord("ignored");
             }
         };
 
@@ -84,8 +80,8 @@ class BaseCsvCallbackHandlerTest {
         }
 
         @Override
-        protected List<String> build() {
-            return List.copyOf(fields);
+        public RecordWrapper<List<String>> buildRecord() {
+            return wrapRecord(List.copyOf(fields));
         }
 
     }

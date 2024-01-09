@@ -21,8 +21,7 @@ public final class RecordWrapper<T> {
      * skip comments and/or empty lines.
      * The {@code fieldCount} parameter is only used if the {@link CsvReader} is configured to check the number of
      * fields in each record.
-     * The {@code wrappedRecord} parameter is the actual record to be returned by the {@link CsvReader}. It can be
-     * {@code null} if the record is to be skipped (e.g. if the callback handler already consumed it as a header).
+     * The {@code wrappedRecord} parameter is the actual record to be returned by the {@link CsvReader}.
      *
      * @param comment       whether the record denotes a comment (to be skipped if
      *                      {@link CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)} is set to
@@ -32,9 +31,9 @@ public final class RecordWrapper<T> {
      * @param fieldCount    the number of fields in the record (to be checked against the number of fields in other
      *                      records if {@link CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)} is set to
      *                      {@code false})
-     * @param wrappedRecord the actual record to be returned by the {@link CsvReader} or {@code null} to skip the record
+     * @param wrappedRecord the actual record to be returned by the {@link CsvReader}, must not be {@code null}
      */
-    public RecordWrapper(final boolean comment, final boolean emptyLine, final int fieldCount, final T wrappedRecord) {
+    RecordWrapper(final boolean comment, final boolean emptyLine, final int fieldCount, final T wrappedRecord) {
         this.comment = comment;
         this.emptyLine = emptyLine;
         this.fieldCount = fieldCount;
@@ -76,11 +75,8 @@ public final class RecordWrapper<T> {
 
     /**
      * Returns the actual record to be returned by the {@link CsvReader}.
-     * <p>
-     * This method can return {@code null} if the record is to be skipped (e.g. if the callback handler already consumed
-     * it as a header).
      *
-     * @return the actual record to be returned by the {@link CsvReader} or {@code null} to skip the record
+     * @return the actual record to be returned by the {@link CsvReader}, never {@code null}
      */
     public T wrappedRecord() {
         return wrappedRecord;

@@ -25,8 +25,8 @@ public final class CsvRecordHandler extends AbstractCsvCallbackHandler<CsvRecord
     }
 
     @Override
-    protected CsvRecord buildRecord(final String[] fields) {
-        return new CsvRecord(startingLineNumber, fields, comment);
+    protected RecordWrapper<CsvRecord> buildRecord() {
+        return buildWrapper(new CsvRecord(startingLineNumber, compactFields(), comment));
     }
 
 }
