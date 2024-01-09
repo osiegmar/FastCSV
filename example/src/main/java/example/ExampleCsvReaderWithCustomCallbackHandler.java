@@ -33,7 +33,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
  *     </tr>
  *     <tr>
  *         <td>Standard stream-based Mapper (with FastNumberParser)</td>
- *         <td>4m 25s (3.77 M record/s) – 63% faster than baseline</td>
+ *         <td>4m 25s (3.77 M records/s) – 63% faster than baseline</td>
  *     </tr>
  *     <tr>
  *         <td>Custom Mapper (with FastNumberParser)</td>
@@ -237,7 +237,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
 
     // Use JavaDoubleParser instead of Double.parseDouble() for way better performance
     // see https://github.com/wrandelshofer/FastDoubleParser
-    private final static class FastNumberParser {
+    private static final class FastNumberParser {
 
         private static long parseLong(final String str) {
             long result = 0;

@@ -359,8 +359,7 @@ class CsvReaderTest {
         assertThat(spliterator.trySplit()).isNull();
         assertThat(spliterator.estimateSize()).isEqualTo(Long.MAX_VALUE);
         assertThat(spliterator.characteristics())
-            .isEqualTo(Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL
-                | Spliterator.IMMUTABLE);
+            .isEqualTo(Spliterator.ORDERED | Spliterator.NONNULL);
 
         final var csvRecords = new AtomicInteger();
         final var csvRecords2 = new AtomicInteger();
