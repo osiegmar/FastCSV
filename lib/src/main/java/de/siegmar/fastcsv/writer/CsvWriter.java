@@ -322,7 +322,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to separate fields (default: ',' - comma).
+         * Sets the character that is used to separate fields – default: {@code ,} (comma).
          *
          * @param fieldSeparator the field separator character.
          * @return This updated object, allowing additional method calls to be chained together.
@@ -334,7 +334,10 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to quote values (default: '"' - double quotes).
+         * Sets the character that is used to quote values – default: {@code "} (double quote).
+         * <p>
+         * Be aware that using characters other than the default double quote character goes against the RFC 4180
+         * standard.
          *
          * @param quoteCharacter the character for enclosing fields.
          * @return This updated object, allowing additional method calls to be chained together.
@@ -346,7 +349,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to prepend commented lines (default: '#' - hash/number).
+         * Sets the character that is used to prepend commented lines – default: {@code #} (hash/number).
          *
          * @param commentCharacter the character for prepending commented lines.
          * @return This updated object, allowing additional method calls to be chained together.
@@ -358,7 +361,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the strategy that defines when optional quoting has to be performed (default: none).
+         * Sets the strategy that defines when optional quoting has to be performed – default: none.
          *
          * @param quoteStrategy the strategy when fields should be enclosed using the {@code quoteCharacter},
          *                      even if not strictly required.
