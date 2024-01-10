@@ -60,16 +60,6 @@ class CsvCallbackHandlerTest {
             .containsExactly("foo", "bar");
     }
 
-    @Test
-    void simpleMapper() {
-        final CsvCallbackHandler<String[]> rh = CsvCallbackHandler
-            .forSimpleMapper(fields -> new String[]{fields[1], fields[0]});
-        process(rh);
-
-        assertThat(rh.buildRecord().wrappedRecord())
-            .containsExactly("bar", "foo");
-    }
-
     private static void process(final CsvCallbackHandler<?> rh) {
         rh.beginRecord(1);
         addField(rh, "foo");

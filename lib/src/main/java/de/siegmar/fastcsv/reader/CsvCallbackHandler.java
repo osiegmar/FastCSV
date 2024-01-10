@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.util.Objects;
-
 /**
  * This class defines the methods that are called during the CSV reading process.
  * <p>
@@ -9,7 +7,7 @@ import java.util.Objects;
  * Don't mess up the CSV reading process!
  * <p>
  * Even if you need custom handling, you typically don't need to extend this class directly.
- * Check out {@link #forSimpleMapper(SimpleCsvMapper)} and {@link AbstractBaseCsvCallbackHandler} first.
+ * Check out {@link AbstractBaseCsvCallbackHandler} first.
  *
  * @param <T> the type of the record that is built from the CSV data
  */
@@ -20,26 +18,6 @@ public abstract class CsvCallbackHandler<T> {
      * Default constructor.
      */
     protected CsvCallbackHandler() {
-    }
-
-    /**
-     * Constructs a callback handler for the given {@link SimpleCsvMapper}.
-     * <p>
-     * The returned callback handler is stateful and must not be reused.
-     *
-     * @param <T>    the type of the resulting records
-     * @param mapper the mapper
-     * @return a callback handler that returns a mapped record for each record
-     * @throws NullPointerException if {@code mapper} is {@code null}
-     */
-    public static <T> CsvCallbackHandler<T> forSimpleMapper(final SimpleCsvMapper<T> mapper) {
-        Objects.requireNonNull(mapper, "mapper must not be null");
-        return new AbstractCsvCallbackHandler<>() {
-            @Override
-            protected RecordWrapper<T> buildRecord() {
-                return buildWrapper(mapper.map(compactFields()));
-            }
-        };
     }
 
     /**
