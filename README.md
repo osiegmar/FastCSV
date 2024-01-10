@@ -186,6 +186,7 @@ CsvWriter.builder()
 - [How to upgrade](UPGRADING.md)
 - [Changelog](CHANGELOG.md)
 - [Design & Architecture](doc/architecture.md)
+- [CSV Interpretation](doc/interpretation.md)
 
 ---
 
