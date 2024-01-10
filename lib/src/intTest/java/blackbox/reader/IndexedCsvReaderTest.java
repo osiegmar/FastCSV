@@ -54,12 +54,12 @@ class IndexedCsvReaderTest {
     @Test
     void outOfBounds() throws IOException {
         try (var csv = buildSinglePage("")) {
-            final CsvIndex index = csv.index();
+            final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.pageCount())
+            softly.assertThat(index.getPageCount())
                 .isZero();
 
-            softly.assertThat(index.recordCount())
+            softly.assertThat(index.getRecordCount())
                 .isZero();
 
             softly.assertThatThrownBy(() -> csv.readPage(0))
@@ -84,12 +84,12 @@ class IndexedCsvReaderTest {
     @Test
     void unicode() throws IOException {
         try (var csv = buildSinglePage("abc\nüöä\nabc")) {
-            final CsvIndex index = csv.index();
+            final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.pageCount())
+            softly.assertThat(index.getPageCount())
                 .isEqualTo(3);
 
-            softly.assertThat(index.recordCount())
+            softly.assertThat(index.getRecordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -109,9 +109,9 @@ class IndexedCsvReaderTest {
     @Test
     void explicitCharset() throws IOException {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), UTF_8)) {
-            final CsvIndex index = csv.index();
+            final CsvIndex index = csv.getIndex();
 
-            assertThat(index.pageCount())
+            assertThat(index.getPageCount())
                 .isEqualTo(3);
         }
     }
@@ -122,12 +122,12 @@ class IndexedCsvReaderTest {
         final var cbh = new NamedCsvRecordHandler();
 
         try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
-            final CsvIndex index = csv.index();
+            final CsvIndex index = csv.getIndex();
 
-            assertThat(index.pageCount())
+            assertThat(index.getPageCount())
                 .isEqualTo(2);
 
-            assertThat(index.recordCount())
+            assertThat(index.getRecordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -292,7 +292,7 @@ class IndexedCsvReaderTest {
 
             final CsvIndex index = builder
                 .ofCsvRecord(file)
-                .index();
+                .getIndex();
 
             assertThatThrownBy(() -> builder.index(index).fieldSeparator(';').ofCsvRecord(file))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -418,11 +418,11 @@ class IndexedCsvReaderTest {
         @Test
         void oneLine() throws IOException {
             try (var csv = buildSinglePage("012")) {
-                final CsvIndex index = csv.index();
+                final CsvIndex index = csv.getIndex();
 
-                assertThat(index.pageCount()).isOne();
+                assertThat(index.getPageCount()).isOne();
 
-                assertThat(index.recordCount()).isOne();
+                assertThat(index.getRecordCount()).isOne();
 
                 assertThat(csv.readPage(0))
                     .singleElement(CSV_RECORD)
@@ -436,12 +436,12 @@ class IndexedCsvReaderTest {
         @Test
         void twoLines() throws IOException {
             try (var csv = buildSinglePage("012,foo\n345,bar")) {
-                final CsvIndex index = csv.index();
+                final CsvIndex index = csv.getIndex();
 
-                assertThat(index.pageCount())
+                assertThat(index.getPageCount())
                     .isEqualTo(2);
 
-                assertThat(index.recordCount())
+                assertThat(index.getRecordCount())
                     .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
@@ -477,12 +477,12 @@ class IndexedCsvReaderTest {
                 .ofCsvRecord(prepareTestFile("1\n2a,2b\n\"3\nfoo\"\n4\n5"));
 
             try (csv) {
-                final CsvIndex index = csv.index();
+                final CsvIndex index = csv.getIndex();
 
-                assertThat(index.pageCount())
+                assertThat(index.getPageCount())
                     .isEqualTo(3);
 
-                assertThat(index.recordCount())
+                assertThat(index.getRecordCount())
                     .isEqualTo(5L);
 
                 assertThat(csv.readPage(0))
@@ -538,7 +538,7 @@ class IndexedCsvReaderTest {
                     .extracting(e -> e.getField(0))
                     .isEqualTo(TEST_STRING);
 
-                expectedIndex = expectedCsv.index();
+                expectedIndex = expectedCsv.getIndex();
             }
 
             final byte[] serialize = serialize(expectedIndex);

@@ -34,8 +34,8 @@ import de.siegmar.fastcsv.util.Util;
  * Example use:
  * {@snippet :
  * try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
- *     CsvIndex index = csv.index();
- *     int lastPage = index.pageCount() - 1;
+ *     CsvIndex index = csv.getIndex();
+ *     int lastPage = index.getPageCount() - 1;
  *     List<CsvRecord> csvRecords = csv.readPage(lastPage);
  * }
  *}
@@ -187,7 +187,7 @@ public final class IndexedCsvReader<T> implements Closeable {
      *
      * @return the index that is used for accessing the CSV file.
      */
-    public CsvIndex index() {
+    public CsvIndex getIndex() {
         return csvIndex;
     }
 
@@ -202,20 +202,20 @@ public final class IndexedCsvReader<T> implements Closeable {
      */
     public List<T> readPage(final int page) throws IOException {
         Preconditions.checkArgument(page >= 0, "page must be >= 0");
-        return readPage(csvIndex.page(page));
+        return readPage(csvIndex.getPage(page));
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
         synchronized (raf) {
-            raf.seek(page.offset());
-            csvParser.reset(page.startingLineNumber() - 1);
+            raf.seek(page.getOffset());
+            csvParser.reset(page.getStartingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
                 final RecordWrapper<T> rec = csvRecordHandler.buildRecord();
                 if (rec != null) {
-                    ret.add(rec.wrappedRecord());
+                    ret.add(rec.getWrappedRecord());
                 }
             }
 

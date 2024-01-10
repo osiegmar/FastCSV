@@ -62,11 +62,11 @@ public class ExampleIndexedCsvReader {
             .ofCsvRecord(file);
 
         try (csv) {
-            final CsvIndex index = csv.index();
-            System.out.printf("Indexed %,d records%n", index.recordCount());
+            final CsvIndex index = csv.getIndex();
+            System.out.printf("Indexed %,d records%n", index.getRecordCount());
 
             System.out.println("Show records of last page");
-            final int lastPage = index.pageCount() - 1;
+            final int lastPage = index.getPageCount() - 1;
             final List<CsvRecord> lastPageRecords = csv.readPage(lastPage);
             lastPageRecords.forEach(System.out::println);
         }
@@ -80,9 +80,9 @@ public class ExampleIndexedCsvReader {
         final CsvIndex csvIndex = IndexedCsvReader.builder()
             .pageSize(5)
             .ofCsvRecord(file)
-            .index();
+            .getIndex();
 
-        System.out.printf("Indexed %,d records%n", csvIndex.recordCount());
+        System.out.printf("Indexed %,d records%n", csvIndex.getRecordCount());
 
         // Store index for the given file somewhere, and use it later ...
 
@@ -93,7 +93,7 @@ public class ExampleIndexedCsvReader {
 
         try (csv) {
             System.out.println("Show records of last page");
-            final int lastPage = csvIndex.pageCount() - 1;
+            final int lastPage = csvIndex.getPageCount() - 1;
             final List<CsvRecord> lastPageRecords = csv.readPage(lastPage);
             lastPageRecords.forEach(System.out::println);
         }
@@ -123,7 +123,7 @@ public class ExampleIndexedCsvReader {
             .ofCsvRecord(file);
 
         try (csv) {
-            System.out.printf("Indexed %,d records%n", csv.index().recordCount());
+            System.out.printf("Indexed %,d records%n", csv.getIndex().getRecordCount());
         }
 
         System.out.println();

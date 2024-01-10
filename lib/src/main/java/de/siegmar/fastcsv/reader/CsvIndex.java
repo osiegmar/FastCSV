@@ -95,7 +95,7 @@ public final class CsvIndex implements Serializable {
      *
      * @return the number of pages the file contents is partitioned to
      */
-    public int pageCount() {
+    public int getPageCount() {
         return pages.size();
     }
 
@@ -104,11 +104,11 @@ public final class CsvIndex implements Serializable {
      *
      * @return the number of records the file contains
      */
-    public long recordCount() {
+    public long getRecordCount() {
         return recordCounter;
     }
 
-    CsvPage page(final int pageNumber) {
+    CsvPage getPage(final int pageNumber) {
         return pages.get(pageNumber);
     }
 
@@ -165,11 +165,11 @@ public final class CsvIndex implements Serializable {
             this.startingLineNumber = startingLineNumber;
         }
 
-        long offset() {
+        long getOffset() {
             return offset;
         }
 
-        long startingLineNumber() {
+        long getStartingLineNumber() {
             return startingLineNumber;
         }
 

@@ -136,10 +136,10 @@ CsvReader.builder()
 
 ```java
 try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
-    CsvIndex index = csv.index();
+    CsvIndex index = csv.getIndex();
 
     System.out.println("Items of last page:");
-    int lastPage = index.pageCount() - 1;
+    int lastPage = index.getPageCount() - 1;
     List<CsvRecord> csvRecords = csv.readPage(lastPage);
     csvRecords.forEach(System.out::println);
 }

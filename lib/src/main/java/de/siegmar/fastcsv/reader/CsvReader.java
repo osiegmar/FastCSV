@@ -162,21 +162,21 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         // handle comment lines
-        if (recordWrapper.comment()) {
-            return commentStrategy == CommentStrategy.SKIP ? null : recordWrapper.wrappedRecord();
+        if (recordWrapper.isComment()) {
+            return commentStrategy == CommentStrategy.SKIP ? null : recordWrapper.getWrappedRecord();
         }
 
         // handle empty lines
-        if (recordWrapper.emptyLine()) {
-            return skipEmptyLines ? null : recordWrapper.wrappedRecord();
+        if (recordWrapper.isEmptyLine()) {
+            return skipEmptyLines ? null : recordWrapper.getWrappedRecord();
         }
 
         // check field count consistency
         if (!ignoreDifferentFieldCount) {
-            checkFieldCountConsistency(recordWrapper.fieldCount());
+            checkFieldCountConsistency(recordWrapper.getFieldCount());
         }
 
-        return recordWrapper.wrappedRecord();
+        return recordWrapper.getWrappedRecord();
     }
 
     private void checkFieldCountConsistency(final int fieldCount) {

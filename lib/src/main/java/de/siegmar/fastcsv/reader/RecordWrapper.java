@@ -47,7 +47,7 @@ public final class RecordWrapper<T> {
      *
      * @return {@code true} if the record denotes a comment
      */
-    public boolean comment() {
+    public boolean isComment() {
         return comment;
     }
 
@@ -58,7 +58,7 @@ public final class RecordWrapper<T> {
      *
      * @return {@code true} if the record is empty
      */
-    public boolean emptyLine() {
+    public boolean isEmptyLine() {
         return emptyLine;
     }
 
@@ -69,7 +69,7 @@ public final class RecordWrapper<T> {
      *
      * @return the number of fields in the record
      */
-    public int fieldCount() {
+    public int getFieldCount() {
         return fieldCount;
     }
 
@@ -78,7 +78,7 @@ public final class RecordWrapper<T> {
      *
      * @return the actual record to be returned by the {@link CsvReader}, never {@code null}
      */
-    public T wrappedRecord() {
+    public T getWrappedRecord() {
         return wrappedRecord;
     }
 
