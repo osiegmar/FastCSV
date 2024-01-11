@@ -192,7 +192,7 @@ CsvWriter.builder()
 
 ## Sponsoring and partnerships
 
-![YourKit](https://www.yourkit.com/images/yklogo.png)
+<img src="yklogo.svg" width="185" height="44" alt="FastCSV">
 
 YourKit was used to optimize the performance and footprint of FastCSV.
 YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
