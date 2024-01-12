@@ -255,6 +255,13 @@ to `writeComment("foo\nbar")` would result in the following output:
 #bar
 ```
 
+When writing a regular CSV record, FastCSV will automatically enclose the first field in double quotes if it starts
+with the configured comment character. A call to `writeRecord("#foo", "#bar")` would result in the following output:
+
+```csv
+"#foo",#barCRLF
+```
+
 When **reading** CSV files: As the RFC does not clearly specify how to handle comments, FastCSV does enable comment
 handling by default. The `CsvReaderBuilder.commentStrategy()` method is used to configure the wanted behavior. The
 following options are available:
@@ -265,7 +272,7 @@ following options are available:
 - `CommentStrategies.SKIP`: Parse comment lines but skip them; no `CsvRecord` is created/returned for comment lines.
 
 Both the `CsvReaderBuilder` and `CsvWriterBuilder`, allows to configure the character to be used as the comment
-character (via `.commentCharacter(char)`). The default value is `#`.
+character (via `commentCharacter(char)`). The default value is `#`.
 
 When comment handling is enabled, FastCSV handles any line that starts with the configured comment character and that is
 not a continuation of a multi-line field as a comment line. The following example illustrates this:
