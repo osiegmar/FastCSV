@@ -27,6 +27,7 @@ This document describes how FastCSV interprets CSV data and how this interpretat
     - [Bidirectional text](#bidirectional-text)
     - [Comments](#comments)
     - [Different end of line characters](#different-end-of-line-characters)
+- [ABNF Grammar](#abnf-grammar)
 
 ## Status of the RFC
 
@@ -266,6 +267,17 @@ following options are available:
 Both the `CsvReaderBuilder` and `CsvWriterBuilder`, allows to configure the character to be used as the comment
 character (via `.commentCharacter(char)`). The default value is `#`.
 
+When comment handling is enabled, FastCSV handles any line that starts with the configured comment character and that is
+not a continuation of a multi-line field as a comment line. The following example illustrates this:
+
+```csv
+# this is a comment
+"# this is not a comment"CRLF
+this is also # not a commentCRLF
+"this is a multi-lineCRLF
+# and therfore not a comment"CRLF
+```
+
 ### Different end of line characters
 
 While RFC 4180 mentions only the CRLF sequence as the end-of-line character, 4180-bis explicitly includes the CR and LF
@@ -274,3 +286,82 @@ characters, while maintaining the CRLF sequence as the default.
 In line with the RFC, FastCSV defaults to using the CRLF sequence as the end-of-line character. However, it also
 provides support for the CR and LF characters (via `CsvWriterBuilder.lineDelimiter(LineDelimiter)`) when writing CSV
 files. The CsvReader, on the other hand, automatically detects the end-of-line character when reading CSV files.
+
+## ABNF Grammar
+
+When comment handling is disabled (default), FastCSV adheres to the ABNF grammar of RFC 4180-bis.
+
+```abnf
+file = [header] *(record)
+
+header = [field] *(COMMA field) linebreak
+
+record = [field] *(COMMA field) linebreak
+
+field = (escaped / non-escaped)
+
+escaped = DQUOTE *(textdata / COMMA / CR / LF / 2DQUOTE) DQUOTE
+
+non-escaped = *(textdata)
+
+textdata = %x00-09 / %x0B-0C / %x0E-21 / %x23-2B / %x2D-7F / UTF8-data
+         ; all characters except LF, CR, DQUOTE and COMMA
+
+linebreak = CR / LF / CRLF
+
+COMMA = %x2C
+
+CR = %x0D ; as per section B.1 of [RFC5234]
+
+CRLF = CR LF ; as per section B.1 of [RFC5234]
+
+DQUOTE = %x22 ; as per section B.1 of [RFC5234]
+
+LF = %x0A ; as per section B.1 of [RFC5234]
+
+UTF8-data = UTF8-2 / UTF8-3 / UTF8-4 ; as per section 4 of [RFC3629]
+```
+
+When comment handling is enabled, FastCSV adheres to the following ABNF grammar:
+
+```abnf
+file = *((comment / record) linebreak)
+
+comment = HASH *comment-data
+
+record = first-field *(COMMA field)
+
+linebreak = CR / LF / CRLF
+
+first-field = (escaped / first-non-escaped)
+
+field = (escaped / non-escaped)
+
+escaped = DQUOTE *(data-with-hash / COMMA / CR / LF / 2DQUOTE) DQUOTE
+
+first-non-escaped = [data *data-with-hash]
+
+non-escaped = *data-with-hash
+
+comment-data = %x00-09 / %x0B-0C / %x0E-7F / UTF8-data
+         ; all characters except LF, CR
+
+data = %x00-09 / %x0B-0C / %x0E-21 / %x24-2B / %x2D-7F / UTF8-data
+         ; all characters except LF, CR, DQUOTE, HASH and COMMA
+
+data-with-hash = data / HASH
+
+HASH = %x23
+
+COMMA = %x2C
+
+CR = %x0D ; as per section B.1 of [RFC5234]
+
+CRLF = CR LF ; as per section B.1 of [RFC5234]
+
+DQUOTE = %x22 ; as per section B.1 of [RFC5234]
+
+LF = %x0A ; as per section B.1 of [RFC5234]
+
+UTF8-data = UTF8-2 / UTF8-3 / UTF8-4 ; as per section 4 of [RFC3629]
+```
