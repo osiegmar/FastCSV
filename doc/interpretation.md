@@ -129,8 +129,8 @@ Fields enclosed in double quotes can span multiple lines.
 field"CRLF
 ```
 
-FastCSV supports this for reading and writing. The Java value for this field would be `"a multi-line\r\nfield"`. The end
-of line characters within the field are preserved.
+FastCSV supports this for reading and writing. The Java value for this field would be `"a multi-line\r\nfield"`.
+Any end-of-line characters within the field are preserved.
 
 ### Unique header names
 
