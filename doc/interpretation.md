@@ -2,8 +2,8 @@
 
 At first, the CSV format may seem very simple. In practice, however, numerous edge cases need to be considered.
 The [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) project illustrates that there are many different
-ways to interpret CSV files. Some of these differences might be considered as bugs, while others represent alternative
-approaches to handling edge cases (mostly garbled data).
+ways to interpret CSV files, especially when not strictly following the RFC specification. Some of these differences
+might be considered as bugs, while others represent alternative approaches to handling edge cases (mostly garbled data).
 
 This document describes how FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
 
