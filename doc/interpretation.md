@@ -71,7 +71,7 @@ to do so.
 
 Example for **empty** and **quoted empty** fields:
 
-```csv
+```
 1,,fooCRLF
 2,"",barCRLF
 ```
@@ -85,7 +85,7 @@ In practice, however, this is not always the case. This prompts the question of 
 
 Consider the following CSV snippet as an illustration of varying field counts:
 
-```csv
+```
 header_a,header_bCRLF
 value_a_1CRLF
 value_a_2,value_b_2CRLF
@@ -104,7 +104,7 @@ As a consequence of not dictating equal field counts, a line could be completely
 for a CSV file with only one column, raising the question of whether the field is empty or if the line is empty and
 should be skipped.
 
-```csv
+```
 value_1CRLF
 CRLF
 value_2CRLF
@@ -124,7 +124,7 @@ Empty files (zero bytes) are valid per RFC. FastCSV will return an empty stream 
 
 Fields enclosed in double quotes can span multiple lines.
 
-```csv
+```
 "a multi-lineCRLF
 field"CRLF
 ```
@@ -138,7 +138,7 @@ The RFC says:
 > Implementers should be aware that some applications may treat header values as unique
 > (either case-sensitive or case-insensitive).
 
-```csv
+```
 header_a,header_aCRLF
 value_1,value_2CRLF
 ```
@@ -177,7 +177,7 @@ FastCSV strictly adheres to this requirement: it never writes whitespaces betwee
 
 Let's explore how FastCSV manages whitespaces when reading CSV files:
 
-```csv
+```
 "value 1","value 2" , "value 3"CRLF
 ```
 
@@ -250,15 +250,15 @@ When **writing** CSV files: The `CsvWriter.writeComment(String)` method can be u
 the `String` parameter contains line breaks, FastCSV will automatically prepend a comment character to each line. A call
 to `writeComment("foo\nbar")` would result in the following output:
 
-```csv
-#foo
-#bar
+```
+#fooCRLF
+#barCRLF
 ```
 
 When writing a regular CSV record, FastCSV will automatically enclose the first field in double quotes if it starts
 with the configured comment character. A call to `writeRecord("#foo", "#bar")` would result in the following output:
 
-```csv
+```
 "#foo",#barCRLF
 ```
 
@@ -277,8 +277,8 @@ character (via `commentCharacter(char)`). The default value is `#`.
 When comment handling is enabled, FastCSV handles any line that starts with the configured comment character and that is
 not a continuation of a multi-line field as a comment line. The following example illustrates this:
 
-```csv
-# this is a comment
+```
+# this is a commentCRLF
 "# this is not a comment"CRLF
 this is also # not a commentCRLF
 "this is a multi-lineCRLF
