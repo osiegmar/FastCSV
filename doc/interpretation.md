@@ -76,6 +76,26 @@ Example for **empty** and **quoted empty** fields:
 2,"",barCRLF
 ```
 
+### Newline after last record
+
+RFC 4180 says:
+> The last record in the file may or may not have an ending line break.
+
+RFC 4180-bis says:
+> The last record in the file MUST have an ending line break indicating the end of a record.
+
+This change was implemented to eliminate ambiguity, especially when the CSV file consists of only one field per record.
+In such cases, it becomes impossible to determine whether the example has a third record (containing an empty field) or
+not:
+
+```
+fooCRLF
+barCRLF
+```
+
+FastCSV conforms to the RFC 4180-bis requirement and includes end-of-line characters after every record, including the
+last one.
+
 ### Different field count
 
 The RFC says:
