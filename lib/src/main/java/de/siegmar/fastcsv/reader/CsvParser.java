@@ -151,10 +151,9 @@ final class CsvParser implements Closeable {
                             }
                         } else {
                             // fast-forward
-                            while (lPos < lLen) {
-                                final char lookAhead = lBuf[lPos++];
+                            for (; lPos < lLen; lPos++) {
+                                final char lookAhead = lBuf[lPos];
                                 if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
-                                    lPos--;
                                     break;
                                 }
                             }
@@ -220,10 +219,9 @@ final class CsvParser implements Closeable {
                                 lStatus = STATUS_DATA_FIELD;
 
                                 // fast-forward
-                                while (lPos < lLen) {
-                                    final char lookAhead = lBuf[lPos++];
+                                for (; lPos < lLen; lPos++) {
+                                    final char lookAhead = lBuf[lPos];
                                     if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
-                                        lPos--;
                                         break;
                                     }
                                 }
