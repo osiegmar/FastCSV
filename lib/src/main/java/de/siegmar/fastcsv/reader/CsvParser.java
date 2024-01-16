@@ -267,9 +267,17 @@ final class CsvParser implements Closeable {
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
                                        final char quoteCharacter) {
+
+        int i = begin;
+
+        // fast-forward to first quote
+        while (i < pos && buf[i] != quoteCharacter) {
+            i++;
+        }
+
         int shift = 0;
         boolean escape = false;
-        for (int i = begin; i < pos; i++) {
+        for (; i < pos; i++) {
             final char c = buf[i];
 
             if (c == quoteCharacter) {
