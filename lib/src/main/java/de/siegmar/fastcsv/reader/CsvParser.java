@@ -99,26 +99,29 @@ final class CsvParser implements Closeable {
             if (csvBuffer.len == csvBuffer.pos && !csvBuffer.fetchData()) {
                 // buffer is processed and no more data available
                 finished = true;
-
-                if (csvBuffer.begin < csvBuffer.pos) {
-                    // we have unconsumed data in the buffer
-                    materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos, status, qChar);
-                    return true;
-                }
-
-                if ((status & STATUS_NEW_FIELD) != 0 || (status & STATUS_COMMENTED_RECORD) != 0) {
-                    // last character was a field separator or comment character – add empty field
-                    materialize(csvBuffer.buf, 0, 0, status, qChar);
-                    return true;
-                }
-
-                // no data left in buffer
-                return false;
+                return processBufferTail();
             }
         } while (consume(csvBuffer.buf, csvBuffer.len));
 
         // we read data (and passed it to the record handler)
         return true;
+    }
+
+    private boolean processBufferTail() {
+        if (csvBuffer.begin < csvBuffer.pos) {
+            // we have unconsumed data in the buffer
+            materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos, status, qChar);
+            return true;
+        }
+
+        if ((status & STATUS_NEW_FIELD) != 0 || (status & STATUS_COMMENTED_RECORD) != 0) {
+            // last character was a field separator or comment character – add empty field
+            materialize(csvBuffer.buf, 0, 0, status, qChar);
+            return true;
+        }
+
+        // no data left in buffer
+        return false;
     }
 
     @SuppressWarnings("PMD.EmptyIfStmt")
