@@ -119,9 +119,9 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.jmh {
     warmupIterations = 2
-    iterations = 5
+    iterations = 1
     benchmarkMode = listOf("thrpt")
-    fork = 2
+    fork = 4
     operationsPerInvocation = 1
 }
 
