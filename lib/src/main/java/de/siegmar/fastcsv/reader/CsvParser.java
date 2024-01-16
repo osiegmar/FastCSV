@@ -102,7 +102,7 @@ final class CsvParser implements Closeable {
 
                 if (csvBuffer.begin < csvBuffer.pos) {
                     // we have unconsumed data in the buffer
-                    materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos - csvBuffer.begin, status, qChar);
+                    materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos, status, qChar);
                     return true;
                 }
 
@@ -165,13 +165,13 @@ final class CsvParser implements Closeable {
                         final char lookAhead = lBuf[lPos++];
 
                         if (lookAhead == CR) {
-                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
+                            materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (lookAhead == LF) {
-                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
+                            materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                             status = STATUS_RESET;
                             lBegin = lPos;
                             moreDataNeeded = false;
@@ -184,18 +184,18 @@ final class CsvParser implements Closeable {
                         final char c = lBuf[lPos++];
 
                         if (c == fsep) {
-                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
+                            materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                             lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
                         } else if (c == CR) {
-                            materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
+                            materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
-                                materialize(lBuf, lBegin, lPos - lBegin - 1, lStatus, qChar);
+                                materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                                 status = STATUS_RESET;
                                 lBegin = lPos;
                                 moreDataNeeded = false;
@@ -248,19 +248,19 @@ final class CsvParser implements Closeable {
 
         if ((lStatus & STATUS_QUOTED_FIELD) != 0) {
             // field with quotes
-            final int shift = cleanDelimiters(lBuf, lBegin + 1, lBegin + lPos, quoteCharacter);
-            callbackHandler.addField(lBuf, lBegin + 1, lPos - 1 - shift, true);
+            final int shift = cleanDelimiters(lBuf, lBegin + 1, lPos, quoteCharacter);
+            callbackHandler.addField(lBuf, lBegin + 1, (lPos - lBegin) - 1 - shift, true);
             return;
         }
 
         if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
             // commented line
-            callbackHandler.setComment(lBuf, lBegin, lPos);
+            callbackHandler.setComment(lBuf, lBegin, lPos - lBegin);
             return;
         }
 
         // field without quotes
-        callbackHandler.addField(lBuf, lBegin, lPos, false);
+        callbackHandler.addField(lBuf, lBegin, lPos - lBegin, false);
     }
 
     private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
