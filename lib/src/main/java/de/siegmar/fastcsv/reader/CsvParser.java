@@ -248,8 +248,10 @@ final class CsvParser implements Closeable {
 
         if ((lStatus & STATUS_QUOTED_FIELD) != 0) {
             // field with quotes
-            final int shift = cleanDelimiters(lBuf, lBegin + 1, lPos, quoteCharacter);
-            callbackHandler.addField(lBuf, lBegin + 1, (lPos - lBegin) - 1 - shift, true);
+            final int beginAfterQuote = lBegin + 1;
+            final int endAfterField = lPos - (lBuf[lPos - 1] == quoteCharacter ? 1 : 0);
+            callbackHandler.addField(lBuf, beginAfterQuote,
+                cleanDelimiters(lBuf, beginAfterQuote, endAfterField, quoteCharacter), true);
             return;
         }
 
@@ -263,36 +265,44 @@ final class CsvParser implements Closeable {
         callbackHandler.addField(lBuf, lBegin, lPos - lBegin, false);
     }
 
-    private static int cleanDelimiters(final char[] buf, final int begin, final int pos,
+    /**
+     * Remove escapes from the field data.
+     * <p>
+     * The input buffer could look like this: {@code foo ""is"" bar}
+     *
+     * @param buf the buffer containing the field data
+     * @param begin the start position of the field data (after the opening quote)
+     * @param end the end position of the field data (on the closing quote / end of buffer)
+     * @param quoteCharacter the quote character
+     * @return the length of the field data after removing escapes
+     */
+    private static int cleanDelimiters(final char[] buf, final int begin, final int end,
                                        final char quoteCharacter) {
 
         int i = begin;
 
         // fast-forward to first quote
-        while (i < pos && buf[i] != quoteCharacter) {
+        while (i < end && buf[i] != quoteCharacter) {
             i++;
         }
 
-        int shift = 0;
+        int newPos = i;
         boolean escape = false;
-        for (; i < pos; i++) {
+        for (; i < end; i++) {
             final char c = buf[i];
-
             if (c == quoteCharacter) {
-                if (!escape) {
-                    shift++;
-                    escape = true;
+                escape = !escape;
+                if (escape) {
+                    // skip quote
                     continue;
                 }
-                escape = false;
             }
 
-            if (shift > 0) {
-                buf[i - shift] = c;
-            }
+            // shift character
+            buf[newPos++] = c;
         }
 
-        return shift;
+        return newPos - begin;
     }
 
     public long getStartingLineNumber() {
