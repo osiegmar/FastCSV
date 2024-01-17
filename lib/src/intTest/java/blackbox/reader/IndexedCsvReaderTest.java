@@ -34,6 +34,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvIndex;
+import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
@@ -74,7 +75,8 @@ class IndexedCsvReaderTest {
 
         assertThat(singlePageBuilder().ofCsvRecord(file)).asString()
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
-                    + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, pageSize=1, "
+                    + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, acceptCharsAfterQuotes=true, "
+                    + "pageSize=1, "
                     + "index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, "
                     + "commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]",
                 file);
@@ -137,6 +139,25 @@ class IndexedCsvReaderTest {
             assertThat(csv.readPage(1))
                 .singleElement(NAMED_CSV_RECORD)
                 .fields().containsExactly(entry("h1", "v2"));
+        }
+    }
+
+    // accept characters after closing quotes
+
+    @Test
+    void acceptCharsAfterQuotes() throws IOException {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), UTF_8)) {
+            CsvRecordAssert.assertThat(csv.readPage(0).get(0)).fields()
+                .containsExactly("foo", "barbaz");
+        }
+    }
+
+    @Test
+    void acceptCharsAfterQuotesNot() throws IOException {
+        final var bldr = singlePageBuilder().acceptCharsAfterQuotes(false);
+        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), UTF_8)) {
+            assertThatThrownBy(() -> csv.readPage(0))
+                .isInstanceOf(CsvParseException.class);
         }
     }
 

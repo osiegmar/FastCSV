@@ -127,6 +127,7 @@ CsvReader.builder()
     .commentCharacter('#')
     .skipEmptyLines(true)
     .ignoreDifferentFieldCount(false)
+    .acceptCharsAfterQuotes(false)
     .detectBomHeader(false);
 ```
 

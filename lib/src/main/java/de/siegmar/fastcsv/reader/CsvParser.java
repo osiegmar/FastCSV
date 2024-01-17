@@ -37,6 +37,7 @@ final class CsvParser implements Closeable {
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
+    private final boolean acceptCharsAfterQuotes;
     private final CsvCallbackHandler<?> callbackHandler;
     private final CsvBuffer csvBuffer;
 
@@ -48,6 +49,7 @@ final class CsvParser implements Closeable {
 
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
+              final boolean acceptCharsAfterQuotes,
               final CsvCallbackHandler<?> callbackHandler, final Reader reader) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
@@ -56,12 +58,14 @@ final class CsvParser implements Closeable {
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(reader);
     }
 
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
+              final boolean acceptCharsAfterQuotes,
               final CsvCallbackHandler<?> callbackHandler, final String data) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
@@ -70,6 +74,7 @@ final class CsvParser implements Closeable {
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
+        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(data);
     }
@@ -228,8 +233,8 @@ final class CsvParser implements Closeable {
                                         break;
                                     }
                                 }
-                            } else {
-                                // field data after closing quote
+                            } else if (!acceptCharsAfterQuotes) {
+                                throw new CsvParseException("Unexpected character after closing quote: " + c);
                             }
                         }
                     }

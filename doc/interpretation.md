@@ -207,7 +207,9 @@ In this case, we observe:
 2. A quoted field with a trailing whitespace `"value 2"_` (the underscore represents the whitespace)
 
    FastCSV would concatenate any trailing characters (including whitespaces) to the field. The Java value for this field
-   would be `"value 2 "` (**without** the quotes).
+   would be `"value 2 "` (**without** the quotes). This lenient behavior can be disabled by configuring
+   `CsvReaderBuilder.acceptCharsAfterQuotes(false)`. In this case, FastCSV would throw an exception when reading this
+   field.
 
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
 

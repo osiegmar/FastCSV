@@ -51,6 +51,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
+    private final boolean acceptCharsAfterQuotes;
     private final int pageSize;
     private final RandomAccessFile raf;
     private final CsvCallbackHandler<T> csvRecordHandler;
@@ -61,7 +62,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     IndexedCsvReader(final Path file, final Charset defaultCharset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final int pageSize,
+                     final boolean acceptCharsAfterQuotes, final int pageSize,
                      final CsvCallbackHandler<T> csvRecordHandler, final CsvIndex csvIndex,
                      final StatusListener statusListener)
         throws IOException {
@@ -76,6 +77,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
+        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
         this.pageSize = pageSize;
         this.csvRecordHandler = csvRecordHandler;
 
@@ -101,7 +103,8 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         raf = new RandomAccessFile(file.toFile(), "r");
         csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            csvRecordHandler, new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
+            acceptCharsAfterQuotes, csvRecordHandler,
+            new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
     private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
@@ -237,6 +240,7 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
+            .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
             .add("pageSize=" + pageSize)
             .add("index=" + csvIndex)
             .toString();
@@ -260,6 +264,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
+        private boolean acceptCharsAfterQuotes = true;
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;
@@ -318,6 +323,27 @@ public final class IndexedCsvReader<T> implements Closeable {
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
             checkControlCharacter(commentCharacter);
             this.commentCharacter = commentCharacter;
+            return this;
+        }
+
+        /**
+         * Specifies whether the presence of characters between a closing quote and a field separator or
+         * the end of a line should be treated as an error or not.
+         * <p>
+         * Example:
+         * <pre>
+         * {@code "a"b,"c"}
+         * </pre>
+         * <p>
+         * If this is set to {@code true}, the value {@code ab} will be returned for the first field.
+         * <p>
+         * If this is set to {@code false}, a {@link CsvParseException} will be thrown.
+         *
+         * @param acceptCharsAfterQuotes allow characters after quotes (default: {@code true}).
+         * @return This updated object, allowing additional method calls to be chained together.
+         */
+        public IndexedCsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
+            this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
             return this;
         }
 
@@ -444,7 +470,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, pageSize, callbackHandler, csvIndex, sl);
+                commentCharacter, acceptCharsAfterQuotes, pageSize, callbackHandler, csvIndex, sl);
         }
 
     }

@@ -299,6 +299,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      *     <li>Comment character: {@code #} (hash) (in case comment strategy is enabled)</li>
      *     <li>Skip empty lines: {@code true}</li>
      *     <li>Ignore different field count: {@code true}</li>
+     *     <li>Accept characters after quotes: {@code true}</li>
      *     <li>Detect BOM header: {@code false}</li>
      * </ul>
      * <p>
@@ -314,6 +315,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private char commentCharacter = '#';
         private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
+        private boolean acceptCharsAfterQuotes = true;
         private boolean detectBomHeader;
 
         private CsvReaderBuilder() {
@@ -404,6 +406,27 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          */
         public CsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
             this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
+            return this;
+        }
+
+        /**
+         * Specifies whether the presence of characters between a closing quote and a field separator or
+         * the end of a line should be treated as an error or not.
+         * <p>
+         * Example:
+         * <pre>
+         * {@code "a"b,"c"}
+         * </pre>
+         * <p>
+         * If this is set to {@code true}, the value {@code ab} will be returned for the first field.
+         * <p>
+         * If this is set to {@code false}, a {@link CsvParseException} will be thrown.
+         *
+         * @param acceptCharsAfterQuotes allow characters after quotes (default: {@code true}).
+         * @return This updated object, allowing additional method calls to be chained together.
+         */
+        public CsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
+            this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
             return this;
         }
 
@@ -564,7 +587,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(reader, "reader must not be null");
 
             final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, callbackHandler, reader);
+                commentCharacter, acceptCharsAfterQuotes, callbackHandler, reader);
 
             return newReader(callbackHandler, csvParser);
         }
@@ -583,7 +606,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(data, "data must not be null");
 
             final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, callbackHandler, data);
+                commentCharacter, acceptCharsAfterQuotes, callbackHandler, data);
 
             return newReader(callbackHandler, csvParser);
         }
@@ -644,6 +667,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+                .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
                 .toString();
         }
 
