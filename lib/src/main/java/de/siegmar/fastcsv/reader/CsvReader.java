@@ -20,6 +20,10 @@ import java.util.stream.StreamSupport;
 /**
  * This is the main class for reading CSV data.
  * <p>
+ * The CSV records are read iteratively, regardless of whether the Iterable, the Iterator, or the Stream is used.
+ * Once all records are read, the data is consumed. If you need to repeatedly read records, you should collect the
+ * records in a List or another collection.
+ * <p>
  * Example use:
  * {@snippet :
  * try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
