@@ -70,6 +70,10 @@ public class CsvRecord {
      * no matter if empty lines or commented records are skipped or not.
      * <p>
      * A starting offset of 1 is used to be consistent with the line numbers shown of most text editors.
+     * <p>
+     * Note that this number is only correct if the CSV data was read from the very beginning. If you passed
+     * a {@link java.io.Reader} to the {@link CsvReader} and have already read from it, the line number will be
+     * incorrect.
      *
      * @return the starting line number of this record, starting from 1
      */
