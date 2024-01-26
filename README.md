@@ -188,6 +188,7 @@ CsvWriter.builder()
 - [Changelog](CHANGELOG.md)
 - [Design & Architecture](doc/architecture.md)
 - [CSV Interpretation](doc/interpretation.md)
+- [Design Goals](doc/goals.md)
 
 ---
 
