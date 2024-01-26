@@ -16,5 +16,5 @@ A clear and concise description of what you want to happen.
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
-**RFC 4180 compliance**
-Would this feature comply to [RFC 4180](https://tools.ietf.org/html/rfc4180)?
+**Goal alignment**
+Does this feature align with the [goals](https://github.com/osiegmar/FastCSV/blob/main/doc/goals.md) of FastCSV?
