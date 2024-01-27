@@ -1,20 +1,15 @@
-# How to contribute
+# How to Contribute
 
-You're considering to contribute work to this project? Sounds great, help is always welcome.
+Are you considering contributing to this project? That's great; help is always welcome.
 
-Please keep in mind that the objectives of this project needs to be kept:
+Please make sure to read the [goals](../doc/goals.md) of FastCSV before investing your time.
 
-- Very fast
-- RFC 4180 compliant
-- No third party libraries
-- Small footprint
+If you're unsure, start a [discussion](https://github.com/osiegmar/FastCSV/discussions) about your idea first.
 
-If unsure, start a [discussion](https://github.com/osiegmar/FastCSV/discussions).
-
-## Steps to take
+## Steps to Take
 
 - Fork
 - Code
 - Add test(s)
 - Commit
-- Send me a pull request
+- Submit a pull request
