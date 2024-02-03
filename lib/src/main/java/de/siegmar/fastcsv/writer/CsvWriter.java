@@ -326,7 +326,6 @@ public final class CsvWriter implements Closeable {
          *
          * @param fieldSeparator the field separator character.
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
             this.fieldSeparator = fieldSeparator;
@@ -341,7 +340,6 @@ public final class CsvWriter implements Closeable {
          *
          * @param quoteCharacter the character for enclosing fields.
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
             this.quoteCharacter = quoteCharacter;
@@ -353,7 +351,6 @@ public final class CsvWriter implements Closeable {
          *
          * @param commentCharacter the character for prepending commented lines.
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder commentCharacter(final char commentCharacter) {
             this.commentCharacter = commentCharacter;
@@ -366,7 +363,6 @@ public final class CsvWriter implements Closeable {
          * @param quoteStrategy the strategy when fields should be enclosed using the {@code quoteCharacter},
          *                      even if not strictly required.
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
             this.quoteStrategy = quoteStrategy;
@@ -378,7 +374,6 @@ public final class CsvWriter implements Closeable {
          *
          * @param lineDelimiter the line delimiter to be used.
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
             this.lineDelimiter = lineDelimiter;
@@ -395,7 +390,6 @@ public final class CsvWriter implements Closeable {
          *
          * @param bufferSize the buffer size to be used (must be &ge; 0).
          * @return This updated object, allowing additional method calls to be chained together.
-
          */
         public CsvWriterBuilder bufferSize(final int bufferSize) {
             Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
