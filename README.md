@@ -79,7 +79,8 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 - for 3.x version: Java ⩾ 11 (Android 13 / API level 33)
 - for 2.x version: Java ⩾ 8 (Android 8 / API level 26)
 
-> :bulb: Android is not Java and is not officially supported.
+> [!NOTE]
+> Android is not Java and is not officially supported.
 > Nevertheless, some basic checks are included in the continuous integration pipeline to
 > verify that the library *should* work with Android.
 
@@ -184,11 +185,12 @@ CsvWriter.builder()
 
 - [Examples](example/src/main/java/example)
 - [JavaDoc](https://javadoc.io/doc/de.siegmar/fastcsv)
-- [How to upgrade](UPGRADING.md)
+- [How to Upgrade](UPGRADING.md)
 - [Changelog](CHANGELOG.md)
 - [Design & Architecture](doc/architecture.md)
 - [CSV Interpretation](doc/interpretation.md)
 - [Design Goals](doc/goals.md)
+- [How to Contribute](.github/CONTRIBUTING.md)
 
 ---
 
