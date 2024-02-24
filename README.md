@@ -23,10 +23,10 @@ The primary use cases of FastCSV include:
 
 ## Benchmark & Compatibility
 
-A selected benchmark from the
-[Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite) project:
-
 ![Benchmark](benchmark.webp "Benchmark")
+
+> [!NOTE]
+> This selected benchmark is based on the [Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite)
 
 While maintaining high performance, FastCSV serves as a strict RFC 4180 CSV writer while
 also exhibiting the ability to read somewhat garbled CSV data.
