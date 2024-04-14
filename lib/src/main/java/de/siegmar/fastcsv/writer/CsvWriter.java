@@ -43,6 +43,7 @@ public final class CsvWriter implements Closeable {
     private int currentLineNo = 1;
     private final char[] lineDelimiterChars;
     private final char[] emptyFieldValue;
+    private boolean openRecordWriter;
 
     CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
               final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
@@ -83,20 +84,20 @@ public final class CsvWriter implements Closeable {
      *               not configured otherwise ({@link QuoteStrategies#EMPTY})).
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
+     * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      * @see #writeRecord(String...)
      */
     public CsvWriter writeRecord(final Iterable<String> values) {
+        validateNoOpenRecord();
         try {
             int fieldIdx = 0;
             for (final String value : values) {
                 writeInternal(value, fieldIdx++);
             }
-            endRecord();
+            return endRecord();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
-
-        return this;
     }
 
     /**
@@ -106,19 +107,42 @@ public final class CsvWriter implements Closeable {
      *               not configured otherwise ({@link QuoteStrategies#EMPTY}))
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
+     * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      * @see #writeRecord(Iterable)
      */
     public CsvWriter writeRecord(final String... values) {
+        validateNoOpenRecord();
         try {
             for (int i = 0; i < values.length; i++) {
                 writeInternal(values[i], i);
             }
-            endRecord();
+            return endRecord();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
 
-        return this;
+    /**
+     * Starts a new record.
+     * <p>
+     * This method is used to write a record field by field. The record is ended by calling
+     * {@link CsvWriterRecord#endRecord()}.
+     *
+     * @return CsvWriterRecord instance to write fields to.
+     * @throws IllegalStateException if a record is already started
+     * @see #writeRecord(String...)
+     * @see #writeRecord(Iterable)
+     */
+    public CsvWriterRecord writeRecord() {
+        validateNoOpenRecord();
+        openRecordWriter = true;
+        return new CsvWriterRecord();
+    }
+
+    private void validateNoOpenRecord() {
+        if (openRecordWriter) {
+            throw new IllegalStateException("Record already started, call end() on CsvWriterRecord first");
+        }
     }
 
     @SuppressWarnings("checkstyle:BooleanExpressionComplexity")
@@ -222,19 +246,19 @@ public final class CsvWriter implements Closeable {
      *                {@link CsvWriterBuilder#lineDelimiter(LineDelimiter)}.
      * @return This CsvWriter.
      * @throws UncheckedIOException if a write error occurs
+     * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      */
     public CsvWriter writeComment(final String comment) {
+        validateNoOpenRecord();
         try {
             writer.write(commentCharacter);
             if (comment != null && !comment.isEmpty()) {
                 writeCommentInternal(comment);
             }
-            endRecord();
+            return endRecord();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
-
-        return this;
     }
 
     private void writeCommentInternal(final String comment) throws IOException {
@@ -270,12 +294,13 @@ public final class CsvWriter implements Closeable {
         writer.write(commentCharacter);
     }
 
-    private void endRecord() throws IOException {
+    private CsvWriter endRecord() throws IOException {
         ++currentLineNo;
         writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
         if (flushWriter) {
             writer.flush();
         }
+        return this;
     }
 
     @Override
@@ -538,6 +563,49 @@ public final class CsvWriter implements Closeable {
         public void close() throws IOException {
             flush();
             writer.close();
+        }
+
+    }
+
+    /**
+     * This class is used to write a record field by field.
+     * <p>
+     * The record is ended by calling {@link CsvWriterRecord#endRecord()}.
+     */
+    public final class CsvWriterRecord {
+
+        private int fieldIdx;
+
+        private CsvWriterRecord() {
+        }
+
+        /**
+         * Writes a field to the current record.
+         * @param value the field value
+         * @return this CsvWriterRecord instance
+         * @throws UncheckedIOException if a write error occurs
+         */
+        public CsvWriterRecord writeField(final String value) {
+            try {
+                writeInternal(value, fieldIdx++);
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            return this;
+        }
+
+        /**
+         * Ends the current record.
+         * @return the enclosing CsvWriter instance
+         * @throws UncheckedIOException if a write error occurs
+         */
+        public CsvWriter endRecord() {
+            openRecordWriter = false;
+            try {
+                return CsvWriter.this.endRecord();
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
 
     }
