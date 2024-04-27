@@ -46,7 +46,7 @@ public final class Limits {
      * @return The system property value as an integer or the default value if the property is not set or is invalid.
      * @throws IllegalArgumentException If the system property value cannot be parsed as an integer.
      */
-    private static int getIntProperty(final String key, final int defaultValue) {
+    static int getIntProperty(final String key, final int defaultValue) {
         final String value = System.getProperty(key);
 
         if (value == null) {
