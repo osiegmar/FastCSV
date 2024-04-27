@@ -1,67 +1,69 @@
 package de.siegmar.fastcsv.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class LimitsTest {
 
-    @BeforeEach
-    void setup() {
-        System.clearProperty("fastcsv.max.field.size");
-        System.clearProperty("fastcsv.max.field.count");
-    }
+    public static final String FASTCSV_MAX_FIELD_SIZE = "fastcsv.max.field.size";
+    public static final String FASTCSV_MAX_FIELD_COUNT = "fastcsv.max.field.count";
 
     @AfterEach
     void cleanup() {
-        System.clearProperty("fastcsv.max.field.size");
-        System.clearProperty("fastcsv.max.field.count");
+        System.clearProperty(FASTCSV_MAX_FIELD_SIZE);
+        System.clearProperty(FASTCSV_MAX_FIELD_COUNT);
     }
 
     @Test
     void defaultMaxFieldSize() {
-        assertEquals(16 * 1024 * 1024, Limits.MAX_FIELD_SIZE, "Default max field size should be correct");
+        assertThat(Limits.MAX_FIELD_SIZE)
+            .as("Default max field size should be correct")
+            .isEqualTo(16 * 1024 * 1024);
     }
 
     @Test
     void customMaxFieldSize() {
-        System.setProperty("fastcsv.max.field.size", "100000");
+        System.setProperty(FASTCSV_MAX_FIELD_SIZE, "100000");
 
-        assertEquals(100000, Limits.getIntProperty("fastcsv.max.field.size", 16 * 1024 * 1024),
-                "Custom max field size should be respected");
+        assertThat(Limits.getIntProperty(FASTCSV_MAX_FIELD_SIZE, 16 * 1024 * 1024))
+            .as("Custom max field size should be respected")
+            .isEqualTo(100000);
     }
 
     @Test
     void defaultMaxFieldCount() {
-        assertEquals(16 * 1024, Limits.MAX_FIELD_COUNT, "Default max field count should be correct");
+        assertThat(Limits.MAX_FIELD_COUNT)
+            .as("Default max field count should be correct")
+            .isEqualTo(16 * 1024);
     }
 
     @Test
     void customMaxFieldCount() {
-        System.setProperty("fastcsv.max.field.count", "200");
+        System.setProperty(FASTCSV_MAX_FIELD_COUNT, "200");
 
-        assertEquals(200, Limits.getIntProperty("fastcsv.max.field.count", 16 * 1024),
-                "Custom max field count should be respected");
+        assertThat(Limits.getIntProperty(FASTCSV_MAX_FIELD_COUNT, 16 * 1024))
+            .as("Custom max field count should be respected")
+            .isEqualTo(200);
     }
 
     @Test
     void invalidMaxFieldSizeThrowsException() {
-        System.setProperty("fastcsv.max.field.size", "invalid");
+        System.setProperty(FASTCSV_MAX_FIELD_SIZE, "invalid");
 
-        assertThrows(IllegalArgumentException.class,
-                () -> Limits.getIntProperty("fastcsv.max.field.size", 16 * 1024 * 1024),
-                "Should throw IllegalArgumentException for invalid integer format");
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> Limits.getIntProperty(FASTCSV_MAX_FIELD_SIZE, 16 * 1024 * 1024))
+            .withMessageContaining("Invalid format for system property " + FASTCSV_MAX_FIELD_SIZE);
     }
 
     @Test
-    void testMaxRecordSizeBasedOnMaxFieldSize() {
-        System.setProperty("fastcsv.max.field.size", "4000000");
+    void maxRecordSizeBasedOnMaxFieldSize() {
+        System.setProperty(FASTCSV_MAX_FIELD_SIZE, "4000000");
 
-        assertEquals(4 * 4000000,
-                4 * Limits.getIntProperty("fastcsv.max.field.size", 16 * 1024 * 1024),
-                "MAX_RECORD_SIZE should be four times MAX_FIELD_SIZE");
+        assertThat(4 * Limits.getIntProperty(FASTCSV_MAX_FIELD_SIZE, 16 * 1024 * 1024))
+            .as("MAX_RECORD_SIZE should be four times MAX_FIELD_SIZE")
+            .isEqualTo(4 * 4000000);
     }
 }
