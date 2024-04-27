@@ -46,8 +46,8 @@ public final class Limits {
      * @return The system property value as an integer or the default value if the property is not set or is invalid.
      * @throws IllegalArgumentException If the system property value cannot be parsed as an integer.
      */
-    private static int getIntProperty(String key, int defaultValue) {
-        String value = System.getProperty(key);
+    private static int getIntProperty(final String key, final int defaultValue) {
+        final String value = System.getProperty(key);
 
         if (value == null) {
             return defaultValue;
@@ -55,7 +55,7 @@ public final class Limits {
 
         try {
             return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new IllegalArgumentException("Invalid format for system property " + key, e);
         }
     }
