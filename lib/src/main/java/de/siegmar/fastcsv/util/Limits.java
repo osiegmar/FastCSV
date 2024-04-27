@@ -3,12 +3,15 @@ package de.siegmar.fastcsv.util;
 /**
  * The {@code Limits} class defines the maximum limits for various fields and records in a CSV file.
  * <p>
- * Properties can be overridden by using
- * <p>
  * Example use:
- * {@snippet : System.setProperty("fastcsv.max.field.size", "1024"); }
+ * <pre>{@code
+ * System.setProperty("fastcsv.max.field.size", "1024");
+ * }</pre>
  * <p>
- * Or using VM options: {@snippet : -Dfastcsv.max.field.count=1024 }
+ * Or using VM options:
+ * <pre>{@code
+ * -Dfastcsv.max.field.count=1024
+ * }</pre>
  */
 public final class Limits {
 
@@ -35,23 +38,25 @@ public final class Limits {
     }
 
     /**
-     * Retrieves the system property value as an integer, with a fallback to a default value.
-     * If the property is not set or cannot be parsed, the default value is returned.
+     * Retrieves the system property value if presented, otherwise default value is returned.
+     * If the property cannot be parsed as an integer, an {@code IllegalArgumentException} is thrown.
      *
      * @param key The system property key.
      * @param defaultValue The default value to use if the system property is not set or is invalid.
      * @return The system property value as an integer or the default value if the property is not set or is invalid.
+     * @throws IllegalArgumentException If the system property value cannot be parsed as an integer.
      */
     private static int getIntProperty(String key, int defaultValue) {
         String value = System.getProperty(key);
-        if (value != null) {
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid format for system property " + key);
-                throw e;
-            }
+
+        if (value == null) {
+            return defaultValue;
         }
-        return defaultValue;
+
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid format for system property " + key, e);
+        }
     }
 }
