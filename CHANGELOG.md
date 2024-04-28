@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add `writeRecord()` to `CsvWriter` to allow writing records field by field
+- Allow overwriting the limits of 16K fields per record and 16M characters per field (#104); Thanks to [@Obolrom](https://github.com/Obolrom)!
 
 ## [3.1.0] - 2024-03-09
 ### Added
