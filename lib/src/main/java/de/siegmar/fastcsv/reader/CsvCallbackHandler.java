@@ -40,7 +40,7 @@ public abstract class CsvCallbackHandler<T> {
      * Any potential escape characters are already removed and the {@code offset} points to the first character
      * after the opening quote and the {@code len} does not include the closing quote. Hence, a quoted field
      * can be processed in the same way as an unquoted field.
-     * Some implementations need the information whether a field was quoted, e.g. for differentiating between
+     * Some implementations need the information whether a field was quoted, e.g., for differentiating between
      * {@code null} and empty fields ({@code foo,,bar} vs. {@code foo,"",bar}).
      * <p>
      * The {@code buf} parameter is the internal buffer that contains the field value (among other data). Do not
@@ -76,7 +76,7 @@ public abstract class CsvCallbackHandler<T> {
     protected abstract void setComment(char[] buf, int offset, int len);
 
     /**
-     * Called at the end of each CSV record in order to build an object representation of the record.
+     * Called at the end of each CSV record to build an object representation of the record.
      * <p>
      * The returned wrapper is used by the {@link CsvReader} in order to determine how to process the record.
      *

@@ -21,10 +21,10 @@ public final class Util {
     }
 
     /**
-     * Checks if at least one of the passed arguments appear more than once.
+     * Checks if the given array of characters contains any duplicate characters.
      *
-     * @param chars characters to check for uniqueness
-     * @return {@code true} if at least one of the passed arguments appear more than once
+     * @param chars the array of characters to check for duplicates
+     * @return {@code true} if any character appears more than once in the array, {@code false} otherwise
      */
     public static boolean containsDupe(final char... chars) {
         for (int i = 0; i < chars.length; i++) {

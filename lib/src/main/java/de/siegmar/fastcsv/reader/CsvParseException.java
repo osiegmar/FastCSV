@@ -8,7 +8,7 @@ public class CsvParseException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Construct exception with message.
+     * Construct exception with a message.
      *
      * @param message the cause for this exception
      */

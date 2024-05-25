@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  FastCSV is a lightning-fast, dependency-free CSV library for Java that conforms to RFC standards.
+  FastCSV is a lightning-fast, dependency-free CSV library for Java that adheres to RFC standards.
 </p>
 
 <p align="center">
@@ -17,11 +17,6 @@
 
 ------
 
-The primary use cases of FastCSV include:
-
-- In *big data* applications: efficiently reading and writing data on a massive scale.
-- In *small data* applications: serving as a lightweight library without additional dependencies.
-
 ## Benchmark & Compatibility
 
 ![Benchmark](benchmark.webp "Benchmark")
@@ -29,15 +24,13 @@ The primary use cases of FastCSV include:
 > [!NOTE]
 > This selected benchmark is based on the [Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite)
 
-While maintaining high performance, FastCSV serves as a strict RFC 4180 CSV writer while
-also exhibiting the ability to read somewhat garbled CSV data.
+FastCSV maintains high performance while serving as a strict RFC 4180 CSV writer and can read somewhat garbled CSV data.
 See [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) for details.
 
 ## Features
 
-As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with a wide range of features:
+The main features of FastCSV include:
 
-- Crafted with natural intelligence, :heart:, and AI assistance :sparkles:
 - Enables ultra-fast reading and writing of CSV data
 - Has zero runtime dependencies
 - Maintains a small footprint
@@ -46,10 +39,16 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 - Delivered as an OSGi-compliant bundle
 - Actively developed and maintained
 - Well-tested and documented
+- Crafted with natural intelligence, :heart:, and AI assistance :sparkles:
+
+### Primary use cases are:
+
+- In *big data* applications: efficiently reading and writing data on a massive scale.
+- In *small data* applications: serving as a lightweight library without additional dependencies.
 
 ### CSV specific
 
-- Compliant to [RFC 4180](https://tools.ietf.org/html/rfc4180) – including:
+- Compliant with [RFC 4180](https://tools.ietf.org/html/rfc4180) – including:
     - Newline and field separator characters in fields
     - Quote escaping
 - Configurable field separator
@@ -63,12 +62,12 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 - Preserves the starting line number (even with skipped and multi-line records) – helpful for error messages
 - Auto-detection of line delimiters (`CRLF`, `LF`, or `CR` – can also be mixed)
 - Configurable data validation
-- Supports (optional) header records (get field based on field name)
+- Supports optional header records (access fields by name)
 - Supports skipping empty lines
 - Supports commented lines (skipping & reading) with configurable comment character
 - Configurable field modifiers (e.g., to trim fields)
 - Flexible callback handlers (e.g., to directly map to domain objects)
-- BOM support (UTF-8, UTF-16 LE/BE, UTF-32 LE/BE)
+- BOM (Byte Order Mark) support (UTF-8, UTF-16 LE/BE, UTF-32 LE/BE)
 
 ### Writer specific
 
@@ -81,9 +80,8 @@ As one of the most popular CSV libraries for Java on GitHub, FastCSV comes with 
 - for 2.x version: Java ⩾ 8 (Android 8 / API level 26)
 
 > [!NOTE]
-> Android is not Java and is not officially supported.
-> Nevertheless, some basic checks are included in the continuous integration pipeline to
-> verify that the library *should* work with Android.
+> Checks are included in the continuous integration pipeline to verify the library's functionality with Android.
+> Nevertheless, the library is not tested on Android devices nor can I provide any support for Android-specific issues.
 
 ## CsvReader examples
 
@@ -106,17 +104,17 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
 
 ```java
 CsvReader.builder().ofNamedCsvRecord("header 1,header 2\nfield 1,field 2")
-    .forEach(rec -> System.out.println(rec.getField("header2")));
+    .forEach(rec -> System.out.println(rec.getField("header 2")));
 ```
 
 ### Iterative reading of some CSV data with a custom header
 
 ```java
 CsvCallbackHandler<NamedCsvRecord> callbackHandler =
-    new NamedCsvRecordHandler("header1", "header2");
+    new NamedCsvRecordHandler("header 1", "header 2");
 
 CsvReader.builder().build(callbackHandler, "field 1,field 2")
-    .forEach(rec -> System.out.println(rec.getField("header2")));
+    .forEach(rec -> System.out.println(rec.getField("header 2")));
 ```
 
 ### Custom settings
@@ -155,8 +153,8 @@ try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(fi
 ```java
 var sw = new StringWriter();
 CsvWriter.builder().build(sw)
-    .writeRecord("header1", "header2")
-    .writeRecord("value1", "value2");
+    .writeRecord("header 1", "header 2")
+    .writeRecord("value 1", "value 2");
 
 System.out.println(sw);
 ```
@@ -166,8 +164,8 @@ System.out.println(sw);
 ```java
 try (CsvWriter csv = CsvWriter.builder().build(file)) {
     csv
-        .writeRecord("header1", "header2")
-        .writeRecord("value1", "value2");
+        .writeRecord("header 1", "header 2")
+        .writeRecord("value 1", "value 2");
 }
 ```
 

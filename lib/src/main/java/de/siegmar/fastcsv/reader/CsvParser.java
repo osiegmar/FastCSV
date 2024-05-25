@@ -120,7 +120,7 @@ final class CsvParser implements Closeable {
         }
 
         if ((status & STATUS_NEW_FIELD) != 0 || (status & STATUS_COMMENTED_RECORD) != 0) {
-            // last character was a field separator or comment character – add empty field
+            // the last character was a field separator or comment character – add empty field
             materialize(csvBuffer.buf, 0, 0, status, qChar);
             return true;
         }

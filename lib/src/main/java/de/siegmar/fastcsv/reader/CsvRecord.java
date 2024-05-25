@@ -91,7 +91,7 @@ public class CsvRecord {
      *
      * @param index index of the field to return
      * @return field value, never {@code null}
-     * @throws IndexOutOfBoundsException if index is out of range
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     public String getField(final int index) {
         return fields[index];
@@ -101,7 +101,7 @@ public class CsvRecord {
      * Retrieves all fields of this record as an unmodifiable list.
      * <p>
      * The returned list has a minimum size of 1, even if the line was empty.
-     * For empty lines the first field is an empty string.
+     * For empty lines, the first field is an empty string.
      *
      * @return all fields of this record, never {@code null}
      */

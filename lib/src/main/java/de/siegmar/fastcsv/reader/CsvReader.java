@@ -80,7 +80,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      * Returns an iterator over elements of type {@link CsvRecord}.
      * <p>
      * The returned iterator is not thread-safe.
-     * Don't forget to close the returned iterator when you're done.
+     * Remember to close the returned iterator when you're done.
      * Alternatively, use {@link #stream()}.
      * <br>
      * This method is idempotent.
@@ -99,7 +99,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      * Returns a {@link Spliterator} over elements of type {@link CsvRecord}.
      * <p>
      * The returned spliterator is not thread-safe.
-     * Don't forget to invoke {@link #close()} when you're done.
+     * Remember to invoke {@link #close()} when you're done.
      * Alternatively, use {@link #stream()}.
      * <br>
      * This method is idempotent.
@@ -118,7 +118,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      * Returns a sequential {@code Stream} with this reader as its source.
      * <p>
      * The returned stream is not thread-safe.
-     * Don't forget to close the returned stream when you're done.
+     * Remember to close the returned stream when you're done.
      * <br>
      * This method is idempotent.
      *
@@ -160,7 +160,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private T processRecord() {
         final RecordWrapper<T> recordWrapper = callbackHandler.buildRecord();
 
-        // handle consumed records (e.g. header for named records)
+        // handle consumed records (e.g., header for named records)
         if (recordWrapper == null) {
             return null;
         }
@@ -619,7 +619,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @param <T>             the type of the CSV record.
          * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
          * @param file            the file to read data from.
-         * @return a new CsvReader - never {@code null}. Don't forget to close it!
+         * @return a new CsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if callbackHandler or file is {@code null}
          */
@@ -636,7 +636,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @param charset         the character set to use. If BOM header detection is enabled
          *                        (via {@link #detectBomHeader(boolean)}), this acts as a default
          *                        when no BOM header was found.
-         * @return a new CsvReader - never {@code null}. Don't forget to close it!
+         * @return a new CsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if callbackHandler, file or charset is {@code null}
          */

@@ -358,7 +358,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to quote values – default: {@code "} (double quote).
+         * Sets the character used to quote values – default: {@code "} (double quote).
          * <p>
          * Be aware that using characters other than the default double quote character goes against the RFC 4180
          * standard.
@@ -372,7 +372,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the character that is used to prepend commented lines – default: {@code #} (hash/number).
+         * Sets the character used to prepend commented lines – default: {@code #} (hash/number).
          *
          * @param commentCharacter the character for prepending commented lines.
          * @return This updated object, allowing additional method calls to be chained together.
@@ -395,7 +395,7 @@ public final class CsvWriter implements Closeable {
         }
 
         /**
-         * Sets the delimiter that is used to separate lines (default: {@link LineDelimiter#CRLF}).
+         * Sets the delimiter used to separate lines (default: {@link LineDelimiter#CRLF}).
          *
          * @param lineDelimiter the line delimiter to be used.
          * @return This updated object, allowing additional method calls to be chained together.
@@ -446,7 +446,7 @@ public final class CsvWriter implements Closeable {
          * @param file        the file to write data to.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
-         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
+         * @return a new CsvWriter instance - never {@code null}. Remember to close it!
          * @throws IOException          if a write error occurs
          * @throws NullPointerException if file or charset is {@code null}
          */
@@ -462,7 +462,7 @@ public final class CsvWriter implements Closeable {
          * @param charset     the character set to be used for writing data to the file.
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
-         * @return a new CsvWriter instance - never {@code null}. Don't forget to close it!
+         * @return a new CsvWriter instance - never {@code null}. Remember to close it!
          * @throws IOException          if a write error occurs
          * @throws NullPointerException if file or charset is {@code null}
          */
@@ -502,7 +502,7 @@ public final class CsvWriter implements Closeable {
     }
 
     /**
-     * Unsynchronized and thus high performance replacement for BufferedWriter.
+     * High-performance buffered writer (without synchronization).
      * <p>
      * This class is intended for internal use only.
      */

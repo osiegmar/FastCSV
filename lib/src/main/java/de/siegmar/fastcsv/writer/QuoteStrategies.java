@@ -36,8 +36,8 @@ public final class QuoteStrategies {
     };
 
     /**
-     * Enclose empty but not @{code null} fields in order to differentiate them.
-     * This is required for PostgreSQL CSV imports for example.
+     * Enclose empty but not @{code null} fields to differentiate them.
+     * This is required for PostgreSQL CSV imports, for example.
      */
     public static final QuoteStrategy EMPTY = new QuoteStrategy() {
         @Override

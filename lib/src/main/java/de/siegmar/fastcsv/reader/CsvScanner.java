@@ -60,11 +60,11 @@ final class CsvScanner {
             // parse fields
             if (d == quoteCharacter) {
                 if (consumeQuotedField()) {
-                    // reached end of record
+                    // reached the end of record
                     break;
                 }
             } else if (consumeUnquotedField(d)) {
-                // reached end of record
+                // reached the end of record
                 break;
             }
         } while ((d = stream.get()) != -1);

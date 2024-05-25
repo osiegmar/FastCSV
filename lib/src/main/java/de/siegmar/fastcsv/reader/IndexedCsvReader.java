@@ -24,7 +24,7 @@ import de.siegmar.fastcsv.util.Util;
 /**
  * CSV reader implementation for indexed based access.
  * <p>
- * If no prebuild index passed in (via {@link IndexedCsvReaderBuilder#index(CsvIndex)}) the constructor will initiate
+ * If no prebuilt index passed in (via {@link IndexedCsvReaderBuilder#index(CsvIndex)}) the constructor will initiate
  * indexing the file.
  * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
  * The current status can be monitored via {@link IndexedCsvReaderBuilder#statusListener(StatusListener)}.
@@ -184,7 +184,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     }
 
     /**
-     * Obtain the index that is used for accessing the CSV file.
+     * Obtain the index used for accessing the CSV file.
      * That index is either a freshly built index or the index that has been
      * passed via {@link IndexedCsvReaderBuilder#index(CsvIndex)}.
      *
@@ -385,7 +385,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         /*
          * Characters from 0 to 127 are base ASCII and collision-free with UTF-8.
-         * Characters from 128 to 255 needs to be represented as a multibyte string in UTF-8.
+         * Characters from 128 to 255 need to be represented as a multibyte string in UTF-8.
          * Multibyte handling of control characters is currently not supported by the byte-oriented CSV indexer
          * of IndexedCsvReader.
          */
@@ -406,7 +406,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * {@link StandardCharsets#UTF_8} as the charset.
          *
          * @param file the file to read data from.
-         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
@@ -422,7 +422,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          *
          * @param file    the file to read data from.
          * @param charset the character set to use.
-         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
@@ -440,7 +440,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * @param <T>             the type of the CSV record.
          * @param callbackHandler the callback handler to use.
          * @param file            the file to read data from.
-         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if callbackHandler, file or charset is {@code null}
          */
@@ -456,7 +456,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * @param callbackHandler the callback handler to use.
          * @param file            the file to read data from.
          * @param charset         the character set to use.
-         * @return a new IndexedCsvReader - never {@code null}. Don't forget to close it!
+         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if callbackHandler, file or charset is {@code null}
          */
