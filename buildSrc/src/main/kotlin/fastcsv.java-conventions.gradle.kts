@@ -15,13 +15,9 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
     reports.maybeCreate("html").required = true
 }
 
-// Need to add this as PMD 7 (required for Java21) is not yet released
-dependencies {
-    pmd("net.sourceforge.pmd:pmd-ant:7.0.0-rc4")
-    pmd("net.sourceforge.pmd:pmd-java:7.0.0-rc4")
-}
-
 pmd {
+    // Version bundled with Gradle 8.8 is not able to run on Java 22.
+    toolVersion = "7.2.0"
     isConsoleOutput = true
     ruleSets = emptyList()
     ruleSetFiles = files("${project.rootDir}/config/pmd/config.xml")
