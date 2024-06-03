@@ -53,16 +53,16 @@ configurations[intTest.implementationConfigurationName].extendsFrom(configuratio
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
-    commonImplementation("org.assertj:assertj-core:3.24.2")
+    commonImplementation("org.assertj:assertj-core:3.26.0")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.assertj:assertj-core:3.26.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     "intTestImplementation"(project)
 
-    signature("com.toasttab.android:gummy-bears-api-33:0.5.1@signature")
+    signature("com.toasttab.android:gummy-bears-api-33:0.8.0@signature")
 }
 
 tasks.test {
