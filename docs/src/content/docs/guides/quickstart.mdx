@@ -1,0 +1,89 @@
+---
+title: Quick Start Guide
+sidebar:
+  order: 1
+---
+
+import {Tabs, TabItem, LinkCard} from '@astrojs/starlight/components';
+
+### Declare dependency
+
+To get started with FastCSV, add the following dependency to your project:
+
+<Tabs>
+    <TabItem label="Gradle/Kotlin">
+        ```kotlin
+        dependencies {
+            implementation("com.github.osiegmar:fastcsv:3.1.0")
+        }
+        ```
+    </TabItem>
+    <TabItem label="Gradle/Groovy">
+        ```groovy
+        dependencies {
+            implementation 'com.github.osiegmar:fastcsv:3.1.0'
+        }
+        ```
+    </TabItem>
+    <TabItem label="Maven">
+        ```xml
+        <dependency>
+            <groupId>com.github.osiegmar</groupId>
+            <artifactId>fastcsv</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        ```
+    </TabItem>
+</Tabs>
+
+<LinkCard
+    title="More examples"
+    description="Check out the Maven Central Repository for examples on how to declare the dependency for even more build tools."
+    href="https://central.sonatype.com/artifact/de.siegmar/fastcsv"
+    target="_blank"
+/>
+
+### Write CSV
+
+The `CsvWriter` class provides a fluent API to write CSV records.
+You'll find all the necessary methods to write CSV records in that class.
+
+To write some basic CSV records to a file, use the following code snippet:
+
+```java
+Path file = Paths.get("output.csv");
+try (CsvWriter csv = CsvWriter.builder().build(file)) {
+    csv
+        .writeRecord("header 1", "header 2")
+        .writeRecord("value 1", "value 2");
+}
+```
+
+### Read CSV
+
+FastCSV provides two main classes to read CSV records: `CsvReader` and `IndexedCsvReader`.
+
+The regular `CsvReader` reads CSV records sequentially.
+To iterate over CSV records in a file and print them to the console, use the following code snippet:
+
+```java
+Path file = Paths.get("input.csv");
+try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
+    csv.forEach(System.out::println);
+}
+```
+
+The `IndexedCsvReader` on the other hand, reads CSV records in pages. This is useful, for example,
+when you have a user interface and want to display only a subset of the records at a time and allow the user
+to navigate through the records.
+
+The following code snippet demonstrates how to read the last page of a CSV file:
+
+```java
+Path file = Paths.get("input.csv");
+try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().pageSize(10).ofCsvRecord(file)) {
+    CsvIndex index = csv.getIndex();
+    int lastPage = index.getPageCount() - 1;
+    List<CsvRecord> csvRecords = csv.readPage(lastPage);
+}
+```

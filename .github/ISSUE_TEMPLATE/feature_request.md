@@ -17,4 +17,4 @@ A clear and concise description of what you want to happen.
 A clear and concise description of any alternative solutions or features you've considered.
 
 **Goal alignment**
-Does this feature align with the [goals](https://github.com/osiegmar/FastCSV/blob/main/doc/goals.md) of FastCSV?
+Does this feature align with the [goals](https://www.fastcsv.org/architecture/goals/) of FastCSV?

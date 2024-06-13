@@ -1,7 +1,11 @@
-# Migrating from 2.x to 3.x
+---
+title: Migrating from 2.x
+sidebar:
+  order: 5
+---
 
-This document only describes the **breaking** changes. For a full list of changes, including new features,
-see the [changelog](CHANGELOG.md).
+This document only describes the **breaking** changes when migrating from FastCSV 2.x to 3.x.
+For a full list of changes, including new features, see the [changelog](https://github.com/osiegmar/FastCSV/blob/main/CHANGELOG.md).
 
 ## Requirement changes
 
@@ -39,11 +43,11 @@ try (CsvWriter csv = CsvWriter.builder().build(file)) {
 ### Method names
 
 - In `CsvReaderBuilder`:
-  - `skipEmptyRows` is now `skipEmptyLines`
-  - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning!)
-  - `build` methods with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
+    - `skipEmptyRows` is now `skipEmptyLines`
+    - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning!)
+    - `build` methods with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
 - In `CsvRecord` (former `CsvRow`):
-  - `getOriginalLineNumber` is now `getStartingLineNumber`
+    - `getOriginalLineNumber` is now `getStartingLineNumber`
 
 ## NamedCsvReader removed/replaced
 
@@ -80,9 +84,3 @@ CsvWriter.builder()
 ## Exception changes
 
 `MalformedCsvException` is now `CsvParseException` and is thrown instead of `IOException` for non-IO related errors.
-
-------
-
-See the https://github.com/osiegmar/FastCSV/tree/main/example/src/main/java/example for more examples.
-
-If you're still on version 1, see https://github.com/osiegmar/FastCSV/blob/v2.2.2/UPGRADING.md

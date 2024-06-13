@@ -1,4 +1,7 @@
-# CSV Interpretation
+---
+title: CSV Interpretation
+description: How FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
+---
 
 At first, the CSV format may seem very simple. In practice, however, numerous edge cases need to be considered.
 The [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) project illustrates that there are many different
@@ -6,28 +9,6 @@ ways to interpret CSV files, especially when not strictly following the RFC spec
 might be considered as bugs, while others represent alternative approaches to handling edge cases (mostly garbled data).
 
 This document describes how FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
-
-## Table of Contents
-
-- [Status of the RFC](#status-of-the-rfc)
-- [Implementation details](#implementation-details)
-    - [Encoding](#encoding)
-    - [Empty fields / null values](#empty-fields--null-values)
-    - [Different field count](#different-field-count)
-    - [Empty lines](#empty-lines)
-    - [Empty files](#empty-files)
-    - [Fields spanning multiple lines](#fields-spanning-multiple-lines)
-    - [Unique header names](#unique-header-names)
-    - [Spaces within fields](#spaces-within-fields)
-    - [Whitespace outside quoted fields](#whitespace-outside-quoted-fields)
-    - [Other field enclosures](#other-field-enclosures)
-    - [Other field separators](#other-field-separators)
-    - [Escaping double quotes](#escaping-double-quotes)
-    - [BOM header](#bom-header)
-    - [Bidirectional text](#bidirectional-text)
-    - [Comments](#comments)
-    - [Different end of line characters](#different-end-of-line-characters)
-- [ABNF Grammar](#abnf-grammar)
 
 ## Status of the RFC
 

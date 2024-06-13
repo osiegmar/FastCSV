@@ -1,6 +1,11 @@
 name: Dependency Submission
 
-on: [ push ]
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
 
 permissions:
   contents: write

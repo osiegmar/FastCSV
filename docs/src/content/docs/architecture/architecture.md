@@ -1,15 +1,10 @@
-# Architecture & Design
+---
+title: Architecture
+description: This document describes the architecture of FastCSV.
+---
 
 This document describes the architecture of FastCSV.
 It is intended for developers who want to understand the inner workings of the library.
-For a general overview of the library, please refer to the [README](../README.md).
-
-## Table of Contents
-
-- [Glossary of CSV Terms](#glossary-of-csv-terms)
-- [Reading CSV](#reading-csv)
-- [Writing CSV](#writing-csv)
-- [Further Reading](#further-reading)
 
 ## Glossary of CSV Terms
 
@@ -186,10 +181,3 @@ try (CsvWriter csv = builder.build(file)) {
     csv.writeRecord("field 1", "field 2");
 }
 ```
-
-## Further Reading
-
-All this only scratches the surface of what FastCSV can do.
-
-Check out the [examples](../example/src/main/java/example) for an overview of many more features, like reading and writing CSV files with
-headers or pagination of huge CSV files.
