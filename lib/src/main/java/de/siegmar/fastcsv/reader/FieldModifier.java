@@ -14,7 +14,7 @@ public interface FieldModifier {
 
     /**
      * Gets called for every single field (that is not a comment).
-     * Default implementation returns the field as is.
+     * The Default implementation returns the field as is.
      *
      * @param startingLineNumber the starting line number (starting with 1)
      * @param fieldIdx           the field index (starting with 0)
@@ -28,7 +28,7 @@ public interface FieldModifier {
 
     /**
      * Gets called for every comment.
-     * Default implementation returns the field as is.
+     * The Default implementation returns the field as is.
      *
      * @param startingLineNumber the starting line number (starting with 1)
      * @param field              the field value (comment), never {@code null}

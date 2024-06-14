@@ -22,8 +22,9 @@ import de.siegmar.fastcsv.writer.CsvWriter;
  * Example for implementing a custom callback handler.
  * <p>
  * You should only go this route if you need to squeeze out every bit of performance and I/O or post-processing is not
- * the bottleneck. The standard implementation ({@link de.siegmar.fastcsv.reader.CsvRecordHandler}) is already
- * very fast and should be sufficient for most use cases.
+ * a bottleneck.
+ * The standard implementation ({@link de.siegmar.fastcsv.reader.CsvRecordHandler}) is already very fast and should be
+ * sufficient for most use cases.
  * <p>
  * A comparison with 1 bn records (86 GiB) has shown the following results:
  * <table>
@@ -153,7 +154,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
                     Long.toString(timestamp),
                     Double.toString(latitude),
                     Double.toString(longitude),
-                    "Celcius",
+                    "Celsius",
                     Double.toString(temperature));
             }
         }

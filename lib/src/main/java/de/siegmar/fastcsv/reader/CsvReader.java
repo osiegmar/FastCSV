@@ -83,7 +83,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      * Remember to close the returned iterator when you're done.
      * Alternatively, use {@link #stream()}.
      * <br>
-     * This method is idempotent.
+     * This method is idempotent and can be called multiple times.
      *
      * @return an iterator over the CSV records.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -102,7 +102,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      * Remember to invoke {@link #close()} when you're done.
      * Alternatively, use {@link #stream()}.
      * <br>
-     * This method is idempotent.
+     * This method is idempotent and can be called multiple times.
      *
      * @return a spliterator over the CSV records.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -115,12 +115,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     /**
-     * Returns a sequential {@code Stream} with this reader as its source.
+     * Returns a new sequential {@code Stream} with this reader as its source.
      * <p>
      * The returned stream is not thread-safe.
      * Remember to close the returned stream when you're done.
+     * Closing the stream will also close this reader.
      * <br>
-     * This method is idempotent.
+     * This method can be called multiple times, although it creates a new stream each time.
+     * <br>
+     * The stream is not reusable after it has been closed.
      *
      * @return a sequential {@code Stream} over the CSV records.
      * @throws UncheckedIOException if an I/O error occurs.
@@ -291,7 +294,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     /**
      * This builder is used to create configured instances of {@link CsvReader}. The default
-     * configuration of this class complies with RFC 4180:
+     * configuration of this class adheres with RFC 4180:
      * <ul>
      *     <li>Field separator: {@code ,} (comma)</li>
      *     <li>Quote character: {@code "} (double quotes)</li>

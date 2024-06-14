@@ -83,7 +83,7 @@ public final class CsvWriter implements Closeable {
      * @param values the fields to write ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategies#EMPTY})).
      * @return This CsvWriter.
-     * @throws UncheckedIOException if a write error occurs
+     * @throws UncheckedIOException if a write-error occurs
      * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      * @see #writeRecord(String...)
      */
@@ -106,7 +106,7 @@ public final class CsvWriter implements Closeable {
      * @param values the fields to write ({@code null} values are handled as empty strings, if
      *               not configured otherwise ({@link QuoteStrategies#EMPTY}))
      * @return This CsvWriter.
-     * @throws UncheckedIOException if a write error occurs
+     * @throws UncheckedIOException if a write-error occurs
      * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      * @see #writeRecord(Iterable)
      */
@@ -245,7 +245,7 @@ public final class CsvWriter implements Closeable {
      *                will be written, terminated with the line break character configured by
      *                {@link CsvWriterBuilder#lineDelimiter(LineDelimiter)}.
      * @return This CsvWriter.
-     * @throws UncheckedIOException if a write error occurs
+     * @throws UncheckedIOException if a write-error occurs
      * @throws IllegalStateException if a record is already started (by calling {@link #writeRecord()}) and not ended
      */
     public CsvWriter writeComment(final String comment) {
@@ -321,7 +321,7 @@ public final class CsvWriter implements Closeable {
 
     /**
      * This builder is used to create configured instances of {@link CsvWriter}. The default
-     * configuration of this class complies with RFC 4180.
+     * configuration of this class adheres with RFC 4180.
      * <ul>
      *     <li>field separator: {@code ,} (comma)</li>
      *     <li>quote character: {@code "} (double quote)</li>
@@ -447,7 +447,7 @@ public final class CsvWriter implements Closeable {
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
          * @return a new CsvWriter instance - never {@code null}. Remember to close it!
-         * @throws IOException          if a write error occurs
+         * @throws IOException          if a write-error occurs
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvWriter build(final Path file, final OpenOption... openOptions)
@@ -463,7 +463,7 @@ public final class CsvWriter implements Closeable {
          * @param openOptions options specifying how the file is opened.
          *                    See {@link Files#newOutputStream(Path, OpenOption...)} for defaults.
          * @return a new CsvWriter instance - never {@code null}. Remember to close it!
-         * @throws IOException          if a write error occurs
+         * @throws IOException          if a write-error occurs
          * @throws NullPointerException if file or charset is {@code null}
          */
         public CsvWriter build(final Path file, final Charset charset,
@@ -583,7 +583,7 @@ public final class CsvWriter implements Closeable {
          * Writes a field to the current record.
          * @param value the field value
          * @return this CsvWriterRecord instance
-         * @throws UncheckedIOException if a write error occurs
+         * @throws UncheckedIOException if a write-error occurs
          */
         public CsvWriterRecord writeField(final String value) {
             try {
@@ -597,7 +597,7 @@ public final class CsvWriter implements Closeable {
         /**
          * Ends the current record.
          * @return the enclosing CsvWriter instance
-         * @throws UncheckedIOException if a write error occurs
+         * @throws UncheckedIOException if a write-error occurs
          */
         public CsvWriter endRecord() {
             openRecordWriter = false;

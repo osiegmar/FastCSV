@@ -147,7 +147,7 @@ publishing {
             pom {
                 name = "FastCSV"
                 description = "Lightning-fast, dependency-free CSV library that conforms to RFC standards."
-                url = "https://github.com/osiegmar/FastCSV"
+                url = "https://fastcsv.org"
                 licenses {
                     license {
                         name = "MIT License"

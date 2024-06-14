@@ -44,7 +44,7 @@ public final class FieldModifiers {
      * Comments are not modified.
      *
      * @param locale use the case transformation rules for this locale
-     * @return a new field modifier that converts the input to lower case.
+     * @return a new field modifier that converts the input to lower-case.
      */
     public static FieldModifier lower(final Locale locale) {
         return (SimpleFieldModifier) field -> field.toLowerCase(locale);
@@ -55,7 +55,7 @@ public final class FieldModifiers {
      * Comments are not modified.
      *
      * @param locale use the case transformation rules for this locale
-     * @return a new field modifier that converts the input to upper case.
+     * @return a new field modifier that converts the input to upper-case.
      */
     public static FieldModifier upper(final Locale locale) {
         return (SimpleFieldModifier) field -> field.toUpperCase(locale);

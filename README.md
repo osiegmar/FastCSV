@@ -18,5 +18,5 @@
 ------
 
 <p align="center">
-  Visit our website at <a href="https://fastcsv.org">https://fastcsv.org</a>
+  Visit our website at <a href="https://fastcsv.org">fastcsv.org</a>
 </p>

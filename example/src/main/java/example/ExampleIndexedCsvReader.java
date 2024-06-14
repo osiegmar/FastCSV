@@ -106,7 +106,7 @@ public class ExampleIndexedCsvReader {
 
         final var statusListener = new CollectingStatusListener();
 
-        // Using the StatusListener we can monitor the indexing process in background
+        // Using the StatusListener, we can monitor the indexing process in the background
         final var executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(
             () -> {

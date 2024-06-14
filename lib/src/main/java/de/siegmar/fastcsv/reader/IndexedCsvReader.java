@@ -184,7 +184,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     }
 
     /**
-     * Obtain the index used for accessing the CSV file.
+     * Get the index used for accessing the CSV file.
      * That index is either a freshly built index or the index that has been
      * passed via {@link IndexedCsvReaderBuilder#index(CsvIndex)}.
      *
@@ -248,7 +248,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
     /**
      * This builder is used to create configured instances of {@link IndexedCsvReader}. The default
-     * configuration of this class complies with RFC 4180.
+     * configuration of this class adheres with RFC 4180.
      * <p>
      * The line delimiter (line-feed, carriage-return or the combination of both) is detected
      * automatically and thus not configurable.

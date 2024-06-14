@@ -1,4 +1,4 @@
-** Please create PR against the develop branch **
+** Please create PR against the main branch **
 
 This PR relates to Issue: #
 
@@ -10,7 +10,7 @@ This PR relates to Issue: #
 
 ## Performance
 
-In order to prevent a performance degradation please run a benchmark
+To prevent a performance degradation, please run a benchmark
 using `./gradlew jmh` before and after your change and show the results.
 
-<!-- Outputs of build/reports/jmh/results.txt -->
+<!-- Outputs of ./lib/build/results/jmh/results.txt -->

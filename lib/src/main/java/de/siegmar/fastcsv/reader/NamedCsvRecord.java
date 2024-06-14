@@ -80,7 +80,7 @@ public final class NamedCsvRecord extends CsvRecord {
         return fields[fieldIdx];
     }
 
-    // Finds the index of the first occurrence of the given header name (case-sensitive); returns -1 if not found
+    // Finds the index for the first occurrence of the given header name (case-sensitive); returns -1 if not found
     private int findHeaderIndex(final String name) {
         for (int i = 0; i < header.length; i++) {
             if (name.equals(header[i])) {
@@ -154,7 +154,7 @@ public final class NamedCsvRecord extends CsvRecord {
     }
 
     /**
-     * Constructs an unordered map, associating header names with an ordered list of corresponding field values of
+     * Constructs an unordered map, associating header names with an ordered list of corresponding field values in
      * this record.
      * <p>
      * The constructed map will only contain entries for fields that have a key and a value. No map entry will have a
