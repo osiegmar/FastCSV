@@ -16,7 +16,7 @@ FastCSV is designed to be blazing fast. It is optimized for reading and writing 
 
 FastCSV is designed to be lightweight. It has no external dependencies and ensures a small memory footprint.
 
-The Jar-File of version 3.1.0 has a size of only 64 KiB!
+The Jar-File of version 3.2.0 has a size of only barely above 64 KiB.
 
 ## Compliant
 
