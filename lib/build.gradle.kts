@@ -24,6 +24,7 @@ java {
 
 tasks.compileJava {
     options.release.set(11)
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
 tasks.javadoc {

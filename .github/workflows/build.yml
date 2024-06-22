@@ -25,7 +25,7 @@ jobs:
     - uses: gradle/actions/wrapper-validation@v3
     - uses: gradle/actions/setup-gradle@v3
     - name: Build with Gradle
-      run: ./gradlew build --warning-mode all
+      run: ./gradlew build
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v4
       if: ${{ !cancelled() }}

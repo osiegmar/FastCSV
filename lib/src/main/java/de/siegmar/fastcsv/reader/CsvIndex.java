@@ -50,6 +50,7 @@ public final class CsvIndex implements Serializable {
     /**
      * The pages this index is partitioned.
      */
+    @SuppressWarnings("serial")
     private final List<CsvPage> pages;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
