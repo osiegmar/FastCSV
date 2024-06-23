@@ -30,6 +30,12 @@ the [GitHub issue tracker](https://github.com/osiegmar/FastCSV/issues/new/choose
 that reproduces the issue.
 This helps to understand the problem and to verify the fix.
 
+Please do not report security vulnerabilities through public GitHub issues, discussions, or pull requests.
+
+### How to report a security vulnerability?
+
+If you discover a security vulnerability, please report it via https://github.com/osiegmar/FastCSV/security.
+
 ### Do I need a CSV library?
 
 Java does not provide built-in support for reading and writing CSV files.
