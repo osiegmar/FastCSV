@@ -6,7 +6,7 @@ sidebar:
 
 import {Tabs, TabItem, LinkCard} from '@astrojs/starlight/components';
 
-### Declare dependency
+## Declare dependency
 
 To get started with FastCSV, add the following dependency to your project:
 
@@ -43,7 +43,7 @@ To get started with FastCSV, add the following dependency to your project:
     target="_blank"
 />
 
-### Write CSV
+## Write CSV
 
 The `CsvWriter` class provides a fluent API to write CSV records.
 You'll find all the necessary methods to write CSV records in that class.
@@ -59,9 +59,11 @@ try (CsvWriter csv = CsvWriter.builder().build(file)) {
 }
 ```
 
-### Read CSV
+## Read CSV
 
 FastCSV provides two main classes to read CSV records: `CsvReader` and `IndexedCsvReader`.
+
+### Reading CSV records sequentially
 
 The regular `CsvReader` reads CSV records sequentially.
 To iterate over CSV records in a file and print them to the console, use the following code snippet:
@@ -72,6 +74,8 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
     csv.forEach(System.out::println);
 }
 ```
+
+### Reading CSV records in pages
 
 The `IndexedCsvReader` on the other hand, reads CSV records in pages. This is useful, for example,
 when you have a user interface and want to display only a subset of the records at a time and allow the user
