@@ -39,13 +39,12 @@ it ensures a high level of stability.
 
 ## Security
 
-FastCSV is designed to be secure. Size constraints (like limits for the number of fields per record, the
-size of a field and the total size of a record) are enforced to prevent denial of service attacks.
+FastCSV is designed to be secure.
 
-See the [Limits](https://github.com/osiegmar/FastCSV/blob/main/lib/src/main/java/de/siegmar/fastcsv/util/Limits.java)
-and how they can be adjusted.
+We follow the Open Source Security Foundation (OpenSSF) Best Practices.
+See our [Best Practices](https://www.bestpractices.dev/projects/9141) report for more information.
 
-[OSS-Fuzz](https://google.github.io/oss-fuzz/) is used to ensure the security of FastCSV.
+FastCSV is also part of the [OSS-Fuzz](https://google.github.io/oss-fuzz/) project to ensure its security.
 
 ## Documentation
 
