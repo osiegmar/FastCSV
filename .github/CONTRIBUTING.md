@@ -11,5 +11,7 @@ If you're unsure, start a [discussion](https://github.com/osiegmar/FastCSV/discu
 - Fork
 - Code
 - Add test(s)
+- Run build locally (`./gradlew build`) to ensure coding standards and tests pass
+- Run and compare benchmarks (`./gradlew jmh`) to ensure performance is not degraded
 - Commit
 - Submit a pull request
