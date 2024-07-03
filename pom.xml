@@ -1,7 +1,0 @@
-<!-- This file is only used to use the Dependency graph feature of GitHub. It is not intended to build this project! -->
-<project>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>de.siegmar</groupId>
-  <artifactId>fastcsv</artifactId>
-  <version>3.2.0</version>
-</project>
