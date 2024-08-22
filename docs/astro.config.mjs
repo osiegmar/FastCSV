@@ -75,6 +75,14 @@ export default defineConfig({
                         defer: true,
                     },
                 },
+                {
+                    tag: 'link',
+                    attrs: {
+                        rel: 'icon',
+                        href:'/favicon.ico',
+                        sizes: '48x48',
+                    },
+                },
             ],
         }),
     ]
