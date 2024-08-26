@@ -12,10 +12,8 @@ public class ExampleCsvWriterWithComments {
     public static void main(final String[] args) {
         final StringWriter sw = new StringWriter();
         CsvWriter.builder().build(sw)
-            .writeComment("A comment can be placed")
-            .writeRecord("header1", "header2")
-            .writeComment("anywhere")
-            .writeRecord("value1", "value2")
+            .writeComment("A comment can be placed\nanywhere")
+            .writeRecord("field 1", "field 2", "field 3\n#with a line break")
             .writeComment("in the CSV file");
 
         System.out.println(sw);
