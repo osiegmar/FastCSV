@@ -30,7 +30,7 @@ public class ExampleCsvReaderWithBomHeader {
 
     // Create a file with content encoded in UTF-16 little-endian and
     // a corresponding BOM header
-    private static Path prepareTestFile() throws IOException {
+    static Path prepareTestFile() throws IOException {
         final Path tmpFile = Files.createTempFile("fastcsv", ".csv");
         tmpFile.toFile().deleteOnExit();
 
