@@ -1,7 +1,7 @@
 package example;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -15,17 +15,15 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 public class ExampleCsvReaderWithClasspathInput {
 
     public static void main(final String[] args) throws IOException {
-        try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(getReader("/example.csv"))) {
-            for (final CsvRecord csvRecord : csv) {
-                System.out.println(csvRecord.getFields());
-            }
+        try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(readFromClasspath("/example.csv"))) {
+            csv.forEach(System.out::println);
         }
     }
 
-    private static Reader getReader(final String name) {
-        final InputStream in = ExampleCsvReaderWithClasspathInput.class.getResourceAsStream(name);
+    static Reader readFromClasspath(final String name) throws FileNotFoundException {
+        final var in = ExampleCsvReaderWithClasspathInput.class.getResourceAsStream(name);
         if (in == null) {
-            throw new IllegalStateException("Resource not found: " + name);
+            throw new FileNotFoundException("Resource not found on classpath: " + name);
         }
         return new InputStreamReader(in, StandardCharsets.UTF_8);
     }

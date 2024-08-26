@@ -1,0 +1,16 @@
+---
+title: Read from classpath
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithClasspathInput.java?raw';
+
+As you can pass any `java.io.Reader` to the `CsvReader` class, you can read CSV data from any source that
+provides a `Reader` or can be converted to a `Reader`.
+This includes reading from the classpath.
+
+## Example
+
+In the following example, a CSV file is read from the classpath.
+
+<Code code={sourceCode} title="ExampleCsvReaderWithClasspathInput.java" lang="java"/>
