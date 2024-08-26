@@ -1,7 +1,7 @@
 ---
 title: Migrating from 2.x
 sidebar:
-  order: 5
+  order: 4
 ---
 
 This document only describes the **breaking** changes when migrating from FastCSV 2.x to 3.x.

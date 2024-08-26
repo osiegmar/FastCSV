@@ -4,6 +4,9 @@ sidebar:
   order: 2
 ---
 
+This section covers the most basic usage of FastCSV. It provides examples for reading and writing CSV data.
+For more advanced features, see the dedicated [Examples](/guides/examples/) section.
+
 ## CsvReader examples
 
 ### Iterative reading of some CSV data from a string

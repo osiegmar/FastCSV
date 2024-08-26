@@ -1,0 +1,36 @@
+---
+title: Byte order mark (BOM) header
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../example/src/main/java/example/ExampleCsvReaderWithBomHeader.java?raw';
+export const highlights = ['.detectBomHeader(true)']
+
+FastCSV is capable of reading CSV files with a [Byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)
+(BOM) header.
+
+:::note
+A BOM header is a sequence of bytes at the beginning of a text file that indicates the file's encoding,
+such as UTF-8, UTF-16, or UTF-32.
+Although UTF-8 is the default encoding for most text files today,
+some applications still use the BOM header to specify the file's encoding.
+:::
+
+Enabling automatic BOM header detection can impact performance
+Due to the decreased usage of BOM headers in modern applications, BOM header detection is disabled by default.
+To enable BOM header detection, use the `detectBomHeader` method of the `CsvReaderBuilder` class.
+
+You may also want to check out the corresponding
+[Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/reader/CsvReader.CsvReaderBuilder.html#detectBomHeader(boolean))
+for more information.
+
+## Example
+
+In the following example, a CSV file with a BOM header is created and read using FastCSV.
+
+<Code code={sourceCode} title="ExampleCsvReaderWithBomHeader.java" lang="java" mark={highlights}/>
+
+:::tip
+To **create** CSV files with a BOM header using FastCSV, you have to write the BOM header manually,
+as shown in the example. FastCSV does not support creating CSV files with a BOM header by itself.
+:::

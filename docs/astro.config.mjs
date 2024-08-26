@@ -29,13 +29,12 @@ export default defineConfig({
                 },
                 {
                     label: 'Guides',
-                    autogenerate: {directory: 'guides'},
+                    autogenerate: {directory: 'guides', collapsed: true},
                 },
                 {
                     label: 'Architecture & Design',
                     autogenerate: {directory: 'architecture'},
                 },
-
                 {
                     label: 'FAQ',
                     link: '/faq/'
