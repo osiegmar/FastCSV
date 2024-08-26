@@ -617,7 +617,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /**
          * Constructs a new {@link CsvReader} for the specified file.
          * <p>
-         * This is a convenience method for calling {@code of(file, StandardCharsets.UTF_8, callbackHandler)}.
+         * This is a convenience method for calling {@code build(file, StandardCharsets.UTF_8, callbackHandler)}.
          *
          * @param <T>             the type of the CSV record.
          * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
