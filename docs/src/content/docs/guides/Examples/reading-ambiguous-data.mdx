@@ -1,0 +1,31 @@
+---
+title: Reading ambiguous data
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithFaultyData.java?raw';
+
+There are a few widespread ambiguities in CSV files:
+
+1. **Empty lines**: CSV files can contain empty lines, which are lines that contain no data.
+   See the [Empty lines section of the CSV Interpretation](/architecture/interpretation/#empty-lines) page for more information.
+2. **Empty fields**: CSV files can contain empty fields, which are fields that contain no data.
+   See the [Empty fields / null values section of the CSV Interpretation](/architecture/interpretation/#empty-fields--null-values) page for more information.
+3. **Missing fields**: CSV files can contain missing fields, which are fields that are not present in a record.
+   See the [Different field count of the CSV Interpretation](/architecture/interpretation/#different-field-count) page for more information.
+
+FastCSV is very aware of these ambiguities and provides ways to handle them.
+
+:::tip
+When writing CSV files, you should avoid empty lines and ensure even field counts in every record.
+Not doing so leads to ambiguities and can cause issues when reading the CSV file.
+:::
+
+## Example
+
+In the following example, a CSV file with various ambiguous data is read using FastCSV.
+
+<Code code={sourceCode} title="ExampleCsvReaderWithFaultyData.java" lang="java"/>
+
+You also find this source code example in the
+[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithFaultyData.java).
