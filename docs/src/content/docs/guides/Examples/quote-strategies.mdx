@@ -1,0 +1,48 @@
+---
+title: Quote strategies
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvWriterWithQuoteStrategy.java?raw';
+export const highlights = [/\.quoteStrategy\(.*\)/g];
+
+Fields in CSV files can be enclosed in quotes.
+Although the CSV specification requires quotes only when a field contains a separator, delimiter,
+or enclosure character, some applications may always enclose fields in quotes for consistency or simplicity.
+
+From a specification standpoint, these two examples are data identical:
+
+```csv
+//example1.csv
+"field 1","field 2","field 3"
+```
+
+```csv
+//example2.csv
+field 1,field 2,field 3
+```
+
+However, certain use cases may require enclosing fields to convey a different meaning.
+For example, this can help distinguish between fields containing an empty string and those with no value at all
+(*null* fields).
+
+FastCSV addresses this need by offering various quote strategies.
+You may also check the corresponding
+[Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/writer/QuoteStrategies.html)
+for more information.
+
+## Example
+
+In the following example, CSV output is created using different quote strategies.
+
+<Code code={sourceCode} title="ExampleCsvWriterWithQuoteStrategy.java" lang="java" mark={highlights}/>
+
+You also find this source code example in the
+[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvWriterWithQuoteStrategy.java).
+
+:::tip
+If you want to know if a field is enclosed in quotes when reading a CSV file, you may implement a
+custom callback handler. Check out the [Custom Callback handler example](/guides/examples/custom-callback-handler/)
+and especially the
+[addField() method](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/reader/CsvCallbackHandler.html).
+:::
