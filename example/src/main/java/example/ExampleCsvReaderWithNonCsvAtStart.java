@@ -28,7 +28,8 @@ public class ExampleCsvReaderWithNonCsvAtStart {
 
     private static void alternative1() throws IOException {
         System.out.println("Alternative 1 - ignore specific number of lines");
-        final CsvReader.CsvReaderBuilder builder = CsvReader.builder().ignoreDifferentFieldCount(false);
+        final CsvReader.CsvReaderBuilder builder = CsvReader.builder()
+            .ignoreDifferentFieldCount(false);
 
         try (var br = new BufferedReader(new StringReader(DATA))) {
             // ignore the first 3 lines
@@ -41,7 +42,8 @@ public class ExampleCsvReaderWithNonCsvAtStart {
 
     private static void alternative2() throws IOException {
         System.out.println("Alternative 2 - wait for a specific line");
-        final CsvReader.CsvReaderBuilder builder = CsvReader.builder().ignoreDifferentFieldCount(false);
+        final CsvReader.CsvReaderBuilder builder = CsvReader.builder()
+            .ignoreDifferentFieldCount(false);
 
         try (var br = new BufferedReader(new StringReader(DATA))) {
             // Look for the CSV header but read at most 100 lines

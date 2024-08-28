@@ -1,0 +1,47 @@
+---
+title: Skip non-CSV head
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithNonCsvAtStart.java?raw';
+
+Some CSV files contain one or more lines of text before the actual CSV data starts.
+For example, it could look like this:
+
+```
+// example.csv
+This is an example of a CSV file that contains
+three lines before the actual CSV records.
+
+header 1,header 2
+value 1,value 2
+```
+
+Strictly speaking, such a file **is not a valid CSV file** as defined by the CSV specification
+([RFC 4180](https://www.rfc-editor.org/rfc/rfc4180)).
+
+The main problem with those files is:
+
+- An exception would be thrown unless the options `ignoreDifferentFieldCount()` and `skipEmptyLines()` are set.
+- When working with named fields, the very first line (*This is an example of a CSV file that contains*)
+  would be interpreted as the actual header line.
+
+FastCSV itself does currently not provide a way to skip non-CSV head lines when reading a CSV file.
+However, you can skip non-CSV head lines by reading the file line by line and only hand over to FastCSV
+when the actual CSV data starts. This could be done based on a fixed number of lines or by detecting
+the actual CSV data.
+
+:::note
+Do not mix this with comments in CSV files. Comments are lines that start with a specific character
+(e.g., `#`) and can be skipped by FastCSV using a `CommentStrategy`.
+See the example on how to [handle comments](/guides/examples/handle-comments/) for more information.
+:::
+
+## Example
+
+This example demonstrates how to skip non-CSV head lines when reading such a CSV file with FastCSV.
+
+<Code code={sourceCode} title="ExampleCsvReaderWithNonCsvAtStart.java" lang="java"/>
+
+You also find this source code example in the
+[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithNonCsvAtStart.java).
