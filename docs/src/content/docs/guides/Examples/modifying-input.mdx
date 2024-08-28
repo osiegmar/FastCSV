@@ -1,0 +1,28 @@
+---
+title: Modifying input
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithFieldModifier.java?raw';
+
+The CSV specification ([section 2.4. of RFC 4180](https://www.rfc-editor.org/rfc/rfc4180#section-2)) explicitly states:
+
+> Spaces are considered part of a field and should not be ignored.
+
+However, in some cases, you might want to remove leading and trailing spaces from fields while reading a CSV file
+or modify the fields in another way (e.g., converting them to lower- or uppercase). FastCSV allows you to do this
+using a field modifier that can be used together with a `CsvRecordHandler`.
+
+:::tip
+If you want to read fields not as string but as a specific type (e.g., `Boolean`, `Long`, `LocalDate`, etc.),
+you should check out the [Custom Callback handler example](../custom-callback-handler/).
+:::
+
+## Example
+
+In the following example, fields are modified while reading a CSV file.
+
+<Code code={sourceCode} title="ExampleCsvReaderWithFieldModifier.java" lang="java"/>
+
+You also find this source code example in the
+[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithFieldModifier.java).

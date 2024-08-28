@@ -16,28 +16,36 @@ public class ExampleCsvReaderWithFieldModifier {
 
     public static void main(final String[] args) {
         System.out.println("Trim fields:");
-        CsvReader.builder().build(new CsvRecordHandler(FieldModifiers.TRIM), DATA)
+        CsvReader.builder()
+            .build(new CsvRecordHandler(FieldModifiers.TRIM), DATA)
             .forEach(System.out::println);
 
-        System.out.println("Trim and lowercase fields:");
-        CsvReader.builder().build(new CsvRecordHandler(combinedModifier()), DATA)
+        System.out.println("Combine modifiers (trim/lowercase):");
+        CsvReader.builder()
+            .build(new CsvRecordHandler(combinedModifier()), DATA)
             .forEach(System.out::println);
 
-        System.out.println("Trim and lowercase fields of first record (by using a custom modifier):");
-        CsvReader.builder().build(new CsvRecordHandler(customModifier()), DATA)
+        System.out.println("Custom modifier (trim/lowercase on first record):");
+        CsvReader.builder()
+            .build(new CsvRecordHandler(customModifier()), DATA)
             .forEach(System.out::println);
     }
 
     private static FieldModifier combinedModifier() {
-        return FieldModifiers.TRIM.andThen(FieldModifiers.lower(Locale.ENGLISH));
+        return FieldModifiers.TRIM
+            .andThen(FieldModifiers.lower(Locale.ENGLISH));
     }
 
     private static FieldModifier customModifier() {
         return new FieldModifier() {
             @Override
-            public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,
+            public String modify(final long startingLineNumber,
+                                 final int fieldIdx,
+                                 final boolean quoted,
                                  final String field) {
-                return startingLineNumber == 1 ? field.trim().toLowerCase(Locale.ENGLISH) : field;
+                return startingLineNumber == 1
+                    ? field.trim().toLowerCase(Locale.ENGLISH)
+                    : field;
             }
         };
     }
