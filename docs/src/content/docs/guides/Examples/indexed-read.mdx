@@ -1,0 +1,47 @@
+---
+title: Indexed reading
+---
+
+import {Code} from '@astrojs/starlight/components';
+import sourceCode from '../../../../../../example/src/main/java/example/ExampleIndexedCsvReader.java?raw';
+
+CSV files are most commonly read sequentially from start to end. In some situations, like in graphical user interfaces,
+you might need to read specific rows directly without having to read the entire file. FastCSV supports indexed reading
+of CSV files, which allows you to navigate back and forth in the file in a random-access manner.
+
+As CSV files do not include an index, FastCSV creates an index while reading the file. This index is stored in memory
+and allows you to access rows directly. The index can optionally be stored in a file to avoid creating it every time
+you read the CSV file.
+
+:::note
+The indexing process runs in the background while reading the CSV file. It is non-blocking, allowing you to start
+reading the file while the index is still being created.
+A status monitor is available to track indexing progress, making it ideal for graphical user interfaces.
+:::
+
+The main API classes and methods for indexed reading are:
+
+```java
+// Index the CSV file with up to 5 records per page
+IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
+    .pageSize(5)
+    .ofCsvRecord(file);
+
+try (csv) {
+    // Find the last page in the index
+    int lastPage = csv.getIndex().getPageCount() - 1;
+
+    // Output the last page
+    List<CsvRecord> lastPageRecords = csv.readPage(lastPage);
+    lastPageRecords.forEach(System.out::println);
+}
+```
+
+## Example
+
+The following example demonstrates how to read a CSV file using FastCSV's indexed reader.
+
+<Code code={sourceCode} title="ExampleIndexedCsvReader.java" lang="java" />
+
+You also find this source code example in the
+[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleIndexedCsvReader.java).

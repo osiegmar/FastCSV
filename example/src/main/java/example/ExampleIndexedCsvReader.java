@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import de.siegmar.fastcsv.reader.CollectingStatusListener;
-import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvIndex;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
@@ -26,22 +25,26 @@ public class ExampleIndexedCsvReader {
         simple(tmpFile);
         reuseIndex(tmpFile);
         statusMonitor(tmpFile);
-        advancedConfiguration(tmpFile);
     }
 
-    private static Path prepareTestFile(final Duration timeToWrite) throws IOException {
+    private static Path prepareTestFile(final Duration timeToWrite)
+        throws IOException {
+
         final Path tmpFile = createTmpFile();
 
         int record = 1;
-        final long writeUntil = System.currentTimeMillis() + timeToWrite.toMillis();
+        final long writeUntil = System.currentTimeMillis()
+            + timeToWrite.toMillis();
 
         try (CsvWriter csv = CsvWriter.builder().build(tmpFile)) {
             for (; System.currentTimeMillis() < writeUntil; record++) {
-                csv.writeRecord("record " + record, "containing standard ASCII, unicode letters öäü and emojis 😎");
+                csv.writeRecord("record " + record,
+                    "containing ASCII, some umlauts öäü and an emoji 😎");
             }
         }
 
-        System.out.format("Temporary test file with %,d records and %,d bytes successfully prepared%n%n",
+        System.out.format("Temporary test file with %,d records and "
+                + "%,d bytes successfully prepared%n%n",
             record - 1, Files.size(tmpFile));
 
         return tmpFile;
@@ -102,12 +105,15 @@ public class ExampleIndexedCsvReader {
     }
 
     private static void statusMonitor(final Path file) throws IOException {
-        System.out.printf("# Read file with a total of %,d bytes%n", Files.size(file));
+        System.out.printf("# Read file with %,d bytes%n", Files.size(file));
 
         final var statusListener = new CollectingStatusListener();
 
-        // Using the StatusListener, we can monitor the indexing process in the background
-        final var executor = Executors.newSingleThreadScheduledExecutor();
+        // Using the StatusListener, we can monitor the
+        // indexing process in the background
+        final var executor = Executors
+            .newSingleThreadScheduledExecutor();
+
         executor.scheduleAtFixedRate(
             () -> {
                 if (statusListener.isCompleted()) {
@@ -123,27 +129,11 @@ public class ExampleIndexedCsvReader {
             .ofCsvRecord(file);
 
         try (csv) {
-            System.out.printf("Indexed %,d records%n", csv.getIndex().getRecordCount());
+            System.out.printf("Indexed %,d records%n",
+                csv.getIndex().getRecordCount());
         }
 
         System.out.println();
-    }
-
-    private static void advancedConfiguration(final Path file) throws IOException {
-        final IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
-            .fieldSeparator(',')
-            .quoteCharacter('"')
-            .commentStrategy(CommentStrategy.NONE)
-            .commentCharacter('#')
-            .pageSize(5)
-            .ofCsvRecord(file);
-
-        try (csv) {
-            final List<CsvRecord> csvRecords = csv.readPage(2);
-
-            System.out.println("Parsed via advanced config:");
-            csvRecords.forEach(System.out::println);
-        }
     }
 
 }
