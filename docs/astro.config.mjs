@@ -82,6 +82,13 @@ export default defineConfig({
                         sizes: '48x48',
                     },
                 },
+                {
+                    tag: 'meta',
+                    attrs: {
+                        property: 'og:image',
+                        content:'https://fastcsv.org/fastcsv-og.png'
+                    },
+                },
             ],
         }),
     ]
