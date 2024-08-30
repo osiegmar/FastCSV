@@ -10,8 +10,7 @@ tableOfContents:
 
 ### How to contribute?
 
-Contributions are welcome! Please refer to
-the [contribution guidelines](https://github.com/osiegmar/FastCSV/blob/main/.github/CONTRIBUTING.md).
+Contributions are welcome! Please refer to the [Contribution Guide](/guides/contribution/).
 
 ### Where to ask questions? Where to get help?
 

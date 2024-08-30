@@ -1,0 +1,58 @@
+---
+title: Contribution
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Are you considering contributing to this project? That's great; help is always welcome.
+
+:::tip
+If you are not contributing a very obvious bug fix or documentation update, please start a
+[discussion](https://github.com/osiegmar/FastCSV/discussions) about your idea first.
+This will help to avoid wasted effort and ensure that your contribution is in line with the project's goals.
+:::
+
+<Steps>
+0. Prerequisites
+
+    - Understand and respect the [goals of the project](/architecture/goals/)
+    - Get familiar with the [architecture](/architecture/architecture/)
+    - Accept the [MIT license](https://opensource.org/license/mit) that will also apply to your contributions
+    - Have Java 21 on our path
+
+1. Fork the [repository](https://github.com/osiegmar/FastCSV) and clone it to your local machine
+
+    See [GitHub's documentation](https://docs.github.com/en/get-started/quickstart/fork-a-repo) for more information.
+
+2. Create a feature branch
+
+    ```bash
+    git checkout -b feature/my-feature
+    ```
+
+3. Write code and tests
+
+    FastCSV enforces top-notch test coverage. Make sure to write proper tests for your code.
+
+4. Build the project, run tests and static code analysis
+
+    ```bash
+    ./gradlew build
+    ```
+
+    To prevent performance degradation, run and compare benchmarks:
+
+    ```bash
+    ./gradlew jmh
+    ```
+
+5. Update documentation
+
+    - Add your change to the `CHANGELOG.md`
+    - Check documentation `/docs/` for required updates or create new documentation
+    - Update the `README.md` if necessary
+
+6. Commit, push and create a pull request
+
+    See [GitHub's documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) for more information.
+</Steps>
