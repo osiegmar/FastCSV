@@ -71,12 +71,25 @@ FastCSV provides two main classes to read CSV records: `CsvReader` and `IndexedC
 The regular `CsvReader` reads CSV records sequentially.
 To iterate over CSV records in a file and print them to the console, use the following code snippet:
 
-```java
+```java "CsvRecord" ".ofCsvRecord(file)"
 Path file = Paths.get("input.csv");
 try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
     csv.forEach(System.out::println);
 }
 ```
+
+The `CsvReader` also provides a method for reading CSV files with headers:
+
+```java "NamedCsvRecord" ".ofNamedCsvRecord(file)"
+Path file = Paths.get("input.csv");
+try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().ofNamedCsvRecord(file)) {
+    csv.forEach(rec -> System.out.println(rec.getField("foo")));
+}
+```
+
+Both methods (`ofCsvRecord` and `ofNamedCsvRecord`) are overloaded for other input sources like `Reader` and `String`.
+Using the more generic `build` method, you can also make use of the Callback mechanism to process the records. See
+[Custom callback handler example](/guides/examples/custom-callback-handler/) for more information.
 
 ### Reading CSV records in pages
 
@@ -94,3 +107,5 @@ try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().pageSize(10).o
     List<CsvRecord> csvRecords = csv.readPage(lastPage);
 }
 ```
+
+More details on the IndexedCsvReader can be found in the [Indexed reading example](/guides/examples/indexed-read/).
