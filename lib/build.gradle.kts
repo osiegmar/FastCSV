@@ -6,10 +6,10 @@ plugins {
     `maven-publish`
     signing
     jacoco
-    id("me.champeau.jmh") version "0.7.2"
-    id("info.solidsoft.pitest") version "1.15.0"
-    id("ru.vyarus.animalsniffer") version "1.7.1"
-    id("biz.aQute.bnd.builder") version "7.0.0"
+    alias(libs.plugins.jmh)
+    alias(libs.plugins.pitest)
+    alias(libs.plugins.animalsniffer)
+    alias(libs.plugins.bnd)
 }
 
 group = "de.siegmar"
@@ -54,16 +54,15 @@ configurations[intTest.implementationConfigurationName].extendsFrom(configuratio
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
-    commonImplementation("org.assertj:assertj-core:3.26.0")
+    commonImplementation(libs.assertj.core)
 
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:3.26.0")
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertj.core)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     "intTestImplementation"(project)
 
-    signature("com.toasttab.android:gummy-bears-api-33:0.8.0@signature")
+    signature(libs.gummy.bears)
 }
 
 tasks.test {
