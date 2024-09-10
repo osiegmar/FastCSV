@@ -16,7 +16,7 @@ public class ExampleCsvReaderWithSpecialQuotedFieldHandling {
         "quoted foo",unquoted foo
         """;
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         CsvReader.builder()
             .skipEmptyLines(false)
             .build(new QuotableFieldHandler(), DATA)
@@ -28,7 +28,9 @@ public class ExampleCsvReaderWithSpecialQuotedFieldHandling {
         private final List<QuotableField> fields = new ArrayList<>();
 
         @Override
-        protected void handleField(final int fieldIdx, final char[] buf, final int offset, final int len, final boolean quoted) {
+        protected void handleField(final int fieldIdx,
+                                   final char[] buf, final int offset, final int len,
+                                   final boolean quoted) {
             final String value = new String(buf, offset, len);
             fields.add(new QuotableField(value, quoted));
         }
