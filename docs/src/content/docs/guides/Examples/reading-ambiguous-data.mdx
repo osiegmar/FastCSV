@@ -2,8 +2,7 @@
 title: Reading ambiguous data
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithFaultyData.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 There are a few widespread ambiguities in CSV files:
 
@@ -29,7 +28,4 @@ libraries and how they handle these ambiguities.
 
 In the following example, a CSV file with various ambiguous data is read using FastCSV.
 
-<Code code={sourceCode} title="ExampleCsvReaderWithFaultyData.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithFaultyData.java).
+<SourceExample filename="ExampleCsvReaderWithFaultyData.java"/>

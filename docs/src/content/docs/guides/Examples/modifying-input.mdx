@@ -2,8 +2,7 @@
 title: Modifying input
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithFieldModifier.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 The CSV specification ([section 2.4. of RFC 4180](https://www.rfc-editor.org/rfc/rfc4180#section-2)) explicitly states:
 
@@ -22,7 +21,4 @@ you should check out the [Custom Callback handler example](/guides/examples/cust
 
 In the following example, fields are modified while reading a CSV file.
 
-<Code code={sourceCode} title="ExampleCsvReaderWithFieldModifier.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithFieldModifier.java).
+<SourceExample filename="ExampleCsvReaderWithFieldModifier.java"/>

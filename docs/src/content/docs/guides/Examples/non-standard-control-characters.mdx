@@ -2,9 +2,7 @@
 title: Non-standard control characters
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import readSourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithNonStandardControlCharacters.java?raw';
-import writeSourceCode from '../../../../../../example/src/main/java/example/ExampleCsvWriterWithNonStandardControlCharacters.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 The CSV specification ([section 2.6. of RFC 4180](https://www.rfc-editor.org/rfc/rfc4180#section-2)) defines the following control characters:
 
@@ -19,10 +17,7 @@ FastCSV uses these control characters by default. However, you can change them u
 
 In the following example, a CSV file with non-standard control characters is read using FastCSV.
 
-<Code code={readSourceCode} title="ExampleCsvReaderWithNonStandardControlCharacters.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithNonStandardControlCharacters.java).
+<SourceExample filename="ExampleCsvReaderWithNonStandardControlCharacters.java"/>
 
 :::note
 The record delimiter cannot be configured when reading CSV files. FastCSV automatically detects the record delimiter
@@ -33,7 +28,4 @@ while reading the CSV file.
 
 In the following example, a CSV file with non-standard control characters is created using FastCSV.
 
-<Code code={writeSourceCode} title="ExampleCsvWriterWithNonStandardControlCharacters.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvWriterWithNonStandardControlCharacters.java).
+<SourceExample filename="ExampleCsvWriterWithNonStandardControlCharacters.java"/>

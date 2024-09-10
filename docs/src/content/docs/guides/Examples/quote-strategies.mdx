@@ -2,9 +2,7 @@
 title: Quote strategies
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvWriterWithQuoteStrategy.java?raw';
-export const highlights = [/\.quoteStrategy\(.*\)/g];
+import SourceExample from '../../../../components/SourceExample.astro';
 
 Fields in CSV files can be enclosed in quotes.
 Although the CSV specification requires quotes only when a field contains a separator, delimiter,
@@ -35,10 +33,7 @@ for more information.
 
 In the following example, CSV output is created using different quote strategies.
 
-<Code code={sourceCode} title="ExampleCsvWriterWithQuoteStrategy.java" lang="java" mark={highlights}/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvWriterWithQuoteStrategy.java).
+<SourceExample filename="ExampleCsvWriterWithQuoteStrategy.java" highlights={[/\.quoteStrategy\(.*\)/g]}/>
 
 :::tip
 If you want to know if a field is enclosed in quotes when reading a CSV file, you may implement a

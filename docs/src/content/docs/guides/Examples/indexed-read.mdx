@@ -2,8 +2,7 @@
 title: Indexed reading
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleIndexedCsvReader.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 CSV files are most commonly read sequentially from start to end. In some situations, like in graphical user interfaces,
 you might need to read specific rows directly without having to read the entire file. FastCSV supports indexed reading
@@ -41,7 +40,4 @@ try (csv) {
 
 The following example demonstrates how to read a CSV file using FastCSV's indexed reader.
 
-<Code code={sourceCode} title="ExampleIndexedCsvReader.java" lang="java" />
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleIndexedCsvReader.java).
+<SourceExample filename="ExampleIndexedCsvReader.java"/>

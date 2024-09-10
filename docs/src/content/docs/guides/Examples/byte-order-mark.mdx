@@ -2,9 +2,7 @@
 title: Byte order mark (BOM) header
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithBomHeader.java?raw';
-export const highlights = ['.detectBomHeader(true)']
+import SourceExample from '../../../../components/SourceExample.astro';
 
 FastCSV is capable of reading CSV files with a [Byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)
 (BOM) header.
@@ -28,10 +26,7 @@ for more information.
 
 In the following example, a CSV file with a BOM header is created and read using FastCSV.
 
-<Code code={sourceCode} title="ExampleCsvReaderWithBomHeader.java" lang="java" mark={highlights}/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithBomHeader.java).
+<SourceExample filename="ExampleCsvReaderWithBomHeader.java" highlights={['.detectBomHeader(true)']}/>
 
 :::tip
 To **create** CSV files with a BOM header using FastCSV, you have to write the BOM header manually,

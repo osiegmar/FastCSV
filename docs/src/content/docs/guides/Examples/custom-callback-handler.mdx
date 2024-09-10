@@ -2,8 +2,7 @@
 title: Custom callback handler
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithCustomCallbackHandler.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 The typical way to read CSV data with FastCSV is to either use one of the `ofCsvRecord()` or `ofNamedCsvRecord()`
 methods of the `CsvReader` class. Those methods provide convenient access to the CSV data as a stream of
@@ -17,7 +16,4 @@ processing the CSV data and to materialize the objects that represent the CSV re
 The following example demonstrates how to read CSV data using a custom callback handler. This allows you to
 process the CSV data in a more flexible way.
 
-<Code code={sourceCode} title="ExampleCsvReaderWithCustomCallbackHandler.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithCustomCallbackHandler.java).
+<SourceExample filename="ExampleCsvReaderWithCustomCallbackHandler.java"/>

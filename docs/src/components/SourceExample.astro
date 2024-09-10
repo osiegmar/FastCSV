@@ -1,0 +1,13 @@
+---
+import {Code} from '@astrojs/starlight/components';
+const { filename, highlights } = Astro.props;
+
+import fs from 'node:fs/promises';
+const url = new URL(`../../../example/src/main/java/example/${filename}`, import.meta.url);
+const sourceCode = await fs.readFile(url, 'utf-8');
+---
+
+<Code code={sourceCode} title={filename} lang="java" mark={highlights}/>
+
+<p>You also find this source code example in the
+    <a href={`https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/${filename}`}>FastCSV GitHub repository</a>.</p>

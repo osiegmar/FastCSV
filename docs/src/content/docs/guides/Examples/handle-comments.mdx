@@ -2,9 +2,7 @@
 title: Handle comments
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import readSourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithComments.java?raw';
-import writeSourceCode from '../../../../../../example/src/main/java/example/ExampleCsvWriterWithComments.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 Although comments are not part of the CSV standard (per [RFC 4180](https://datatracker.ietf.org/doc/html/rfc4180)),
 many applications make use of comments in CSV files to provide additional information or to add context to the data.
@@ -41,10 +39,7 @@ More information about the `CommentStrategy` enum can be found in the correspond
 By default, FastCSV treats comments as part of the data to ensure that no data is lost and to maintain
 maximum compatibility with the RFC 4180 standard.
 
-<Code code={readSourceCode} title="ExampleCsvReaderWithComments.java" lang="java" />
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithComments.java).
+<SourceExample filename="ExampleCsvReaderWithComments.java"/>
 
 ## Writing CSV files with comments
 
@@ -54,7 +49,4 @@ Writing comments to a CSV file is straightforward, as FastCSV takes care of any 
 Be aware that comments are not part of the CSV standard and may not be supported by all applications that read CSV files.
 :::
 
-<Code code={writeSourceCode} title="ExampleCsvWriterWithComments.java" lang="java" />
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvWriterWithComments.java).
+<SourceExample filename="ExampleCsvWriterWithComments.java"/>

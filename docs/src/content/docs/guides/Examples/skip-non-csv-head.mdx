@@ -2,8 +2,7 @@
 title: Skip non-CSV head
 ---
 
-import {Code} from '@astrojs/starlight/components';
-import sourceCode from '../../../../../../example/src/main/java/example/ExampleCsvReaderWithNonCsvAtStart.java?raw';
+import SourceExample from '../../../../components/SourceExample.astro';
 
 Some CSV files contain one or more lines of text before the actual CSV data starts.
 For example, it could look like this:
@@ -41,7 +40,4 @@ See the example on how to [handle comments](/guides/examples/handle-comments/) f
 
 This example demonstrates how to skip non-CSV head lines when reading such a CSV file with FastCSV.
 
-<Code code={sourceCode} title="ExampleCsvReaderWithNonCsvAtStart.java" lang="java"/>
-
-You also find this source code example in the
-[FastCSV GitHub repository](https://github.com/osiegmar/FastCSV/blob/main/example/src/main/java/example/ExampleCsvReaderWithNonCsvAtStart.java).
+<SourceExample filename="ExampleCsvReaderWithNonCsvAtStart.java"/>
