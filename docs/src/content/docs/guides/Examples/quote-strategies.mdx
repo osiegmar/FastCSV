@@ -29,15 +29,16 @@ You may also check the corresponding
 [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/writer/QuoteStrategies.html)
 for more information.
 
-## Example
+## Writing fields with different quote strategies
 
 In the following example, CSV output is created using different quote strategies.
 
 <SourceExample filename="ExampleCsvWriterWithQuoteStrategy.java" highlights={[/\.quoteStrategy\(.*\)/g]}/>
 
-:::tip
-If you want to know if a field is enclosed in quotes when reading a CSV file, you may implement a
-custom callback handler. Check out the [Custom Callback handler example](/guides/examples/custom-callback-handler/)
-and especially the
-[addField() method](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/reader/CsvCallbackHandler.html).
-:::
+## Reading quoted fields
+
+To determine if a field is enclosed in quotes when reading a CSV file,
+additional work and an extra object per field are required.
+FastCSV does not support this feature out of the box, but it can be implemented using a custom callback handler.
+
+<SourceExample filename="ExampleCsvReaderWithSpecialQuotedFieldHandling.java" highlights={['QuotableFieldHandler', 'QuotableField']}/>
