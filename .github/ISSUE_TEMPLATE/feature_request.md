@@ -4,17 +4,23 @@ about: Suggest an idea for this project
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### Is your feature request related to a problem? Please describe.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!--
+A clear and concise description of what the problem is.
+Ex. I'm always frustrated when [...]
+-->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### Describe the solution you'd like
 
-**Goal alignment**
-Does this feature align with the [goals](https://www.fastcsv.org/architecture/goals/) of FastCSV?
+<!-- A clear and concise description of what you want to happen. -->
+
+### Describe alternatives you've considered
+
+<!-- A clear and concise description of any alternative solutions or features you've considered. -->
+
+### Goal alignment
+
+<!-- Does this feature align with the Goals (https://www.fastcsv.org/architecture/goals/) of FastCSV? -->
