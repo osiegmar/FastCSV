@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Nothing yet
+
+## [3.3.0] - 2024-09-19
 ### Added
 - Implement `Flushable` interface for `CsvWriter` to allow flushing the underlying writer
 - Implement `autoFlush` option for `CsvWriter` to automatically flush the writer after writing a record
@@ -123,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v3.2.0...main
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v3.3.0...main
+[3.3.0]: https://github.com/osiegmar/FastCSV/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/osiegmar/FastCSV/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/osiegmar/FastCSV/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/osiegmar/FastCSV/compare/v2.2.2...v3.0.0
