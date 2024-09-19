@@ -1,7 +1,5 @@
 package example;
 
-import java.io.StringWriter;
-
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 /**
@@ -10,12 +8,9 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 public class ExampleCsvWriterWithSingleFields {
 
     public static void main(final String[] args) {
-        final StringWriter sw = new StringWriter();
-        CsvWriter.builder().build(sw)
+        CsvWriter.builder().toConsole()
             .writeRecord("header1", "header2")
             .writeRecord().writeField("value1").writeField("value2").endRecord();
-
-        System.out.println(sw);
     }
 
 }

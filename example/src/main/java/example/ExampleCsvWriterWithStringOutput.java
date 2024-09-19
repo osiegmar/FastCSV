@@ -15,7 +15,8 @@ public class ExampleCsvWriterWithStringOutput {
             .writeRecord("header1", "header2")
             .writeRecord("value1", "value2");
 
-        System.out.println(sw);
+        final String csv = sw.toString();
+        System.out.println(csv);
     }
 
 }

@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Nothing yet
+### Added
+- Implement `Flushable` interface for `CsvWriter` to allow flushing the underlying writer
+- Implement `autoFlush` option for `CsvWriter` to automatically flush the writer after writing a record
+- Implement `toConsole` method for `CsvWriter` to write records to the console
 
 ## [3.2.0] - 2024-06-15
 ### Added

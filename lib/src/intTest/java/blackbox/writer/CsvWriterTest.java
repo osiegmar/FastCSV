@@ -1,11 +1,14 @@
 package blackbox.writer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -260,13 +263,49 @@ class CsvWriterTest {
         assertThat(stringWriter).asString().isEqualTo("foo,bar\n");
     }
 
+    // autoFlush
+
+    @Test
+    void noAutoFlush() {
+        final CsvWriter csvWriter = CsvWriter.builder().build(flushFailWriter());
+        assertThatCode(() -> csvWriter.writeRecord("foo"))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    void manualFlush(@TempDir final Path tempDir) throws IOException {
+        final Path file = tempDir.resolve("fastcsv.csv");
+        CsvWriter.builder().build(file)
+            .writeRecord("foo")
+            .flush();
+
+        assertThat(Files.readString(file))
+            .isEqualTo("foo\r\n");
+    }
+
+    @Test
+    void autoFlush() {
+        final CsvWriter csvWriter = CsvWriter.builder().autoFlush(true).build(flushFailWriter());
+        assertThatThrownBy(() -> csvWriter.writeRecord("foo"))
+            .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    private static FilterWriter flushFailWriter() {
+        return new FilterWriter(FilterWriter.nullWriter()) {
+            @Override
+            public void flush() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
     // toString()
 
     @Test
     void builderToString() {
         assertThat(crw).asString()
             .isEqualTo("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=8192]");
+                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=8192, autoFlush=false]");
     }
 
     @Test

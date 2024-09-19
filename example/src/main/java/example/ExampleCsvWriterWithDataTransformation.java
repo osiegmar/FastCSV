@@ -1,7 +1,6 @@
 package example;
 
 import java.io.IOException;
-import java.io.StringWriter;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -15,10 +14,8 @@ public class ExampleCsvWriterWithDataTransformation {
     private static final String DATA = "firstname,initial,lastname,age\njohn,h.,smith";
 
     public static void main(final String[] args) throws IOException {
-        final StringWriter out = new StringWriter();
-
         try (CsvReader<NamedCsvRecord> reader = CsvReader.builder().ofNamedCsvRecord(DATA);
-             CsvWriter writer = CsvWriter.builder().build(out)) {
+             CsvWriter writer = CsvWriter.builder().toConsole()) {
 
             // transform firstname, initial, lastname to lastname, firstname
             writer.writeRecord("lastname", "firstname");
@@ -28,8 +25,6 @@ public class ExampleCsvWriterWithDataTransformation {
                 writer.writeRecord(lastname, firstname);
             }
         }
-
-        System.out.println(out);
     }
 
 }

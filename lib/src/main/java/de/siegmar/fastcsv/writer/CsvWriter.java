@@ -5,6 +5,7 @@ import static de.siegmar.fastcsv.util.Util.LF;
 import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
@@ -31,23 +32,22 @@ import de.siegmar.fastcsv.util.Util;
  *}
  */
 @SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:CyclomaticComplexity"})
-public final class CsvWriter implements Closeable {
+public final class CsvWriter implements Closeable, Flushable {
 
-    private final Writer writer;
+    private final Writable writer;
     private final char fieldSeparator;
     private final char quoteCharacter;
     private final char commentCharacter;
     private final QuoteStrategy quoteStrategy;
     private final LineDelimiter lineDelimiter;
-    private final boolean flushWriter;
     private int currentLineNo = 1;
     private final char[] lineDelimiterChars;
     private final char[] emptyFieldValue;
     private boolean openRecordWriter;
 
-    CsvWriter(final Writer writer, final char fieldSeparator, final char quoteCharacter,
-              final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter,
-              final boolean flushWriter) {
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    CsvWriter(final Writable writer, final char fieldSeparator, final char quoteCharacter,
+              final char commentCharacter, final QuoteStrategy quoteStrategy, final LineDelimiter lineDelimiter) {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
@@ -61,7 +61,6 @@ public final class CsvWriter implements Closeable {
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
         this.lineDelimiter = Objects.requireNonNull(lineDelimiter);
-        this.flushWriter = flushWriter;
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
@@ -153,7 +152,7 @@ public final class CsvWriter implements Closeable {
 
         if (value == null) {
             if (quoteStrategy != null && quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
-                writer.write(emptyFieldValue);
+                writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
@@ -162,7 +161,7 @@ public final class CsvWriter implements Closeable {
 
         if (length == 0) {
             if (quoteStrategy != null && quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
-                writer.write(emptyFieldValue);
+                writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
@@ -215,7 +214,7 @@ public final class CsvWriter implements Closeable {
         return false;
     }
 
-    private static void writeEscaped(final Writer w, final String value, final char quoteChar)
+    private static void writeEscaped(final Writable w, final String value, final char quoteChar)
         throws IOException {
 
         int startPos = 0;
@@ -297,15 +296,19 @@ public final class CsvWriter implements Closeable {
     private CsvWriter endRecord() throws IOException {
         ++currentLineNo;
         writer.write(lineDelimiterChars, 0, lineDelimiterChars.length);
-        if (flushWriter) {
-            writer.flush();
-        }
+        writer.endRecord();
+
         return this;
     }
 
     @Override
     public void close() throws IOException {
         writer.close();
+    }
+
+    @Override
+    public void flush() throws IOException {
+        writer.flush();
     }
 
     @Override
@@ -329,6 +332,7 @@ public final class CsvWriter implements Closeable {
      *     <li>quote strategy: {@code null} (only required quoting)</li>
      *     <li>line delimiter: {@link LineDelimiter#CRLF}</li>
      *     <li>buffer size: 8,192 bytes</li>
+     *     <li>auto flush: {@code false}</li>
      * </ul>
      */
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
@@ -342,6 +346,7 @@ public final class CsvWriter implements Closeable {
         private QuoteStrategy quoteStrategy;
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
         private int bufferSize = DEFAULT_BUFFER_SIZE;
+        private boolean autoFlush;
 
         CsvWriterBuilder() {
         }
@@ -412,6 +417,8 @@ public final class CsvWriter implements Closeable {
          * need many instances of a CsvWriter and need to optimize for instantiation time and memory footprint.
          * <p>
          * A buffer size of 0 disables the buffer.
+         * <p>
+         * This setting is ignored when using {@link #toConsole()} as console output is unbuffered.
          *
          * @param bufferSize the buffer size to be used (must be &ge; 0).
          * @return This updated object, allowing additional method calls to be chained together.
@@ -419,6 +426,21 @@ public final class CsvWriter implements Closeable {
         public CsvWriterBuilder bufferSize(final int bufferSize) {
             Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
             this.bufferSize = bufferSize;
+            return this;
+        }
+
+        /**
+         * Configures whether data should be flushed after each record write operation.
+         * <p>
+         * Obviously this comes with drastic performance implications but can be useful for debugging purposes.
+         * <p>
+         * This setting is ignored when using {@link #toConsole()} as console output is always flushed.
+         *
+         * @param autoFlush whether the data should be flushed after each record write operation.
+         * @return This updated object, allowing additional method calls to be chained together.
+         */
+        public CsvWriterBuilder autoFlush(final boolean autoFlush) {
+            this.autoFlush = autoFlush;
             return this;
         }
 
@@ -437,7 +459,7 @@ public final class CsvWriter implements Closeable {
         public CsvWriter build(final Writer writer) {
             Objects.requireNonNull(writer, "writer must not be null");
 
-            return newWriter(writer, true);
+            return csvWriter(writer, bufferSize, true, autoFlush);
         }
 
         /**
@@ -473,18 +495,40 @@ public final class CsvWriter implements Closeable {
             Objects.requireNonNull(file, "file must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            return newWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
-                charset), false);
+            return csvWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
+                charset), bufferSize, false, autoFlush);
         }
 
-        private CsvWriter newWriter(final Writer writer, final boolean flushWriter) {
-            if (bufferSize > 0) {
-                return new CsvWriter(new FastBufferedWriter(writer, bufferSize), fieldSeparator, quoteCharacter,
-                    commentCharacter, quoteStrategy, lineDelimiter, flushWriter);
-            }
+        /**
+         * Convenience method to write to the console (standard output).
+         * <p>
+         * Settings {@link #bufferSize(int)} and {@link #autoFlush(boolean)} are ignored.
+         * Data is directly written to standard output and flushed after each record.
+         * <p>
+         * Example use:
+         * <p>
+         * {@snippet :
+         * CsvWriter.builder().toConsole()
+         *     .writeRecord("Hello", "world");
+         *}
+         *
+         * @return a new CsvWriter instance - never {@code null}.
+         *     Calls to {@link #close()} are ignored, standard out remains open.
+         */
+        @SuppressWarnings("checkstyle:RegexpMultiline")
+        public CsvWriter toConsole() {
+            final Writer writer = new NoCloseWriter(new OutputStreamWriter(System.out, Charset.defaultCharset()));
+            return csvWriter(writer, 0, false, true);
+        }
 
-            return new CsvWriter(writer, fieldSeparator, quoteCharacter,
-                commentCharacter, quoteStrategy, lineDelimiter, false);
+        private CsvWriter csvWriter(final Writer writer, final int bufferSize,
+                                    final boolean autoFlushBuffer, final boolean autoFlushWriter) {
+            final Writable writable = bufferSize > 0
+                ? new FastBufferedWriter(writer, bufferSize, autoFlushBuffer, autoFlushWriter)
+                : new UnbufferedWriter(writer, autoFlushWriter);
+
+            return new CsvWriter(writable,
+                fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy, lineDelimiter);
         }
 
         @Override
@@ -496,73 +540,8 @@ public final class CsvWriter implements Closeable {
                 .add("quoteStrategy=" + quoteStrategy)
                 .add("lineDelimiter=" + lineDelimiter)
                 .add("bufferSize=" + bufferSize)
+                .add("autoFlush=" + autoFlush)
                 .toString();
-        }
-
-    }
-
-    /**
-     * High-performance buffered writer (without synchronization).
-     * <p>
-     * This class is intended for internal use only.
-     */
-    static final class FastBufferedWriter extends Writer {
-
-        private final Writer writer;
-        private final char[] buf;
-        private int pos;
-
-        FastBufferedWriter(final Writer writer, final int bufferSize) {
-            this.writer = writer;
-            buf = new char[bufferSize];
-        }
-
-        @Override
-        public void write(final int c) throws IOException {
-            if (pos == buf.length) {
-                flush();
-            }
-            buf[pos++] = (char) c;
-        }
-
-        @Override
-        public void write(final char[] cbuf, final int off, final int len) throws IOException {
-            if (pos + len >= buf.length) {
-                flush();
-                if (len >= buf.length) {
-                    writer.write(cbuf, off, len);
-                    return;
-                }
-            }
-
-            System.arraycopy(cbuf, off, buf, pos, len);
-            pos += len;
-        }
-
-        @Override
-        public void write(final String str, final int off, final int len) throws IOException {
-            if (pos + len >= buf.length) {
-                flush();
-                if (len >= buf.length) {
-                    writer.write(str, off, len);
-                    return;
-                }
-            }
-
-            str.getChars(off, off + len, buf, pos);
-            pos += len;
-        }
-
-        @Override
-        public void flush() throws IOException {
-            writer.write(buf, 0, pos);
-            pos = 0;
-        }
-
-        @Override
-        public void close() throws IOException {
-            flush();
-            writer.close();
         }
 
     }

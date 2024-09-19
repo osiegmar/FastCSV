@@ -1,8 +1,5 @@
 package example;
 
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.QuoteStrategies;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
@@ -13,33 +10,29 @@ import de.siegmar.fastcsv.writer.QuoteStrategy;
 public class ExampleCsvWriterWithQuoteStrategy {
 
     public static void main(final String[] args) {
-        final PrintWriter pw = new PrintWriter(System.out, false, StandardCharsets.UTF_8);
-
-        pw.println("Quote always");
+        System.out.println("Quote always");
         CsvWriter.builder()
             .quoteStrategy(QuoteStrategies.ALWAYS)
-            .build(pw)
+            .toConsole()
             .writeRecord("value1", "", null, "value,4");
 
-        pw.println("Quote non-empty");
+        System.out.println("Quote non-empty");
         CsvWriter.builder()
             .quoteStrategy(QuoteStrategies.NON_EMPTY)
-            .build(pw)
+            .toConsole()
             .writeRecord("value1", "", null, "value,4");
 
-        pw.println("Quote empty");
+        System.out.println("Quote empty");
         CsvWriter.builder()
             .quoteStrategy(QuoteStrategies.EMPTY)
-            .build(pw)
+            .toConsole()
             .writeRecord("value1", "", null, "value,4");
 
-        pw.println("Quote custom");
+        System.out.println("Quote custom");
         CsvWriter.builder()
             .quoteStrategy(customQuote())
-            .build(pw)
+            .toConsole()
             .writeRecord("value1", "", null, "value,4");
-
-        pw.flush();
     }
 
     // A quote strategy can be used to force quote fields that would otherwise not be quoted.
