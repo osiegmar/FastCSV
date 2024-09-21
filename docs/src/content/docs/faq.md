@@ -121,36 +121,7 @@ See also: https://github.com/osiegmar/FastCSV/issues/103
 
 #### Does FastCSV support automatic bean mapping?
 
-The goals of FastCSV are not going hand in hand with automatic bean mapping as it would increase the complexity and
-footprint of the library and decrease its performance.
-
-If FastCSV otherwise suits your needs, you can easily map CSV records to beans using the Java stream API. 
-
-```java
-public class Test {
-
-    public static void main(String[] args) throws IOException {
-        var file = Paths.get("input.csv");
-        try (var csv = CsvReader.builder().ofNamedCsvRecord(file)) {
-            csv.stream()
-                .map(Test::mapPerson)
-                .forEach(System.out::println);
-        }
-    }
-
-    private static Person mapPerson(NamedCsvRecord rec) {
-        return new Person(
-            Long.parseLong(rec.getField("ID")),
-            rec.getField("firstName"),
-            rec.getField("lastName")
-        );
-    }
-
-    private record Person(Long id, String firstName, String lastName) {
-    }
-
-}
-```
+See [Bean Mapping example](/guides/examples/bean-mapping/) for more information.
 
 #### Does FastCSV support automatic type conversion?
 

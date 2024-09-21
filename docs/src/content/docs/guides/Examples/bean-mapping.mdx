@@ -1,0 +1,17 @@
+---
+title: Bean Mapping
+---
+
+import SourceExample from '../../../../components/SourceExample.astro';
+
+Many CSV libraries come with built-in support for mapping CSV records to Java beans.
+While this is a convenient feature, the reflection-based approach used by most libraries comes with
+a heavy performance penalty, which contradicts FastCSV’s design goal of being fast.
+
+Thanks to Java stream mapping, FastCSV can provide a similar feature without sacrificing performance.
+
+## Example
+
+The following example demonstrates how to map CSV records to Java beans using FastCSV.
+
+<SourceExample filename="ExampleCsvReaderMapping.java"/>
