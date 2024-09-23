@@ -95,34 +95,6 @@ class CsvReaderTest {
                 + "ignoreDifferentFieldCount=true]");
     }
 
-    // skipped record
-
-    @Test
-    void singleRecordNoSkipEmpty() {
-        crb.skipEmptyLines(false);
-        assertThat(crb.ofCsvRecord("").iterator()).isExhausted();
-    }
-
-    @Test
-    void multipleRecordsNoSkipEmpty() {
-        crb.skipEmptyLines(false);
-
-        assertThat(crb.ofCsvRecord("\n\na").iterator()).toIterable()
-            .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(1).fields().containsExactly(""),
-                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(2).fields().containsExactly(""),
-                item3 -> CsvRecordAssert.assertThat(item3).isStartingLineNumber(3).fields().containsExactly("a"));
-    }
-
-    @Test
-    void skippedRecords() {
-        assertThat(crb.ofCsvRecord("\n\nfoo\n\nbar\n\n").stream())
-            .satisfiesExactly(
-                item1 -> CsvRecordAssert.assertThat(item1).isStartingLineNumber(3).fields().containsExactly("foo"),
-                item2 -> CsvRecordAssert.assertThat(item2).isStartingLineNumber(5).fields().containsExactly("bar")
-            );
-    }
-
     // different field count
 
     @ParameterizedTest

@@ -380,13 +380,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /**
          * Defines whether empty lines should be skipped when reading data.
          * <p>
-         * The default implementation interprets empty lines as lines that do not contain any data.
-         * This includes lines that consist only of opening and closing quote characters.
-         * <p>
-         * A line that only contains whitespace characters is not considered empty.
-         * However, the determination of empty lines is done after field modifiers have been applied.
-         * If you use a field trimming modifier (like {@link FieldModifiers#TRIM}), lines that only contain whitespaces
-         * are considered empty.
+         * The default implementation interprets empty lines as lines that do not contain any data
+         * (no whitespace, no quotes, nothing).
          * <p>
          * Commented lines are not considered empty lines. Use {@link #commentStrategy(CommentStrategy)} for handling
          * commented lines.

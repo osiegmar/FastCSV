@@ -93,7 +93,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
      */
     @Override
     protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
-        emptyLine = emptyLine && len == 0;
+        emptyLine = emptyLine && fieldCount == 0 && len == 0 && !quoted;
         handleField(fieldCount++, buf, offset, len, quoted);
     }
 

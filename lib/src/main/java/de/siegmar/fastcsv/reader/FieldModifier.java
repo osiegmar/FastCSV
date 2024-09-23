@@ -3,9 +3,6 @@ package de.siegmar.fastcsv.reader;
 /**
  * Implementations of this class are used within {@link CsvCallbackHandler} implementations to modify the fields of
  * a CSV record before storing them in the resulting object.
- * <p>
- * Applying field modifiers might affect the behavior of skipping empty lines – see
- * {@link CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)}.
  *
  * @see FieldModifiers
  * @see SimpleFieldModifier

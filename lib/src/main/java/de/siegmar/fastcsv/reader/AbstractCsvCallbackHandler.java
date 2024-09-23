@@ -48,6 +48,11 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
     protected boolean comment;
 
     /**
+     * Whether the line is empty.
+     */
+    protected boolean emptyLine;
+
+    /**
      * Constructs a new instance with an initial fields array of size {@value #INITIAL_FIELDS_SIZE}.
      */
     protected AbstractCsvCallbackHandler() {
@@ -81,6 +86,7 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         fieldIdx = 0;
         recordSize = 0;
         comment = false;
+        emptyLine = true;
     }
 
     /**
@@ -95,6 +101,7 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         if (recordSize + len > Limits.MAX_RECORD_SIZE) {
             throw new CsvParseException(maxRecordSizeExceededMessage(startingLineNumber));
         }
+        emptyLine = emptyLine && fieldIdx == 0 && len == 0 && !quoted;
         addField(modifyField(materializeField(buf, offset, len), quoted), quoted);
     }
 
@@ -175,8 +182,9 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
      * @throws CsvParseException if the addition exceeds the limit of record size.
      */
     protected void setComment(final String value) {
-        recordSize += value.length();
         comment = true;
+        emptyLine = false;
+        recordSize += value.length();
         fields[fieldIdx++] = value;
     }
 
@@ -234,7 +242,7 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
      * @throws NullPointerException if {@code rec} is {@code null}
      */
     protected RecordWrapper<T> buildWrapper(final T rec) {
-        return new RecordWrapper<>(comment, recordSize == 0, fieldIdx, rec);
+        return new RecordWrapper<>(comment, emptyLine, fieldIdx, rec);
     }
 
 }
