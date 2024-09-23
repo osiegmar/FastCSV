@@ -16,7 +16,10 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 @SuppressWarnings("RedundantExplicitVariableType")
 public class ExampleCsvReaderWithFileInput {
 
-    private static final String DATA = "foo,bar\nfoo2,bar2";
+    private static final String DATA = """
+        foo,bar
+        foo2,bar2
+        """;
 
     public static void main(final String[] args) throws IOException {
         final Path tmpFile = prepareTestFile();

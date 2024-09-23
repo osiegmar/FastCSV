@@ -8,7 +8,10 @@ import de.siegmar.fastcsv.reader.CsvRecord;
  */
 public class ExampleCsvReaderWithStringInput {
 
-    private static final String DATA = "foo,bar\nfoo2,bar2";
+    private static final String DATA = """
+        foo,bar
+        foo2,bar2
+        """;
 
     public static void main(final String[] args) {
         System.out.println("Reading data via for-each loop:");

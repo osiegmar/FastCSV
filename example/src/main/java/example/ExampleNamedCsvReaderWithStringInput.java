@@ -7,7 +7,11 @@ import de.siegmar.fastcsv.reader.CsvReader;
  */
 public class ExampleNamedCsvReaderWithStringInput {
 
-    private static final String DATA = "header1,header2\nvalue1,value2\nfoo,bar";
+    private static final String DATA = """
+        header1,header2
+        value1,value2
+        foo,bar
+        """;
 
     public static void main(final String[] args) {
         System.out.println("Field 'header2' of each record:");

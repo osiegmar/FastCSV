@@ -11,7 +11,10 @@ import de.siegmar.fastcsv.writer.CsvWriter;
  */
 public class ExampleCsvWriterWithDataTransformation {
 
-    private static final String DATA = "firstname,initial,lastname,age\njohn,h.,smith";
+    private static final String DATA = """
+        firstname,initial,lastname,age
+        john,h.,smith
+        """;
 
     public static void main(final String[] args) throws IOException {
         try (CsvReader<NamedCsvRecord> reader = CsvReader.builder().ofNamedCsvRecord(DATA);

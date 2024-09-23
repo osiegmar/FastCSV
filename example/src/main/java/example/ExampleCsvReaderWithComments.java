@@ -8,7 +8,10 @@ import de.siegmar.fastcsv.reader.CsvReader;
  */
 public class ExampleCsvReaderWithComments {
 
-    private static final String DATA = "#line1\nfoo,bar";
+    private static final String DATA = """
+        #line1
+        foo,bar
+        """;
 
     public static void main(final String[] args) {
         System.out.println("Reading data with no special treatment for comments:");

@@ -7,7 +7,10 @@ import de.siegmar.fastcsv.reader.CsvReader;
  */
 public class ExampleCsvReaderWithNonStandardControlCharacters {
 
-    private static final String DATA = "'foo';'bar'\n'foo2';'bar2'";
+    private static final String DATA = """
+        'foo';'bar'
+        'foo2';'bar2'
+        """;
 
     public static void main(final String[] args) {
         CsvReader.builder()

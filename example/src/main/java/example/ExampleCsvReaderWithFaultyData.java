@@ -8,7 +8,13 @@ import de.siegmar.fastcsv.reader.CsvReader;
  */
 public class ExampleCsvReaderWithFaultyData {
 
-    private static final String DATA = "foo,bar\nonly one field followed by some empty lines\n\n\nbar,foo";
+    private static final String DATA = """
+        foo,bar
+        only one field followed by some empty lines
+
+
+        bar,foo
+        """;
 
     public static void main(final String[] args) {
         System.out.println("Reading data with lenient (default) settings:");

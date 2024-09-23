@@ -10,7 +10,10 @@ import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
  */
 public class ExampleNamedCsvReaderWithCustomHeader {
 
-    private static final String DATA = "value1,value2\nfoo,bar";
+    private static final String DATA = """
+        value1,value2
+        foo,bar
+        """;
 
     public static void main(final String[] args) {
         final CsvCallbackHandler<NamedCsvRecord> callbackHandler =
