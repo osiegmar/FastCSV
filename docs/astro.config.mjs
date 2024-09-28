@@ -40,6 +40,10 @@ export default defineConfig({
                     link: '/faq/'
                 },
                 {
+                    label: 'Other libraries',
+                    link: '/other-libraries/'
+                },
+                {
                     label: 'Further Reading',
                     items: [
                         {
