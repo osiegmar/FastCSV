@@ -8,10 +8,12 @@ FastCSV is capable of reading CSV files with a [Byte order mark](https://en.wiki
 (BOM) header.
 
 :::note
-A BOM header is a sequence of bytes at the beginning of a text file that indicates the file's encoding,
-such as UTF-8, UTF-16, or UTF-32.
-Although UTF-8 is the default encoding for most text files today,
-some applications still use the BOM header to specify the file's encoding.
+A byte order mark (BOM) is a sequence of 2 to 4 bytes at the start of a text file
+that serves as a header to indicate the file's Unicode encoding, such as UTF-8, UTF-16, or UTF-32.
+For UTF-16 and UTF-32, the BOM header also indicates the byte order (big-endian or little-endian).
+
+While UTF-8 is the standard encoding for most text files today,
+some applications still use the BOM header to explicitly specify the file's encoding.
 :::
 
 Enabling automatic BOM header detection can impact performance.
@@ -21,6 +23,16 @@ To enable BOM header detection, use the `detectBomHeader` method of the `CsvRead
 You may also want to check out the corresponding
 [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/reader/CsvReader.CsvReaderBuilder.html#detectBomHeader(boolean))
 for more information.
+
+The following table shows the BOM headers for different Unicode encodings that FastCSV can detect:
+
+| Encoding    | BOM header (hex) |
+|-------------|------------------|
+| UTF-8       | `EF BB BF`       |
+| UTF-16 (BE) | `FE FF`          |
+| UTF-16 (LE) | `FF FE`          |
+| UTF-32 (BE) | `00 00 FE FF`    |
+| UTF-32 (LE) | `FF FE 00 00`    |
 
 ## Example
 
