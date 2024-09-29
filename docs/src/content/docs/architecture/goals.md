@@ -8,7 +8,8 @@ The development of FastCSV is guided by a set of design goals.
 
 ## Performance
 
-FastCSV is designed to be blazing fast. It is optimized for reading and writing CSV files as quickly as possible.
+FastCSV is engineered for exceptional speed, optimized for rapid CSV file reading and writing.
+It achieves high performance without compromising on CSV specification compliance, robustness, or security.
 
 ![Benchmark](../../../assets/benchmark.png "Benchmark")
 
