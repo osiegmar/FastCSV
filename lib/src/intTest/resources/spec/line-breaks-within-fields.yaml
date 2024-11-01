@@ -1,0 +1,17 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Line breaks within fields
+description: >-
+  RFC 4180 section 2.6 specifies:
+  "Fields containing line breaks (CRLF), double quotes, and commas should be enclosed in double-quotes."
+  
+  The line break actually is part of the field value and should be preserved.
+checks:
+  - id: line-breaks-within-fields
+    input: '"A⏎B"'
+    records:
+      - ['A⏎B']

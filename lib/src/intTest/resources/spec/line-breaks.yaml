@@ -1,0 +1,25 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Line breaks
+description: >-
+  RFC 4180-bis section 2.1.1 specifies:
+  "Each record is located on a separate line, ended by a line break (CR, LF or CRLF) indicating the end of this record."
+checks:
+  - id: line-breaks-1
+    input: 'A␤B'
+    records:
+      - ['A']
+      - ['B']
+  - id: line-breaks-2
+    input: 'D␤'
+    records:
+      - ['D']
+  - id: line-breaks-3
+    input: '␤D'
+    records:
+      - ['']
+      - ['D']

@@ -1,0 +1,36 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Open Quotation (violating RFC 4180)
+description: >-
+  RFC 4180 section 2.5 specifies:
+  "Each field may or may not be enclosed in double quotes".
+  
+  A parser should either stop parsing when quotation marks are not appearing in the right places or treat them according to these rules.
+settings:
+  exceptionAllowed: true
+checks:
+  - id: open-quotation-1
+    input: 'A,"B'
+    description: >-
+      A regular, unquoted field `A`, followed by a field that starts with a quotation mark, followed by the letter `B` and then ended by end of data.
+      As the quotation mark in CSV is not allowed for any other purpose than enclosing fields, the parser should treat this as an open quotation and not part of the field.
+    records:
+      - [ 'A', 'B' ]
+  - id: open-quotation-2
+    input: '"A,B'
+    description: >-
+      A line that starts with a quotation mark, followed by some arbitrary data and then ended by end of data.
+      As the quotation mark in CSV is not allowed for any other purpose than enclosing fields, the parser should treat this as an open quotation and not part of the field.
+    records:
+      - [ 'A,B' ]
+  - id: open-quotation-3
+    input: 'A,B"'
+    description: >-
+      A regular, unquoted field `A`, followed by a field that ends with a quotation mark and then ended by end of data.
+      As the second field didn't start with a quotation mark, the parser should treat this as a regular field and not part of an open quotation. The quotation mark after the `B` should be treated as a regular character.
+    records:
+      - [ 'A', 'B"' ]

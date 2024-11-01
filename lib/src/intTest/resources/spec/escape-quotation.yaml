@@ -1,0 +1,23 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Escape Quotation
+description: >-
+  RFC 4180 section 2.7 specifies:
+  "If double-quotes are used to enclose fields, then a double-quote appearing inside a field must be escaped by preceding it with another double quote."
+checks:
+  - id: escape-quotation-1
+    input: '"""D"'
+    records:
+    - [ '"D' ]
+  - id: escape-quotation-2
+    input: '"D"""'
+    records:
+    - [ 'D"' ]
+  - id: escape-quotation-3
+    input: '"A""B"'
+    records:
+      - [ 'A"B' ]

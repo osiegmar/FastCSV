@@ -1,0 +1,43 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Skip comments
+description: >-
+  RFC 4180-bis section 3.11. specifies:
+  "Some implementations may use the hash sign ("#") to mark lines that are meant to be commented lines."
+  
+  These checks are treating the hash sign as a comment character and skip the comments while reading the records.
+settings:
+  commentMode: SKIP
+checks:
+  - id: comments-skip-1
+    input: 'A⏎#B,C⏎D'
+    records:
+      - [ 'A' ]
+      - [ 'D' ]
+  - id: comments-skip-2
+    input: "#A⏎#B⏎C"
+    records:
+      - [ 'C' ]
+  - id: comments-skip-3
+    input: "#A⏎ #B⏎C"
+    description: >-
+      The hash sign loses its special treatment if not at the beginning of the line
+    records:
+      - [ ' #B' ]
+      - [ 'C' ]
+  - id: comments-skip-4
+    input: "#"
+    records: []
+  - id: comments-skip-5
+    input: "#A⏎#"
+    records: []
+  - id: comments-skip-6
+    input: "#⏎#A"
+    records: []
+  - id: comments-skip-7
+    input: "#⏎#⏎#"
+    records: []

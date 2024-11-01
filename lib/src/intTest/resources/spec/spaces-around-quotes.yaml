@@ -1,0 +1,36 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Spaces around quotes
+description: >-
+  RFC 4180-bis section 3.6. specifies:
+  "When quoted fields are used, this document does not allow whitespace between double quotes and commas.
+  Implementers should be aware that some applications may be more lenient and allow whitespace outside the double quotes."
+  
+  Implementors should either reject to further process the file or should handle the whitespaces as this test suite does.
+settings:
+  exceptionAllowed: true
+checks:
+  - id: spaces-around-quotes-1
+    input: '"D" '
+    records:
+      - ['D ']
+  - id: spaces-around-quotes-2
+    input: '"A,B" '
+    records:
+      - ['A,B ']
+  - id: spaces-around-quotes-3
+    input: ' "D"'
+    records:
+      - [' "D"']
+  - id: spaces-around-quotes-4
+    input: ' "D" '
+    records:
+      - [' "D" ']
+  - id: spaces-around-quotes-5
+    input: ' "A,B" '
+    records:
+      - [' "A', 'B" ']

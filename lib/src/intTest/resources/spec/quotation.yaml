@@ -1,0 +1,27 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Quotation
+description: >-
+  RFC 4180 section 2.5 specifies:
+  "Each field may or may not be enclosed in double quotes"
+checks:
+  - id: quotation-1
+    input: '"D"'
+    records:
+      - [ 'D' ]
+  - id: quotation-2
+    input: '" D "'
+    records:
+      - [ ' D ' ]
+  - id: quotation-3
+    input: '"A",B'
+    records:
+      - [ 'A', 'B' ]
+  - id: quotation-4
+    input: 'A,"B"'
+    records:
+      - [ 'A', 'B' ]

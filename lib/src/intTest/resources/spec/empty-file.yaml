@@ -1,0 +1,14 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Empty file
+description: >-
+  RFC 4180-bis section 3.2 specifies:
+  "Implementers should be aware that in accordance to this specification a file does not need to contain any comments or records. Therefore, an empty file with zero bytes is considered valid."
+checks:
+  - id: empty-file
+    input: ''
+    records: []

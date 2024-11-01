@@ -1,0 +1,25 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Different field count
+description: >-
+  RFC 4180 section 2.4 specifies:
+  "Each line should contain the same number of fields throughout the file."
+  
+  Implementors should either reject to further process the file or should ignore different field counts.
+settings:
+  exceptionAllowed: true
+checks:
+  - id: different-field-count-1
+    input: 'A⏎B,C'
+    records:
+      - ['A']
+      - ['B', 'C']
+  - id: different-field-count-2
+    input: 'A,B⏎C'
+    records:
+      - ['A', 'B']
+      - ['C']

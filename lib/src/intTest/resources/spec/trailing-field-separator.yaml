@@ -1,0 +1,38 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Trailing field separator
+description: >-
+  RFC 4180-bis section 2.1.4 specifies:
+  "The last field in the record MUST NOT be followed by a comma (since this will indicate an empty field following the comma)."
+checks:
+  - id: trailing-field-separator-1
+    input: ','
+    records:
+      - ['', '']
+  - id: trailing-field-separator-2
+    input: ' ,'
+    records:
+      - [' ', '']
+  - id: trailing-field-separator-3
+    input: 'D,'
+    records:
+      - ['D', '']
+  - id: trailing-field-separator-4
+    input: 'A,⏎B,C'
+    records:
+      - ['A', '']
+      - ['B', 'C']
+  - id: trailing-field-separator-5
+    input: ' ,⏎A,B'
+    records:
+      - [' ', '']
+      - ['A', 'B']
+  - id: trailing-field-separator-6
+    input: ',⏎A,B'
+    records:
+      - ['', '']
+      - ['A', 'B']

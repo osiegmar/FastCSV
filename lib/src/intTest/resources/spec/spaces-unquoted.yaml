@@ -1,0 +1,31 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Single line with various spaces
+description: >-
+  RFC 4180 section 2 specifies:
+  "Spaces are considered part of a field and should not be ignored"
+checks:
+  - id: spaces-unquoted-1
+    input: ' '
+    records:
+      - [' ']
+  - id: spaces-unquoted-2
+    input: ' , '
+    records:
+      - [' ', ' ']
+  - id: spaces-unquoted-3
+    input: ', '
+    records:
+      - ['', ' ']
+  - id: spaces-unquoted-4
+    input: ' D'
+    records:
+      - [' D']
+  - id: spaces-unquoted-5
+    input: ' A , B '
+    records:
+      - [' A ', ' B ']

@@ -1,0 +1,23 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Single line without line break
+description: >-
+  RFC 4180 section 2.2 specifies:
+  "The last record in the file may or may not have an ending line break."
+checks:
+  - id: single-line-1
+    input: 'D'
+    records:
+      - ['D']
+  - id: single-line-2
+    input: 'A,B'
+    records:
+      - ['A', 'B']
+  - id: single-line-3
+    input: ',D'
+    records:
+      - ['', 'D']

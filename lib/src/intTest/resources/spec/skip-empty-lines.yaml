@@ -1,0 +1,28 @@
+# Character usage:
+#   ␍  carriage return (\r)
+#   ␊  line feed (\n)
+#   ␤  carriage return + line feed (\r\n)
+#   ⏎  all variations of line endings (\r, \n, \r\n)
+#   ␠  various spaces
+name: Skip empty lines
+description: >-
+  RFC 4180-bis section 3.3. specifies:
+  "Implementors may choose to skip empty lines instead of parsing them but this specification does not dictate such behavior."
+settings:
+  skipEmptyLines: true
+checks:
+  - id: skip-empty-lines-1
+    input: '␤A␤B␤'
+    records:
+      - [ 'A' ]
+      - [ 'B' ]
+  - id: skip-empty-lines-2
+    input: '␤A␤ ␤'
+    records:
+      - [ 'A' ]
+      - [ ' ' ]
+  - id: skip-empty-lines-3
+    input: '␤A␤""␤'
+    records:
+      - [ 'A' ]
+      - [ '' ]
