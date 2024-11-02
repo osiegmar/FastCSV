@@ -278,9 +278,9 @@ final class CsvParser implements Closeable {
      * <p>
      * The input buffer could look like this: {@code foo ""is"" bar}
      *
-     * @param buf the buffer containing the field data
-     * @param begin the start position of the field data (after the opening quote)
-     * @param end the end position of the field data (on the closing quote / end of buffer)
+     * @param buf            the buffer containing the field data
+     * @param begin          the start position of the field data (after the opening quote)
+     * @param end            the end position of the field data (on the closing quote / end of buffer)
      * @param quoteCharacter the quote character
      * @return the length of the field data after removing escapes
      */

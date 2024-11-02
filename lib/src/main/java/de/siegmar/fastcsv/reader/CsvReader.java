@@ -560,7 +560,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if file or charset is {@code null}
          */
-        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset) throws IOException {
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset)
+            throws IOException {
             return build(new NamedCsvRecordHandler(), file, charset);
         }
 
@@ -621,7 +622,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * @throws IOException          if an I/O error occurs.
          * @throws NullPointerException if callbackHandler or file is {@code null}
          */
-        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file) throws IOException {
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file)
+            throws IOException {
             return build(callbackHandler, file, StandardCharsets.UTF_8);
         }
 
