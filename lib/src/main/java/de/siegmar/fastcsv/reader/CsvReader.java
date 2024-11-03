@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Spliterator;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -74,6 +75,77 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
      */
     public static CsvReaderBuilder builder() {
         return new CsvReaderBuilder();
+    }
+
+    /**
+     * Skips the specified number of lines.
+     * <p>
+     * The setting {@link CsvReaderBuilder#skipEmptyLines(boolean)} has no effect on this method.
+     *
+     * @param lineCount the number of lines to skip.
+     * @throws IllegalArgumentException if lineCount is negative.
+     * @throws UncheckedIOException     if an I/O error occurs.
+     * @throws CsvParseException        if not enough lines are available to skip.
+     */
+    public void skipLines(final int lineCount) {
+        if (lineCount < 0) {
+            throw new IllegalArgumentException("lineCount must be non-negative");
+        }
+
+        try {
+            for (int i = 0; i < lineCount; i++) {
+                if (!csvParser.skipLine(0)) {
+                    throw new CsvParseException("Not enough lines to skip. Skipped only " + i + " line(s).");
+                }
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Skip lines until the specified predicate matches.
+     * The line that matches the predicate is not skipped.
+     * <p>
+     * The method returns the number of lines actually skipped.
+     * <p>
+     * The setting {@link CsvReaderBuilder#skipEmptyLines(boolean)} has no effect on this method.
+     *
+     * @param predicate the predicate to match the lines.
+     * @param maxLines  the maximum number of lines to skip.
+     * @return the number of lines actually skipped.
+     * @throws NullPointerException if predicate is {@code null}.
+     * @throws UncheckedIOException if an I/O error occurs.
+     * @throws CsvParseException if no matching line is found within the maximum limit of maxLines.
+     */
+    public int skipLines(final Predicate<String> predicate, final int maxLines) {
+        Objects.requireNonNull(predicate, "predicate must not be null");
+        if (maxLines < 0) {
+            throw new IllegalArgumentException("maxLines must be non-negative");
+        }
+
+        if (maxLines == 0) {
+            return 0;
+        }
+
+        try {
+            for (int i = 0; i < maxLines; i++) {
+                final String line = csvParser.peekLine();
+                if (predicate.test(line)) {
+                    return i;
+                }
+
+                if (!csvParser.skipLine(line.length())) {
+                    throw new CsvParseException(String.format(
+                        "No matching line found. Skipped %d line(s) before reaching end of data.", i));
+                }
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        throw new CsvParseException(String.format(
+            "No matching line found within the maximum limit of %d lines.", maxLines));
     }
 
     /**

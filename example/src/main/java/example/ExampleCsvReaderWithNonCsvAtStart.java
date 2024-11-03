@@ -1,12 +1,9 @@
 package example;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
+import java.util.function.Predicate;
 
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 
 /**
  * Example for reading CSV data with non-CSV data before the actual CSV header.
@@ -15,7 +12,7 @@ public class ExampleCsvReaderWithNonCsvAtStart {
 
     private static final String DATA = """
         Your CSV file contains some non-CSV data before the actual CSV header?
-        And you don't want to misinterpret them as CSV header? No problem!
+        And you don't want to (mis)interpret them as CSV header? No problem!
 
         header1,header2
         foo,bar
@@ -28,36 +25,30 @@ public class ExampleCsvReaderWithNonCsvAtStart {
 
     private static void alternative1() throws IOException {
         System.out.println("Alternative 1 - ignore specific number of lines");
-        final CsvReader.CsvReaderBuilder builder = CsvReader.builder()
-            .ignoreDifferentFieldCount(false);
 
-        try (var br = new BufferedReader(new StringReader(DATA))) {
-            // ignore the first 3 lines
-            br.lines().limit(3).forEach(r -> { });
+        try (var csv = CsvReader.builder().ofNamedCsvRecord(DATA)) {
+            // Skip the first 3 lines
+            System.out.println("Skipping the first 3 lines");
+            csv.skipLines(3);
 
-            builder.ofNamedCsvRecord(br)
-                .forEach(System.out::println);
+            // Read the CSV data
+            csv.forEach(System.out::println);
         }
     }
 
     private static void alternative2() throws IOException {
         System.out.println("Alternative 2 - wait for a specific line");
-        final CsvReader.CsvReaderBuilder builder = CsvReader.builder()
-            .ignoreDifferentFieldCount(false);
 
-        try (var br = new BufferedReader(new StringReader(DATA))) {
-            // Look for the CSV header but read at most 100 lines
-            final List<String> header = br.lines()
-                .limit(100)
-                .filter(l -> l.contains("header1,header2"))
-                .findFirst()
-                .map(line -> builder.ofCsvRecord(line).stream().findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Illegal header: " + line))
-                    .getFields())
-                .orElseThrow(() -> new IllegalStateException("No CSV header found"));
+        final Predicate<String> isHeader = line ->
+            line.contains("header1");
 
-            builder.build(new NamedCsvRecordHandler(header), br)
-                .forEach(System.out::println);
+        try (var csv = CsvReader.builder().ofNamedCsvRecord(DATA)) {
+            // Skip until the header line is found, but not more than 10 lines
+            final int actualSkipped = csv.skipLines(isHeader, 10);
+            System.out.println("Found header line after skipping " + actualSkipped + " lines");
+
+            // Read the CSV data
+            csv.forEach(System.out::println);
         }
     }
 
