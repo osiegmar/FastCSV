@@ -29,7 +29,7 @@ jobs:
       uses: mikepenz/action-junit-report@v4
       if: ${{ !cancelled() }}
       with:
-        report_paths: 'build/test-results/**/TEST-*.xml'
+        report_paths: 'lib/build/test-results/*/TEST-*.xml'
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
