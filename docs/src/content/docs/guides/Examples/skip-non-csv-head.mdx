@@ -22,13 +22,14 @@ Strictly speaking, such a file **is not a valid CSV file** as defined by the CSV
 The main problem with those files is:
 
 - An exception would be thrown unless the options `ignoreDifferentFieldCount()` and `skipEmptyLines()` are set.
-- When working with named fields, the very first line (*This is an example of a CSV file that contains*)
+- When working with named fields, the very first line (`This is an example of a CSV file that contains`)
   would be interpreted as the actual header line.
 
-FastCSV itself does currently not provide a way to skip non-CSV head lines when reading a CSV file.
-However, you can skip non-CSV head lines by reading the file line by line and only hand over to FastCSV
-when the actual CSV data starts. This could be done based on a fixed number of lines or by detecting
-the actual CSV data.
+FastCSV comes with two features to handle such files:
+
+- `skipLines(int lineCount)`: Skip a specific number of lines (`lineCount`) regardless of their content.
+- `skipLines(Predicate<String> predicate, int maxLines)`: Skip lines until a specific line (e.g., the header) is found.
+  Stop skipping after a specific number of lines (`maxLines`).
 
 :::note
 Do not mix this with comments in CSV files. Comments are lines that start with a specific character
@@ -40,4 +41,4 @@ See the example on how to [handle comments](/guides/examples/handle-comments/) f
 
 This example demonstrates how to skip non-CSV head lines when reading such a CSV file with FastCSV.
 
-<SourceExample filename="ExampleCsvReaderWithNonCsvAtStart.java"/>
+<SourceExample filename="ExampleCsvReaderWithNonCsvAtStart.java" highlights={'skipLines'}/>

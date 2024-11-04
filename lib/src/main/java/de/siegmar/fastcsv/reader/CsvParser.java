@@ -328,6 +328,48 @@ final class CsvParser implements Closeable {
         csvBuffer.close();
     }
 
+    String peekLine() throws IOException {
+        final int savedPos = csvBuffer.pos;
+
+        for (; csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData(); csvBuffer.pos++) {
+            final char c = csvBuffer.buf[csvBuffer.pos];
+            if (c == CR || c == LF) {
+                break;
+            }
+        }
+
+        final String s = new String(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos - csvBuffer.begin);
+        csvBuffer.pos = savedPos;
+        return s;
+    }
+
+    boolean skipLine(final int numCharsToSkip) throws IOException {
+        // Skip chars that have been peeked already
+        csvBuffer.pos += numCharsToSkip;
+
+        while (csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData()) {
+            final char c = csvBuffer.buf[csvBuffer.pos++];
+            if (c == CR) {
+                if ((csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData())
+                    && csvBuffer.buf[csvBuffer.pos] == LF) {
+                    // CRLF
+                    csvBuffer.pos++;
+                }
+                break;
+            } else if (c == LF) {
+                break;
+            }
+        }
+
+        if (csvBuffer.begin < csvBuffer.pos) {
+            csvBuffer.begin = csvBuffer.pos;
+            startingLineNumber++;
+            return true;
+        }
+
+        return false;
+    }
+
     @SuppressWarnings("checkstyle:visibilitymodifier")
     private static class CsvBuffer implements Closeable {
 
