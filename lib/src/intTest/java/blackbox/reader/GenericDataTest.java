@@ -50,6 +50,8 @@ class GenericDataTest {
             .map(spec -> Arguments.of(buildName(spec), spec.testSpecFile().spec(), spec.testSpecCheck()));
     }
 
+    // use id for the name
+
     private static String buildName(final CheckVariantWrapper spec) {
         final var formattedInput = spec.testSpecCheck().variant().data()
             .replace("\n", "\\n")
