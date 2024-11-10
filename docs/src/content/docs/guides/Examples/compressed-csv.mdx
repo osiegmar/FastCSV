@@ -1,0 +1,17 @@
+---
+title: Compressed CSV
+---
+
+import SourceExample from '../../../../components/SourceExample.astro';
+
+CSV files are typically used as uncompressed files.
+However, compressing CSV files can be advantageous, especially for larger files, as it saves disk space and reduces transfer times.
+Depending on the system's I/O performance, working with compressed CSV files can also speed up data processing.
+
+## Example
+
+The following example demonstrates how to write and read CSV files with FastCSV using [GZIP] compression:
+
+<SourceExample filename="ExampleCsvCompression.java"/>
+
+[GZIP]: https://datatracker.ietf.org/doc/html/rfc1952
