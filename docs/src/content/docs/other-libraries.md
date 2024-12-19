@@ -18,7 +18,8 @@ for reading and writing CSV files.
 - It [struggles](https://github.com/osiegmar/JavaCsvComparison) with some non-standard CSV files
 - It has a quite [low performance](https://github.com/osiegmar/JavaCsvBenchmarkSuite)
 - Many [open issues](https://issues.apache.org/jira/browse/CSV)
-- No features known that FastCSV doesn't offer
+- Comes with the following features that FastCSV doesn't offer:
+  - Configurable escape character (non-RFC compliant). FastCSV uses the same character for escaping and quoting – see [why](https://github.com/osiegmar/FastCSV/issues/103#issuecomment-1925787519).
 
 ## Jackson CSV
 
