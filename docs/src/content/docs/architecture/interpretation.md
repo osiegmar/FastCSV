@@ -41,7 +41,7 @@ when such a distinction is required.
 FastCSV provides the following options to handle null values:
 
 **on Writing**: depending on the configured `QuoteStrategy`, null values are either written as empty fields (default) or
-as quoted empty fields (`QuoteStrategies.EMPTY`). This helps to produce Postgres-compatible CSV files for example. If
+as quoted empty fields (`QuoteStrategies.EMPTY`). This helps to produce PostgreSQL-compatible CSV files for example. If
 you instead want to write a specific string for null values, you have to pass the string to
 the `CsvWriter.writeRecord()` method.
 
