@@ -63,7 +63,11 @@ dependencies {
     "intTestImplementation"(project)
     "intTestImplementation"(libs.jackson.dataformat.yaml)
 
-    signature(libs.gummy.bears)
+    signature(libs.gummy.bears) {
+        artifact {
+            type = "signature"
+        }
+    }
 }
 
 tasks.test {

@@ -11,11 +11,10 @@
     <exclude-pattern>.*Example.*</exclude-pattern>
 
     <rule ref="category/java/bestpractices.xml">
-        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
-        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
 
         <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
-        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="UnitTestShouldIncludeAssert"/>
     </rule>
     <rule ref="category/java/performance.xml" />
 
