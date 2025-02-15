@@ -525,7 +525,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream)} with
          * {@link CsvRecordHandler} as callback handler.
          * <p>
-         * If {@link #detectBomHeader(boolean)} is enabled, the character set is determined by the BOM header.
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          * Per default the character set is {@link StandardCharsets#UTF_8}.
          *
          * @param inputStream the input stream to read data from.
@@ -543,6 +544,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream, Charset)} with
          * {@link CsvRecordHandler} as callback handler.
+         * <p>
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          *
          * @param inputStream the input stream to read data from.
          * @param charset     the character set to use. If BOM header detection is enabled
@@ -634,7 +638,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream)} with
          * {@link NamedCsvRecordHandler} as callback handler.
          * <p>
-         * If {@link #detectBomHeader(boolean)} is enabled, the character set is determined by the BOM header.
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          * Per default the character set is {@link StandardCharsets#UTF_8}.
          *
          * @param inputStream the input stream to read data from.
@@ -652,6 +657,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream, Charset)} with
          * {@link NamedCsvRecordHandler} as callback handler.
+         * <p>
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          *
          * @param inputStream the input stream to read data from.
          * @param charset     the character set to use. If BOM header detection is enabled
@@ -747,7 +755,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * implementation such as {@link java.io.BufferedInputStream}. Performance may be even likely
          * better if you do not.
          * <p>
-         * If {@link #detectBomHeader(boolean)} is enabled, the character set is determined by the BOM header.
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          * Per default the character set is {@link StandardCharsets#UTF_8}.
          * <p>
          * Use {@link #build(CsvCallbackHandler, Path)} for optimal performance when reading files.
@@ -771,6 +780,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
          * This library uses built-in buffering, so you do not need to pass in a buffered InputStream
          * implementation such as {@link java.io.BufferedInputStream}. Performance may be even likely
          * better if you do not.
+         * <p>
+         * If {@link #detectBomHeader(boolean)} is enabled, this method will immediately cause consumption of the
+         * input stream to read the BOM header and determine the character set.
          * <p>
          * Use {@link #build(CsvCallbackHandler, Path, Charset)} for optimal performance when reading files.
          *
