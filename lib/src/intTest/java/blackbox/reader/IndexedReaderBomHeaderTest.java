@@ -16,7 +16,7 @@ class IndexedReaderBomHeaderTest {
     private final IndexedCsvReader.IndexedCsvReaderBuilder crb = IndexedCsvReader.builder();
 
     @ParameterizedTest
-    @MethodSource("blackbox.reader.CsvReaderBomHeaderTest#bom")
+    @MethodSource("blackbox.reader.CsvReaderBomHeaderTest#bomFile")
     void bom(final Path testFile) throws IOException {
         try (var index = crb.ofCsvRecord(testFile)) {
             assertThat(index.getIndex()).satisfies(i -> assertThat(i.getPageCount()).isOne());
