@@ -87,7 +87,8 @@ try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().ofNamedCsvRecord(file))
 }
 ```
 
-Both methods (`ofCsvRecord` and `ofNamedCsvRecord`) are overloaded for other input sources like `Reader` and `String`.
+Both methods (`ofCsvRecord` and `ofNamedCsvRecord`) are overloaded for other input sources like `String`, `Reader`
+and `InputStream` as well.
 Using the more generic `build` method, you can also make use of the Callback mechanism to process the records. See
 [Custom callback handler example](/guides/examples/custom-callback-handler/) for more information.
 
