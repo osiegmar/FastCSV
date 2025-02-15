@@ -520,7 +520,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new index-based {@link CsvReader} for the specified input stream.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -540,7 +540,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new index-based {@link CsvReader} for the specified input stream and character set.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream, Charset)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -563,7 +563,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} that uses {@link CsvRecord} as record type.
+         * Constructs a new index-based {@link CsvReader} for the specified reader.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Reader)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -579,7 +579,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new index-based {@link CsvReader} for the specified String.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, String)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -595,7 +595,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new index-based {@link CsvReader} for the specified file.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Path)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -614,7 +614,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new index-based {@link CsvReader} for the specified file and character set.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Path, Charset)} with
          * {@link CsvRecordHandler} as callback handler.
@@ -633,7 +633,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} that uses {@link CsvRecord} as record type.
+         * Constructs a new name-based {@link CsvReader} for the specified input stream.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -653,7 +653,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new name-based {@link CsvReader} for the specified input stream and character set.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream, Charset)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -676,7 +676,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} that uses {@link CsvRecord} as record type.
+         * Constructs a new name-based {@link CsvReader} for the specified reader.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Reader)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -692,7 +692,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new name-based {@link CsvReader} for the specified String.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, String)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -708,7 +708,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new name-based {@link CsvReader} for the specified file.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Path)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -727,7 +727,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new name-based {@link CsvReader} for the specified file and character set.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, Path, Charset)} with
          * {@link NamedCsvRecordHandler} as callback handler.
@@ -747,7 +747,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified input stream.
+         * Constructs a new callback-based {@link CsvReader} for the specified input stream.
          * <p>
          * This is a convenience method for calling {@link #build(CsvCallbackHandler, InputStream, Charset)}.
          * <p>
@@ -775,7 +775,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new callback-based {@link CsvReader} for the specified input stream and character set.
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered InputStream
          * implementation such as {@link java.io.BufferedInputStream}. Performance may be even likely
@@ -813,7 +813,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new callback-based {@link CsvReader} for the specified reader.
          * <p>
          * This library uses built-in buffering, so you do not need to pass in a buffered Reader
          * implementation such as {@link java.io.BufferedReader}. Performance may be even likely
@@ -841,7 +841,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new callback-based {@link CsvReader} for the specified String.
          * <p>
          * {@link #detectBomHeader(boolean)} has no effect on this method.
          *
@@ -862,7 +862,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified file.
+         * Constructs a new callback-based {@link CsvReader} for the specified file.
          * <p>
          * If {@link #detectBomHeader(boolean)} is enabled, the character set is determined by the BOM header.
          * Per default the character set is {@link StandardCharsets#UTF_8}.
@@ -881,7 +881,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /**
-         * Constructs a new {@link CsvReader} for the specified arguments.
+         * Constructs a new callback-based {@link CsvReader} for the specified file and character set.
          *
          * @param <T>             the type of the CSV record.
          * @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
