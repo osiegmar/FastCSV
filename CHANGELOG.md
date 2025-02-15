@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support InputStream as an input source for CsvReader including BOM detection [\#130](https://github.com/osiegmar/FastCSV/issues/130)
+
 ## [3.4.0] - 2024-11-04
 ### Added
 - Add `skipLines(int)` and `skipLines(Predicate<String>, int)` to `CsvReader` to skip lines before the actual CSV data starts
@@ -132,6 +136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v3.4.0...HEAD
 [3.4.0]: https://github.com/osiegmar/FastCSV/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/osiegmar/FastCSV/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/osiegmar/FastCSV/compare/v3.2.0...v3.3.0
