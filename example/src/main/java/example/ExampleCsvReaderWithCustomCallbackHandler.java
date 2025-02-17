@@ -18,40 +18,28 @@ import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.reader.RecordWrapper;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for implementing a custom callback handler.
- * <p>
- * You should only go this route if you need to squeeze out every bit of performance and I/O or post-processing is not
- * a bottleneck.
- * The standard implementation ({@link de.siegmar.fastcsv.reader.CsvRecordHandler}) is already very fast and should be
- * sufficient for most use cases.
- * <p>
- * A comparison with 1 bn records (86 GiB) has shown the following results:
- * <table>
- *     <tr>
- *         <td>Standard stream-based Mapper (with standard Java Parser)</td>
- *         <td>11m 48s (1.41 M records/s) – baseline</td>
- *     </tr>
- *     <tr>
- *         <td>Standard stream-based Mapper (with FastNumberParser)</td>
- *         <td>4m 25s (3.77 M records/s) – 63% faster than baseline</td>
- *     </tr>
- *     <tr>
- *         <td>Custom Mapper (with FastNumberParser)</td>
- *         <td>3m 2s (5.49 M records/s) – 74% faster than baseline</td>
- *     </tr>
- * </table>
- * <p>
- * As you can see, the biggest impact on performance has the number parser.
- */
+/// Example for implementing a custom callback handler.
+///
+/// You should only go this route if you need to squeeze out every bit of performance and I/O or post-processing is not
+/// a bottleneck.
+/// The standard implementation ([de.siegmar.fastcsv.reader.CsvRecordHandler]) is already very fast and should be
+/// sufficient for most use cases.
+///
+/// A comparison with 1 bn records (86 GiB) has shown the following results:
+///
+/// | Description                                              | Duration (throughput)                                |
+/// |----------------------------------------------------------|------------------------------------------------------|
+/// | Standard stream-based Mapper (with standard Java Parser) | 11m 48s (1.41 M records/s) – baseline                |
+/// | Standard stream-based Mapper (with FastNumberParser)     | 4m 25s (3.77 M records/s) – 63% faster than baseline |
+/// | Custom Mapper (with FastNumberParser)                    | 3m 2s (5.49 M records/s) – 74% faster than baseline  |
+///
+/// As you can see, the biggest impact on performance has the number parser.
 public class ExampleCsvReaderWithCustomCallbackHandler {
 
-    /**
-     * 1 million records creates a temporary file of about 72 MiB.
-     * <p>
-     * Of course, this is definitely not large enough to justify a custom callback handler.
-     * I just don't want to fill up your disk with a terabyte of data by default. 😇
-     */
+    /// 1 million records creates a temporary file of about 72 MiB.
+    ///
+    /// Of course, this is definitely not large enough to justify a custom callback handler.
+    /// I just don't want to fill up your disk with a terabyte of data by default. 😇
     private static final int RECORDS_TO_PRODUCE = 1_000_000;
 
     private static final Random RND = new Random();
@@ -113,24 +101,21 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
             FastNumberParser.parseDouble(record.getField("Temperature")));
     }
 
-    /**
-     * Produces a fake dataset with the given number of records.
-     * <p>
-     * The file contains a header and 5 columns:
-     * <ul>
-     *     <li>ID</li>
-     *     <li>Timestamp</li>
-     *     <li>Longitude</li>
-     *     <li>Latitude</li>
-     *     <li>TemperatureUnit</li>
-     *     <li>Temperature</li>
-     * </ul>
-     * <p>
-     * The file will be deleted on JVM exit.
-     *
-     * @return path to the created file
-     * @throws IOException if an I/O error occurs
-     */
+    /// Produces a fake dataset with the given number of records.
+    ///
+    /// The file contains a header and 5 columns:
+    ///
+    /// - ID
+    /// - Timestamp
+    /// - Longitude
+    /// - Latitude
+    /// - TemperatureUnit
+    /// - Temperature
+    ///
+    /// The file will be deleted on JVM exit.
+    ///
+    /// @return path to the created file
+    /// @throws IOException if an I/O error occurs
     private static Path produceLargeFakeDataset() throws IOException {
         final Path tmpFile = Files.createTempFile("fastcsv", ".csv");
         tmpFile.toFile().deleteOnExit();

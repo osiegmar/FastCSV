@@ -5,51 +5,33 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-/**
- * Index built by {@link IndexedCsvReader} to access large CSV data files.
- */
+/// Index built by [IndexedCsvReader] to access large CSV data files.
 public final class CsvIndex implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * The length of an optional BOM header.
-     */
+    /// The length of an optional BOM header.
     private final int bomHeaderLength;
 
-    /**
-     * The CSV file size this index was built for.
-     */
+    /// The CSV file size this index was built for.
     private final long fileSize;
 
-    /**
-     * The field separator used when building this index.
-     */
+    /// The field separator used when building this index.
     private final byte fieldSeparator;
 
-    /**
-     * The quote character used when building this index.
-     */
+    /// The quote character used when building this index.
     private final byte quoteCharacter;
 
-    /**
-     * The comment strategy used when building this index.
-     */
+    /// The comment strategy used when building this index.
     private final CommentStrategy commentStrategy;
 
-    /**
-     * The comment character used when building this index.
-     */
+    /// The comment character used when building this index.
     private final byte commentCharacter;
 
-    /**
-     * The total number of records the CSV file contains this index was built for.
-     */
+    /// The total number of records the CSV file contains this index was built for.
     private final long recordCounter;
 
-    /**
-     * The pages this index is partitioned.
-     */
+    /// The pages this index is partitioned.
     @SuppressWarnings("serial")
     private final List<CsvPage> pages;
 
@@ -91,20 +73,16 @@ public final class CsvIndex implements Serializable {
         return commentCharacter;
     }
 
-    /**
-     * Gets the number of pages the file contents is partitioned to.
-     *
-     * @return the number of pages the file contents is partitioned to
-     */
+    /// Gets the number of pages the file contents is partitioned to.
+    ///
+    /// @return the number of pages the file contents is partitioned to
     public int getPageCount() {
         return pages.size();
     }
 
-    /**
-     * Gets the number of records the file contains.
-     *
-     * @return the number of records the file contains
-     */
+    /// Gets the number of records the file contains.
+    ///
+    /// @return the number of records the file contains
     public long getRecordCount() {
         return recordCounter;
     }

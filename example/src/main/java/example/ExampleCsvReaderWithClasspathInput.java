@@ -9,9 +9,7 @@ import java.nio.charset.StandardCharsets;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 
-/**
- * Example for reading CSV data from a file in the classpath.
- */
+/// Example for reading CSV data from a file in the classpath.
 public class ExampleCsvReaderWithClasspathInput {
 
     public static void main(final String[] args) throws IOException {

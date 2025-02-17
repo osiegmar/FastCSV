@@ -12,9 +12,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for reading CSV files with a BOM header.
- */
+/// Example for reading CSV files with a BOM header.
 public class ExampleCsvReaderWithBomHeader {
 
     public static void main(final String[] args) throws IOException {

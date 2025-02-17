@@ -19,12 +19,10 @@ import specreader.TestSpecRepository;
 import specreader.spec.TestSpec;
 import specreader.spec.TestSpecSettings;
 
-/**
- * This test uses a set of test specs to verify the correctness of the CSV parser.
- * The test specs cover all relevant parser branches of FastCSV.
- * <p>
- * The test specs can be reused for other CSV parsers as well.
- */
+/// This test uses a set of test specs to verify the correctness of the CSV parser.
+/// The test specs cover all relevant parser branches of FastCSV.
+///
+/// The test specs can be reused for other CSV parsers as well.
 class GenericDataTest {
 
     @ParameterizedTest(name = "{index} - {0}")
@@ -66,13 +64,11 @@ class GenericDataTest {
             String.valueOf(spec.testSpecFile().file().getFileName()));
     }
 
-    /**
-     * Adapter method to actually parse the CSV records and return them as library-independent data structure.
-     *
-     * @param input    the CSV input (virtual file content including line breaks)
-     * @param settings the test spec settings
-     * @return the parsed CSV records
-     */
+    /// Adapter method to actually parse the CSV records and return them as library-independent data structure.
+    ///
+    /// @param input    the CSV input (virtual file content including line breaks)
+    /// @param settings the test spec settings
+    /// @return the parsed CSV records
     private static List<List<String>> parseCsvRecords(final TestSpecSettings settings, final String input) {
 
         final CommentStrategy commentStrategy = switch (settings.commentMode()) {

@@ -3,9 +3,7 @@ package example;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 
-/**
- * Example for reading CSV data from a String.
- */
+/// Example for reading CSV data from a String.
 public class ExampleCsvReaderWithStringInput {
 
     private static final String DATA = """

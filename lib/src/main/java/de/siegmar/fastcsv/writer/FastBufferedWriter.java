@@ -4,9 +4,7 @@ import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * High-performance buffered writer (without synchronization).
- */
+/// High-performance buffered writer (without synchronization).
 final class FastBufferedWriter extends FilterWriter implements Writable {
 
     private final char[] buf;

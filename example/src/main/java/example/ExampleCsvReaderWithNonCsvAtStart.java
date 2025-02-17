@@ -5,9 +5,7 @@ import java.util.function.Predicate;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 
-/**
- * Example for reading CSV data with non-CSV data before the actual CSV header.
- */
+/// Example for reading CSV data with non-CSV data before the actual CSV header.
 public class ExampleCsvReaderWithNonCsvAtStart {
 
     private static final String DATA = """

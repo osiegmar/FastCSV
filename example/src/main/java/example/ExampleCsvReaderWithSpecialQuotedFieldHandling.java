@@ -7,9 +7,7 @@ import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.RecordWrapper;
 
-/**
- * Example for reading CSV data with custom handling of quoted fields.
- */
+/// Example for reading CSV data with custom handling of quoted fields.
 public class ExampleCsvReaderWithSpecialQuotedFieldHandling {
 
     private static final String DATA = """

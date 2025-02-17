@@ -21,27 +21,25 @@ import java.util.concurrent.atomic.AtomicLong;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
-/**
- * CSV reader implementation for indexed based access.
- * <p>
- * If no prebuilt index passed in (via {@link IndexedCsvReaderBuilder#index(CsvIndex)}) the constructor will initiate
- * indexing the file.
- * This process is optimized on performance and low memory usage – no CSV data is stored in memory.
- * The current status can be monitored via {@link IndexedCsvReaderBuilder#statusListener(StatusListener)}.
- * <p>
- * This class is thread-safe.
- * <p>
- * Example use:
- * {@snippet :
- * try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
- *     CsvIndex index = csv.getIndex();
- *     int lastPage = index.getPageCount() - 1;
- *     List<CsvRecord> csvRecords = csv.readPage(lastPage);
- * }
- *}
- *
- * @param <T> the type of the CSV record.
- */
+/// CSV reader implementation for indexed based access.
+///
+/// If no prebuilt index passed in (via [IndexedCsvReaderBuilder#index(CsvIndex)]) the constructor will initiate
+/// indexing the file.
+/// This process is optimized on performance and low memory usage – no CSV data is stored in memory.
+/// The current status can be monitored via [IndexedCsvReaderBuilder#statusListener(StatusListener)].
+///
+/// This class is thread-safe.
+///
+/// Example use:
+/// ```
+/// try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
+///     CsvIndex index = csv.getIndex();
+///     int lastPage = index.getPageCount() - 1;
+///     List<CsvRecord> csvRecords = csv.readPage(lastPage);
+/// }
+/// ```
+///
+/// @param <T> the type of the CSV record.
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
 public final class IndexedCsvReader<T> implements Closeable {
 
@@ -173,36 +171,30 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
     }
 
-    /**
-     * Constructs a {@link IndexedCsvReaderBuilder} to configure and build instances of
-     * this class.
-     *
-     * @return a new {@link IndexedCsvReaderBuilder} instance.
-     */
+    /// Constructs a [IndexedCsvReaderBuilder] to configure and build instances of
+    /// this class.
+    ///
+    /// @return a new [IndexedCsvReaderBuilder] instance.
     public static IndexedCsvReaderBuilder builder() {
         return new IndexedCsvReaderBuilder();
     }
 
-    /**
-     * Get the index used for accessing the CSV file.
-     * That index is either a freshly built index or the index that has been
-     * passed via {@link IndexedCsvReaderBuilder#index(CsvIndex)}.
-     *
-     * @return the index that is used for accessing the CSV file.
-     */
+    /// Get the index used for accessing the CSV file.
+    /// That index is either a freshly built index or the index that has been
+    /// passed via [IndexedCsvReaderBuilder#index(CsvIndex)].
+    ///
+    /// @return the index that is used for accessing the CSV file.
     public CsvIndex getIndex() {
         return csvIndex;
     }
 
-    /**
-     * Reads a page of records.
-     *
-     * @param page the page to read (0-based).
-     * @return a page of records, never {@code null}.
-     * @throws IOException               if an I/O error occurs.
-     * @throws IllegalArgumentException  if {@code page} is &lt; 0
-     * @throws IndexOutOfBoundsException if the file does not contain the specified page
-     */
+    /// Reads a page of records.
+    ///
+    /// @param page the page to read (0-based).
+    /// @return a page of records, never `null`.
+    /// @throws IOException               if an I/O error occurs.
+    /// @throws IllegalArgumentException  if `page` is &lt; 0
+    /// @throws IndexOutOfBoundsException if the file does not contain the specified page
     public List<T> readPage(final int page) throws IOException {
         Preconditions.checkArgument(page >= 0, "page must be >= 0");
         return readPage(csvIndex.getPage(page));
@@ -246,13 +238,11 @@ public final class IndexedCsvReader<T> implements Closeable {
             .toString();
     }
 
-    /**
-     * This builder is used to create configured instances of {@link IndexedCsvReader}. The default
-     * configuration of this class adheres with RFC 4180.
-     * <p>
-     * The line delimiter (line-feed, carriage-return or the combination of both) is detected
-     * automatically and thus not configurable.
-     */
+    /// This builder is used to create configured instances of [IndexedCsvReader]. The default
+    /// configuration of this class adheres with RFC 4180.
+    ///
+    /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
+    /// automatically and thus not configurable.
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class IndexedCsvReaderBuilder {
 
@@ -272,40 +262,34 @@ public final class IndexedCsvReader<T> implements Closeable {
         private IndexedCsvReaderBuilder() {
         }
 
-        /**
-         * Sets the {@code fieldSeparator} used when reading CSV data.
-         *
-         * @param fieldSeparator the field separator character (default: {@code ,} - comma).
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Sets the `fieldSeparator` used when reading CSV data.
+        ///
+        /// @param fieldSeparator the field separator character (default: `,` - comma).
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder fieldSeparator(final char fieldSeparator) {
             checkControlCharacter(fieldSeparator);
             this.fieldSeparator = fieldSeparator;
             return this;
         }
 
-        /**
-         * Sets the {@code quoteCharacter} used when reading CSV data.
-         *
-         * @param quoteCharacter the character used to enclose fields
-         *                       (default: {@code "} - double quotes).
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Sets the `quoteCharacter` used when reading CSV data.
+        ///
+        /// @param quoteCharacter the character used to enclose fields
+        ///                       (default: `"` - double quotes).
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             checkControlCharacter(quoteCharacter);
             this.quoteCharacter = quoteCharacter;
             return this;
         }
 
-        /**
-         * Sets the strategy that defines how (and if) commented lines should be handled
-         * (default: {@link CommentStrategy#NONE} as comments are not defined in RFC 4180).
-         *
-         * @param commentStrategy the strategy for handling comments.
-         * @return This updated object, allowing additional method calls to be chained together.
-         * @throws IllegalArgumentException if {@link CommentStrategy#SKIP} is passed, as this is not supported
-         * @see #commentCharacter(char)
-         */
+        /// Sets the strategy that defines how (and if) commented lines should be handled
+        /// (default: [CommentStrategy#NONE] as comments are not defined in RFC 4180).
+        ///
+        /// @param commentStrategy the strategy for handling comments.
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws IllegalArgumentException if [CommentStrategy#SKIP] is passed, as this is not supported
+        /// @see #commentCharacter(char)
         public IndexedCsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
             Preconditions.checkArgument(commentStrategy != CommentStrategy.SKIP,
                 "CommentStrategy SKIP is not supported in IndexedCsvReader");
@@ -313,69 +297,56 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
-        /**
-         * Sets the {@code commentCharacter} used to comment lines.
-         *
-         * @param commentCharacter the character used to comment lines (default: {@code #} - hash)
-         * @return This updated object, allowing additional method calls to be chained together.
-         * @see #commentStrategy(CommentStrategy)
-         */
+        /// Sets the `commentCharacter` used to comment lines.
+        ///
+        /// @param commentCharacter the character used to comment lines (default: `#` - hash)
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @see #commentStrategy(CommentStrategy)
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
             checkControlCharacter(commentCharacter);
             this.commentCharacter = commentCharacter;
             return this;
         }
 
-        /**
-         * Specifies whether the presence of characters between a closing quote and a field separator or
-         * the end of a line should be treated as an error or not.
-         * <p>
-         * Example:
-         * <pre>
-         * {@code "a"b,"c"}
-         * </pre>
-         * <p>
-         * If this is set to {@code true}, the value {@code ab} will be returned for the first field.
-         * <p>
-         * If this is set to {@code false}, a {@link CsvParseException} will be thrown.
-         *
-         * @param acceptCharsAfterQuotes allow characters after quotes (default: {@code true}).
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Specifies whether the presence of characters between a closing quote and a field separator or
+        /// the end of a line should be treated as an error or not.
+        ///
+        /// Example: `"a"b,"c"`
+        ///
+        /// If this is set to `true`, the value `ab` will be returned for the first field.
+        ///
+        /// If this is set to `false`, a [CsvParseException] will be thrown.
+        ///
+        /// @param acceptCharsAfterQuotes allow characters after quotes (default: `true`).
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
             this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
             return this;
         }
 
-        /**
-         * Sets the {@code statusListener} to listen for indexer status updates.
-         *
-         * @param statusListener the status listener.
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Sets the `statusListener` to listen for indexer status updates.
+        ///
+        /// @param statusListener the status listener.
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder statusListener(final StatusListener statusListener) {
             this.statusListener = statusListener;
             return this;
         }
 
-        /**
-         * Sets a prebuilt index that should be used for accessing the file.
-         *
-         * @param csvIndex a prebuilt index
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Sets a prebuilt index that should be used for accessing the file.
+        ///
+        /// @param csvIndex a prebuilt index
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder index(final CsvIndex csvIndex) {
             this.csvIndex = csvIndex;
             return this;
         }
 
-        /**
-         * Sets the {@code pageSize} for pages returned by {@link IndexedCsvReader#readPage(int)}
-         * (default: {@value DEFAULT_PAGE_SIZE}).
-         *
-         * @param pageSize the maximum size of pages.
-         * @return This updated object, allowing additional method calls to be chained together.
-         */
+        /// Sets the `pageSize` for pages returned by [#readPage(int)]
+        /// (default: [#DEFAULT_PAGE_SIZE]).
+        ///
+        /// @param pageSize the maximum size of pages.
+        /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
             Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE,
                 "pageSize must be >= %d", MIN_PAGE_SIZE);
@@ -397,69 +368,61 @@ public final class IndexedCsvReader<T> implements Closeable {
                 controlChar, (int) controlChar);
         }
 
-        /**
-         * Constructs a new {@link IndexedCsvReader} of {@link CsvRecord} for the specified path using UTF-8
-         * as the character set.
-         * <p>
-         * Convenience method for {@link #build(CsvCallbackHandler, Path, Charset)} with
-         * {@link CsvRecordHandler} as the callback handler and
-         * {@link StandardCharsets#UTF_8} as the charset.
-         *
-         * @param file the file to read data from.
-         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
-         * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if file or charset is {@code null}
-         */
+        /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified path using UTF-8
+        /// as the character set.
+        ///
+        /// Convenience method for [#build(CsvCallbackHandler,Path,Charset)] with
+        /// [CsvRecordHandler] as the callback handler and
+        /// [StandardCharsets#UTF_8] as the charset.
+        ///
+        /// @param file the file to read data from.
+        /// @return a new IndexedCsvReader - never `null`. Remember to close it!
+        /// @throws IOException          if an I/O error occurs.
+        /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
             return build(new CsvRecordHandler(), file, StandardCharsets.UTF_8);
         }
 
-        /**
-         * Constructs a new {@link IndexedCsvReader} of {@link CsvRecord} for the specified arguments.
-         * <p>
-         * Convenience method for {@link #build(CsvCallbackHandler, Path, Charset)} with
-         * {@link CsvRecordHandler} as the callback handler.
-         *
-         * @param file    the file to read data from.
-         * @param charset the character set to use.
-         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
-         * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if file or charset is {@code null}
-         */
+        /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified arguments.
+        ///
+        /// Convenience method for [#build(CsvCallbackHandler,Path,Charset)] with
+        /// [CsvRecordHandler] as the callback handler.
+        ///
+        /// @param file    the file to read data from.
+        /// @param charset the character set to use.
+        /// @return a new IndexedCsvReader - never `null`. Remember to close it!
+        /// @throws IOException          if an I/O error occurs.
+        /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
             return build(new CsvRecordHandler(), file, charset);
         }
 
-        /**
-         * Constructs a new {@link IndexedCsvReader} for the specified callback handler and path using UTF-8
-         * as the character set.
-         * <p>
-         * Convenience method for {@link #build(CsvCallbackHandler, Path, Charset)} with {@link StandardCharsets#UTF_8}
-         * as charset.
-         *
-         * @param <T>             the type of the CSV record.
-         * @param callbackHandler the callback handler to use.
-         * @param file            the file to read data from.
-         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
-         * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if callbackHandler, file or charset is {@code null}
-         */
+        /// Constructs a new [IndexedCsvReader] for the specified callback handler and path using UTF-8
+        /// as the character set.
+        ///
+        /// Convenience method for [#build(CsvCallbackHandler,Path,Charset)] with [StandardCharsets#UTF_8]
+        /// as charset.
+        ///
+        /// @param <T>             the type of the CSV record.
+        /// @param callbackHandler the callback handler to use.
+        /// @param file            the file to read data from.
+        /// @return a new IndexedCsvReader - never `null`. Remember to close it!
+        /// @throws IOException          if an I/O error occurs.
+        /// @throws NullPointerException if callbackHandler, file or charset is `null`
         public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file)
             throws IOException {
             return build(callbackHandler, file, StandardCharsets.UTF_8);
         }
 
-        /**
-         * Constructs a new {@link IndexedCsvReader} for the specified arguments.
-         *
-         * @param <T>             the type of the CSV record.
-         * @param callbackHandler the callback handler to use.
-         * @param file            the file to read data from.
-         * @param charset         the character set to use.
-         * @return a new IndexedCsvReader - never {@code null}. Remember to close it!
-         * @throws IOException          if an I/O error occurs.
-         * @throws NullPointerException if callbackHandler, file or charset is {@code null}
-         */
+        /// Constructs a new [IndexedCsvReader] for the specified arguments.
+        ///
+        /// @param <T>             the type of the CSV record.
+        /// @param callbackHandler the callback handler to use.
+        /// @param file            the file to read data from.
+        /// @param charset         the character set to use.
+        /// @return a new IndexedCsvReader - never `null`. Remember to close it!
+        /// @throws IOException          if an I/O error occurs.
+        /// @throws NullPointerException if callbackHandler, file or charset is `null`
         public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                              final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");

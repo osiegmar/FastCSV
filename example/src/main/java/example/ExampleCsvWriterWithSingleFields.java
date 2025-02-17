@@ -2,9 +2,7 @@ package example;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing CSV data field by field.
- */
+/// Example for writing CSV data field by field.
 public class ExampleCsvWriterWithSingleFields {
 
     public static void main(final String[] args) {

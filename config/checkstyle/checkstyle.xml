@@ -209,14 +209,22 @@
         <module name="JavadocContentLocation"/>
         <module name="JavadocMethod"/>
         <!--<module name="JavadocParagraph"/>-->
+        <!--
         <module name="JavadocStyle"/>
+        -->
         <module name="JavadocTagContinuationIndentation"/>
         <module name="JavadocType"/>
+        <!--
         <module name="JavadocVariable">
             <property name="scope" value="public"/>
         </module>
+        -->
+        <!--
         <module name="MissingJavadocMethod"/>
+        -->
+        <!--
         <module name="MissingJavadocType"/>
+        -->
         <module name="NonEmptyAtclauseDescription"/>
         <!--<module name="RequireEmptyLineBeforeBlockTagGroup"/>-->
         <module name="SingleLineJavadoc"/>

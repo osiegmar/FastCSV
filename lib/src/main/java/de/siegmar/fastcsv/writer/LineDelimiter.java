@@ -1,28 +1,18 @@
 package de.siegmar.fastcsv.writer;
 
-/**
- * Enumeration for different line delimiters (LF, CR, CRLF, platform default).
- */
+/// Enumeration for different line delimiters (LF, CR, CRLF, platform default).
 public enum LineDelimiter {
 
-    /**
-     * Line Feed - (UNIX).
-     */
+    /// Line Feed - (UNIX).
     LF("\n"),
 
-    /**
-     * Carriage Return - (Mac classic).
-     */
+    /// Carriage Return - (Mac classic).
     CR("\r"),
 
-    /**
-     * Carriage Return and Line Feed (Windows).
-     */
+    /// Carriage Return and Line Feed (Windows).
     CRLF("\r\n"),
 
-    /**
-     * Use current platform default ({@link System#lineSeparator()}.
-     */
+    /// Use current platform default ([System#lineSeparator()].
     PLATFORM(System.lineSeparator());
 
     private final String str;
@@ -31,12 +21,10 @@ public enum LineDelimiter {
         this.str = str;
     }
 
-    /**
-     * Build an enum based on the given string.
-     *
-     * @param str the string to convert to an enum.
-     * @return the enum representation of the given string.
-     */
+    /// Build an enum based on the given string.
+    ///
+    /// @param str the string to convert to an enum.
+    /// @return the enum representation of the given string.
     public static LineDelimiter of(final String str) {
         switch (str) {
             case "\r\n":

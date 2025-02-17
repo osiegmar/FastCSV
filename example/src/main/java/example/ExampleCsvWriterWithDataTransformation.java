@@ -6,9 +6,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for transforming CSV data.
- */
+/// Example for transforming CSV data.
 public class ExampleCsvWriterWithDataTransformation {
 
     private static final String DATA = """

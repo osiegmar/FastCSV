@@ -2,9 +2,7 @@ package example;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing CSV data with comments (not part of the CSV standard).
- */
+/// Example for writing CSV data with comments (not part of the CSV standard).
 public class ExampleCsvWriterWithComments {
 
     public static void main(final String[] args) {

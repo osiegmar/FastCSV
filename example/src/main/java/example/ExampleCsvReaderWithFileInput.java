@@ -10,9 +10,7 @@ import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 
-/**
- * Example for reading CSV data from a file.
- */
+/// Example for reading CSV data from a file.
 @SuppressWarnings("RedundantExplicitVariableType")
 public class ExampleCsvReaderWithFileInput {
 

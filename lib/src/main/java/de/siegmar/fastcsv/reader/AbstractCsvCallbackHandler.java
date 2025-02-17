@@ -4,68 +4,48 @@ import java.util.Objects;
 
 import de.siegmar.fastcsv.util.Limits;
 
-/**
- * Abstract base class for {@link CsvCallbackHandler} implementations.
- * <p>
- * This implementation is stateful and must not be reused.
- *
- * @param <T> the type of the resulting records
- */
+/// Abstract base class for [CsvCallbackHandler] implementations.
+///
+/// This implementation is stateful and must not be reused.
+///
+/// @param <T> the type of the resulting records
 abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private static final int INITIAL_FIELDS_SIZE = 32;
 
-    /**
-     * The field modifier.
-     */
+    /// The field modifier.
     protected final FieldModifier fieldModifier;
 
-    /**
-     * The starting line number of the current record.
-     * <p>
-     * See {@link CsvCallbackHandler#beginRecord(long)} and {@link CsvRecord#getStartingLineNumber()}.
-     */
+    /// The starting line number of the current record.
+    ///
+    /// See [#beginRecord(long)].
     protected long startingLineNumber;
 
-    /**
-     * The internal fields array.
-     */
+    /// The internal fields array.
     protected String[] fields;
 
-    /**
-     * The total size (sum of all characters) of the current record.
-     */
+    /// The total size (sum of all characters) of the current record.
     protected int recordSize;
 
-    /**
-     * The current index in the internal fields array.
-     */
+    /// The current index in the internal fields array.
     protected int fieldIdx;
 
-    /**
-     * Whether the current record is a comment.
-     */
+    /// Whether the current record is a comment.
     protected boolean comment;
 
-    /**
-     * Whether the line is empty.
-     */
+    /// Whether the line is empty.
     protected boolean emptyLine;
 
-    /**
-     * Constructs a new instance with an initial fields array of size {@value #INITIAL_FIELDS_SIZE}.
-     */
+    /// Constructs a new instance with an initial fields array of size [#INITIAL_FIELDS_SIZE].
     protected AbstractCsvCallbackHandler() {
         this(FieldModifiers.NOP, INITIAL_FIELDS_SIZE);
     }
 
-    /**
-     * Constructs a new instance with the given field modifier and initial fields array of size
-     * {@value #INITIAL_FIELDS_SIZE}.
-     *
-     * @param fieldModifier the field modifier, must not be {@code null}
-     * @throws NullPointerException if {@code null} is passed
-     */
+    /// Constructs a new instance with the given field modifier and initial fields array of size
+    /// [#INITIAL_FIELDS_SIZE].
+    ///
+    /// @param fieldModifier the field modifier, must not be `null`
+    /// @throws NullPointerException if `null` is passed
     protected AbstractCsvCallbackHandler(final FieldModifier fieldModifier) {
         this(fieldModifier, INITIAL_FIELDS_SIZE);
     }
@@ -75,10 +55,8 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         fields = new String[len];
     }
 
-    /**
-     * {@inheritDoc}
-     * Resets the internal state of this handler.
-     */
+    /// {@inheritDoc}
+    /// Resets the internal state of this handler.
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     protected void beginRecord(final long startingLineNumber) {
@@ -89,13 +67,11 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         emptyLine = true;
     }
 
-    /**
-     * {@inheritDoc}
-     * Passes the materialized ({@link #materializeField(char[], int, int)}) and
-     * modified ({@link #modifyField(String, boolean)}) value to {@link #addField(String, boolean)}.
-     *
-     * @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
-     */
+    /// {@inheritDoc}
+    /// Passes the materialized ([#materializeField(char\[\],int,int)]) and
+    /// modified ([#modifyField(String,boolean)]) value to [#addField(String,boolean)].
+    ///
+    /// @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
     @Override
     protected void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
         if (recordSize + len > Limits.MAX_RECORD_SIZE) {
@@ -105,15 +81,13 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         addField(modifyField(materializeField(buf, offset, len), quoted), quoted);
     }
 
-    /**
-     * Adds the given value to the internal fields array.
-     * <p>
-     * Extends the array if necessary and keeps track of the total record size and fields count.
-     *
-     * @param value  the field value
-     * @param quoted {@code true} if the field was quoted
-     * @throws CsvParseException if the addition exceeds the maximum fields count.
-     */
+    /// Adds the given value to the internal fields array.
+    ///
+    /// Extends the array if necessary and keeps track of the total record size and fields count.
+    ///
+    /// @param value  the field value
+    /// @param quoted `true` if the field was quoted
+    /// @throws CsvParseException if the addition exceeds the maximum fields count.
     protected void addField(final String value, final boolean quoted) {
         if (fieldIdx == fields.length) {
             extendCapacity();
@@ -123,25 +97,21 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         recordSize += value.length();
     }
 
-    /**
-     * Modifies field value.
-     *
-     * @param value  the field value
-     * @param quoted {@code true} if the field was quoted
-     * @return the modified field value
-     */
+    /// Modifies field value.
+    ///
+    /// @param value  the field value
+    /// @param quoted `true` if the field was quoted
+    /// @return the modified field value
     protected String modifyField(final String value, final boolean quoted) {
         return fieldModifier.modify(startingLineNumber, fieldIdx, quoted, value);
     }
 
-    /**
-     * Materializes field from the given buffer.
-     *
-     * @param buf    the internal buffer that contains the field value (among other data)
-     * @param offset the offset of the field value in the buffer
-     * @param len    the length of the field value
-     * @return the materialized field value
-     */
+    /// Materializes field from the given buffer.
+    ///
+    /// @param buf    the internal buffer that contains the field value (among other data)
+    /// @param offset the offset of the field value in the buffer
+    /// @param len    the length of the field value
+    /// @return the materialized field value
     protected String materializeField(final char[] buf, final int offset, final int len) {
         return new String(buf, offset, len);
     }
@@ -151,13 +121,11 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
             line, Limits.MAX_RECORD_SIZE);
     }
 
-    /**
-     * {@inheritDoc}
-     * Passes the materialized ({@link #materializeComment(char[], int, int)}) and
-     * modified ({@link #modifyComment(String)}) value to {@link #setComment(String)}.
-     *
-     * @throws CsvParseException if the addition exceeds the limit of record size.
-     */
+    /// {@inheritDoc}
+    /// Passes the materialized ([#materializeComment(char\[\],int,int)]) and
+    /// modified ([#modifyComment(String)]) value to [#setComment(String)].
+    ///
+    /// @throws CsvParseException if the addition exceeds the limit of record size.
     @Override
     protected void setComment(final char[] buf, final int offset, final int len) {
         if (fieldIdx != 0) {
@@ -173,14 +141,12 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         setComment(modifyComment(materializeComment(buf, offset, len)));
     }
 
-    /**
-     * Sets the given value as the only field in the internal fields array.
-     * <p>
-     * Keeps track of the total record size.
-     *
-     * @param value the comment value
-     * @throws CsvParseException if the addition exceeds the limit of record size.
-     */
+    /// Sets the given value as the only field in the internal fields array.
+    ///
+    /// Keeps track of the total record size.
+    ///
+    /// @param value the comment value
+    /// @throws CsvParseException if the addition exceeds the limit of record size.
     protected void setComment(final String value) {
         comment = true;
         emptyLine = false;
@@ -188,24 +154,20 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         fields[fieldIdx++] = value;
     }
 
-    /**
-     * Modifies comment value.
-     *
-     * @param field the comment value
-     * @return the modified comment value
-     */
+    /// Modifies comment value.
+    ///
+    /// @param field the comment value
+    /// @return the modified comment value
     protected String modifyComment(final String field) {
         return fieldModifier.modifyComment(startingLineNumber, field);
     }
 
-    /**
-     * Materializes comment from the given buffer.
-     *
-     * @param buf    the internal buffer that contains the comment value (among other data)
-     * @param offset the offset of the field value in the buffer
-     * @param len    the length of the field value
-     * @return the materialized field value
-     */
+    /// Materializes comment from the given buffer.
+    ///
+    /// @param buf    the internal buffer that contains the comment value (among other data)
+    /// @param offset the offset of the field value in the buffer
+    /// @param len    the length of the field value
+    /// @return the materialized field value
     protected String materializeComment(final char[] buf, final int offset, final int len) {
         return new String(buf, offset, len);
     }
@@ -220,27 +182,23 @@ abstract class AbstractCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
         fields = newFields;
     }
 
-    /**
-     * Builds a compact fields array (a copy of the internal fields array with the length of the current record).
-     * <p>
-     * In contrast to the class property {@link #fields}, the returned array does only contain the fields of the
-     * current record.
-     *
-     * @return the compact fields array
-     */
+    /// Builds a compact fields array (a copy of the internal fields array with the length of the current record).
+    ///
+    /// In contrast to the class property [#fields], the returned array does only contain the fields of the
+    /// current record.
+    ///
+    /// @return the compact fields array
     protected String[] compactFields() {
         final String[] ret = new String[fieldIdx];
         System.arraycopy(fields, 0, ret, 0, fieldIdx);
         return ret;
     }
 
-    /**
-     * Builds a record wrapper for the given record.
-     *
-     * @param rec the record, must not be {@code null}
-     * @return the record wrapper
-     * @throws NullPointerException if {@code rec} is {@code null}
-     */
+    /// Builds a record wrapper for the given record.
+    ///
+    /// @param rec the record, must not be `null`
+    /// @return the record wrapper
+    /// @throws NullPointerException if `rec` is `null`
     protected RecordWrapper<T> buildWrapper(final T rec) {
         return new RecordWrapper<>(comment, emptyLine, fieldIdx, rec);
     }

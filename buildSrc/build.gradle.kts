@@ -9,3 +9,7 @@ repositories {
 dependencies {
     implementation(libs.spotbugs)
 }
+
+kotlin {
+    jvmToolchain(21)
+}

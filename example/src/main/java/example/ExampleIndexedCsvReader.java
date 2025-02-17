@@ -14,9 +14,7 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for reading CSV data from a file using an index (non-streaming).
- */
+/// Example for reading CSV data from a file using an index (non-streaming).
 public class ExampleIndexedCsvReader {
 
     public static void main(final String[] args) throws Exception {

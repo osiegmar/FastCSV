@@ -14,12 +14,10 @@ import java.util.function.Supplier;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing CSV data to rolling files.
- * <p>
- * This can be handy if you want to split large data sets into multiple files, where each file contains only
- * a certain number of records or a certain amount of data.
- */
+/// Example for writing CSV data to rolling files.
+///
+/// This can be handy if you want to split large data sets into multiple files, where each file contains only
+/// a certain number of records or a certain amount of data.
 public class ExampleCsvWriterWithRollingFile {
 
     private static final int MAX_RECORDS = 500;
@@ -70,13 +68,11 @@ public class ExampleCsvWriterWithRollingFile {
         private Path currentFile;
         private OutputStream out;
 
-        /**
-         * Creates a new rolling output stream.
-         *
-         * @param fileSupplier  a supplier for the next file to write to
-         * @param rollingPolicy the rolling policy
-         * @param fileConsumer  a consumer for rolled files (e.g., for further processing)
-         */
+        /// Creates a new rolling output stream.
+        ///
+        /// @param fileSupplier  a supplier for the next file to write to
+        /// @param rollingPolicy the rolling policy
+        /// @param fileConsumer  a consumer for rolled files (e.g., for further processing)
         public RollingOutputStream(final Supplier<Path> fileSupplier, final RollingPolicy rollingPolicy,
                                    final Consumer<ProcessedFile> fileConsumer) {
             this.fileSupplier = Objects.requireNonNull(fileSupplier);
@@ -135,14 +131,12 @@ public class ExampleCsvWriterWithRollingFile {
     @FunctionalInterface
     public interface RollingPolicy {
 
-        /**
-         * Determines whether a roll should be performed.
-         *
-         * @param recordsWritten the number of records written so far
-         * @param bytesWritten   the number of bytes written so far
-         * @param bufferSize     the size of the current buffer (yet unwritten data)
-         * @return {@code true} if a roll should be performed
-         */
+        /// Determines whether a roll should be performed.
+        ///
+        /// @param recordsWritten the number of records written so far
+        /// @param bytesWritten   the number of bytes written so far
+        /// @param bufferSize     the size of the current buffer (yet unwritten data)
+        /// @return `true` if a roll should be performed
         boolean shouldRoll(int recordsWritten, long bytesWritten, int bufferSize);
 
     }

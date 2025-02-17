@@ -1,6 +1,4 @@
-/**
- * FastCSV reader.
- * <p>
- * Obtain reader via {@link de.siegmar.fastcsv.reader.CsvReader#builder()}.
- */
+/// FastCSV reader.
+///
+/// Obtain reader via [de.siegmar.fastcsv.reader.CsvReader#builder()].
 package de.siegmar.fastcsv.reader;

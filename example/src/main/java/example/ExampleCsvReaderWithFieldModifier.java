@@ -7,9 +7,7 @@ import de.siegmar.fastcsv.reader.CsvRecordHandler;
 import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 
-/**
- * Example for reading CSV data from a String while using a field modifier.
- */
+/// Example for reading CSV data from a String while using a field modifier.
 public class ExampleCsvReaderWithFieldModifier {
 
     private static final String DATA = " foo , BAR \n FOO2 , bar2 ";
