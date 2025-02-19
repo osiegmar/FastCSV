@@ -2,9 +2,7 @@ package de.siegmar.fastcsv.reader;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Implementation of {@link StatusListener} that collects updates.
- */
+/// Implementation of [StatusListener] that collects updates.
 public class CollectingStatusListener implements StatusListener {
 
     private volatile long fileSize;
@@ -13,9 +11,7 @@ public class CollectingStatusListener implements StatusListener {
     private volatile boolean completionStatus;
     private volatile Throwable failedThrowable;
 
-    /**
-     * Default constructor.
-     */
+    /// Default constructor.
     public CollectingStatusListener() {
     }
 
@@ -25,11 +21,9 @@ public class CollectingStatusListener implements StatusListener {
         this.fileSize = fileSize;
     }
 
-    /**
-     * Get the total size in bytes.
-     *
-     * @return the total size in bytes
-     */
+    /// Get the total size in bytes.
+    ///
+    /// @return the total size in bytes
     public long getFileSize() {
         return fileSize;
     }
@@ -39,11 +33,9 @@ public class CollectingStatusListener implements StatusListener {
         recordCount.incrementAndGet();
     }
 
-    /**
-     * Get the number of records already indexed.
-     *
-     * @return the number of records already indexed
-     */
+    /// Get the number of records already indexed.
+    ///
+    /// @return the number of records already indexed
     public long getRecordCount() {
         return recordCount.longValue();
     }
@@ -53,11 +45,9 @@ public class CollectingStatusListener implements StatusListener {
         byteCount.addAndGet(bytes);
     }
 
-    /**
-     * Get the number of bytes already read.
-     *
-     * @return the number of bytes already read
-     */
+    /// Get the number of bytes already read.
+    ///
+    /// @return the number of bytes already read
     public long getByteCount() {
         return byteCount.longValue();
     }
@@ -67,11 +57,9 @@ public class CollectingStatusListener implements StatusListener {
         completionStatus = true;
     }
 
-    /**
-     * Get the completion status.
-     *
-     * @return {@code true}, when all data have been indexed successfully
-     */
+    /// Get the completion status.
+    ///
+    /// @return `true`, when all data have been indexed successfully
     public boolean isCompleted() {
         return completionStatus;
     }
@@ -81,11 +69,9 @@ public class CollectingStatusListener implements StatusListener {
         this.failedThrowable = throwable;
     }
 
-    /**
-     * Get the throwable that occurred while indexing.
-     *
-     * @return the throwable that occurred while indexing, {@code null} otherwise.
-     */
+    /// Get the throwable that occurred while indexing.
+    ///
+    /// @return the throwable that occurred while indexing, `null` otherwise.
     public Throwable getThrowable() {
         return failedThrowable;
     }

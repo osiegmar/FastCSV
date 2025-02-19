@@ -6,9 +6,7 @@ import java.util.stream.Stream;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
-/**
- * Example for reading CSV data with a mapping function.
- */
+/// Example for reading CSV data with a mapping function.
 public class ExampleCsvReaderMapping {
 
     private static final String DATA = """

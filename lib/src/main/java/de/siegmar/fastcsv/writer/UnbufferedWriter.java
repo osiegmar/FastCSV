@@ -4,10 +4,8 @@ import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- * Implementation of {@link Writable} that does not buffer any data
- * but flushes the underlying writer at the end of each record if configured.
- */
+/// Implementation of [Writable] that does not buffer any data
+/// but flushes the underlying writer at the end of each record if configured.
 final class UnbufferedWriter extends FilterWriter implements Writable {
 
     private final boolean autoFlushWriter;

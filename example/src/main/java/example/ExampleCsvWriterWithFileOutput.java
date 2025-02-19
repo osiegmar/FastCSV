@@ -7,9 +7,7 @@ import java.nio.file.Path;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing CSV data to a file.
- */
+/// Example for writing CSV data to a file.
 public class ExampleCsvWriterWithFileOutput {
 
     public static void main(final String[] args) throws IOException {

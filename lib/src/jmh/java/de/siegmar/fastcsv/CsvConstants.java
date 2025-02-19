@@ -18,14 +18,10 @@ final class CsvConstants {
         "two columns"
     );
 
-    /**
-     * Data to write CSV.
-     */
+    /// Data to write CSV.
     public static final List<List<String>> RECORDS = List.of(RECORD_1, RECORD_2);
 
-    /**
-     * Data to read CSV.
-     */
+    /// Data to read CSV.
     public static final String DATA = "Simple field,"
         + ","
         + "\"Example with separator ,\","

@@ -4,9 +4,7 @@ import java.io.StringWriter;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing CSV data to a string.
- */
+/// Example for writing CSV data to a string.
 public class ExampleCsvWriterWithStringOutput {
 
     public static void main(final String[] args) {

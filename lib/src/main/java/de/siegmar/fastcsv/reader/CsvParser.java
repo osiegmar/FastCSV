@@ -273,17 +273,15 @@ final class CsvParser implements Closeable {
         callbackHandler.addField(lBuf, lBegin, lPos - lBegin, false);
     }
 
-    /**
-     * Remove escapes from the field data.
-     * <p>
-     * The input buffer could look like this: {@code foo ""is"" bar}
-     *
-     * @param buf            the buffer containing the field data
-     * @param begin          the start position of the field data (after the opening quote)
-     * @param end            the end position of the field data (on the closing quote / end of buffer)
-     * @param quoteCharacter the quote character
-     * @return the length of the field data after removing escapes
-     */
+    /// Remove escapes from the field data.
+    ///
+    /// The input buffer could look like this: `foo ""is"" bar`
+    ///
+    /// @param buf            the buffer containing the field data
+    /// @param begin          the start position of the field data (after the opening quote)
+    /// @param end            the end position of the field data (on the closing quote / end of buffer)
+    /// @param quoteCharacter the quote character
+    /// @return the length of the field data after removing escapes
     private static int cleanDelimiters(final char[] buf, final int begin, final int end,
                                        final char quoteCharacter) {
 
@@ -394,12 +392,10 @@ final class CsvParser implements Closeable {
             len = data.length();
         }
 
-        /**
-         * Reads data from the underlying reader and manages the local buffer.
-         *
-         * @return {@code true}, if data was fetched, {@code false} if the end of the stream was reached
-         * @throws IOException if a read error occurs
-         */
+        /// Reads data from the underlying reader and manages the local buffer.
+        ///
+        /// @return `true`, if data was fetched, `false` if the end of the stream was reached
+        /// @throws IOException if a read error occurs
         private boolean fetchData() throws IOException {
             if (reader == null) {
                 return false;

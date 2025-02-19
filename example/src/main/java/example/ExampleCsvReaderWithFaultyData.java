@@ -3,9 +3,7 @@ package example;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 
-/**
- * Example for reading CSV data with faulty (or ambiguous) data.
- */
+/// Example for reading CSV data with faulty (or ambiguous) data.
 public class ExampleCsvReaderWithFaultyData {
 
     private static final String DATA = """

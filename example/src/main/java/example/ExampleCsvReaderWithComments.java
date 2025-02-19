@@ -3,9 +3,7 @@ package example;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 
-/**
- * Example for reading CSV data with comments.
- */
+/// Example for reading CSV data with comments.
 public class ExampleCsvReaderWithComments {
 
     private static final String DATA = """

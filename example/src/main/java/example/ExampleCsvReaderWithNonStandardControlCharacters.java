@@ -2,9 +2,7 @@ package example;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 
-/**
- * Example for reading CSV data with control characters that are not the default/standard ones.
- */
+/// Example for reading CSV data with control characters that are not the default/standard ones.
 public class ExampleCsvReaderWithNonStandardControlCharacters {
 
     private static final String DATA = """

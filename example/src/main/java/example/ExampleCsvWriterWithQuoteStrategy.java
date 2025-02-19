@@ -4,9 +4,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.QuoteStrategies;
 import de.siegmar.fastcsv.writer.QuoteStrategy;
 
-/**
- * Example for writing CSV data with different quote strategies.
- */
+/// Example for writing CSV data with different quote strategies.
 public class ExampleCsvWriterWithQuoteStrategy {
 
     public static void main(final String[] args) {

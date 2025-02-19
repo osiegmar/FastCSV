@@ -5,18 +5,14 @@ import java.util.Arrays;
 
 import org.openjdk.jmh.infra.Blackhole;
 
-/**
- * Writer implementation that sends all data to a black hole.
- */
+/// Writer implementation that sends all data to a black hole.
 public class NullWriter extends Writer {
 
     private final Blackhole bh;
 
-    /**
-     * Initializes a new instance of the {@link NullWriter} class.
-     *
-     * @param bh the black hole to send all data to
-     */
+    /// Initializes a new instance of the [NullWriter] class.
+    ///
+    /// @param bh the black hole to send all data to
     public NullWriter(final Blackhole bh) {
         this.bh = bh;
     }

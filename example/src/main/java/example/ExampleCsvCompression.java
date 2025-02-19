@@ -16,9 +16,7 @@ import java.util.zip.GZIPOutputStream;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
-/**
- * Example for writing and reading compressed CSV data.
- */
+/// Example for writing and reading compressed CSV data.
 public class ExampleCsvCompression {
 
     public static void main(final String[] args) throws IOException {

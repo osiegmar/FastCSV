@@ -2,9 +2,7 @@ package example;
 
 import de.siegmar.fastcsv.reader.CsvReader;
 
-/**
- * Example for reading CSV data with a header.
- */
+/// Example for reading CSV data with a header.
 public class ExampleNamedCsvReaderWithStringInput {
 
     private static final String DATA = """

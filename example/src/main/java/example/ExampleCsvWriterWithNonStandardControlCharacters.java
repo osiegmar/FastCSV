@@ -3,9 +3,7 @@ package example;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 
-/**
- * Example for writing CSV data with non-standard control characters.
- */
+/// Example for writing CSV data with non-standard control characters.
 public class ExampleCsvWriterWithNonStandardControlCharacters {
 
     public static void main(final String[] args) {

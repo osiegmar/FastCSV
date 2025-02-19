@@ -5,9 +5,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 
-/**
- * Example for reading CSV data with a custom header.
- */
+/// Example for reading CSV data with a custom header.
 public class ExampleNamedCsvReaderWithCustomHeader {
 
     private static final String DATA = """
