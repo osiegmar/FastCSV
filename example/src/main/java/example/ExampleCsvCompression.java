@@ -2,12 +2,10 @@ package example;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
@@ -51,10 +49,8 @@ public class ExampleCsvCompression {
         }
     }
 
-    private static Reader gzipReader(final Path file) throws IOException {
-        final var bufIn = new BufferedInputStream(Files.newInputStream(file));
-        final var gzipIn = new GZIPInputStream(bufIn);
-        return new InputStreamReader(gzipIn, UTF_8);
+    private static InputStream gzipReader(final Path file) throws IOException {
+        return new GZIPInputStream(Files.newInputStream(file));
     }
 
 }
