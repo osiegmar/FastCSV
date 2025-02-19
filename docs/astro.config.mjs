@@ -71,26 +71,34 @@ export default defineConfig({
             ],
             head: [
                 {
-                    tag: 'script',
+                    tag: 'link',
                     attrs: {
-                        src: 'https://plausible.io/js/script.js',
-                        'data-domain': 'fastcsv.org',
-                        defer: true,
+                        rel: 'icon',
+                        href: '/favicon.ico',
+                        sizes: '48x48',
                     },
                 },
                 {
                     tag: 'link',
                     attrs: {
-                        rel: 'icon',
-                        href:'/favicon.ico',
-                        sizes: '48x48',
+                        rel: 'apple-touch-icon' ,
+                        sizes: '180x180' ,
+                        href: '/apple-touch-icon.png'
                     },
                 },
                 {
                     tag: 'meta',
                     attrs: {
                         property: 'og:image',
-                        content:'https://fastcsv.org/fastcsv-og.png'
+                        content: 'https://fastcsv.org/fastcsv-og.png'
+                    },
+                },
+                {
+                    tag: 'script',
+                    attrs: {
+                        src: 'https://plausible.io/js/script.js',
+                        'data-domain': 'fastcsv.org',
+                        defer: true,
                     },
                 },
             ],
