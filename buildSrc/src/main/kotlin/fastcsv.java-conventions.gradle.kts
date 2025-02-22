@@ -5,6 +5,12 @@ plugins {
     id("com.github.spotbugs")
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
 repositories {
     mavenCentral()
 }
