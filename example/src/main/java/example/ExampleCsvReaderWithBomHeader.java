@@ -3,7 +3,6 @@ package example;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -33,8 +32,7 @@ public class ExampleCsvReaderWithBomHeader {
         tmpFile.toFile().deleteOnExit();
 
         try (var out = Files.newOutputStream(tmpFile);
-             var csv = CsvWriter.builder()
-                 .build(new OutputStreamWriter(out, UTF_16LE))) {
+             var csv = CsvWriter.builder().build(out, UTF_16LE)) {
 
             // Manually write UTF-16LE BOM header
             out.write(new byte[]{(byte) 0xff, (byte) 0xfe});

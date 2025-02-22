@@ -4,8 +4,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -37,19 +35,18 @@ public class ExampleCsvWriterWithRollingFile {
         final Consumer<ProcessedFile> fileConsumer = (ProcessedFile file) ->
             System.out.println("Rolled file: " + file);
 
-        // Create a CSV writer with internal buffering disabled to avoid double buffering,
-        // which would render the rolling policy ineffective
-        final var csvWriterBuilder = CsvWriter.builder().bufferSize(0);
+        // Enable auto-flushing to ensure that records are written immediately to the output stream,
+        // to ensure everything is written to the output stream before rolling the file.
+        final var csvWriterBuilder = CsvWriter.builder()
+            .autoFlush(true);
 
-        try (var out = new RollingOutputStream(fileSupplier, rollingPolicy, fileConsumer);
-             var writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-             var csv = csvWriterBuilder.build(writer)) {
+        try (
+            var out = new RollingOutputStream(fileSupplier, rollingPolicy, fileConsumer);
+            var csv = csvWriterBuilder.build(out)
+        ) {
 
             for (int i = 0; i < 1000; i++) {
                 csv.writeRecord("a", "b", "c");
-
-                // Flush the writer to ensure that the record is written to the buffer
-                writer.flush();
 
                 // Tell the rolling output stream that a record has been completely written
                 out.done();

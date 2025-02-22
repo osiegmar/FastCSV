@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support InputStream as an input source for CsvReader including BOM detection [\#130](https://github.com/osiegmar/FastCSV/issues/130)
+- Support OutputStream as an output target for CsvWriter
 
 ## [3.4.0] - 2024-11-04
 ### Added

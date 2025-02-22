@@ -1,11 +1,6 @@
 package example;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
@@ -21,36 +16,31 @@ public class ExampleCsvCompression {
         final Path file = Files.createTempFile("fastcsv", ".csv.gz");
         file.toFile().deleteOnExit();
 
-        System.out.println(file.toAbsolutePath());
-
         writeCsvGzipped(file);
         readCsvGzipped(file);
     }
 
     private static void writeCsvGzipped(final Path file) throws IOException {
-        try (var csv = CsvWriter.builder().build(gzipWriter(file))) {
+        System.out.println("Writing compressed CSV file: " + file);
+
+        try (
+            var csv = CsvWriter.builder()
+                .build(new GZIPOutputStream(Files.newOutputStream(file)))
+        ) {
             csv.writeRecord("header1", "header2");
             csv.writeRecord("value1", "value2");
         }
     }
 
-    private static OutputStreamWriter gzipWriter(final Path file)
-        throws IOException {
-        final var bufOut = new BufferedOutputStream(Files.newOutputStream(file));
-        final var gzipOut = new GZIPOutputStream(bufOut);
-        return new OutputStreamWriter(gzipOut, UTF_8);
-    }
-
     private static void readCsvGzipped(final Path file) throws IOException {
-        System.out.println("Reading compressed CSV file:");
+        System.out.println("Reading compressed CSV file: " + file);
 
-        try (var csv = CsvReader.builder().ofCsvRecord(gzipReader(file))) {
+        try (
+            var csv = CsvReader.builder()
+                .ofCsvRecord(new GZIPInputStream(Files.newInputStream(file)))
+        ) {
             csv.forEach(System.out::println);
         }
-    }
-
-    private static InputStream gzipReader(final Path file) throws IOException {
-        return new GZIPInputStream(Files.newInputStream(file));
     }
 
 }

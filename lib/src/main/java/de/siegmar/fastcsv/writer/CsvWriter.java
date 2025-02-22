@@ -7,6 +7,7 @@ import static de.siegmar.fastcsv.util.Util.containsDupe;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
@@ -413,6 +414,47 @@ public final class CsvWriter implements Closeable, Flushable {
         public CsvWriterBuilder autoFlush(final boolean autoFlush) {
             this.autoFlush = autoFlush;
             return this;
+        }
+
+        /// Constructs a [CsvWriter] for the specified OutputStream.
+        ///
+        /// This is a convenience method for calling [#build(OutputStream, Charset)]
+        /// with the default charset [StandardCharsets#UTF_8].
+        ///
+        /// This build method wraps the given `outputStream` with an [OutputStreamWriter].
+        /// Both this library's internal buffer and the used [OutputStreamWriter] cause deferred writes to the
+        /// underlying stream. This ensures good performance but also means that **you must call [#flush()] or
+        /// [#close()] to ensure that all data is written to the stream!**
+        ///
+        /// @param outputStream the OutputStream to write CSV data to.
+        /// @return a new CsvWriter instance - never `null`.
+        /// @throws NullPointerException if outputStream is `null`
+        /// @see #build(OutputStream, Charset)
+        public CsvWriter build(final OutputStream outputStream) {
+            Objects.requireNonNull(outputStream, "outputStream must not be null");
+
+            return build(outputStream, StandardCharsets.UTF_8);
+        }
+
+        /// Constructs a [CsvWriter] for the specified OutputStream and character set.
+        ///
+        /// This build method wraps the given `outputStream` with an [OutputStreamWriter].
+        /// Both this library's internal buffer and the used [OutputStreamWriter] cause deferred writes to the
+        /// underlying stream. This ensures good performance but also means that you **must call [#flush()] or
+        /// [#close()] to ensure that all data is written to the stream!**
+        ///
+        /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files!
+        ///
+        /// @param outputStream the OutputStream to write CSV data to.
+        /// @param charset      the character set to be used for writing data to the output stream.
+        /// @return a new CsvWriter instance - never `null`.
+        /// @throws NullPointerException if outputStream or charset is `null`
+        /// @see #build(OutputStream)
+        public CsvWriter build(final OutputStream outputStream, final Charset charset) {
+            Objects.requireNonNull(outputStream, "outputStream must not be null");
+            Objects.requireNonNull(charset, "charset must not be null");
+
+            return csvWriter(new OutputStreamWriter(outputStream, charset), bufferSize, false, autoFlush);
         }
 
         /// Constructs a [CsvWriter] for the specified Writer.
