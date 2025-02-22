@@ -28,7 +28,7 @@ final class BomInputStream extends InputStream {
         }
     }
 
-    public Charset getCharset() {
+    Charset getCharset() {
         return charset;
     }
 

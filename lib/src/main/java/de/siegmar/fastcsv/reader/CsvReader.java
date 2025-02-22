@@ -488,16 +488,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream)] with
         /// [CsvRecordHandler] as callback handler.
         ///
-        /// If [#detectBomHeader(boolean)] is enabled, this method will immediately cause consumption of the
-        /// input stream to read the BOM header and determine the character set.
+        /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM header.
         /// Per default the character set is [StandardCharsets#UTF_8].
         ///
         /// @param inputStream the input stream to read data from.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if inputStream is `null`
         /// @see #ofCsvRecord(InputStream, Charset)
-        public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream) throws IOException {
+        public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream) {
             return build(new CsvRecordHandler(), inputStream);
         }
 
@@ -506,19 +504,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream,Charset)] with
         /// [CsvRecordHandler] as callback handler.
         ///
-        /// If [#detectBomHeader(boolean)] is enabled, this method will immediately cause consumption of the
-        /// input stream to read the BOM header and determine the character set.
-        ///
         /// @param inputStream the input stream to read data from.
         /// @param charset     the character set to use. If BOM header detection is enabled
         ///                    (via [#detectBomHeader(boolean)]), this acts as a default
         ///                    when no BOM header was found.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if inputStream or charset is `null`
         /// @see #ofCsvRecord(InputStream)
-        public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream, final Charset charset)
-            throws IOException {
+        public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream, final Charset charset) {
             return build(new CsvRecordHandler(), inputStream, charset);
         }
 
@@ -589,16 +582,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream)] with
         /// [NamedCsvRecordHandler] as callback handler.
         ///
-        /// If [#detectBomHeader(boolean)] is enabled, this method will immediately cause consumption of the
-        /// input stream to read the BOM header and determine the character set.
+        /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM header.
         /// Per default the character set is [StandardCharsets#UTF_8].
         ///
         /// @param inputStream the input stream to read data from.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if reader is `null`
         /// @see #ofNamedCsvRecord(InputStream, Charset)
-        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream) throws IOException {
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream) {
             return build(new NamedCsvRecordHandler(), inputStream);
         }
 
@@ -607,19 +598,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream,Charset)] with
         /// [NamedCsvRecordHandler] as callback handler.
         ///
-        /// If [#detectBomHeader(boolean)] is enabled, this method will immediately cause consumption of the
-        /// input stream to read the BOM header and determine the character set.
-        ///
         /// @param inputStream the input stream to read data from.
         /// @param charset     the character set to use. If BOM header detection is enabled
         ///                    (via [#detectBomHeader(boolean)]), this acts as a default
         ///                    when no BOM header was found.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofNamedCsvRecord(InputStream)
-        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream, final Charset charset)
-            throws IOException {
+        public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream, final Charset charset) {
             return build(new NamedCsvRecordHandler(), inputStream, charset);
         }
 
@@ -694,8 +680,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// implementation such as [java.io.BufferedInputStream]. Performance may be even likely
         /// better if you do not.
         ///
-        /// If [#detectBomHeader(boolean)] is enabled, this method will immediately cause consumption of the
-        /// input stream to read the BOM header and determine the character set.
+        /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM header.
         /// Per default the character set is [StandardCharsets#UTF_8].
         ///
         /// Use [#build(CsvCallbackHandler,Path)] for optimal performance when reading files.
@@ -704,11 +689,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
         /// @param inputStream     the input stream to read data from.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler or inputStream is `null`
         /// @see #build(CsvCallbackHandler, InputStream, Charset)
-        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final InputStream inputStream)
-            throws IOException {
+        public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final InputStream inputStream) {
             return build(callbackHandler, inputStream, StandardCharsets.UTF_8);
         }
 
@@ -730,22 +713,20 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///                        (via [#detectBomHeader(boolean)]), this acts as a default
         ///                        when no BOM header was found.
         /// @return a new CsvReader - never `null`.
-        /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler, inputStream or charset is `null`
         /// @see #build(CsvCallbackHandler, InputStream)
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
-                                      final InputStream inputStream, final Charset charset) throws IOException {
+                                      final InputStream inputStream, final Charset charset) {
 
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(inputStream, "inputStream must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            if (detectBomHeader) {
-                final var bomIn = new BomInputStream(inputStream, charset);
-                return build(callbackHandler, new InputStreamReader(bomIn, bomIn.getCharset()));
-            }
+            final Reader reader = detectBomHeader
+                ? new BomInputStreamReader(inputStream, charset)
+                : new InputStreamReader(inputStream, charset);
 
-            return build(callbackHandler, new InputStreamReader(inputStream, charset));
+            return build(callbackHandler, reader);
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified reader.
