@@ -17,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
@@ -52,6 +54,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final boolean acceptCharsAfterQuotes;
     private final int pageSize;
     private final RandomAccessFile raf;
+    private final Lock fileLock = new ReentrantLock();
     private final CsvCallbackHandler<T> csvRecordHandler;
     private final CsvParser csvParser;
     private final CsvIndex csvIndex;
@@ -200,10 +203,11 @@ public final class IndexedCsvReader<T> implements Closeable {
         return readPage(csvIndex.getPage(page));
     }
 
-    @SuppressWarnings("PMD.AssignmentInOperand")
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
-        synchronized (raf) {
+        try {
+            fileLock.lock();
+
             raf.seek(page.getOffset());
             csvParser.reset(page.getStartingLineNumber() - 1);
 
@@ -213,9 +217,10 @@ public final class IndexedCsvReader<T> implements Closeable {
                     ret.add(rec.getWrappedRecord());
                 }
             }
-
-            return ret;
+        } finally {
+            fileLock.unlock();
         }
+        return ret;
     }
 
     @Override
