@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "3.5.0"
+version = "3.6.0-SNAPSHOT"
 
 project.base.archivesName = "fastcsv"
 
