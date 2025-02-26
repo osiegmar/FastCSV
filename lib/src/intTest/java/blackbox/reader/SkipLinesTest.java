@@ -92,7 +92,7 @@ class SkipLinesTest {
     @Test
     void zeroMaxLines() {
         final CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord("A\nB");
-        csv.skipLines(line -> false, 0);
+        csv.skipLines(_ -> false, 0);
         assertThat(csv.stream())
             .satisfiesExactly(
                 rec1 -> CsvRecordAssert.assertThat(rec1)

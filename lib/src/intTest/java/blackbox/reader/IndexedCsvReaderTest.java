@@ -147,7 +147,7 @@ class IndexedCsvReaderTest {
     @Test
     void acceptCharsAfterQuotes() throws IOException {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), UTF_8)) {
-            CsvRecordAssert.assertThat(csv.readPage(0).get(0)).fields()
+            CsvRecordAssert.assertThat(csv.readPage(0).getFirst()).fields()
                 .containsExactly("foo", "barbaz");
         }
     }

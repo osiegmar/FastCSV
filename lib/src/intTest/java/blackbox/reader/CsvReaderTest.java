@@ -311,7 +311,7 @@ class CsvReaderTest {
 
     @Test
     void closeApi() throws IOException {
-        final Consumer<CsvRecord> consumer = csvRecord -> {
+        final Consumer<CsvRecord> consumer = _ -> {
         };
 
         final Supplier<CloseStatusReader> supp =
@@ -354,7 +354,7 @@ class CsvReaderTest {
 
         final var csvRecords = new AtomicInteger();
         final var csvRecords2 = new AtomicInteger();
-        while (spliterator.tryAdvance(csvRecord -> csvRecords.incrementAndGet())) {
+        while (spliterator.tryAdvance(_ -> csvRecords.incrementAndGet())) {
             csvRecords2.incrementAndGet();
         }
 
