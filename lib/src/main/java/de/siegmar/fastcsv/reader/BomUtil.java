@@ -86,7 +86,7 @@ final class BomUtil {
     static Optional<BomHeader> detectCharset(final Path file)
         throws IOException {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
-            return detectCharset(in.readNBytes(BomUtil.POTENTIAL_BOM_SIZE));
+            return detectCharset(in.readNBytes(POTENTIAL_BOM_SIZE));
         }
     }
 
