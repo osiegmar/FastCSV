@@ -38,7 +38,7 @@ final class BomInputStream extends InputStream {
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() {
         // Have to implement this per contract, but it's not used within FastCSV
         throw new UnsupportedOperationException();
     }
