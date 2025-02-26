@@ -16,7 +16,27 @@
         <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
         <exclude name="UnitTestShouldIncludeAssert"/>
     </rule>
-    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="ConfusingTernary"/>
+        <exclude name="EmptyMethodInAbstractClassShouldBeAbstract"/>
+        <exclude name="LongVariable"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="UseExplicitTypes"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidDuplicateLiterals"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <property name="skipAnnotations" value="true" />
+        </properties>
+    </rule>
     <rule ref="category/java/multithreading.xml" />
     <rule ref="category/java/performance.xml" />
     <rule ref="category/java/security.xml" />

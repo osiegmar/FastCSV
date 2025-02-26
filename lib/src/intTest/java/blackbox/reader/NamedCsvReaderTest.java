@@ -1,13 +1,12 @@
 package blackbox.reader;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.MapEntry.entry;
-import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -28,7 +27,7 @@ import testutil.NamedCsvRecordAssert;
 class NamedCsvReaderTest {
 
     @Test
-    void getHeader() {
+    void simpleHeader() {
         final var reader = parse("foo\nbar").iterator();
         final NamedCsvRecord record = reader.next();
         NamedCsvRecordAssert.assertThat(record)
@@ -39,35 +38,35 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void getFieldByName() {
+    void fieldByName() {
         assertThat(parse("foo\nbar").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .field("foo").isEqualTo("bar");
     }
 
     @Test
     void findFieldByName() {
         assertThat(parse("foo\nbar").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .findField("foo").hasValue("bar");
     }
 
     @Test
     void findFieldsByName() {
         assertThat(parse("foo,xoo,foo\nbar,moo,baz").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .findFields("foo").containsExactly("bar", "baz");
     }
 
     @Test
-    void getNonExistingFieldByName() {
+    void nonExistingFieldName() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("Header does not contain a field 'bar'. Valid names are: [foo]");
     }
 
     @Test
-    void getNonExistingFieldByName2() {
+    void nonExistingFieldName2() {
         assertThatThrownBy(() -> parse("foo,bar\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("Field 'bar' is on index 1, but current record only contains 1 fields");
@@ -86,7 +85,7 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void toStringWithHeader() {
+    void headerToString() {
         assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
@@ -99,7 +98,7 @@ class NamedCsvReaderTest {
     @Test
     void fieldMap() {
         assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("headerA", "fieldA"), entry("headerB", "fieldB"));
     }
@@ -107,7 +106,7 @@ class NamedCsvReaderTest {
     @Test
     void allFieldsMap() {
         assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .allFields()
             .containsOnly(entry("headerA", List.of("fieldA", "fieldC")), entry("headerB", List.of("fieldB")));
     }
@@ -117,7 +116,7 @@ class NamedCsvReaderTest {
         final var cbh = new NamedCsvRecordHandler("h1", "h2");
         final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
     }
@@ -127,7 +126,7 @@ class NamedCsvReaderTest {
         final var cbh = new NamedCsvRecordHandler(List.of("h1", "h2"));
         final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
         assertThat(csvReader.stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
     }
@@ -174,7 +173,7 @@ class NamedCsvReaderTest {
     @Test
     void string() {
         assertThat(CsvReader.builder().ofNamedCsvRecord("h1,h2\nv1,v2").stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(2)
             .isNotComment()
             .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -183,7 +182,7 @@ class NamedCsvReaderTest {
     @Test
     void reader() {
         assertThat(CsvReader.builder().ofNamedCsvRecord(new StringReader("h1,h2\nv1,v2")).stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(2)
             .isNotComment()
             .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -196,7 +195,7 @@ class NamedCsvReaderTest {
 
         try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file).stream()) {
             assertThat(stream)
-                .singleElement(NAMED_CSV_RECORD)
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
                 .isStartingLineNumber(2)
                 .isNotComment()
                 .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -208,9 +207,10 @@ class NamedCsvReaderTest {
         final Path file = tempDir.resolve("fastcsv.csv");
         Files.writeString(file, "h1,h2\nv1,v2");
 
-        try (Stream<NamedCsvRecord> stream = CsvReader.builder().ofNamedCsvRecord(file, UTF_8).stream()) {
+        try (Stream<NamedCsvRecord> stream =
+                 CsvReader.builder().ofNamedCsvRecord(file, StandardCharsets.UTF_8).stream()) {
             assertThat(stream)
-                .singleElement(NAMED_CSV_RECORD)
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
                 .isStartingLineNumber(2)
                 .isNotComment()
                 .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -224,7 +224,7 @@ class NamedCsvReaderTest {
         final var csvReader = CsvReader.builder()
             .build(new NamedCsvRecordHandler(FieldModifiers.TRIM), "h1 , h2 \n v1 , v2");
         assertThat(csvReader.stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(2)
             .isNotComment()
             .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -235,7 +235,7 @@ class NamedCsvReaderTest {
         final var csvReader = CsvReader.builder()
             .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, "h1", "h2"), "v1 , v2");
         assertThat(csvReader.stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));
@@ -246,7 +246,7 @@ class NamedCsvReaderTest {
         final var csvReader = CsvReader.builder()
             .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, List.of("h1", "h2")), "v1 , v2");
         assertThat(csvReader.stream())
-            .singleElement(NAMED_CSV_RECORD)
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly(entry("h1", "v1"), entry("h2", "v2"));

@@ -1,11 +1,8 @@
 package blackbox.reader;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static testutil.CsvRecordAssert.CSV_RECORD;
-import static testutil.NamedCsvRecordAssert.NAMED_CSV_RECORD;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -39,6 +37,7 @@ import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 import testutil.CsvRecordAssert;
+import testutil.NamedCsvRecordAssert;
 
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(SoftAssertionsExtension.class)
@@ -95,22 +94,22 @@ class IndexedCsvReaderTest {
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
-                .singleElement(CSV_RECORD)
+                .singleElement(CsvRecordAssert.CSV_RECORD)
                 .fields().singleElement().isEqualTo("abc");
 
             assertThat(csv.readPage(1))
-                .singleElement(CSV_RECORD)
+                .singleElement(CsvRecordAssert.CSV_RECORD)
                 .fields().singleElement().isEqualTo("üöä");
 
             assertThat(csv.readPage(2))
-                .singleElement(CSV_RECORD)
+                .singleElement(CsvRecordAssert.CSV_RECORD)
                 .fields().singleElement().isEqualTo("abc");
         }
     }
 
     @Test
     void explicitCharset() throws IOException {
-        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), UTF_8)) {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), StandardCharsets.UTF_8)) {
             final CsvIndex index = csv.getIndex();
 
             assertThat(index.getPageCount())
@@ -133,11 +132,11 @@ class IndexedCsvReaderTest {
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
-                .singleElement(NAMED_CSV_RECORD)
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
                 .fields().containsExactly(entry("h1", "v1"));
 
             assertThat(csv.readPage(1))
-                .singleElement(NAMED_CSV_RECORD)
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
                 .fields().containsExactly(entry("h1", "v2"));
         }
     }
@@ -146,7 +145,7 @@ class IndexedCsvReaderTest {
 
     @Test
     void acceptCharsAfterQuotes() throws IOException {
-        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), UTF_8)) {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             CsvRecordAssert.assertThat(csv.readPage(0).getFirst()).fields()
                 .containsExactly("foo", "barbaz");
         }
@@ -155,7 +154,7 @@ class IndexedCsvReaderTest {
     @Test
     void acceptCharsAfterQuotesNot() throws IOException {
         final var bldr = singlePageBuilder().acceptCharsAfterQuotes(false);
-        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), UTF_8)) {
+        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             assertThatThrownBy(() -> csv.readPage(0))
                 .isInstanceOf(CsvParseException.class);
         }
@@ -170,7 +169,7 @@ class IndexedCsvReaderTest {
     }
 
     private Path prepareTestFile(final String s) throws IOException {
-        return prepareTestFile(s.getBytes(UTF_8));
+        return prepareTestFile(s.getBytes(StandardCharsets.UTF_8));
     }
 
     private Path prepareTestFile(final byte[] data) throws IOException {
@@ -337,19 +336,19 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(2)
                     .isComment()
                     .fields().containsExactly("a,b,c");
 
                 assertThat(csv.readPage(2))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -366,19 +365,19 @@ class IndexedCsvReaderTest {
 
             try (csv) {
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("foo");
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("#a", "b", "c");
 
                 assertThat(csv.readPage(2))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(3)
                     .isNotComment()
                     .fields().containsExactly("baz");
@@ -446,7 +445,7 @@ class IndexedCsvReaderTest {
                 assertThat(index.getRecordCount()).isOne();
 
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012");
@@ -466,13 +465,13 @@ class IndexedCsvReaderTest {
                     .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(1)
                     .isNotComment()
                     .fields().containsExactly("012", "foo");
 
                 assertThat(csv.readPage(1))
-                    .singleElement(CSV_RECORD)
+                    .singleElement(CsvRecordAssert.CSV_RECORD)
                     .isStartingLineNumber(2)
                     .isNotComment()
                     .fields().containsExactly("345", "bar");

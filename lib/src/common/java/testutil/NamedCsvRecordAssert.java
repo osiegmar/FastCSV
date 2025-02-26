@@ -25,6 +25,7 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return new NamedCsvRecordAssert(actual);
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public NamedCsvRecordAssert isStartingLineNumber(final long startingLineNumber) {
         isNotNull();
         if (actual.getStartingLineNumber() != startingLineNumber) {
@@ -55,16 +56,19 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return new StringAssert(actual.getField(name));
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public OptionalAssert<String> findField(final String name) {
         isNotNull();
         return Assertions.assertThat(actual.findField(name));
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public ListAssert<String> findFields(final String name) {
         isNotNull();
         return Assertions.assertThat(actual.findFields(name));
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public NamedCsvRecordAssert isComment(final boolean comment) {
         isNotNull();
         if (actual.isComment() != comment) {
@@ -75,10 +79,12 @@ public class NamedCsvRecordAssert extends AbstractAssert<NamedCsvRecordAssert, N
         return this;
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public NamedCsvRecordAssert isComment() {
         return isComment(true);
     }
 
+    @SuppressWarnings("PMD.LinguisticNaming")
     public NamedCsvRecordAssert isNotComment() {
         return isComment(false);
     }

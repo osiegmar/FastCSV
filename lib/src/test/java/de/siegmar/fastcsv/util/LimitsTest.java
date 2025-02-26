@@ -24,6 +24,7 @@ class LimitsTest {
             .isEqualTo(16 * 1024 * 1024);
     }
 
+    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     @Test
     void customMaxFieldSize() {
         System.setProperty(FASTCSV_MAX_FIELD_SIZE, "100000");
@@ -58,6 +59,7 @@ class LimitsTest {
             .withMessageContaining("Invalid format for system property " + FASTCSV_MAX_FIELD_SIZE);
     }
 
+    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     @Test
     void maxRecordSizeBasedOnMaxFieldSize() {
         System.setProperty(FASTCSV_MAX_FIELD_SIZE, "4000000");

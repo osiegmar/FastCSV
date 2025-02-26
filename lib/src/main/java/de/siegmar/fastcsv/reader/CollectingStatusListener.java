@@ -14,6 +14,7 @@ public class CollectingStatusListener implements StatusListener {
     private final AtomicReference<Throwable> failedThrowable = new AtomicReference<>();
 
     /// Default constructor.
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
     public CollectingStatusListener() {
     }
 

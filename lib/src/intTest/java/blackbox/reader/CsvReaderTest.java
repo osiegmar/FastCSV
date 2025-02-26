@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static testutil.CsvRecordAssert.CSV_RECORD;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -132,7 +131,7 @@ class CsvReaderTest {
     @Test
     void acceptCharsAfterQuotes() {
         assertThat(crb.ofCsvRecord("foo,\"bar\"baz").stream())
-            .singleElement(CSV_RECORD)
+            .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields().containsExactly("foo", "barbaz");
     }
 
@@ -150,7 +149,7 @@ class CsvReaderTest {
 
     @Test
     @SuppressWarnings("CheckReturnValue")
-    void getNonExistingFieldByIndex() {
+    void indexOutOfBounds() {
         assertThat(crb.ofCsvRecord("foo").stream())
             .singleElement()
             .satisfies(item -> assertThatThrownBy(() -> spotbugs(item.getField(1)))
@@ -213,7 +212,7 @@ class CsvReaderTest {
     // to string
 
     @Test
-    void toStringWithoutHeader() {
+    void withoutHeaderToString() {
         assertThat(crb.ofCsvRecord("fieldA,fieldB\n").stream())
             .singleElement()
             .asString()
@@ -231,7 +230,7 @@ class CsvReaderTest {
         System.arraycopy(extra, 0, buf, 8190, extra.length);
 
         assertThat(crb.ofCsvRecord(new CharArrayReader(buf)).stream())
-            .singleElement(CSV_RECORD)
+            .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields().hasSize(4)
             .endsWith("a\"b\"c", "d", "XX");
     }
