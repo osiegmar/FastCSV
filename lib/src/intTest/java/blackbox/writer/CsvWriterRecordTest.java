@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CsvWriterRecordTest {
 
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()
@@ -40,6 +41,7 @@ class CsvWriterRecordTest {
         assertThat(sw).hasToString("foo,bar\nbaz,qux\n");
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     @Test
     void ioError() {
         final var un = new UnwritableWriter();
@@ -57,21 +59,23 @@ class CsvWriterRecordTest {
         final CsvWriter csv = crw.build(new StringWriter());
         csv.writeRecord();
 
+        final String exptectedMessage = "Record already started, call end() on CsvWriterRecord first";
+
         assertThatThrownBy(csv::writeRecord)
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Record already started, call end() on CsvWriterRecord first");
+            .hasMessage(exptectedMessage);
 
         assertThatThrownBy(() -> csv.writeComment("foo"))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Record already started, call end() on CsvWriterRecord first");
+            .hasMessage(exptectedMessage);
 
         assertThatThrownBy(() -> csv.writeRecord("foo"))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Record already started, call end() on CsvWriterRecord first");
+            .hasMessage(exptectedMessage);
 
         assertThatThrownBy(() -> csv.writeRecord(List.of("foo")))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Record already started, call end() on CsvWriterRecord first");
+            .hasMessage(exptectedMessage);
     }
 
 }

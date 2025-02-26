@@ -102,11 +102,11 @@ class FastBufferedWriterTest {
 
         final var fbw = new FastBufferedWriter(stringWriter, 8, true, true);
 
-        fbw.write("foo");
+        fbw.write("bar");
         assertThat(stringWriter).asString().isEmpty();
 
         fbw.endRecord();
-        assertThat(stringWriter).asString().isEqualTo("foo");
+        assertThat(stringWriter).asString().isEqualTo("bar");
         assertThat(flushCount).hasValue(1);
     }
 

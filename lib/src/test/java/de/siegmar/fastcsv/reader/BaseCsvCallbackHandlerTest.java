@@ -32,7 +32,7 @@ class BaseCsvCallbackHandlerTest {
 
     @Test
     void simple() {
-        final TestHandler handler = new TestHandler();
+        final SimpleFieldCollector handler = new SimpleFieldCollector();
 
         final Iterator<List<String>> it = CsvReader.builder()
             .commentStrategy(CommentStrategy.READ)
@@ -59,7 +59,7 @@ class BaseCsvCallbackHandlerTest {
         assertThat(handler.getFieldCount()).isOne();
     }
 
-    private static class TestHandler extends AbstractBaseCsvCallbackHandler<List<String>> {
+    private static class SimpleFieldCollector extends AbstractBaseCsvCallbackHandler<List<String>> {
 
         private final List<String> fields = new ArrayList<>();
 

@@ -40,10 +40,10 @@ import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 import testutil.CsvRecordAssert;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(SoftAssertionsExtension.class)
 class IndexedCsvReaderTest {
 
-    private static final String TEST_STRING = "foo";
     private static final String NON_EXISTENT_FILENAME = "/tmp/non-existent";
 
     @InjectSoftAssertions
@@ -71,7 +71,7 @@ class IndexedCsvReaderTest {
 
     @Test
     void readerToString() throws IOException {
-        final Path file = prepareTestFile(TEST_STRING);
+        final Path file = prepareTestFile("foo");
 
         assertThat(singlePageBuilder().ofCsvRecord(file)).asString()
             .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
@@ -277,14 +277,14 @@ class IndexedCsvReaderTest {
 
         @Test
         void illegalPage() {
-            assertThatThrownBy(() -> buildSinglePage(TEST_STRING).readPage(-1))
+            assertThatThrownBy(() -> buildSinglePage("foo").readPage(-1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("page must be >= 0");
         }
 
         @Test
         void pageOutOfBounds() {
-            assertThatThrownBy(() -> buildSinglePage(TEST_STRING).readPage(10))
+            assertThatThrownBy(() -> buildSinglePage("foo").readPage(10))
                 .isInstanceOf(IndexOutOfBoundsException.class)
                 .hasMessage("Index 10 out of bounds for length 1");
         }
@@ -306,7 +306,7 @@ class IndexedCsvReaderTest {
 
         @Test
         void invalidIndex() throws IOException {
-            final Path file = prepareTestFile(TEST_STRING);
+            final Path file = prepareTestFile("foo");
 
             final IndexedCsvReader.IndexedCsvReaderBuilder builder =
                 IndexedCsvReader.builder();
@@ -469,7 +469,7 @@ class IndexedCsvReaderTest {
                     .singleElement(CSV_RECORD)
                     .isStartingLineNumber(1)
                     .isNotComment()
-                    .fields().containsExactly("012", TEST_STRING);
+                    .fields().containsExactly("012", "foo");
 
                 assertThat(csv.readPage(1))
                     .singleElement(CSV_RECORD)
@@ -548,7 +548,7 @@ class IndexedCsvReaderTest {
 
         @Test
         void serializeIndex() throws IOException, ClassNotFoundException {
-            final Path file = prepareTestFile(TEST_STRING);
+            final Path file = prepareTestFile("foo");
 
             final CsvIndex expectedIndex;
             try (IndexedCsvReader<CsvRecord> expectedCsv = singlePageBuilder()
@@ -557,7 +557,7 @@ class IndexedCsvReaderTest {
                 assertThat(expectedCsv.readPage(0))
                     .singleElement()
                     .extracting(e -> e.getField(0))
-                    .isEqualTo(TEST_STRING);
+                    .isEqualTo("foo");
 
                 expectedIndex = expectedCsv.getIndex();
             }
@@ -576,7 +576,7 @@ class IndexedCsvReaderTest {
                 assertThat(actualCsv.readPage(0))
                     .singleElement()
                     .extracting(e -> e.getField(0))
-                    .isEqualTo(TEST_STRING);
+                    .isEqualTo("foo");
             }
         }
 

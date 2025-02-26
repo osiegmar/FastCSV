@@ -10,6 +10,7 @@ class NoCloseWriterTest {
 
     @Test
     void noClose() {
+        @SuppressWarnings("PMD.CloseResource")
         final var closeFailWriter = new FilterWriter(FilterWriter.nullWriter()) {
             @Override
             public void close() {

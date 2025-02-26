@@ -154,13 +154,15 @@ class CsvScannerTest {
             .replace("$", newLine);
     }
 
-    @SuppressWarnings("PMD.AvoidReassigningLoopVariables")
+    @SuppressWarnings("PMD.AssignmentInOperand")
     private static List<Integer> indexesOf(final String str, final String newLine) {
         final List<Integer> indexes = new ArrayList<>();
 
         final String strToFindIndexes = repl(str, newLine);
-        for (int index = 0; (index = strToFindIndexes.indexOf('^', index)) != -1; index++) {
+        int index = 0;
+        while ((index = strToFindIndexes.indexOf('^', index)) != -1) {
             indexes.add(index - indexes.size());
+            index++;
         }
 
         return indexes;

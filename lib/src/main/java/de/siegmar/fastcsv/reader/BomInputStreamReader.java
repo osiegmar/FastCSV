@@ -18,6 +18,7 @@ final class BomInputStreamReader extends Reader {
         this.defaultCharset = defaultCharset;
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     @Override
     public int read(final char[] cbuf, final int off, final int len) throws IOException {
         if (reader == null) {

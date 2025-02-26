@@ -14,6 +14,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CsvReaderInputStreamTest {
 
     @Test

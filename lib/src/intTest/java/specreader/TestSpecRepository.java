@@ -17,6 +17,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import specreader.spec.TestSpec;
 import specreader.spec.TestSpecCheck;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class TestSpecRepository {
 
     private static final ObjectReader OR = new ObjectMapper(new YAMLFactory())

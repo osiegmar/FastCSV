@@ -18,6 +18,7 @@ import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import testutil.CsvRecordAssert;
 import testutil.NamedCsvRecordAssert;
 
+@SuppressWarnings({"PMD.CloseResource", "PMD.AvoidDuplicateLiterals"})
 class SkipLinesTest {
 
     // Skip lines based on the count
