@@ -25,6 +25,7 @@ public enum LineDelimiter {
     ///
     /// @param str the string to convert to an enum.
     /// @return the enum representation of the given string.
+    /// @throws IllegalArgumentException if the string is not a known line delimiter.
     public static LineDelimiter of(final String str) {
         switch (str) {
             case "\r\n":

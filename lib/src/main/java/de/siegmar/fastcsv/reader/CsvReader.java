@@ -109,6 +109,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @param maxLines  the maximum number of lines to skip.
     /// @return the number of lines actually skipped.
     /// @throws NullPointerException if predicate is `null`.
+    /// @throws IllegalArgumentException if maxLines is negative.
     /// @throws UncheckedIOException if an I/O error occurs.
     /// @throws CsvParseException if no matching line is found within the maximum limit of maxLines.
     public int skipLines(final Predicate<String> predicate, final int maxLines) {
