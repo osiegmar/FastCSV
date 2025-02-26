@@ -16,6 +16,7 @@
         <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
         <exclude name="UnitTestShouldIncludeAssert"/>
     </rule>
+    <rule ref="category/java/multithreading.xml" />
     <rule ref="category/java/performance.xml" />
 
 </ruleset>

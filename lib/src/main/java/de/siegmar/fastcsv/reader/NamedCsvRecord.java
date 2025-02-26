@@ -132,6 +132,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return an ordered map of header names and field values of this record, never `null`
     /// @see #getFieldsAsMapList()
+    @SuppressWarnings("PMD.UseConcurrentHashMap")
     public Map<String, String> getFieldsAsMap() {
         final int bound = commonSize();
         final Map<String, String> map = new LinkedHashMap<>(bound);
@@ -151,7 +152,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return an unordered map of header names and field values of this record, never `null`
     /// @see #getFieldsAsMap()
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.UseConcurrentHashMap"})
     public Map<String, List<String>> getFieldsAsMapList() {
         final int bound = commonSize();
         final Map<String, List<String>> map = new HashMap<>(bound);
