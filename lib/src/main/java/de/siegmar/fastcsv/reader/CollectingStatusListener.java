@@ -1,15 +1,17 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /// Implementation of [StatusListener] that collects updates.
 public class CollectingStatusListener implements StatusListener {
 
-    private volatile long fileSize;
+    private final AtomicLong fileSize = new AtomicLong();
     private final AtomicLong recordCount = new AtomicLong();
     private final AtomicLong byteCount = new AtomicLong();
-    private volatile boolean completionStatus;
-    private volatile Throwable failedThrowable;
+    private final AtomicBoolean completionStatus = new AtomicBoolean();
+    private final AtomicReference<Throwable> failedThrowable = new AtomicReference<>();
 
     /// Default constructor.
     public CollectingStatusListener() {
@@ -18,14 +20,14 @@ public class CollectingStatusListener implements StatusListener {
     @SuppressWarnings("checkstyle:HiddenField")
     @Override
     public void onInit(final long fileSize) {
-        this.fileSize = fileSize;
+        this.fileSize.set(fileSize);
     }
 
     /// Get the total size in bytes.
     ///
     /// @return the total size in bytes
     public long getFileSize() {
-        return fileSize;
+        return fileSize.get();
     }
 
     @Override
@@ -54,34 +56,35 @@ public class CollectingStatusListener implements StatusListener {
 
     @Override
     public void onComplete() {
-        completionStatus = true;
+        completionStatus.set(true);
     }
 
     /// Get the completion status.
     ///
     /// @return `true`, when all data have been indexed successfully
     public boolean isCompleted() {
-        return completionStatus;
+        return completionStatus.get();
     }
 
     @Override
     public void onError(final Throwable throwable) {
-        this.failedThrowable = throwable;
+        this.failedThrowable.set(throwable);
     }
 
     /// Get the throwable that occurred while indexing.
     ///
     /// @return the throwable that occurred while indexing, `null` otherwise.
     public Throwable getThrowable() {
-        return failedThrowable;
+        return failedThrowable.get();
     }
 
     @Override
     public String toString() {
         final long byteCntVal = byteCount.longValue();
-        final double percentage = byteCntVal * 100.0 / fileSize;
+        final long currentFileSize = fileSize.get();
+        final double percentage = byteCntVal * 100.0 / currentFileSize;
         return String.format("Read %,d records and %,d of %,d bytes (%.2f %%)",
-            recordCount.longValue(), byteCntVal, fileSize, percentage);
+            recordCount.longValue(), byteCntVal, currentFileSize, percentage);
     }
 
 }
