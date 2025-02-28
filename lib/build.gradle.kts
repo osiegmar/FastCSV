@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "3.7.0-SNAPSHOT"
+version = "4.0.0-SNAPSHOT"
 
 project.base.archivesName = "fastcsv"
 
@@ -23,7 +23,7 @@ java {
 }
 
 tasks.compileJava {
-    options.release.set(11)
+    options.release.set(17)
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
