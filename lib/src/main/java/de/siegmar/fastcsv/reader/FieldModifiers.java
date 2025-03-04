@@ -6,9 +6,10 @@ import java.util.Locale;
 ///
 /// Example usage:
 /// ```
-/// var modifier = FieldModifiers.TRIM.andThen(FieldModifiers.upper(Locale.ENGLISH));
-/// var fields = CsvReader.builder()
-///     .build(new CsvRecordHandler(modifier, "  foo   ,   bar"))
+/// FieldModifier modifier = FieldModifiers.TRIM.andThen(FieldModifiers.upper(Locale.ENGLISH));
+/// CsvRecordHandler handler = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
+/// List<CsvRecord> records = CsvReader.builder()
+///     .build(handler, "  foo   ,   bar")
 ///     .stream()
 ///     .collect(Collectors.toList());
 ///

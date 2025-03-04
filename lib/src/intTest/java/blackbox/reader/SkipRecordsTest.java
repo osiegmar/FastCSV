@@ -41,7 +41,7 @@ class SkipRecordsTest {
     @ValueSource(strings = {",\nfoo\n", ",,\nfoo\n", "''\nfoo\n", "' '\nfoo\n"})
     void notEmpty(final String input) {
         crb.quoteCharacter('\'');
-        final var cbh = new CsvRecordHandler(FieldModifiers.TRIM);
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
         assertThat(crb.build(cbh, input).stream()).hasSize(2);
     }
 

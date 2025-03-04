@@ -19,6 +19,9 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import de.siegmar.fastcsv.util.Limits;
+import de.siegmar.fastcsv.util.Preconditions;
+
 /// This is the main class for reading CSV data.
 ///
 /// The CSV records are read iteratively, regardless of whether the Iterable, the Iterator, or the Stream is used.
@@ -363,11 +366,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// - Ignore different field count: `true`
     /// - Accept characters after quotes: `true`
     /// - Detect BOM header: `false`
+    /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
     /// automatically and thus not configurable.
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvReaderBuilder {
+
+        private static final int DEFAULT_MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
@@ -377,6 +383,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private boolean ignoreDifferentFieldCount = true;
         private boolean acceptCharsAfterQuotes = true;
         private boolean detectBomHeader;
+        @SuppressWarnings("removal")
+        private int maxBufferSize = Math.min(DEFAULT_MAX_BUFFER_SIZE, Limits.MAX_FIELD_SIZE);
 
         private CsvReaderBuilder() {
         }
@@ -484,6 +492,30 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return this;
         }
 
+        /// Defines the maximum buffer size used when parsing data.
+        ///
+        /// The size of the internal buffer is automatically adjusted to the needs of the parser.
+        /// To protect against out-of-memory errors, its maximum size is limited.
+        ///
+        /// The buffer is used for two purposes:
+        ///   - Reading data from the underlying stream of data in chunks
+        ///   - Storing the data of a single field before it is passed to the callback handler
+        ///
+        /// Set a larger value only if you expect to read fields larger than the default limit.
+        /// In that case you probably **also need to adjust** the maximum field size of the callback handler.
+        ///
+        /// Set a smaller value if your runtime environment has not enough memory available for the default value.
+        /// Setting values smaller than 16,384 characters will most likely lead to performance degradation.
+        ///
+        /// @param maxBufferSize the maximum buffer size in characters (default: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE})
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws IllegalArgumentException if maxBufferSize is not positive
+        public CsvReaderBuilder maxBufferSize(final int maxBufferSize) {
+            Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be greater than 0");
+            this.maxBufferSize = maxBufferSize;
+            return this;
+        }
+
         /// Constructs a new index-based [CsvReader] for the specified input stream.
         ///
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream)] with
@@ -497,7 +529,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if inputStream is `null`
         /// @see #ofCsvRecord(InputStream, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream) {
-            return build(new CsvRecordHandler(), inputStream);
+            return build(CsvRecordHandler.of(), inputStream);
         }
 
         /// Constructs a new index-based [CsvReader] for the specified input stream and character set.
@@ -513,7 +545,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if inputStream or charset is `null`
         /// @see #ofCsvRecord(InputStream)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream, final Charset charset) {
-            return build(new CsvRecordHandler(), inputStream, charset);
+            return build(CsvRecordHandler.of(), inputStream, charset);
         }
 
         /// Constructs a new index-based [CsvReader] for the specified reader.
@@ -527,7 +559,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if reader is `null`
         public CsvReader<CsvRecord> ofCsvRecord(final Reader reader) {
-            return build(new CsvRecordHandler(), reader);
+            return build(CsvRecordHandler.of(), reader);
         }
 
         /// Constructs a new index-based [CsvReader] for the specified String.
@@ -541,7 +573,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if data is `null`
         public CsvReader<CsvRecord> ofCsvRecord(final String data) {
-            return build(new CsvRecordHandler(), data);
+            return build(CsvRecordHandler.of(), data);
         }
 
         /// Constructs a new index-based [CsvReader] for the specified file.
@@ -558,7 +590,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file is `null`
         /// @see #ofCsvRecord(Path, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
-            return build(new CsvRecordHandler(), file);
+            return build(CsvRecordHandler.of(), file);
         }
 
         /// Constructs a new index-based [CsvReader] for the specified file and character set.
@@ -575,7 +607,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofCsvRecord(Path)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
-            return build(new CsvRecordHandler(), file, charset);
+            return build(CsvRecordHandler.of(), file, charset);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified input stream.
@@ -591,7 +623,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if reader is `null`
         /// @see #ofNamedCsvRecord(InputStream, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream) {
-            return build(new NamedCsvRecordHandler(), inputStream);
+            return build(NamedCsvRecordHandler.of(), inputStream);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified input stream and character set.
@@ -607,7 +639,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file or charset is `null`
         /// @see #ofNamedCsvRecord(InputStream)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream, final Charset charset) {
-            return build(new NamedCsvRecordHandler(), inputStream, charset);
+            return build(NamedCsvRecordHandler.of(), inputStream, charset);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified reader.
@@ -621,7 +653,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if reader is `null`
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Reader reader) {
-            return build(new NamedCsvRecordHandler(), reader);
+            return build(NamedCsvRecordHandler.of(), reader);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified String.
@@ -635,7 +667,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if data is `null`
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final String data) {
-            return build(new NamedCsvRecordHandler(), data);
+            return build(NamedCsvRecordHandler.of(), data);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified file.
@@ -652,7 +684,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws NullPointerException if file is `null`
         /// @see #ofNamedCsvRecord(Path, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file) throws IOException {
-            return build(new NamedCsvRecordHandler(), file);
+            return build(NamedCsvRecordHandler.of(), file);
         }
 
         /// Constructs a new name-based [CsvReader] for the specified file and character set.
@@ -670,7 +702,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @see #ofNamedCsvRecord(Path)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset)
             throws IOException {
-            return build(new NamedCsvRecordHandler(), file, charset);
+            return build(NamedCsvRecordHandler.of(), file, charset);
         }
 
         /// Constructs a new callback-based [CsvReader] for the specified input stream.
@@ -747,13 +779,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param reader          the data source to read from.
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if callbackHandler or reader is `null`
+        /// @throws IllegalArgumentException if argument validation fails.
         @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(reader, "reader must not be null");
 
             final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, callbackHandler, reader);
+                commentCharacter, acceptCharsAfterQuotes, callbackHandler, maxBufferSize, reader);
 
             return newReader(callbackHandler, csvParser);
         }
@@ -767,6 +800,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @param data            the data to read.
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if callbackHandler or data is `null`
+        /// @throws IllegalArgumentException if argument validation fails.
         @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
@@ -836,6 +870,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
                 .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
+                .add("detectBomHeader=" + detectBomHeader)
+                .add("maxBufferSize=" + maxBufferSize)
                 .toString();
         }
 

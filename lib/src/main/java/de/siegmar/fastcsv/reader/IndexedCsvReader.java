@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import de.siegmar.fastcsv.util.Limits;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -34,12 +35,12 @@ import de.siegmar.fastcsv.util.Util;
 ///
 /// Example use:
 /// ```
-/// try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
+/// try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)){
 ///     CsvIndex index = csv.getIndex();
 ///     int lastPage = index.getPageCount() - 1;
 ///     List<CsvRecord> csvRecords = csv.readPage(lastPage);
-/// }
-/// ```
+///}
+///```
 ///
 /// @param <T> the type of the CSV record.
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})
@@ -63,7 +64,9 @@ public final class IndexedCsvReader<T> implements Closeable {
     IndexedCsvReader(final Path file, final Charset defaultCharset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final boolean acceptCharsAfterQuotes, final int pageSize,
+                     final boolean acceptCharsAfterQuotes,
+                     final int maxBufferSize,
+                     final int pageSize,
                      final CsvCallbackHandler<T> csvRecordHandler, final CsvIndex csvIndex,
                      final StatusListener statusListener)
         throws IOException {
@@ -104,7 +107,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         raf = new RandomAccessFile(file.toFile(), "r");
         csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            acceptCharsAfterQuotes, csvRecordHandler,
+            acceptCharsAfterQuotes, csvRecordHandler, maxBufferSize,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
@@ -203,6 +206,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         return readPage(csvIndex.getPage(page));
     }
 
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
         try {
@@ -217,10 +221,21 @@ public final class IndexedCsvReader<T> implements Closeable {
                     ret.add(rec.getWrappedRecord());
                 }
             }
+        } catch (final IOException e) {
+            throw new IOException(buildExceptionMessage(), e);
+        } catch (final Throwable t) {
+            throw new CsvParseException(buildExceptionMessage(), t);
         } finally {
             fileLock.unlock();
         }
         return ret;
+    }
+
+    private String buildExceptionMessage() {
+        return (csvParser.getStartingLineNumber() == 1)
+            ? "Exception when reading first record"
+            : String.format("Exception when reading record that started in line %d",
+            csvParser.getStartingLineNumber());
     }
 
     @Override
@@ -244,12 +259,21 @@ public final class IndexedCsvReader<T> implements Closeable {
     }
 
     /// This builder is used to create configured instances of [IndexedCsvReader]. The default
-    /// configuration of this class adheres with RFC 4180.
+    /// configuration of this class adheres with RFC 4180:
+    ///
+    /// - Field separator: `,` (comma)
+    /// - Quote character: `"` (double quotes)
+    /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
+    /// - Comment character: `#` (hash) (in case comment strategy is enabled)
+    /// - Accept characters after quotes: `true`
+    /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
     /// automatically and thus not configurable.
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class IndexedCsvReaderBuilder {
+
+        private static final int DEFAULT_MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
         private static final int MAX_BASE_ASCII = 127;
         private static final int DEFAULT_PAGE_SIZE = 100;
@@ -263,6 +287,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;
+        @SuppressWarnings("removal")
+        private int maxBufferSize = Math.min(DEFAULT_MAX_BUFFER_SIZE, Limits.MAX_FIELD_SIZE);
 
         private IndexedCsvReaderBuilder() {
         }
@@ -280,7 +306,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// Sets the `quoteCharacter` used when reading CSV data.
         ///
         /// @param quoteCharacter the character used to enclose fields
-        ///                       (default: `"` - double quotes).
+        ///                                             (default: `"` - double quotes).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             checkControlCharacter(quoteCharacter);
@@ -359,6 +385,30 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
+        /// Defines the maximum buffer size used when parsing data.
+        ///
+        /// The size of the internal buffer is automatically adjusted to the needs of the parser.
+        /// To protect against out-of-memory errors, its maximum size is limited.
+        ///
+        /// The buffer is used for two purposes:
+        ///   - Reading data from the underlying stream of data in chunks
+        ///   - Storing the data of a single field before it is passed to the callback handler
+        ///
+        /// Set a larger value only if you expect to read fields larger than the default limit.
+        /// In that case you probably **also need to adjust** the maximum field size of the callback handler.
+        ///
+        /// Set a smaller value if your runtime environment has not enough memory available for the default value.
+        /// Setting values smaller than 16,384 characters will most likely lead to performance degradation.
+        ///
+        /// @param maxBufferSize the maximum buffer size in characters (default: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE})
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws IllegalArgumentException if maxBufferSize is not positive
+        public IndexedCsvReaderBuilder maxBufferSize(final int maxBufferSize) {
+            Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be greater than 0");
+            this.maxBufferSize = maxBufferSize;
+            return this;
+        }
+
         /*
          * Characters from 0 to 127 are base ASCII and collision-free with UTF-8.
          * Characters from 128 to 255 need to be represented as a multibyte string in UTF-8.
@@ -385,7 +435,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
-            return build(new CsvRecordHandler(), file, StandardCharsets.UTF_8);
+            return build(CsvRecordHandler.of(), file, StandardCharsets.UTF_8);
         }
 
         /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified arguments.
@@ -399,7 +449,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if file or charset is `null`
         public IndexedCsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
-            return build(new CsvRecordHandler(), file, charset);
+            return build(CsvRecordHandler.of(), file, charset);
         }
 
         /// Constructs a new [IndexedCsvReader] for the specified callback handler and path using UTF-8
@@ -426,8 +476,9 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param file            the file to read data from.
         /// @param charset         the character set to use.
         /// @return a new IndexedCsvReader - never `null`. Remember to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if callbackHandler, file or charset is `null`
+        /// @throws IOException              if an I/O error occurs.
+        /// @throws NullPointerException     if callbackHandler, file or charset is `null`
+        /// @throws IllegalArgumentException if argument validation fails.
         public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                              final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
@@ -438,7 +489,8 @@ public final class IndexedCsvReader<T> implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, pageSize, callbackHandler, csvIndex, sl);
+                commentCharacter, acceptCharsAfterQuotes, maxBufferSize, pageSize, callbackHandler,
+                csvIndex, sl);
         }
 
     }

@@ -8,7 +8,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
-import de.siegmar.fastcsv.util.Limits;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -47,10 +46,13 @@ final class CsvParser implements Closeable {
     private int status;
     private boolean finished;
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean acceptCharsAfterQuotes,
-              final CsvCallbackHandler<?> callbackHandler, final Reader reader) {
+              final CsvCallbackHandler<?> callbackHandler,
+              final int maxBufferSize,
+              final Reader reader) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
@@ -60,13 +62,14 @@ final class CsvParser implements Closeable {
         this.cChar = commentCharacter;
         this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
         this.callbackHandler = callbackHandler;
-        csvBuffer = new CsvBuffer(reader);
+        csvBuffer = new CsvBuffer(reader, maxBufferSize);
     }
 
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
               final boolean acceptCharsAfterQuotes,
-              final CsvCallbackHandler<?> callbackHandler, final String data) {
+              final CsvCallbackHandler<?> callbackHandler,
+              final String data) {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
@@ -371,8 +374,7 @@ final class CsvParser implements Closeable {
     @SuppressWarnings("checkstyle:visibilitymodifier")
     private static class CsvBuffer implements Closeable {
 
-        private static final int READ_SIZE = 8192;
-        private static final int BUFFER_SIZE = READ_SIZE;
+        private static final int DEFAULT_READ_SIZE = 8192;
 
         char[] buf;
         int len;
@@ -380,16 +382,27 @@ final class CsvParser implements Closeable {
         int pos;
 
         private final Reader reader;
+        private final int maxBufferSize;
+        private final int readSize;
 
-        CsvBuffer(final Reader reader) {
+        CsvBuffer(final Reader reader, final int maxBufferSize) {
+            Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be > 0");
             this.reader = reader;
-            buf = new char[BUFFER_SIZE];
+            this.maxBufferSize = maxBufferSize;
+
+            // limit optimal read size to maxBufferSize
+            readSize = Math.min(maxBufferSize, DEFAULT_READ_SIZE);
+
+            // Buffer may still contain unprocessed data, so extra space is needed to read readSize chars.
+            buf = new char[Math.min(maxBufferSize, readSize * 2)];
         }
 
         CsvBuffer(final String data) {
             reader = null;
+            maxBufferSize = -1;
             buf = data.toCharArray();
             len = data.length();
+            readSize = -1;
         }
 
         /// Reads data from the underlying reader and manages the local buffer.
@@ -398,51 +411,51 @@ final class CsvParser implements Closeable {
         /// @throws IOException if a read error occurs
         private boolean fetchData() throws IOException {
             if (reader == null) {
+                // Fixed string data
                 return false;
             }
 
-            if (begin < pos) {
-                // we have data that can be relocated
+            if (buf.length - len < readSize) {
+                // not enough space in the buffer to read readSize chars
 
-                if (READ_SIZE > buf.length - pos) {
-                    // need to relocate data in buffer -- not enough capacity left
-
-                    final int lenToCopy = pos - begin;
-                    if (READ_SIZE > buf.length - lenToCopy) {
-                        // need to relocate data in new, larger buffer
-                        buf = extendAndRelocate(buf, begin);
+                if (begin == len) {
+                    // all data was consumed -- nothing to relocate
+                    pos = len = 0;
+                } else {
+                    if (buf.length - len + begin < readSize) {
+                        // reclaimable space is insufficient - allocate a larger buffer
+                        final char[] newBuf = largerBuffer();
+                        System.arraycopy(buf, begin, newBuf, 0, len - begin);
+                        buf = newBuf;
                     } else {
-                        // relocate data in existing buffer
-                        System.arraycopy(buf, begin, buf, 0, lenToCopy);
+                        // it's enough to relocate data and continue with the same buffer
+                        System.arraycopy(buf, begin, buf, 0, len - begin);
                     }
+
                     pos -= begin;
-                    begin = 0;
+                    len -= begin;
                 }
-            } else {
-                // all data was consumed -- nothing to relocate
-                pos = begin = 0;
+
+                begin = 0;
             }
 
-            final int cnt = reader.read(buf, pos, READ_SIZE);
+            final int cnt = reader.read(buf, len, readSize);
             if (cnt == -1) {
                 return false;
             }
-            len = pos + cnt;
+            len += cnt;
             return true;
         }
 
-        private static char[] extendAndRelocate(final char[] buf, final int begin) {
-            final int newBufferSize = buf.length * 2;
-            if (newBufferSize > Limits.MAX_FIELD_SIZE) {
+        private char[] largerBuffer() {
+            if (maxBufferSize == buf.length) {
                 throw new CsvParseException(String.format("The maximum buffer size of %d is "
                         + "insufficient to read the data of a single field. "
                         + "This issue typically arises when a quotation begins but does not conclude within the "
                         + "confines of this buffer's maximum limit.",
-                    Limits.MAX_FIELD_SIZE));
+                    maxBufferSize));
             }
-            final char[] newBuf = new char[newBufferSize];
-            System.arraycopy(buf, begin, newBuf, 0, buf.length - begin);
-            return newBuf;
+            return new char[Math.min(maxBufferSize, buf.length * 2)];
         }
 
         private void reset() {

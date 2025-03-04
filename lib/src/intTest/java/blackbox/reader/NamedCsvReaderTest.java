@@ -113,9 +113,17 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader() {
-        final var cbh = new NamedCsvRecordHandler("h1", "h2");
-        final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
-        assertThat(csvReader.stream())
+        final var cbh = NamedCsvRecordHandler.of(c -> c.header("h1", "h2"));
+        assertThat(CsvReader.builder().build(cbh, "foo,bar").stream())
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+            .fields()
+            .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
+    }
+
+    @Test
+    void customHeaderList() {
+        final var cbh = NamedCsvRecordHandler.of(c -> c.header(List.of("h1", "h2")));
+        assertThat(CsvReader.builder().build(cbh, "foo,bar").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
@@ -123,9 +131,8 @@ class NamedCsvReaderTest {
 
     @Test
     void customHeader2() {
-        final var cbh = new NamedCsvRecordHandler(List.of("h1", "h2"));
-        final var csvReader = CsvReader.builder().build(cbh, "foo,bar");
-        assertThat(csvReader.stream())
+        final var cbh = NamedCsvRecordHandler.of(c -> c.header("h1", "h2"));
+        assertThat(CsvReader.builder().build(cbh, "foo,bar").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
@@ -221,9 +228,8 @@ class NamedCsvReaderTest {
 
     @Test
     void fieldModifier() {
-        final var csvReader = CsvReader.builder()
-            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM), "h1 , h2 \n v1 , v2");
-        assertThat(csvReader.stream())
+        final NamedCsvRecordHandler cbh = NamedCsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
+        assertThat(CsvReader.builder().build(cbh, "h1 , h2 \n v1 , v2").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(2)
             .isNotComment()
@@ -232,9 +238,10 @@ class NamedCsvReaderTest {
 
     @Test
     void fieldModifierPredefinedHeader() {
-        final var csvReader = CsvReader.builder()
-            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, "h1", "h2"), "v1 , v2");
-        assertThat(csvReader.stream())
+        final NamedCsvRecordHandler cbh = NamedCsvRecordHandler.of(c -> c
+            .fieldModifier(FieldModifiers.TRIM)
+            .header("h1", "h2"));
+        assertThat(CsvReader.builder().build(cbh, "v1 , v2").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(1)
             .isNotComment()
@@ -243,9 +250,10 @@ class NamedCsvReaderTest {
 
     @Test
     void fieldModifierPredefinedHeaderList() {
-        final var csvReader = CsvReader.builder()
-            .build(new NamedCsvRecordHandler(FieldModifiers.TRIM, List.of("h1", "h2")), "v1 , v2");
-        assertThat(csvReader.stream())
+        final NamedCsvRecordHandler cbh = NamedCsvRecordHandler.of(c -> c
+            .fieldModifier(FieldModifiers.TRIM)
+            .header("h1", "h2"));
+        assertThat(CsvReader.builder().build(cbh, "v1 , v2").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .isStartingLineNumber(1)
             .isNotComment()

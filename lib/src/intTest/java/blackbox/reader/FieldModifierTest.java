@@ -26,9 +26,10 @@ class FieldModifierTest {
     @Test
     void defaultImpl() {
         crb.commentStrategy(CommentStrategy.READ);
-        final FieldModifier modifier = new FieldModifier() { };
 
-        assertThat(crb.build(new CsvRecordHandler(modifier), "foo\n#bar").stream())
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(new FieldModifier() { }));
+
+        assertThat(crb.build(cbh, "foo\n#bar").stream())
             .satisfiesExactly(
                 item -> CsvRecordAssert.assertThat(item).fields().containsExactly("foo"),
                 item -> CsvRecordAssert.assertThat(item).isComment().fields().containsExactly("bar")
@@ -37,9 +38,9 @@ class FieldModifierTest {
 
     @Test
     void trim() {
-        final FieldModifier modifier = FieldModifiers.TRIM;
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
 
-        assertThat(crb.build(new CsvRecordHandler(modifier), "foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar\u2000", "baz");
@@ -47,9 +48,9 @@ class FieldModifierTest {
 
     @Test
     void strip() {
-        final FieldModifier modifier = FieldModifiers.STRIP;
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.STRIP));
 
-        assertThat(crb.build(new CsvRecordHandler(modifier), "foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar", "baz");
@@ -65,7 +66,9 @@ class FieldModifierTest {
             .andThen(FieldModifiers.lower(Locale.ROOT))
             .andThen(FieldModifiers.TRIM);
 
-        assertThat(crb.build(new CsvRecordHandler(modifier), "FOO, bar , BAZ  \n# foo ").stream())
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
+
+        assertThat(crb.build(cbh, "FOO, bar , BAZ  \n# foo ").stream())
             .satisfiesExactly(
                 item -> CsvRecordAssert.assertThat(item).fields().containsExactly("foo", "bar", "baz"),
                 item -> CsvRecordAssert.assertThat(item).isComment().fields().containsExactly(" foo ")
@@ -77,9 +80,9 @@ class FieldModifierTest {
     void noNull(final String value) {
         crb.commentStrategy(CommentStrategy.READ);
 
-        final FieldModifier modifier = new NullFieldModifier();
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(new NullFieldModifier()));
 
-        assertThatThrownBy(() -> crb.build(new CsvRecordHandler(modifier), value).stream().toList())
+        assertThatThrownBy(() -> crb.build(cbh, value).stream().toList())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .rootCause()

@@ -15,17 +15,17 @@ public class ExampleCsvReaderWithFieldModifier {
     public static void main(final String[] args) {
         System.out.println("Trim fields:");
         CsvReader.builder()
-            .build(new CsvRecordHandler(FieldModifiers.TRIM), DATA)
+            .build(CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM)), DATA)
             .forEach(System.out::println);
 
         System.out.println("Combine modifiers (trim/lowercase):");
         CsvReader.builder()
-            .build(new CsvRecordHandler(combinedModifier()), DATA)
+            .build(CsvRecordHandler.of(c -> c.fieldModifier(combinedModifier())), DATA)
             .forEach(System.out::println);
 
         System.out.println("Custom modifier (trim/lowercase on first record):");
         CsvReader.builder()
-            .build(new CsvRecordHandler(customModifier()), DATA)
+            .build(CsvRecordHandler.of(c -> c.fieldModifier(customModifier())), DATA)
             .forEach(System.out::println);
     }
 

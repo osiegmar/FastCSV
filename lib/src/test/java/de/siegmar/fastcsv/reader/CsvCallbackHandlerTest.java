@@ -13,7 +13,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void csvRecord() {
-        final CsvCallbackHandler<CsvRecord> rh = new CsvRecordHandler();
+        final CsvCallbackHandler<CsvRecord> rh = CsvRecordHandler.of();
         process(rh);
 
         CsvRecordAssert.assertThat(rh.buildRecord().getWrappedRecord())
@@ -24,7 +24,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void namedCsvRecord() {
-        final CsvCallbackHandler<NamedCsvRecord> rh = new NamedCsvRecordHandler();
+        final CsvCallbackHandler<NamedCsvRecord> rh = NamedCsvRecordHandler.of();
 
         rh.beginRecord(1);
         addField(rh, "head1");
@@ -42,7 +42,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void stringArray() {
-        final CsvCallbackHandler<String[]> rh = new StringArrayHandler();
+        final CsvCallbackHandler<String[]> rh = StringArrayHandler.of();
         process(rh);
 
         assertThat(rh.buildRecord().getWrappedRecord())
@@ -51,7 +51,7 @@ class CsvCallbackHandlerTest {
 
     @Test
     void stringArrayFieldModifier() {
-        final CsvCallbackHandler<String[]> rh = new StringArrayHandler(FieldModifiers.TRIM);
+        final CsvCallbackHandler<String[]> rh = StringArrayHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
         rh.beginRecord(1);
         addField(rh, " foo");
         addField(rh, "bar ");

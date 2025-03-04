@@ -6,8 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Configuration of maximum fields, maximum field size, and maximum record size via record handler
+- Fluent configuration for `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler`
+- `maxBufferSize(int)` in `CsvReaderBuilder` and `IndexedCsvReaderBuilder` to alter the maximum buffer size of the parser
+
 ### Changed
 - Use ReentrantLock in IndexedCsvReader instead of synchronized to prevent pinning of virtual threads
+- More precise error messages when exceeding the maximum field or record size
+- More precise error when parsing error occurs within `IndexedCsvReader`
+- Apply length constraints (maximum field size and maximum record size) **after** applying field modifiers
+
+### Deprecated
+- Setting the maximum field size (and maximum buffer size) via system property `fastcsv.max.field.size`
+- Setting the maximum field count per record via system property `fastcsv.max.field.count`
+- Constructor initialization of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler`
 
 ## [3.5.0] - 2025-02-22
 ### Added

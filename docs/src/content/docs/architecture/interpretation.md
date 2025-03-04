@@ -164,7 +164,7 @@ When reading CSV files, you have the option to configure a `FieldModifier` to tr
 to the user. The following example demonstrates trimming, printing `"foo"` and `"bar"` without any whitespaces:
 
 ```java
-var handler = new CsvRecordHandler(FieldModifiers.TRIM);
+var handler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
 CsvReader.builder().build(handler, " foo , bar ")
     .forEach(System.out::println);
 ```

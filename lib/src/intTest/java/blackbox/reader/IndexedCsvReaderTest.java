@@ -16,6 +16,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.core.api.SoftAssertions;
@@ -120,7 +121,7 @@ class IndexedCsvReaderTest {
     @Test
     void namedCsv() throws IOException {
         final var icrb = IndexedCsvReader.builder().pageSize(2);
-        final var cbh = new NamedCsvRecordHandler();
+        final var cbh = NamedCsvRecordHandler.of();
 
         try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
             final CsvIndex index = csv.getIndex();
@@ -176,6 +177,40 @@ class IndexedCsvReaderTest {
         final Path file = tmpDir.resolve("foo.csv");
         Files.write(file, data, StandardOpenOption.CREATE_NEW);
         return file;
+    }
+
+    @Nested
+    class MaxBuffer {
+
+        @Test
+        void illegalBufferSize() {
+            assertThatThrownBy(() -> IndexedCsvReader.builder().maxBufferSize(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("maxBufferSize must be greater than 0");
+        }
+
+        @SuppressWarnings("PMD.CloseResource")
+        @Test
+        void bufferExceed() throws IOException {
+            final int limit = 512;
+
+            // buffer in CsvReader is in char, so prepare enough bytes
+            final byte[] data = new byte[2 * limit];
+            Arrays.fill(data, (byte) 'X');
+            data[data.length - 1] = ',';
+
+            final IndexedCsvReader<CsvRecord> csv = singlePageBuilder()
+                .maxBufferSize(limit)
+                .ofCsvRecord(prepareTestFile(data));
+
+            assertThatThrownBy(() -> csv.readPage(0).getFirst())
+                .isInstanceOf(CsvParseException.class)
+                .hasMessageContaining("Exception when reading first record")
+                .rootCause()
+                .isInstanceOf(CsvParseException.class)
+                .hasMessageContaining("is insufficient to read the data of a single field");
+        }
+
     }
 
     @Nested

@@ -16,7 +16,6 @@ import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -246,18 +245,27 @@ class CsvReaderTest {
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Maximum number of fields exceeded: %d", buf.length);
+            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of %d fields", buf.length);
     }
 
     // buffer exceed
 
     @Test
+    void illegalBufferSize() {
+        assertThatThrownBy(() -> crb.maxBufferSize(0))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("maxBufferSize must be greater than 0");
+    }
+
+    @Test
     void bufferExceed() {
-        final char[] buf = new char[16 * 1024 * 1024];
+        final int limit = 512;
+
+        final char[] buf = new char[limit];
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
 
-        crb.ofCsvRecord(new CharArrayReader(buf)).iterator().next();
+        crb.maxBufferSize(limit).ofCsvRecord(new CharArrayReader(buf)).iterator().next();
 
         buf[buf.length - 1] = (byte) 'X';
 
@@ -303,7 +311,8 @@ class CsvReaderTest {
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of 67108864 characters");
+            .hasRootCauseMessage("Field at index 8 in record starting at line 1 exceeds the max record size of "
+                + "67108864 characters");
     }
 
     // API
@@ -393,7 +402,7 @@ class CsvReaderTest {
     // test helpers
 
     private List<CsvRecord> readAll(final String data) {
-        return crb.ofCsvRecord(data).stream().collect(Collectors.toList());
+        return crb.ofCsvRecord(data).stream().toList();
     }
 
 }

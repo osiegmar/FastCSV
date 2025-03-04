@@ -28,7 +28,7 @@ tasks.compileJava {
 }
 
 tasks.javadoc {
-    options.jFlags = listOf("-Duser.language=en")
+    options.jFlags = listOf("-Duser.language=en", "-Duser.country=US")
 }
 
 sourceSets {

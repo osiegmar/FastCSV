@@ -17,6 +17,7 @@ class LimitsTest {
         System.clearProperty(FASTCSV_MAX_FIELD_COUNT);
     }
 
+    @SuppressWarnings("removal")
     @Test
     void defaultMaxFieldSize() {
         assertThat(Limits.MAX_FIELD_SIZE)
@@ -24,7 +25,7 @@ class LimitsTest {
             .isEqualTo(16 * 1024 * 1024);
     }
 
-    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
+    @SuppressWarnings({"removal", "PMD.UseUnderscoresInNumericLiterals"})
     @Test
     void customMaxFieldSize() {
         System.setProperty(FASTCSV_MAX_FIELD_SIZE, "100000");
@@ -34,6 +35,7 @@ class LimitsTest {
             .isEqualTo(100000);
     }
 
+    @SuppressWarnings("removal")
     @Test
     void defaultMaxFieldCount() {
         assertThat(Limits.MAX_FIELD_COUNT)
@@ -41,6 +43,7 @@ class LimitsTest {
             .isEqualTo(16 * 1024);
     }
 
+    @SuppressWarnings("removal")
     @Test
     void customMaxFieldCount() {
         System.setProperty(FASTCSV_MAX_FIELD_COUNT, "200");
@@ -50,6 +53,7 @@ class LimitsTest {
             .isEqualTo(200);
     }
 
+    @SuppressWarnings("removal")
     @Test
     void invalidMaxFieldSizeThrowsException() {
         System.setProperty(FASTCSV_MAX_FIELD_SIZE, "invalid");
@@ -59,7 +63,7 @@ class LimitsTest {
             .withMessageContaining("Invalid format for system property " + FASTCSV_MAX_FIELD_SIZE);
     }
 
-    @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
+    @SuppressWarnings({"removal", "PMD.UseUnderscoresInNumericLiterals"})
     @Test
     void maxRecordSizeBasedOnMaxFieldSize() {
         System.setProperty(FASTCSV_MAX_FIELD_SIZE, "4000000");
