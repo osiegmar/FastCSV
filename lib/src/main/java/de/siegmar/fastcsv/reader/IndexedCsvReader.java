@@ -213,9 +213,9 @@ public final class IndexedCsvReader<T> implements Closeable {
             csvParser.reset(page.startingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
-                final RecordWrapper<T> rec = csvRecordHandler.buildRecord();
+                final T rec = csvRecordHandler.buildRecord();
                 if (rec != null) {
-                    ret.add(rec.getWrappedRecord());
+                    ret.add(rec);
                 }
             }
         } catch (final IOException e) {

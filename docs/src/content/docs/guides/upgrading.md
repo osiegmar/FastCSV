@@ -57,3 +57,11 @@ The `CsvIndex` and `CsvPage` classes have been changed to Java records. With thi
 - firstPage.getStartingLineNumber();
 + firstPage.startingLineNumber();
 ```
+
+## Record wrapper removal
+
+The `RecordWrapper` class has been removed. It was a wrapper around the `CsvRecord` class that was used to provide parsing context information to the reading process.
+
+If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, all you need to do is to return the `CsvRecord` instance directly instead of wrapping it in a `RecordWrapper`.
+
+If you implemented a custom callback handler by implementing the `CsvCallbackHandler` interface, you also have to implement three additional methods: `isComment`, `isEmptyLine` and `getFieldCount`. Those methods simply have to return the information that was previously provided by the `RecordWrapper` instance.

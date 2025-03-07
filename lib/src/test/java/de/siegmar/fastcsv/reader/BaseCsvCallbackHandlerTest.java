@@ -15,8 +15,8 @@ class BaseCsvCallbackHandlerTest {
     void onlyAbstract() {
         final var handler = new AbstractBaseCsvCallbackHandler<String>() {
             @Override
-            protected RecordWrapper<String> buildRecord() {
-                return wrapRecord("ignored");
+            protected String buildRecord() {
+                return "ignored";
             }
         };
 
@@ -80,8 +80,8 @@ class BaseCsvCallbackHandlerTest {
         }
 
         @Override
-        public RecordWrapper<List<String>> buildRecord() {
-            return wrapRecord(List.copyOf(fields));
+        public List<String> buildRecord() {
+            return List.copyOf(fields);
         }
 
     }

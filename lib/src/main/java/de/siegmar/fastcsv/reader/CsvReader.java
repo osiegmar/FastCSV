@@ -223,29 +223,29 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     @SuppressWarnings("checkstyle:ReturnCount")
     private T processRecord() {
-        final RecordWrapper<T> recordWrapper = callbackHandler.buildRecord();
+        final T csvRecord = callbackHandler.buildRecord();
 
         // handle consumed records (e.g., header for named records)
-        if (recordWrapper == null) {
+        if (csvRecord == null) {
             return null;
         }
 
         // handle comment lines
-        if (recordWrapper.isComment()) {
-            return commentStrategy == CommentStrategy.SKIP ? null : recordWrapper.getWrappedRecord();
+        if (callbackHandler.isComment()) {
+            return commentStrategy == CommentStrategy.SKIP ? null : csvRecord;
         }
 
         // handle empty lines
-        if (recordWrapper.isEmptyLine()) {
-            return skipEmptyLines ? null : recordWrapper.getWrappedRecord();
+        if (callbackHandler.isEmptyLine()) {
+            return skipEmptyLines ? null : csvRecord;
         }
 
         // check field count consistency
         if (!ignoreDifferentFieldCount) {
-            checkFieldCountConsistency(recordWrapper.getFieldCount());
+            checkFieldCountConsistency(callbackHandler.getFieldCount());
         }
 
-        return recordWrapper.getWrappedRecord();
+        return csvRecord;
     }
 
     private void checkFieldCountConsistency(final int fieldCount) {

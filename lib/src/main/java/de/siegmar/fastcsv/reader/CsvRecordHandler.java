@@ -73,8 +73,8 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
     }
 
     @Override
-    protected RecordWrapper<CsvRecord> buildRecord() {
-        return buildWrapper(new CsvRecord(startingLineNumber, compactFields(), comment));
+    protected CsvRecord buildRecord() {
+        return new CsvRecord(startingLineNumber, compactFields(), comment);
     }
 
     /// A builder for [CsvRecordHandler].

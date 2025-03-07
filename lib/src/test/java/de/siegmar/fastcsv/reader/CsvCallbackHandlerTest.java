@@ -16,7 +16,7 @@ class CsvCallbackHandlerTest {
         final CsvCallbackHandler<CsvRecord> rh = CsvRecordHandler.of();
         process(rh);
 
-        CsvRecordAssert.assertThat(rh.buildRecord().getWrappedRecord())
+        CsvRecordAssert.assertThat(rh.buildRecord())
             .isStartingLineNumber(1)
             .isNotComment()
             .fields().containsExactly("foo", "bar");
@@ -35,7 +35,7 @@ class CsvCallbackHandlerTest {
         addField(rh, "foo");
         addField(rh, "bar");
 
-        NamedCsvRecordAssert.assertThat(rh.buildRecord().getWrappedRecord())
+        NamedCsvRecordAssert.assertThat(rh.buildRecord())
             .isStartingLineNumber(2)
             .fields().containsExactly(entry("head1", "foo"), entry("head2", "bar"));
     }
@@ -45,7 +45,7 @@ class CsvCallbackHandlerTest {
         final CsvCallbackHandler<String[]> rh = StringArrayHandler.of();
         process(rh);
 
-        assertThat(rh.buildRecord().getWrappedRecord())
+        assertThat(rh.buildRecord())
             .containsExactly("foo", "bar");
     }
 
@@ -56,7 +56,7 @@ class CsvCallbackHandlerTest {
         addField(rh, " foo");
         addField(rh, "bar ");
 
-        assertThat(rh.buildRecord().getWrappedRecord())
+        assertThat(rh.buildRecord())
             .containsExactly("foo", "bar");
     }
 

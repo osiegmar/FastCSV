@@ -16,6 +16,29 @@ public abstract class CsvCallbackHandler<T> {
     protected CsvCallbackHandler() {
     }
 
+    /// {@return whether the record denotes a comment}
+    ///
+    /// If this method returns `true`, the record is a comment and cannot be a regular record.
+    /// The [CsvReader] will skip the record if
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
+    /// is set to [CommentStrategy#SKIP].
+    protected abstract boolean isComment();
+
+    /// {@return whether the line is empty}
+    ///
+    /// If this method returns `true`, the line is empty.
+    /// The [CsvReader] will skip the record if
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)]
+    /// is set to `true`.
+    protected abstract boolean isEmptyLine();
+
+    /// {@return the number of fields in the record}
+    ///
+    /// The [CsvReader] will check the number of fields in the record against the number of fields in other records if
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)]
+    /// is set to `false`.
+    protected abstract int getFieldCount();
+
     /// Called at the beginning of each record.
     ///
     /// The `startingLineNumber` is the line number where the record starts (starting with 1).
@@ -64,12 +87,10 @@ public abstract class CsvCallbackHandler<T> {
     /// @param len    the length of the field value
     protected abstract void setComment(char[] buf, int offset, int len);
 
-    /// Called at the end of each CSV record to build an object representation of the record.
+    /// Called at the end of each CSV record to build the actual record representation.
     ///
-    /// The returned wrapper is used by the [CsvReader] in order to determine how to process the record.
-    ///
-    /// @return the record wrapper or `null` if the record should be ignored/skipped
-    protected abstract RecordWrapper<T> buildRecord();
+    /// @return the record or `null` if the record should be ignored/skipped as it is consumed by the callback handler.
+    protected abstract T buildRecord();
 
     /// Called at the end of the CSV reading process.
     protected void terminate() {

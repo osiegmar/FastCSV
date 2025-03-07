@@ -92,6 +92,21 @@ public abstract class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackH
         fields = new String[Math.min(DEFAULT_INITIAL_FIELDS_SIZE, maxFields)];
     }
 
+    @Override
+    protected boolean isComment() {
+        return comment;
+    }
+
+    @Override
+    protected boolean isEmptyLine() {
+        return emptyLine;
+    }
+
+    @Override
+    protected int getFieldCount() {
+        return fieldIdx;
+    }
+
     /// {@inheritDoc}
     /// Resets the internal state of this handler.
     @SuppressWarnings("checkstyle:HiddenField")
@@ -202,15 +217,6 @@ public abstract class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackH
         final String[] ret = new String[fieldIdx];
         System.arraycopy(fields, 0, ret, 0, fieldIdx);
         return ret;
-    }
-
-    /// Builds a record wrapper for the given record.
-    ///
-    /// @param rec the record, must not be `null`
-    /// @return the record wrapper
-    /// @throws NullPointerException if `rec` is `null`
-    protected RecordWrapper<T> buildWrapper(final T rec) {
-        return new RecordWrapper<>(comment, emptyLine, fieldIdx, rec);
     }
 
     /// Abstract builder for [AbstractInternalCsvCallbackHandler] subclasses.

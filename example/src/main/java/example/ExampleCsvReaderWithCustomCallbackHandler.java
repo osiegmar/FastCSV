@@ -15,7 +15,6 @@ import ch.randelshofer.fastdoubleparser.JavaDoubleParser;
 import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
-import de.siegmar.fastcsv.reader.RecordWrapper;
 import de.siegmar.fastcsv.writer.CsvWriter;
 
 /// Example for implementing a custom callback handler.
@@ -202,7 +201,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
         }
 
         @Override
-        protected RecordWrapper<Measurement> buildRecord() {
+        protected Measurement buildRecord() {
             if (recordCount++ == 0) {
                 // Skip header
                 return null;
@@ -213,7 +212,7 @@ public class ExampleCsvReaderWithCustomCallbackHandler {
                     .formatted(getFieldCount(), getStartingLineNumber()));
             }
 
-            return wrapRecord(new Measurement(id, timestamp, latitude, longitude, temperature));
+            return new Measurement(id, timestamp, latitude, longitude, temperature);
         }
 
     }
