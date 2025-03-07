@@ -6,11 +6,9 @@ import de.siegmar.fastcsv.util.Preconditions;
 
 /// Abstract base class for [CsvCallbackHandler] implementations.
 ///
-/// This class is for **internal use only** and should not be used directly. It will be sealed in a future release.
-/// Use [AbstractBaseCsvCallbackHandler] instead. Open an issue if you feel that you need this class.
-///
 /// @param <T> the type of the resulting records
-public abstract class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
+public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackHandler<T>
+    permits CsvRecordHandler, NamedCsvRecordHandler, StringArrayHandler {
 
     private static final int DEFAULT_INITIAL_FIELDS_SIZE = 32;
 
