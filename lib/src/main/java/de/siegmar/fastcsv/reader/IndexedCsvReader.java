@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import de.siegmar.fastcsv.util.Limits;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -283,8 +282,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;
-        @SuppressWarnings("removal")
-        private int maxBufferSize = Math.min(DEFAULT_MAX_BUFFER_SIZE, Limits.MAX_FIELD_SIZE);
+        private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
         private IndexedCsvReaderBuilder() {
         }

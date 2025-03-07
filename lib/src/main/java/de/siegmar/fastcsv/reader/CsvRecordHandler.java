@@ -15,26 +15,6 @@ import java.util.function.Consumer;
 /// This implementation is stateful and must not be reused.
 public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<CsvRecord> {
 
-    /// Constructs a new [CsvRecordHandler].
-    ///
-    /// @deprecated Use [#of()] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public CsvRecordHandler() {
-        super();
-    }
-
-    /// Constructs a new [CsvRecordHandler] with the given field modifier.
-    ///
-    /// @param fieldModifier the field modifier, must not be `null`
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public CsvRecordHandler(final FieldModifier fieldModifier) {
-        super(fieldModifier);
-    }
-
     private CsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                              final FieldModifier fieldModifier) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);

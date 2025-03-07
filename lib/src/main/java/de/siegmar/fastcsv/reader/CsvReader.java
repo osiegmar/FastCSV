@@ -19,7 +19,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import de.siegmar.fastcsv.util.Limits;
 import de.siegmar.fastcsv.util.Preconditions;
 
 /// This is the main class for reading CSV data.
@@ -380,8 +379,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private boolean ignoreDifferentFieldCount = true;
         private boolean acceptCharsAfterQuotes = true;
         private boolean detectBomHeader;
-        @SuppressWarnings("removal")
-        private int maxBufferSize = Math.min(DEFAULT_MAX_BUFFER_SIZE, Limits.MAX_FIELD_SIZE);
+        private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
         private CsvReaderBuilder() {
         }

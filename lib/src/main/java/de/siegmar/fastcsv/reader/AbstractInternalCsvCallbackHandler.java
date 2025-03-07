@@ -2,7 +2,6 @@ package de.siegmar.fastcsv.reader;
 
 import java.util.Objects;
 
-import de.siegmar.fastcsv.util.Limits;
 import de.siegmar.fastcsv.util.Preconditions;
 
 /// Abstract base class for [CsvCallbackHandler] implementations.
@@ -46,26 +45,6 @@ public abstract class AbstractInternalCsvCallbackHandler<T> extends CsvCallbackH
 
     /// Whether the line is empty.
     protected boolean emptyLine;
-
-    /// Constructs a new default instance.
-    ///
-    /// @deprecated Use [#AbstractInternalCsvCallbackHandler(int, int, int, FieldModifier)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    protected AbstractInternalCsvCallbackHandler() {
-        this(FieldModifiers.NOP);
-    }
-
-    /// Constructs a new instance with the given field modifier.
-    ///
-    /// @param fieldModifier the field modifier, must not be `null`
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#AbstractInternalCsvCallbackHandler(int, int, int, FieldModifier)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    protected AbstractInternalCsvCallbackHandler(final FieldModifier fieldModifier) {
-        this(Limits.MAX_FIELD_COUNT, Limits.MAX_FIELD_SIZE, Limits.MAX_RECORD_SIZE, fieldModifier);
-    }
 
     /// Constructs a new instance with the given configuration.
     ///

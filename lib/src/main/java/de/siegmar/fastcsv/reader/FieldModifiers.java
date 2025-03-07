@@ -1,6 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -33,28 +32,6 @@ public final class FieldModifiers {
 
     private FieldModifiers() {
         // Utility class
-    }
-
-    /// Builds modifier that modifies the field value with [String#toLowerCase(Locale)].
-    /// Comments are not modified.
-    ///
-    /// @param locale use the case transformation rules for this locale
-    /// @return a new field modifier that converts the input to lower-case.
-    /// @deprecated Use [#modify(Function)] instead.
-    @Deprecated(since = "3.7.0", forRemoval = true)
-    public static FieldModifier lower(final Locale locale) {
-        return modify(field -> field.toLowerCase(locale));
-    }
-
-    /// Builds modifier that modifies the field value with [String#toUpperCase(Locale)].
-    /// Comments are not modified.
-    ///
-    /// @param locale use the case transformation rules for this locale
-    /// @return a new field modifier that converts the input to upper-case.
-    /// @deprecated Use [#modify(Function)] instead.
-    @Deprecated(since = "3.7.0", forRemoval = true)
-    public static FieldModifier upper(final Locale locale) {
-        return modify(field -> field.toUpperCase(locale));
     }
 
     /// Builds a modifier that modifies the field value using the provided function.
