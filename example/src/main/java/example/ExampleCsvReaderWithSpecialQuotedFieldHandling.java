@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
-import de.siegmar.fastcsv.reader.RecordWrapper;
 
 /// Example for reading CSV data with custom handling of quoted fields.
 public class ExampleCsvReaderWithSpecialQuotedFieldHandling {
@@ -39,8 +38,8 @@ public class ExampleCsvReaderWithSpecialQuotedFieldHandling {
         }
 
         @Override
-        protected RecordWrapper<List<QuotableField>> buildRecord() {
-            return wrapRecord(List.copyOf(fields));
+        protected List<QuotableField> buildRecord() {
+            return List.copyOf(fields);
         }
 
     }

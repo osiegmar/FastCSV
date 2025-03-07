@@ -136,9 +136,9 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     }
 
     @Override
-    protected RecordWrapper<NamedCsvRecord> buildRecord() {
+    protected NamedCsvRecord buildRecord() {
         if (comment) {
-            return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER));
+            return new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER);
         }
 
         if (header == null) {
@@ -146,7 +146,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             return null;
         }
 
-        return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), false, header));
+        return new NamedCsvRecord(startingLineNumber, compactFields(), false, header);
     }
 
     /// A builder for [NamedCsvRecordHandler].

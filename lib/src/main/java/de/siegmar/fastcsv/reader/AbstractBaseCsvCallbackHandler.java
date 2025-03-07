@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.util.Objects;
-
 /// Base class for [CsvCallbackHandler] implementations that handles their own field storage and record building.
 ///
 /// This implementation is stateful and must not be reused.
@@ -110,17 +108,6 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// @param offset the offset of the field value in the buffer
     /// @param len    the length of the field value
     protected void handleComment(final char[] buf, final int offset, final int len) {
-    }
-
-    /// Builds a wrapper for the record that contains information necessary for the [CsvReader] in order to
-    /// determine how to process the record.
-    ///
-    /// @param record the actual record to be returned by the [CsvReader], must not be `null`
-    /// @return the wrapper for the actual record
-    /// @throws NullPointerException if `null` is passed for `record`
-    protected RecordWrapper<T> wrapRecord(final T record) {
-        return new RecordWrapper<>(comment, emptyLine, fieldCount,
-            Objects.requireNonNull(record, "record must not be null"));
     }
 
 }

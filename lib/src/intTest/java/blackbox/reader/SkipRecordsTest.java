@@ -13,7 +13,6 @@ import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
 import de.siegmar.fastcsv.reader.FieldModifiers;
-import de.siegmar.fastcsv.reader.RecordWrapper;
 import testutil.CsvRecordAssert;
 
 class SkipRecordsTest {
@@ -64,8 +63,8 @@ class SkipRecordsTest {
             }
 
             @Override
-            protected RecordWrapper<String[]> buildRecord() {
-                return wrapRecord(fields.toArray(new String[0]));
+            protected String[] buildRecord() {
+                return fields.toArray(new String[0]);
             }
         };
         assertThat(crb.build(cbh, input).stream()).hasSize(2);
