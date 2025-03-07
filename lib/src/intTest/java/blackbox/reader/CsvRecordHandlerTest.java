@@ -14,24 +14,6 @@ class CsvRecordHandlerTest {
     private static final String TEST_DATA = " foo , bar ";
 
     @Test
-    void defaultConstructor() {
-        @SuppressWarnings("removal")
-        final CsvRecordHandler handler = new CsvRecordHandler();
-        assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())
-            .singleElement(CsvRecordAssert.CSV_RECORD)
-            .fields().containsExactly(" foo ", " bar ");
-    }
-
-    @Test
-    void fieldModifierConstructor() {
-        @SuppressWarnings("removal")
-        final CsvRecordHandler handler = new CsvRecordHandler(FieldModifiers.TRIM);
-        assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())
-            .singleElement(CsvRecordAssert.CSV_RECORD)
-            .fields().containsExactly("foo", "bar");
-    }
-
-    @Test
     void defaultHandler() {
         final CsvRecordHandler handler = CsvRecordHandler.of();
         assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())
