@@ -50,21 +50,23 @@ CsvReader csvReader = CsvReader.builder()
 
 ## SimpleFieldModifier
 
-The `SimpleFieldModifier` class has been removed. It was a simple implementation of the `FieldModifier` interface that is now replaced by the `FieldModifiers#modify(Function<String, String>)` method.
+The `SimpleFieldModifier` class has been deprecated in 3.7.0 and are now removed in 4.0.0.
 
 Old way:
 ```java
-SimpleFieldModifier normalizeWhitespaces = field -> field.replaceAll("\\s", " ");
+FieldModifier normalizeWhitespaces = 
+    (SimpleFieldModifier) field -> field.replaceAll("\\s", " ");
 ```
 
 New way:
 ```java
-FieldModifier normalizeWhitespaces = FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
+FieldModifier normalizeWhitespaces = 
+    FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
 ```
 
 ## Upper and lower case field modifiers
 
-The edge-case methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)` have been removed in favor of a more versatile `FieldModifiers#modify(Function<String, String>)` method.
+The edge-case methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)` were deprecated in 3.7.0 and now have been removed in 4.0.0.
 
 Old way:
 ```java
