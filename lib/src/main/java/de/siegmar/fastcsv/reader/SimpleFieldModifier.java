@@ -5,6 +5,8 @@ package de.siegmar.fastcsv.reader;
 /// When implementing this interface, comments are ignored (not modified), by default.
 ///
 /// @see FieldModifiers
+/// @deprecated Use [FieldModifiers#modify(java.util.function.Function)] instead.
+@Deprecated(since = "3.7.0", forRemoval = true)
 @FunctionalInterface
 public interface SimpleFieldModifier extends FieldModifier {
 

@@ -25,27 +25,27 @@ public class ExampleCsvReaderWithFieldModifier {
 
         System.out.println("Custom modifier (trim/lowercase on first record):");
         CsvReader.builder()
-            .build(CsvRecordHandler.of(c -> c.fieldModifier(customModifier())), DATA)
+            .build(CsvRecordHandler.of(c -> c.fieldModifier(new CustomModifier())), DATA)
             .forEach(System.out::println);
     }
 
     private static FieldModifier combinedModifier() {
         return FieldModifiers.TRIM
-            .andThen(FieldModifiers.lower(Locale.ENGLISH));
+            .andThen(FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH)));
     }
 
-    private static FieldModifier customModifier() {
-        return new FieldModifier() {
-            @Override
-            public String modify(final long startingLineNumber,
-                                 final int fieldIdx,
-                                 final boolean quoted,
-                                 final String field) {
-                return startingLineNumber == 1
-                    ? field.trim().toLowerCase(Locale.ENGLISH)
-                    : field;
+    private static class CustomModifier implements FieldModifier {
+
+        @Override
+        public String modify(final long startingLineNumber, final int fieldIdx,
+                             final boolean quoted, final String field) {
+            if (startingLineNumber == 1) {
+                return field.trim().toLowerCase(Locale.ENGLISH);
             }
-        };
+
+            return field;
+        }
+
     }
 
 }

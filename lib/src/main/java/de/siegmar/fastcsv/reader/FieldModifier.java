@@ -4,7 +4,6 @@ package de.siegmar.fastcsv.reader;
 /// a CSV record before storing them in the resulting object.
 ///
 /// @see FieldModifiers
-/// @see SimpleFieldModifier
 public interface FieldModifier {
 
     /// Gets called for every single field (that is not a comment).

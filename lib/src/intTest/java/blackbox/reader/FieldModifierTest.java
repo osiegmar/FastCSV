@@ -56,14 +56,45 @@ class FieldModifierTest {
             .containsExactly("foo", "bar", "baz");
     }
 
+    @SuppressWarnings("removal")
+    @Test
+    void lower() {
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.lower(Locale.ROOT)));
+
+        assertThat(crb.build(cbh, "FOO,BAR").stream())
+            .singleElement(CsvRecordAssert.CSV_RECORD)
+            .fields()
+            .containsExactly("foo", "bar");
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void upper() {
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.upper(Locale.ROOT)));
+
+        assertThat(crb.build(cbh, "foo,bar").stream())
+            .singleElement(CsvRecordAssert.CSV_RECORD)
+            .fields()
+            .containsExactly("FOO", "BAR");
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void simple() {
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c
+            .fieldModifier((SimpleFieldModifier) field -> "<" + field + ">"));
+
+        assertThat(crb.build(cbh, "foo,bar").stream())
+            .singleElement(CsvRecordAssert.CSV_RECORD)
+            .fields()
+            .containsExactly("<foo>", "<bar>");
+    }
+
     @Test
     void combination() {
         crb.commentStrategy(CommentStrategy.READ);
 
-        final SimpleFieldModifier addSpaces = field -> " " + field + " ";
-        final FieldModifier modifier = addSpaces
-            .andThen(FieldModifiers.upper(Locale.ROOT))
-            .andThen(FieldModifiers.lower(Locale.ROOT))
+        final FieldModifier modifier = FieldModifiers.modify(field -> field.toLowerCase(Locale.ROOT))
             .andThen(FieldModifiers.TRIM);
 
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
