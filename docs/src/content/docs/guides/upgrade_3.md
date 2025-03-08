@@ -42,7 +42,7 @@ CsvReader csvReader = CsvReader.builder()
 
 ## SimpleFieldModifier
 
-The `SimpleFieldModifier` class has been removed. It was a simple implementation of the `FieldModifier` interface that is now replaced by the `FieldModifiers#transform(Function<String, String>)` method.
+The `SimpleFieldModifier` class has been removed. It was a simple implementation of the `FieldModifier` interface that is now replaced by the `FieldModifiers#modify(Function<String, String>)` method.
 
 Old way:
 ```java
@@ -51,12 +51,12 @@ SimpleFieldModifier normalizeWhitespaces = field -> field.replaceAll("\\s", " ")
 
 New way:
 ```java
-FieldModifier normalizeWhitespaces = FieldModifiers.transform(field -> field.replaceAll("\\s", " "));
+FieldModifier normalizeWhitespaces = FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
 ```
 
 ## Upper and lower case field modifiers
 
-The edge-case methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)` have been removed in favor of a more versatile `FieldModifiers#transform(Function<String, String>)` method.
+The edge-case methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)` have been removed in favor of a more versatile `FieldModifiers#modify(Function<String, String>)` method.
 
 Old way:
 ```java
@@ -66,6 +66,6 @@ FieldModifier toUpperFieldModifier = FieldModifiers.upper(Locale.ENGLISH);
 
 New way:
 ```java
-FieldModifier toLowerFieldModifier = FieldModifiers.transform(field -> field.toLowerCase(Locale.ENGLISH));
-FieldModifier toUpperFieldModifier = FieldModifiers.transform(field -> field.toUpperCase(Locale.ENGLISH));
+FieldModifier toLowerFieldModifier = FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
+FieldModifier toUpperFieldModifier = FieldModifiers.modify(field -> field.toUpperCase(Locale.ENGLISH));
 ```

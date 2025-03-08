@@ -58,7 +58,7 @@ class FieldModifierTest {
         crb.commentStrategy(CommentStrategy.READ);
 
         final FieldModifier modifier = FieldModifiers.TRIM
-            .andThen(FieldModifiers.transform(field -> "<" + field + ">"));
+            .andThen(FieldModifiers.modify(field -> "<" + field + ">"));
 
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
 
