@@ -12,6 +12,14 @@ For a full list of changes, including new features, see the [changelog](https://
 - The minimum Java version is now 17 (compared to 11 in FastCSV 3.x)
 - This also raised the required Android API level from version 33 (Android 13) to 34 (Android 14)
 
+## Record wrapper removal
+
+The `RecordWrapper` class has been removed. It was a wrapper around the `CsvRecord` class that was used to provide parsing context information to the reading process.
+
+If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, all you need to do is to return the `CsvRecord` instance directly instead of wrapping it in a `RecordWrapper`.
+
+If you implemented a custom callback handler by implementing the `CsvCallbackHandler` interface, you also have to implement three additional methods: `isComment`, `isEmptyLine` and `getFieldCount`. Those methods simply have to return the information that was previously provided by the `RecordWrapper` instance.
+
 ## Configuring limits
 
 In FastCSV 3.2.0, the default limits for the maximum number of fields per record and the maximum field size were made configurable
