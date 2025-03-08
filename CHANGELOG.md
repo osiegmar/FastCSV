@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated from Java 11 to Java 17
 - Removed record wrapper and moved its methods to `CsvCallbackHandler`
+- Sealed internal class `AbstractInternalCsvCallbackHandler`
 
 ### Removed
-- Removed deprecated methods and classes
+- Removed deprecated `Limits` class
+- Removed deprecated constructors of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler`
+- Removed deprecated `SimpleFieldModifier` 
+- Removed deprecated methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)`
 
 ## [Unreleased]
 ### Added

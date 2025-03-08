@@ -20,6 +20,31 @@ If you implemented a custom callback handler by extending `AbstractBaseCsvCallba
 
 If you implemented a custom callback handler by implementing the `CsvCallbackHandler` interface, you also have to implement three additional methods: `isComment`, `isEmptyLine` and `getFieldCount`. Those methods simply have to return the information that was previously provided by the `RecordWrapper` instance.
 
+## Callback handler instantiation
+
+The constructors of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler` have been deprecated in 3.6.0 and now have been removed in 4.0.0.
+
+Just use the builder methods instead:
+
+Old way:
+```java
+CsvRecordHandler defaultHandler = new CsvRecordHandler();
+CsvRecordHandler trimmingHandler = new CsvRecordHandler(FieldModifiers.TRIM);
+```
+
+New way:
+```java
+CsvRecordHandler defaultHandler = CsvRecordHandler.of();
+CsvRecordHandler trimmingHandler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
+
+// or
+CsvRecordHandler trimmingHandler = CsvRecordHandler.builder()
+    .fieldModifier(FieldModifiers.TRIM)
+    .build();
+```
+
+This change was necessary because callback handlers now have more configuration options, making constructor initialization impractical.
+
 ## Configuring limits
 
 In FastCSV 3.2.0, the default limits for the maximum number of fields per record and the maximum field size were made configurable
