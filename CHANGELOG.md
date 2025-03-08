@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0]
 ### Changed
 - Updated from Java 11 to Java 17
+- Removed record wrapper and moved its methods to `CsvCallbackHandler`
 
 ### Removed
 - Removed deprecated methods and classes
