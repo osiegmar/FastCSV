@@ -87,11 +87,9 @@ public abstract class CsvCallbackHandler<T> {
     /// @param len    the length of the field value
     protected abstract void setComment(char[] buf, int offset, int len);
 
-    /// Called at the end of each CSV record to build an object representation of the record.
+    /// Called at the end of each CSV record to build the actual record representation.
     ///
-    /// The returned wrapper is used by the [CsvReader] in order to determine how to process the record.
-    ///
-    /// @return the record wrapper or `null` if the record should be ignored/skipped
+    /// @return the record or `null` if the record should be ignored/skipped as it is consumed by the callback handler.
     protected abstract T buildRecord();
 
     /// Called at the end of the CSV reading process.
