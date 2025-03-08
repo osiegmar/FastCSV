@@ -20,7 +20,7 @@ import java.util.function.Function;
 public final class FieldModifiers {
 
     /// Modifier that does not modify anything.
-    public static final FieldModifier NOP = modify(field -> field);
+    public static final FieldModifier NOP = new FieldModifier() { };
 
     /// Modifier that modifies the field value with [String#trim()].
     /// Comments are not modified.
