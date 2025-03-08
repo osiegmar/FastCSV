@@ -54,13 +54,13 @@ The `SimpleFieldModifier` class has been deprecated in 3.7.0 and are now removed
 
 Old way:
 ```java
-FieldModifier normalizeWhitespaces = 
+FieldModifier normalizeWhitespaces =
     (SimpleFieldModifier) field -> field.replaceAll("\\s", " ");
 ```
 
 New way:
 ```java
-FieldModifier normalizeWhitespaces = 
+FieldModifier normalizeWhitespaces =
     FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
 ```
 
