@@ -57,10 +57,10 @@ class IndexedCsvReaderTest {
         try (var csv = buildSinglePage("")) {
             final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.getPageCount())
+            softly.assertThat(index.pages().size())
                 .isZero();
 
-            softly.assertThat(index.getRecordCount())
+            softly.assertThat(index.recordCount())
                 .isZero();
 
             softly.assertThatThrownBy(() -> csv.readPage(0))
@@ -88,10 +88,10 @@ class IndexedCsvReaderTest {
         try (var csv = buildSinglePage("abc\nüöä\nabc")) {
             final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.getPageCount())
+            softly.assertThat(index.pages().size())
                 .isEqualTo(3);
 
-            softly.assertThat(index.getRecordCount())
+            softly.assertThat(index.recordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -113,7 +113,7 @@ class IndexedCsvReaderTest {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), StandardCharsets.UTF_8)) {
             final CsvIndex index = csv.getIndex();
 
-            assertThat(index.getPageCount())
+            assertThat(index.pages().size())
                 .isEqualTo(3);
         }
     }
@@ -126,10 +126,10 @@ class IndexedCsvReaderTest {
         try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
             final CsvIndex index = csv.getIndex();
 
-            assertThat(index.getPageCount())
+            assertThat(index.pages().size())
                 .isEqualTo(2);
 
-            assertThat(index.getRecordCount())
+            assertThat(index.recordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -320,7 +320,7 @@ class IndexedCsvReaderTest {
         void pageOutOfBounds() {
             assertThatThrownBy(() -> buildSinglePage("foo").readPage(10))
                 .isInstanceOf(IndexOutOfBoundsException.class)
-                .hasMessage("Index 10 out of bounds for length 1");
+                .hasMessage("Index: 10 Size: 1");
         }
 
         @ParameterizedTest
@@ -475,9 +475,9 @@ class IndexedCsvReaderTest {
             try (var csv = buildSinglePage("012")) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount()).isOne();
+                assertThat(index.pages().size()).isOne();
 
-                assertThat(index.getRecordCount()).isOne();
+                assertThat(index.recordCount()).isOne();
 
                 assertThat(csv.readPage(0))
                     .singleElement(CsvRecordAssert.CSV_RECORD)
@@ -493,10 +493,10 @@ class IndexedCsvReaderTest {
             try (var csv = buildSinglePage("012,foo\n345,bar")) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount())
+                assertThat(index.pages().size())
                     .isEqualTo(2);
 
-                assertThat(index.getRecordCount())
+                assertThat(index.recordCount())
                     .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
@@ -534,10 +534,10 @@ class IndexedCsvReaderTest {
             try (csv) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount())
+                assertThat(index.pages().size())
                     .isEqualTo(3);
 
-                assertThat(index.getRecordCount())
+                assertThat(index.recordCount())
                     .isEqualTo(5L);
 
                 assertThat(csv.readPage(0))

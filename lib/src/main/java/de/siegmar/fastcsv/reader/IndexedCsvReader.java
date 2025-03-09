@@ -131,12 +131,12 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("commentCharacter=" + commentCharacter)
             .toString();
         final var actualSignature = new StringJoiner(", ")
-            .add("bomHeaderLength=" + csvIndex.getBomHeaderLength())
-            .add("fileSize=" + csvIndex.getFileSize())
-            .add("fieldSeparator=" + csvIndex.getFieldSeparator())
-            .add("quoteCharacter=" + csvIndex.getQuoteCharacter())
-            .add("commentStrategy=" + csvIndex.getCommentStrategy())
-            .add("commentCharacter=" + csvIndex.getCommentCharacter())
+            .add("bomHeaderLength=" + csvIndex.bomHeaderLength())
+            .add("fileSize=" + csvIndex.fileSize())
+            .add("fieldSeparator=" + csvIndex.fieldSeparator())
+            .add("quoteCharacter=" + csvIndex.quoteCharacter())
+            .add("commentStrategy=" + csvIndex.commentStrategy())
+            .add("commentCharacter=" + csvIndex.commentCharacter())
             .toString();
 
         Preconditions.checkArgument(expectedSignature.equals(actualSignature),
@@ -200,7 +200,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     /// @throws IndexOutOfBoundsException if the file does not contain the specified page
     public List<T> readPage(final int page) throws IOException {
         Preconditions.checkArgument(page >= 0, "page must be >= 0");
-        return readPage(csvIndex.getPage(page));
+        return readPage(csvIndex.pages().get(page));
     }
 
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
@@ -209,8 +209,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         try {
             fileLock.lock();
 
-            raf.seek(page.getOffset());
-            csvParser.reset(page.getStartingLineNumber() - 1);
+            raf.seek(page.offset());
+            csvParser.reset(page.startingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
                 final RecordWrapper<T> rec = csvRecordHandler.buildRecord();
