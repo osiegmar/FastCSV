@@ -19,7 +19,7 @@ class IndexedReaderBomHeaderTest {
     @MethodSource("blackbox.reader.CsvReaderBomHeaderTest#bomFile")
     void bom(final Path testFile) throws IOException {
         try (var index = crb.ofCsvRecord(testFile)) {
-            assertThat(index.getIndex()).satisfies(i -> assertThat(i.getPageCount()).isOne());
+            assertThat(index.getIndex()).satisfies(i -> assertThat(i.pages().size()).isOne());
             assertThat(index.readPage(0))
                 .satisfiesExactly(
                     c -> CsvRecordAssert.assertThat(c).fields().containsExactly("foo", "üÜß"),

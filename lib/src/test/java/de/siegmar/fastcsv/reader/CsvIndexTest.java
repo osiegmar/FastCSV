@@ -4,7 +4,6 @@ import static de.siegmar.fastcsv.reader.CommentStrategy.NONE;
 import static de.siegmar.fastcsv.reader.CommentStrategy.READ;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -100,9 +99,6 @@ class CsvIndexTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     void differentPage() {
-        final List<CsvIndex.CsvPage> nullPage = new ArrayList<>();
-        nullPage.add(null);
-
         final List wrongTypePage = List.of(new Object());
 
         assertThat(defaultBuilder.build())
@@ -113,7 +109,6 @@ class CsvIndexTest {
             .isNotEqualTo(defaultBuilder.pages(
                 List.of(new CsvIndex.CsvPage(0, 2))
             ).build())
-            .isNotEqualTo(defaultBuilder.pages(nullPage).build())
             .isNotEqualTo(defaultBuilder.pages(wrongTypePage).build());
     }
 

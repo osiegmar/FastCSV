@@ -104,3 +104,49 @@ New way:
 FieldModifier toLowerFieldModifier = FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
 FieldModifier toUpperFieldModifier = FieldModifiers.modify(field -> field.toUpperCase(Locale.ENGLISH));
 ```
+
+## Changed implementation of `CsvIndex` and `CsvPage` to Java records
+
+The `CsvIndex` and `CsvPage` classes have been changed to Java records. With this change, a few method calls have changed as well.
+
+Old way:
+```java
+CsvIndex csvIndex = yourCodeToBuildTheIndex();
+
+// Data types haven't changed, so omitting them here
+var bomHeaderLength = csvIndex.getBomHeaderLength();
+var fileSize = csvIndex.getFileSize();
+var fieldSeparator = csvIndex.getFieldSeparator();
+var quoteCharacter = csvIndex.getQuoteCharacter();
+var commentStrategy = csvIndex.getCommentStrategy();
+var commentCharacter = csvIndex.getCommentCharacter();
+var recordCount = csvIndex.getRecordCount();
+var pageCount = csvIndex.getPageCount();
+var firstPage = csvIndex.getPage(0);
+var offset = firstPage.getOffset();
+var lineNumber = firstPage.getStartingLineNumber();
+```
+
+New way:
+```java
+CsvIndex csvIndex = yourCodeToBuildTheIndex();
+
+// Simple get-prefix removal
+var bomHeaderLength = csvIndex.bomHeaderLength();
+var fileSize = csvIndex.fileSize();
+var fieldSeparator = csvIndex.fieldSeparator();
+var quoteCharacter = csvIndex.quoteCharacter();
+var commentStrategy = csvIndex.commentStrategy();
+var commentCharacter = csvIndex.commentCharacter();
+var recordCount = csvIndex.recordCount();
+
+// Replaced getPageCount() with pages().size()
+var pageCount = csvIndex.pages().size();
+
+// Replaced getPage(int) with direct access to the pages list
+var firstPage = csvIndex.pages().getFirst();
+
+// Again, simple get-prefix removal
+var offset = firstPage.offset();
+var lineNumber = firstPage.startingLineNumber();
+```
