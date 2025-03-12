@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced record wrapper by moving its methods to `CsvCallbackHandler`
 - Sealed internal class `AbstractInternalCsvCallbackHandler`
 - Changed implementation of `CsvIndex` and `CsvPage` to Java records
+- `CsvWriterBuilder#toConsole()` writes to `System.console().writer()` instead of `System.out`
 
 ### Removed
 - Removed deprecated `Limits` class

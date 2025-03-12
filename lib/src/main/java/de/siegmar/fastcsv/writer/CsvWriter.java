@@ -5,6 +5,7 @@ import static de.siegmar.fastcsv.util.Util.LF;
 import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
+import java.io.Console;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -520,10 +521,13 @@ public final class CsvWriter implements Closeable, Flushable {
         ///
         /// @return a new CsvWriter instance - never `null`.
         ///     Calls to [CsvWriter#close()] are ignored, standard out remains open.
-        @SuppressWarnings("checkstyle:RegexpMultiline")
+        /// @throws IllegalStateException if no console is available
         public CsvWriter toConsole() {
-            final Writer writer = new NoCloseWriter(new OutputStreamWriter(System.out, Charset.defaultCharset()));
-            return csvWriter(writer, 0, false, true);
+            final Console console = System.console();
+            if (console == null) {
+                throw new IllegalStateException("No console available");
+            }
+            return csvWriter(console.writer(), 0, false, true);
         }
 
         private CsvWriter csvWriter(final Writer writer, final int bufferSize,
