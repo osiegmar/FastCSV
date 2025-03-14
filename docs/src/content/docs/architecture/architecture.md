@@ -110,7 +110,9 @@ CsvReaderBuilder builder = CsvReader.builder()
 FieldModifier fieldModifier = FieldModifiers.NOP;
 
 // Initializes a callback handler for CsvRecord objects and set the field modifier.
-CsvCallbackHandler<CsvRecord> callbackHandler = new NamedCsvRecordHandler(fieldModifier);
+NamedCsvRecordHandler callbackHandler = NamedCsvRecordHandler.of(c -> c.
+    .fieldModifier(fieldModifier)
+);
 
 // Use the builder to instantiate a CsvReader while passing the callback handler and the CSV file.
 try (CsvReader<CsvRecord> csv = builder.build(callbackHandler, file)) {
