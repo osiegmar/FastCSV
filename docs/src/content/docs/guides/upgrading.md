@@ -5,252 +5,173 @@ sidebar:
   order: 3
 ---
 
-This document describes the **breaking** changes when upgrading from earlier versions of FastCSV to 3.x.
+This document describes the **breaking** changes when upgrading from earlier versions of FastCSV to 4.x.
 For a full list of changes, including new features, see the [changelog](https://github.com/osiegmar/FastCSV/blob/main/CHANGELOG.md).
 
-## Upgrading from 2.x
+## Requirements
 
-This section describes the **breaking** changes when migrating from FastCSV 2.x to 3.x.
+The following table shows the minimum requirements for each version of FastCSV.
 
-### Requirement changes
+| FastCSV version | Support status | Java version | Android API level |
+|-----------------|----------------|--------------|-------------------|
+| 4.x             | supported      | 17           | 34 (Android 14)   |
+| 3.x             | supported      | 11           | 33 (Android 13)   |
+| 2.x             | support ended  | 8            | 26 (Android 8)    |
+| 1.x             | support ended  | 7            | N/A               |
 
-- The minimum Java version is now 11 (compared to 8 in earlier versions)
-- This also raised the required Android API level from version 26 (Android 8) to 33 (Android 13)
+## Upgrading from 3.x
 
-### New limitations
+This section describes the **breaking** changes when migrating from FastCSV 3.x to 4.x.
 
-- The maximum number of fields per record is now limited to 16,384 to avoid `OutOfMemoryErrors` caused
-  by excessive field counts.
-- The maximum record size is now limited to (64 MiB) to prevent `OutOfMemoryErrors`.
+### Internal buffer flushing
 
-### Naming changes
+In FastCSV 2.x and 3.x, the CsvWriter instantiated via `CsvWriterBuilder#build(Writer)` flushed the internal buffer to the `Writer` after each record.
 
-#### Rows are now called Records (aligned to RFC 4180)
+**This is no longer the case!**
 
-**Reading CSV records:**
+In FastCSV 4.x, the CsvWriter for `OutputStream` and `Writer` behaves the same way: it writes the internal buffer to the `OutputStream` or `Writer` only when the internal buffer is full or when you call `flush()`. The buffer can be disabled by calling `CsvWriterBuilder#bufferSize(0)`.
 
+As a consequence, you no longer need or should wrap the `Writer` in a `BufferedWriter` to ensure proper performance, unless you haven't disabled FastCSV's internal buffer (`CsvWriterBuilder#bufferSize(0)`).
+
+:::caution
+This is a tricky one, as the behavior of this method has changed but the API has not! Check your code to ensure that you are not relying on the old behavior.
+:::
+
+### Record wrapper removal
+
+The `RecordWrapper` class has been removed. It was a wrapper around the `CsvRecord` class that was used to provide parsing context information to the reading process.
+
+If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, all you need to do is to return the `CsvRecord` instance directly instead of wrapping it in a `RecordWrapper`.
+
+If you implemented a custom callback handler by implementing the `CsvCallbackHandler` interface, you also have to implement three additional methods: `isComment`, `isEmptyLine` and `getFieldCount`. Those methods simply have to return the information that was previously provided by the `RecordWrapper` instance.
+
+### Callback handler instantiation
+
+The constructors of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler` have been deprecated in 3.6.0 and now have been removed in 4.0.0.
+
+Just use the builder methods instead:
+
+Old way:
 ```java
-try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
-    csv.forEach(System.out::println);
-}
+CsvRecordHandler defaultHandler = new CsvRecordHandler();
+CsvRecordHandler trimmingHandler = new CsvRecordHandler(FieldModifiers.TRIM);
 ```
 
-**Write CSV records:**
-
+New way:
 ```java
-try (CsvWriter csv = CsvWriter.builder().build(file)) {
-    csv
-        .writeRecord("header1", "header2")
-        .writeRecord("value1", "value2");
-}
+CsvRecordHandler defaultHandler = CsvRecordHandler.of();
+CsvRecordHandler trimmingHandler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
+
+// or
+CsvRecordHandler trimmingHandler = CsvRecordHandler.builder()
+    .fieldModifier(FieldModifiers.TRIM)
+    .build();
 ```
 
-#### Method names
+This change was necessary because callback handlers now have more configuration options, making constructor initialization impractical.
 
-- In `CsvReaderBuilder`:
-    - `skipEmptyRows` is now `skipEmptyLines`
-    - `errorOnDifferentFieldCount` is now `ignoreDifferentFieldCount` (opposite meaning!)
-    - `build` methods with callback handlers and `ofCsvRecord` / `ofNamedCsvRecord` as convenience methods
-- In `CsvRecord` (former `CsvRow`):
-    - `getOriginalLineNumber` is now `getStartingLineNumber`
+### Configuring limits
 
-### NamedCsvReader removed/replaced
+In FastCSV 3.2.0, the default limits for the maximum number of fields per record and the maximum field size were made configurable
+via system properties `fastcsv.max.field.count` and `fastcsv.max.field.size`.
+In version 3.6.0 these properties were deprecated in favor of a more flexible configuration via the CsvReader and CallbackHandler builder methods.
+In version 4.0.0 those deprecated properties were removed.
 
-A distinct `NamedCsvReader` is no longer needed as the `CsvReader` now supports callbacks for header and record
-processing.
-
+Old way:
 ```java
-CsvReader.builder().ofNamedCsvRecord("header 1,header 2\nfield 1,field 2")
-    .forEach(rec -> System.out.println(rec.getField("header2")));
+// Set the maximum number of fields per record
+System.setProperty("fastcsv.max.field.count", "16384");
+
+// Set the maximum buffer size and maximum field size
+System.setProperty("fastcsv.max.field.size", "16777216");
 ```
 
-or with a custom header:
-
+New way:
 ```java
-NamedCsvRecordHandler callbackHandler = NamedCsvRecordHandler.builder()
-    .header("header1", "header2")
+CsvRecordHandler handler = CsvRecordHandler.builder()
+    .maxFields(16_384)
+    .maxFieldSize(16_777_216)
     .build();
 
-CsvReader.builder().build(callbackHandler, "field 1,field 2")
-    .forEach(rec -> System.out.println(rec.getField("header2")));
+CsvReader csvReader = CsvReader.builder()
+    .maxBufferSize(16_777_216)
+    .build(handler, file);
 ```
 
-### Extended/Refactored quote strategies
+### SimpleFieldModifier
 
-- `QuoteStrategy` changed from an enum to an interface (see `QuoteStrategies` for the default implementations)
-- The `REQUIRED` quote strategy is removed as it is the default (no quote strategy is needed)
-
-**Example to enable always quoting:**
-
-```java
-CsvWriter.builder()
-    .quoteStrategy(QuoteStrategies.ALWAYS);
-```
-
-### Exception changes
-
-`MalformedCsvException` is now `CsvParseException` and is thrown instead of `IOException` for non-IO related errors.
-
-## Upgrading from 1.x
-
-This section describes the **breaking** changes when migrating from FastCSV 1.x to 3.x.
-
-### Reader
-
-#### Configuring the reader
+The `SimpleFieldModifier` class has been deprecated in 3.7.0 and removed in 4.0.0.
 
 Old way:
 ```java
-CsvReader csvReader = new CsvReader();
-csvReader.setFieldSeparator(',');
-csvReader.setTextDelimiter('"');
-csvReader.setSkipEmptyRows(true);
-csvReader.setErrorOnDifferentFieldCount(false);
+FieldModifier normalizeWhitespaces =
+    (SimpleFieldModifier) field -> field.replaceAll("\\s", " ");
 ```
 
 New way:
 ```java
-CsvReader.builder()
-    .fieldSeparator(',')
-    .quoteCharacter('"')
-    .skipEmptyLines(true)
-    .ignoreDifferentFieldCount(true);   
+FieldModifier normalizeWhitespaces =
+    FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
 ```
 
-#### Reading data from file
+### Upper and lower case field modifiers
+
+The edge-case methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)` were deprecated in 3.7.0 and removed in 4.0.0.
 
 Old way:
 ```java
-try (CsvParser csvParser = new CsvReader().parse(file, UTF_8)) {
-    CsvRow row;
-    while ((row = csvParser.nextRow()) != null) {
-        System.out.println("First field of row: " + row.getField(0));
-    }
-}
+FieldModifier toLowerFieldModifier = FieldModifiers.lower(Locale.ENGLISH);
+FieldModifier toUpperFieldModifier = FieldModifiers.upper(Locale.ENGLISH);
 ```
 
 New way:
 ```java
-try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
-    csv.forEach(rec ->
-        System.out.println("First field of record: " + rec.getField(0))
-    );
-}
+FieldModifier toLowerFieldModifier = FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
+FieldModifier toUpperFieldModifier = FieldModifiers.modify(field -> field.toUpperCase(Locale.ENGLISH));
 ```
 
-#### Reading data with a header from file
+### Changed implementation of `CsvIndex` and `CsvPage` to Java records
+
+The `CsvIndex` and `CsvPage` classes have been changed to Java records. With this change, a few method calls have changed as well.
 
 Old way:
 ```java
-CsvReader csvReader = new CsvReader();
-csvReader.setContainsHeader(true);
-try (CsvParser csvParser = csvReader.parse(file, UTF_8)) {
-    CsvRow row;
-    while ((row = csvParser.nextRow()) != null) {
-        System.out.println("Field named firstname: " + row.getField("firstname"));
-    }
-}
+CsvIndex csvIndex = yourCodeToBuildTheIndex();
+
+// Data types haven't changed, so omitting them here
+var bomHeaderLength = csvIndex.getBomHeaderLength();
+var fileSize = csvIndex.getFileSize();
+var fieldSeparator = csvIndex.getFieldSeparator();
+var quoteCharacter = csvIndex.getQuoteCharacter();
+var commentStrategy = csvIndex.getCommentStrategy();
+var commentCharacter = csvIndex.getCommentCharacter();
+var recordCount = csvIndex.getRecordCount();
+var pageCount = csvIndex.getPageCount();
+var firstPage = csvIndex.getPage(0);
+var offset = firstPage.getOffset();
+var lineNumber = firstPage.getStartingLineNumber();
 ```
 
 New way:
 ```java
-try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().ofNamedCsvRecord(file)) {
-    csv.forEach(rec ->
-        System.out.println("Field named firstname: " + rec.getField("firstname"))
-    );
-}
+CsvIndex csvIndex = yourCodeToBuildTheIndex();
+
+// Simple get-prefix removal
+var bomHeaderLength = csvIndex.bomHeaderLength();
+var fileSize = csvIndex.fileSize();
+var fieldSeparator = csvIndex.fieldSeparator();
+var quoteCharacter = csvIndex.quoteCharacter();
+var commentStrategy = csvIndex.commentStrategy();
+var commentCharacter = csvIndex.commentCharacter();
+var recordCount = csvIndex.recordCount();
+
+// Replaced getPageCount() with pages().size()
+var pageCount = csvIndex.pages().size();
+
+// Replaced getPage(int) with direct access to the pages list
+var firstPage = csvIndex.pages().getFirst();
+
+// Again, simple get-prefix removal
+var offset = firstPage.offset();
+var lineNumber = firstPage.startingLineNumber();
 ```
-
-#### Read an entire file at once
-
-Old way:
-```java
-CsvContainer csv = new CsvReader().read(file, UTF_8);
-```
-
-New way:
-
-The container concept has been removed, but you can
-easily build something similar using the Java Stream API.
-```java
-List<CsvRecord> data;
-try (CsvReader<CsvRecord> csvReader = CsvReader.builder().ofCsvRecord(file)) {
-    data = csvReader.stream().toList();
-}
-```
-
-### Writer
-
-#### Configuring the writer
-
-Old way:
-```java
-CsvWriter csvWriter = new CsvWriter();
-csvWriter.setFieldSeparator(',');
-csvWriter.setTextDelimiter('"');
-csvWriter.setAlwaysDelimitText(true);
-csvWriter.setLineDelimiter(new char[]{'\r','\n'});
-```
-
-New way:
-```java
-CsvWriter.builder()
-    .fieldSeparator(',')
-    .quoteCharacter('"')
-    .quoteStrategy(QuoteStrategies.ALWAYS)
-    .lineDelimiter(LineDelimiter.CRLF);
-```
-
-:::caution
-Also note that the default line delimiter has changed!
-In version 1.x the line delimiter was set based on system default `System.lineSeparator()`.
-In version 2 and later the default is `\r\n` as defined in RFC 4180.
-:::
-
-#### Write to file
-
-Old way:
-```java
-try (CsvAppender csvAppender = new CsvWriter().append(file)) {
-    csvAppender.appendLine("header1", "header2");
-    csvAppender.appendLine("value1", "value2");
-}
-```
-
-New way:
-```java
-try (CsvWriter csvWriter = CsvWriter.builder().build(file)) {
-    csvWriter
-        .writeRecord("header1", "header2")
-        .writeRecord("value1", "value2");
-}
-```
-
-#### Write to writer
-
-Old way:
-```java
-Writer writer = new StringWriter();
-try (CsvAppender csvAppender = new CsvWriter().append(writer)) {
-    csvAppender.appendLine("header1", "header2");
-    csvAppender.appendLine("value1", "value2");
-}
-```
-
-New way:
-```java
-Writer writer = new StringWriter();
-try (CsvWriter csvWriter = CsvWriter.builder().build(writer)) {
-    csvWriter
-        .writeRecord("header1", "header2")
-        .writeRecord("value1", "value2");
-}
-```
-
-:::caution
-Be aware of a change in the semantic in FastCSV.
-
-In version 3.x you probably want to pass in a `java.io.BufferedWriter` for proper
-performance. The opposite was recommended in version 1.x.
-Check the Javadoc for further information.
-:::
