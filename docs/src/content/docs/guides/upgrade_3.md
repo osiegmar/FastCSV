@@ -10,7 +10,21 @@ For a full list of changes, including new features, see the [changelog](https://
 ## Requirement changes
 
 - The minimum Java version is now 17 (compared to 11 in FastCSV 3.x)
-- This also raised the required Android API level from version 33 (Android 13) to 34 (Android 14)
+- When using on Android, the minimum version is now 34 (Android 14) (compared to 33 in FastCSV 3.x)
+
+## Internal buffer flushing
+
+In FastCSV 2.x, the CsvWriter instantiated via `CsvWriterBuilder#build(Writer)` flushed the internal buffer to the `Writer` after each record.
+
+**This is no longer the case!**
+
+In FastCSV 3.x, the CsvWriter for `OutputStream` and `Writer` behaves the same way: it writes the internal buffer to the `OutputStream` or `Writer` only when the internal buffer is full or when you call `flush()`. The buffer can be disabled by calling `CsvWriterBuilder#bufferSize(0)`.
+
+As a consequence, you no longer need or should wrap the `Writer` in a `BufferedWriter` to ensure proper performance, unless you haven't disabled FastCSV's internal buffer (`CsvWriterBuilder#bufferSize(0)`).
+
+:::caution
+This is a tricky one, as the behavior of this method has changed but the API has not! Check your code to ensure that you are not relying on the old behavior.
+:::
 
 ## Record wrapper removal
 

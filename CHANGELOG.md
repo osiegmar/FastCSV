@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0]
 ### Changed
 - Updated from Java 11 to Java 17
+- `CsvWriter` no longer flushes its internal buffer after each record when initialized for a `Writer`. **Check the Upgrade-Guide for details!**
 - Replaced record wrapper by moving its methods to `CsvCallbackHandler`
 - Sealed internal class `AbstractInternalCsvCallbackHandler`
 - Changed implementation of `CsvIndex` and `CsvPage` to Java records

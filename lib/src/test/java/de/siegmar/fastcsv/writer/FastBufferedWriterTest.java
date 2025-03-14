@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class FastBufferedWriterTest {
 
     private final StringWriter sw = new StringWriter();
-    private final FastBufferedWriter cw = new FastBufferedWriter(sw, 8192, false, false);
+    private final FastBufferedWriter cw = new FastBufferedWriter(sw, 8192);
 
     @Test
     void appendSingle() throws IOException {
@@ -73,24 +73,6 @@ class FastBufferedWriterTest {
     }
 
     @Test
-    void autoFlushBuffer() throws IOException {
-        final var stringWriter = new StringWriter() {
-            @Override
-            public void flush() {
-                throw new UnsupportedOperationException();
-            }
-        };
-
-        final var fbw = new FastBufferedWriter(stringWriter, 8, true, false);
-
-        fbw.write("foo");
-        assertThat(stringWriter).asString().isEmpty();
-
-        fbw.endRecord();
-        assertThat(stringWriter).asString().isEqualTo("foo");
-    }
-
-    @Test
     void autoFlushWriter() throws IOException {
         final AtomicInteger flushCount = new AtomicInteger();
         final var stringWriter = new StringWriter() {
@@ -100,7 +82,7 @@ class FastBufferedWriterTest {
             }
         };
 
-        final var fbw = new FastBufferedWriter(stringWriter, 8, true, true);
+        final var fbw = new AutoflushingFastBufferedWriter(stringWriter, 8);
 
         fbw.write("bar");
         assertThat(stringWriter).asString().isEmpty();
