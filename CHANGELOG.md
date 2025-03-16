@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- `FieldModifiers#modify(Function<String, String>)` to simply modify fields via functional interface
+- `FieldModifiers.modify(Function<String, String>)` to simply modify fields via functional interface
 
 ### Deprecated
 - `SimpleFieldModifier` interface
-- `FieldModifiers#lower` and `FieldModifiers#upper` methods
+- `FieldModifiers.lower` and `FieldModifiers.upper` methods
 
 ## [3.6.0] - 2025-03-04
 ### Added
