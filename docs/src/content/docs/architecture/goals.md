@@ -38,6 +38,8 @@ FastCSV is designed to be robust and reliable. [Thoroughly tested](https://app.c
 it ensures a high level of stability.
 [PIT mutation testing](https://pitest.org) is used to ensure the quality of the tests.
 
+While FastCSV accepts null inputs for certain and documented methods, it does not return null values in any of its public APIs.
+
 ## Security
 
 FastCSV is designed to be secure.
