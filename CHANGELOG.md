@@ -12,13 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced record wrapper by moving its methods to `CsvCallbackHandler`
 - Sealed internal class `AbstractInternalCsvCallbackHandler`
 - Changed implementation of `CsvIndex` and `CsvPage` to Java records
-- `CsvWriterBuilder#toConsole()` writes to `System.console().writer()` instead of `System.out`
+- `CsvWriterBuilder.toConsole()` writes to `System.console().writer()` instead of `System.out`
 
 ### Removed
 - Removed deprecated `Limits` class
 - Removed deprecated constructors of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler`
 - Removed deprecated `SimpleFieldModifier` 
-- Removed deprecated methods `FieldModifiers#lower(Locale)` and `FieldModifiers#upper(Locale)`
+- Removed deprecated methods `FieldModifiers.lower(Locale)` and `FieldModifiers.upper(Locale)`
 
 ## [Unreleased]
 ### Added
