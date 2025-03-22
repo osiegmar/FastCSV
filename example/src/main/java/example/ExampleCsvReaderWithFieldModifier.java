@@ -30,8 +30,9 @@ public class ExampleCsvReaderWithFieldModifier {
     }
 
     private static FieldModifier combinedModifier() {
-        return FieldModifiers.TRIM
-            .andThen(FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH)));
+        final FieldModifier toLower =
+            FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
+        return FieldModifiers.TRIM.andThen(toLower);
     }
 
     private static class CustomModifier implements FieldModifier {
