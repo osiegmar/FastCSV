@@ -29,7 +29,7 @@ public final class Preconditions {
     public static void checkArgument(final boolean expression, final String errorMessageTemplate,
                                      final Object... errorMessageArgs) {
         if (!expression) {
-            throw new IllegalArgumentException(String.format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalArgumentException(errorMessageTemplate.formatted(errorMessageArgs));
         }
     }
 

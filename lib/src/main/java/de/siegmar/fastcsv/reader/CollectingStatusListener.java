@@ -84,8 +84,8 @@ public class CollectingStatusListener implements StatusListener {
         final long byteCntVal = byteCount.longValue();
         final long currentFileSize = fileSize.get();
         final double percentage = byteCntVal * 100.0 / currentFileSize;
-        return String.format("Read %,d records and %,d of %,d bytes (%.2f %%)",
-            recordCount.longValue(), byteCntVal, currentFileSize, percentage);
+        return "Read %,d records and %,d of %,d bytes (%.2f %%)"
+            .formatted(recordCount.longValue(), byteCntVal, currentFileSize, percentage);
     }
 
 }

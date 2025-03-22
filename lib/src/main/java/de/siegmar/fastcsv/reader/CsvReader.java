@@ -132,16 +132,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 }
 
                 if (!csvParser.skipLine(line.length())) {
-                    throw new CsvParseException(String.format(
-                        "No matching line found. Skipped %d line(s) before reaching end of data.", i));
+                    throw new CsvParseException(
+                        "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i));
                 }
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        throw new CsvParseException(String.format(
-            "No matching line found within the maximum limit of %d lines.", maxLines));
+        throw new CsvParseException(
+            "No matching line found within the maximum limit of %d lines.".formatted(maxLines));
     }
 
     /// {@return an iterator over elements of type [CsvRecord].}
@@ -252,9 +252,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         if (firstRecordFieldCount == -1) {
             firstRecordFieldCount = fieldCount;
         } else if (fieldCount != firstRecordFieldCount) {
-            throw new CsvParseException(
-                String.format("Record %d has %d fields, but first record had %d fields",
-                    csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+            throw new CsvParseException("Record %d has %d fields, but first record had %d fields"
+                .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
         }
     }
 
@@ -286,8 +285,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private String buildExceptionMessage() {
         return (csvParser.getStartingLineNumber() == 1)
             ? "Exception when reading first record"
-            : String.format("Exception when reading record that started in line %d",
-            csvParser.getStartingLineNumber());
+            : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
     private class CsvSpliterator implements Spliterator<T> {

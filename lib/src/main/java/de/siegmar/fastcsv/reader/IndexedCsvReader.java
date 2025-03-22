@@ -233,8 +233,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private String buildExceptionMessage() {
         return (csvParser.getStartingLineNumber() == 1)
             ? "Exception when reading first record"
-            : String.format("Exception when reading record that started in line %d",
-            csvParser.getStartingLineNumber());
+            : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
     @Override

@@ -131,13 +131,13 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     }
 
     private String maxFieldSizeExceededMessage() {
-        return String.format("Field at index %d in record starting at line %d exceeds the max "
-            + "field size of %d characters", fieldIdx, startingLineNumber, maxFieldSize);
+        return "Field at index %d in record starting at line %d exceeds the max field size of %d characters"
+            .formatted(fieldIdx, startingLineNumber, maxFieldSize);
     }
 
     private String maxRecordSizeExceededMessage() {
-        return String.format("Field at index %d in record starting at line %d exceeds the max "
-            + "record size of %d characters", fieldIdx, startingLineNumber, maxRecordSize);
+        return "Field at index %d in record starting at line %d exceeds the max record size of %d characters"
+            .formatted(fieldIdx, startingLineNumber, maxRecordSize);
     }
 
     /// {@inheritDoc}
@@ -176,9 +176,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
     private void extendCapacity() {
         if (fields.length == maxFields) {
-            throw new CsvParseException(String.format(
-                "Record starting at line %d has surpassed the maximum limit of %d fields",
-                startingLineNumber, maxFields));
+            throw new CsvParseException("Record starting at line %d has surpassed the maximum limit of %d fields"
+                .formatted(startingLineNumber, maxFields));
         }
         final String[] newFields = new String[Math.min(maxFields, fields.length * 2)];
         System.arraycopy(fields, 0, newFields, 0, fieldIdx);
