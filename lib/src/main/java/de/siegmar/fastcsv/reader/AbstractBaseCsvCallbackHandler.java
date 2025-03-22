@@ -27,23 +27,17 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
         return startingLineNumber;
     }
 
-    /// Returns whether the current record is a comment.
-    ///
-    /// @return `true` if the current record is a comment
+    /// {@return whether the current record is a comment.}
     protected boolean isComment() {
         return comment;
     }
 
-    /// Returns whether the current record is an empty line.
-    ///
-    /// @return `true` if the current record is an empty line
+    /// {@return whether the current record is an empty line.}
     protected boolean isEmptyLine() {
         return emptyLine;
     }
 
-    /// Returns the number of fields in the current record.
-    ///
-    /// @return the number of fields in the current record
+    /// {@return the number of fields in the current record.}
     protected int getFieldCount() {
         return fieldCount;
     }

@@ -36,36 +36,28 @@ public final class RecordWrapper<T> {
         this.wrappedRecord = wrappedRecord;
     }
 
-    /// Returns whether the record denotes a comment.
+    /// {@return whether the record denotes a comment.}
     ///
     /// This method is only used if the [CsvReader] is configured to skip comments.
-    ///
-    /// @return `true` if the record denotes a comment
     public boolean isComment() {
         return comment;
     }
 
-    /// Returns whether the record is empty.
+    /// {@return whether the record is empty.}
     ///
     /// This method is only used if the [CsvReader] is configured to skip empty lines.
-    ///
-    /// @return `true` if the record is empty
     public boolean isEmptyLine() {
         return emptyLine;
     }
 
-    /// Returns the number of fields in the record.
+    /// {@return the number of fields in the record.}
     ///
     /// This method is only used if the [CsvReader] is configured to check the number of fields in each record.
-    ///
-    /// @return the number of fields in the record
     public int getFieldCount() {
         return fieldCount;
     }
 
-    /// Returns the actual record to be returned by the [CsvReader].
-    ///
-    /// @return the actual record to be returned by the [CsvReader], never `null`
+    /// {@return the actual record to be returned by the [CsvReader], never `null`.}
     public T getWrappedRecord() {
         return wrappedRecord;
     }

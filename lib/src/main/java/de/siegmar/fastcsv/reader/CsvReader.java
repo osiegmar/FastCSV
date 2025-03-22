@@ -145,7 +145,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             "No matching line found within the maximum limit of %d lines.", maxLines));
     }
 
-    /// Returns an iterator over elements of type [CsvRecord].
+    /// {@return an iterator over elements of type [CsvRecord].}
     ///
     /// The returned iterator is not thread-safe.
     /// Remember to close the returned iterator when you're done.
@@ -153,7 +153,6 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     ///
     /// This method is idempotent and can be called multiple times.
     ///
-    /// @return an iterator over the CSV records.
     /// @throws UncheckedIOException if an I/O error occurs.
     /// @throws CsvParseException    if any other problem occurs when parsing the CSV data.
     /// @see #stream()
@@ -162,7 +161,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         return csvRecordIterator;
     }
 
-    /// Returns a [Spliterator] over elements of type [CsvRecord].
+    /// Constructs a [Spliterator] for splitting and traversing the elements of this reader.
     ///
     /// The returned spliterator is not thread-safe.
     /// Remember to invoke [#close()] when you're done.
@@ -179,7 +178,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         return new CsvSpliterator();
     }
 
-    /// Returns a new sequential `Stream` with this reader as its source.
+    /// Constructs a new sequential `Stream` with this reader as its source.
     ///
     /// The returned stream is not thread-safe.
     /// Remember to close the returned stream when you're done.
