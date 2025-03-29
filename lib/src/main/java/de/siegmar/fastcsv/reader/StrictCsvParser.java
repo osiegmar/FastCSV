@@ -454,10 +454,10 @@ final class StrictCsvParser implements CsvParser {
 
         private char[] largerBuffer() {
             if (maxBufferSize == buf.length) {
-                throw new CsvParseException("The maximum buffer size of %d is "
+                throw new CsvParseException(("The maximum buffer size of %d is "
                         + "insufficient to read the data of a single field. "
                         + "This issue typically arises when a quotation begins but does not conclude within the "
-                        + "confines of this buffer's maximum limit.".formatted(maxBufferSize));
+                        + "confines of this buffer's maximum limit.").formatted(maxBufferSize));
             }
             return new char[Math.min(maxBufferSize, buf.length * 2)];
         }

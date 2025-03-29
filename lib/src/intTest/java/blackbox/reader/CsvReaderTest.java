@@ -279,7 +279,7 @@ class CsvReaderTest {
 
     @Test
     void bufferExceedSubsequentRecord() {
-        final char[] buf = new char[16 * 1024 * 1024];
+        final char[] buf = new char[17 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
@@ -292,7 +292,7 @@ class CsvReaderTest {
             .hasMessage("Exception when reading record that started in line 2")
             .rootCause()
                 .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("is insufficient to read the data of a single field");
+                .hasMessageContaining("The maximum buffer size of 16777216 is insufficient");
     }
 
     // record size exceed
