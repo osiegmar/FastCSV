@@ -2,7 +2,6 @@ package de.siegmar.fastcsv.reader;
 
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
-import static de.siegmar.fastcsv.util.Util.containsDupe;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -86,7 +85,7 @@ final class CsvParser implements Closeable {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
-        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
             "Control characters must differ"
                 + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
             fieldSeparator, quoteCharacter, commentCharacter);
