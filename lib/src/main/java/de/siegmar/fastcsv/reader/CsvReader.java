@@ -488,7 +488,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// If this is set to `false`, a [CsvParseException] will be thrown.
         ///
-        /// @param acceptCharsAfterQuotes allow characters after quotes (default: `true`).
+        /// @param acceptCharsAfterQuotes allow characters after quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
             this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
