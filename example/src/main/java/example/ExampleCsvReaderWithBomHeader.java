@@ -1,6 +1,6 @@
 package example;
 
-import static java.nio.charset.StandardCharsets.UTF_16LE;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,17 +25,16 @@ public class ExampleCsvReaderWithBomHeader {
         }
     }
 
-    // Create a file with content encoded in UTF-16 little-endian and
-    // a corresponding BOM header
+    // Create a file with UTF-8 encoding and a corresponding BOM header
     static Path prepareTestFile() throws IOException {
         final Path tmpFile = Files.createTempFile("fastcsv", ".csv");
         tmpFile.toFile().deleteOnExit();
 
         try (var out = Files.newOutputStream(tmpFile);
-             var csv = CsvWriter.builder().build(out, UTF_16LE)) {
+             var csv = CsvWriter.builder().build(out, UTF_8)) {
 
-            // Manually write UTF-16LE BOM header
-            out.write(new byte[]{(byte) 0xff, (byte) 0xfe});
+            // Manually write UTF-8 BOM header
+            out.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
 
             csv.writeRecord("a", "o", "u");
             csv.writeRecord("ä", "ö", "ü");

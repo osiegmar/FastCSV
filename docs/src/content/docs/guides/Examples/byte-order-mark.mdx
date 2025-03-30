@@ -13,7 +13,7 @@ that serves as a header to indicate the file's Unicode encoding, such as UTF-8, 
 For UTF-16 and UTF-32, the BOM header also indicates the byte order (big-endian or little-endian).
 
 While UTF-8 is the standard encoding for most text files today,
-some applications still use the BOM header to explicitly specify the file's encoding.
+some applications (like Microsoft Excel) still use the BOM header to explicitly specify the file's encoding.
 :::
 
 Enabling automatic BOM header detection can impact performance.
@@ -33,6 +33,8 @@ The following table shows the BOM headers for different Unicode encodings that F
 | UTF-16 (LE) | `FF FE`          |
 | UTF-32 (BE) | `00 00 FE FF`    |
 | UTF-32 (LE) | `FF FE 00 00`    |
+
+The UTF-8 BOM header is the most common one that is also used by Microsoft Excel.
 
 ## Example
 
