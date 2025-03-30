@@ -9,7 +9,7 @@ import java.util.function.Function;
 /// Example usage:
 /// ```
 /// FieldModifier modifier = FieldModifiers.TRIM
-///     .andThen(FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH)));
+///     .andThen(FieldModifiers.modify(field -> field.toUpperCase(Locale.ENGLISH)));
 /// CsvRecordHandler handler = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
 /// List<CsvRecord> records = CsvReader.builder()
 ///     .build(handler, "  foo   ,   bar")
