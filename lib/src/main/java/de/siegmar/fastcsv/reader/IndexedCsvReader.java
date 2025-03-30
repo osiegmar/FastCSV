@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import static de.siegmar.fastcsv.util.Util.containsDupe;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -70,7 +68,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                      final StatusListener statusListener)
         throws IOException {
 
-        Preconditions.checkArgument(!containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
             "Control characters must differ"
                 + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
             fieldSeparator, quoteCharacter, commentCharacter);
