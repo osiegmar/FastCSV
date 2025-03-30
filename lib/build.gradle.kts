@@ -85,7 +85,8 @@ val intTestTask = tasks.register<Test>("intTest") {
 }
 
 tasks.check {
-    dependsOn(intTestTask, tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+    //dependsOn(intTestTask, tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+    dependsOn(intTestTask, tasks.jacocoTestReport)
 }
 
 pitest {

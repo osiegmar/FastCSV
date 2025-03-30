@@ -37,6 +37,20 @@ As a consequence, you no longer need or should wrap the `Writer` in a `BufferedW
 This is a tricky one, as the behavior of this method has changed but the API has not! Check your code to ensure that you are not relying on the old behavior.
 :::
 
+### Stricter handling of characters after closing quote
+
+Prior to FastCSV 4.x, the parser was lenient when it came to characters **after** the closing quote of a quoted field,
+as long as you haven't used `acceptCharsAfterQuotes(boolean)` in `CsvReaderBuilder` or `IndexedCsvReaderBuilder` to explicitly disable this behavior.
+
+In FastCSV 4.x, the default has changed to **not accept** characters after the closing quote of a quoted field.
+As characters after closing quotes are **invalid** according to the CSV specification anyway, this should hopefully not cause any trouble.
+
+This change was necessary as it conflicted with the new `CsvReaderBuilder.lenientSpacesAroundQuotes(boolean)` method.
+
+:::caution
+This is a tricky one, as the default has changed but the API has not! Check your code and your desired behavior.
+:::
+
 ### Record wrapper removal
 
 The `RecordWrapper` class has been removed. It was a wrapper around the `CsvRecord` class that was used to provide parsing context information to the reading process.
@@ -70,7 +84,6 @@ Just use the builder methods instead:
 +         .fieldModifier(FieldModifiers.TRIM)
 +         .header("foo", "bar")
 +     );
-
 ```
 
 This change was necessary because callback handlers now have more configuration options, making constructor initialization impractical.
@@ -79,7 +92,7 @@ This change was necessary because callback handlers now have more configuration 
 
 In FastCSV 3.2.0, the default limits for the maximum number of fields per record and the maximum field size were made configurable
 via system properties `fastcsv.max.field.count` and `fastcsv.max.field.size`.
-In version 3.6.0 these properties were deprecated in favor of a more flexible configuration via the CsvReader and CallbackHandler builder methods.
+In version 3.6.0 these properties were deprecated in favor of a more flexible configuration via the builder methods of `CsvReader` and `CallbackHandler`.
 In version 4.0.0 those deprecated properties were removed.
 
 ```diff lang="java"

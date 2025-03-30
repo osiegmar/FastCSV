@@ -70,7 +70,6 @@ class GenericDataTest {
     /// @param settings the test spec settings
     /// @return the parsed CSV records
     private static List<List<String>> parseCsvRecords(final TestSpecSettings settings, final String input) {
-
         final CommentStrategy commentStrategy = switch (settings.commentMode()) {
             case NONE -> CommentStrategy.NONE;
             case READ -> CommentStrategy.READ;
@@ -79,6 +78,7 @@ class GenericDataTest {
 
         return CsvReader.builder()
             .commentStrategy(commentStrategy)
+            .acceptCharsAfterQuotes(true)
             .skipEmptyLines(settings.skipEmptyLines())
             .ofCsvRecord(input)
             .stream()

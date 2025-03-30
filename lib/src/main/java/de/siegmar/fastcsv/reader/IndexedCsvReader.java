@@ -261,7 +261,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     /// - Quote character: `"` (double quotes)
     /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
-    /// - Accept characters after quotes: `true`
+    /// - Accept characters after quotes: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
@@ -279,7 +279,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private boolean acceptCharsAfterQuotes = true;
+        private boolean acceptCharsAfterQuotes;
         private StatusListener statusListener;
         private int pageSize = DEFAULT_PAGE_SIZE;
         private CsvIndex csvIndex;

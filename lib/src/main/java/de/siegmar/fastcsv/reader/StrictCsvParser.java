@@ -6,6 +6,7 @@ import static de.siegmar.fastcsv.util.Util.LF;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HexFormat;
 
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
@@ -237,7 +238,8 @@ final class StrictCsvParser implements CsvParser {
                                     }
                                 }
                             } else if (!acceptCharsAfterQuotes) {
-                                throw new CsvParseException("Unexpected character after closing quote: " + c);
+                                throw new CsvParseException("Unexpected character after closing quote: 0x"
+                                    + HexFormat.of().toHexDigits(c));
                             }
                         }
                     }

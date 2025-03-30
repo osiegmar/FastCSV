@@ -360,7 +360,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Skip empty lines: `true`
     /// - Ignore different field count: `true`
-    /// - Accept characters after quotes: `true`
+    /// - Accept characters after quotes: `false`
+    /// - Lenient spaces around quotes: `false`
     /// - Detect BOM header: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
@@ -371,13 +372,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         private static final int DEFAULT_MAX_BUFFER_SIZE = 16 * 1024 * 1024;
 
-        private char fieldSeparator = ',';
+        private String fieldSeparator = ",";
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
-        private boolean acceptCharsAfterQuotes = true;
+        private boolean acceptCharsAfterQuotes;
+        private boolean lenientSpacesAroundQuotes;
         private boolean detectBomHeader;
         private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
@@ -388,7 +390,29 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// @param fieldSeparator the field separator character (default: `,` - comma).
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @see #fieldSeparator(String)
         public CsvReaderBuilder fieldSeparator(final char fieldSeparator) {
+            this.fieldSeparator = String.valueOf(fieldSeparator);
+            return this;
+        }
+
+        /// Sets the `fieldSeparator` used when reading CSV data.
+        ///
+        /// Unlike [#fieldSeparator(char)], this method allows specifying a string of multiple characters to
+        /// separate fields. The entire string is used as the delimiter, meaning fields are only separated if
+        /// the **full string** matches. Individual characters within the string are **not** treated as
+        /// separate delimiters.
+        ///
+        /// **If multiple characters are used, the less performant `LooseCsvParser` is used!**
+        ///
+        /// @param fieldSeparator the field separator string (default: `,` - comma).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws IllegalArgumentException if fieldSeparator is `null` or empty
+        /// @see #fieldSeparator(char)
+        public CsvReaderBuilder fieldSeparator(final String fieldSeparator) {
+            if (fieldSeparator == null || fieldSeparator.isEmpty()) {
+                throw new IllegalArgumentException("fieldSeparator must not be null or empty");
+            }
             this.fieldSeparator = fieldSeparator;
             return this;
         }
@@ -468,6 +492,32 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
             this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+            return this;
+        }
+
+        /// Defines if spaces around quotes should be handled leniently.
+        ///
+        /// RFC 4180 specifies that no characters are allowed between the quote character and the field separator.
+        /// When violating this rule, this causes two major problems:
+        ///
+        /// *For better readability, the underscore `_` is used to indicate the position of the space character.*
+        ///
+        ///   - Spaces after a closing quote (like in `"foo"_,"x"`) would cause a [CsvParseException],
+        ///     unless [#acceptCharsAfterQuotes(boolean)] is enabled.
+        ///   - Spaces before an opening quote (like in `"x",_"foo,bar"`) would cause the parser to read the second
+        ///     field as an **unquoted** field, resulting in a record with three fields: `x`, `_"foo` and `bar"`.
+        ///
+        /// Handling spaces around quotes leniently means that those spaces are ignored and removed.
+        /// As a consequence, a record `_"x"_,_"foo,bar"_` would be parsed as two fields: `x` and `foo,bar`.
+        ///
+        /// Note, that only the space character (ASCII Code 32) is handled leniently.
+        ///
+        /// **When enabling this, the less performant `LooseCsvParser` is used!**
+        ///
+        /// @param lenientSpacesAroundQuotes if spaces should be ignored and removed (default: `false`).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public CsvReaderBuilder lenientSpacesAroundQuotes(final boolean lenientSpacesAroundQuotes) {
+            this.lenientSpacesAroundQuotes = lenientSpacesAroundQuotes;
             return this;
         }
 
@@ -780,8 +830,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(reader, "reader must not be null");
 
-            final CsvParser csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, callbackHandler, maxBufferSize, reader);
+            final CsvParser csvParser;
+            if (isStrictConfiguration()) {
+                csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
+                    commentCharacter, acceptCharsAfterQuotes, callbackHandler, maxBufferSize, reader);
+            } else {
+                csvParser = new LooseCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
+                    commentCharacter, lenientSpacesAroundQuotes, callbackHandler,
+                    maxBufferSize, reader
+                );
+            }
 
             return newReader(callbackHandler, csvParser);
         }
@@ -801,8 +859,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(data, "data must not be null");
 
-            final CsvParser csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, callbackHandler, data);
+            final CsvParser csvParser;
+            if (isStrictConfiguration()) {
+                csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
+                    commentCharacter, acceptCharsAfterQuotes, callbackHandler, data);
+            } else {
+                csvParser = new LooseCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
+                    commentCharacter, lenientSpacesAroundQuotes, callbackHandler,
+                    maxBufferSize, data
+                );
+            }
 
             return newReader(callbackHandler, csvParser);
         }
@@ -850,6 +916,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return build(callbackHandler, reader);
         }
 
+        private boolean isStrictConfiguration() {
+            final boolean strict = !lenientSpacesAroundQuotes && fieldSeparator.length() == 1;
+            if (!strict && acceptCharsAfterQuotes) {
+                throw new IllegalArgumentException("acceptCharsAfterQuotes is not supported in loose mode");
+            }
+            return strict;
+        }
+
         private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final CsvParser csvParser) {
             return new CsvReader<>(csvParser, callbackHandler,
                 commentStrategy, skipEmptyLines, ignoreDifferentFieldCount);
@@ -865,6 +939,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
                 .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
+                .add("lenientSpacesAroundQuotes=" + lenientSpacesAroundQuotes)
                 .add("detectBomHeader=" + detectBomHeader)
                 .add("maxBufferSize=" + maxBufferSize)
                 .toString();

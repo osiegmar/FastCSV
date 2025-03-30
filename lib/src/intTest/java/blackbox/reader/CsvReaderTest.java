@@ -129,19 +129,18 @@ class CsvReaderTest {
 
     @Test
     void acceptCharsAfterQuotes() {
-        assertThat(crb.ofCsvRecord("foo,\"bar\"baz").stream())
+        assertThat(crb.acceptCharsAfterQuotes(true).ofCsvRecord("foo,\"bar\"baz").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields().containsExactly("foo", "barbaz");
     }
 
     @Test
     void acceptCharsAfterQuotesNot() {
-        crb.acceptCharsAfterQuotes(false);
         assertThatThrownBy(() -> readAll("foo,\"bar\"baz").stream())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Unexpected character after closing quote: b");
+            .hasRootCauseMessage("Unexpected character after closing quote: 0x0062");
     }
 
     // field by index

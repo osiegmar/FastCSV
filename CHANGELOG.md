@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.0]
+## [4.0.0-develop]
+### Added
+- `CsvReaderBuilder.fieldSeparator(String)` to set a multi-character field separator
+- `CsvReaderBuilder.lenientSpacesAroundQuotes(boolean)` to handle spaces around quotes
+
 ### Changed
 - Updated from Java 11 to Java 17
 - `CsvWriter` no longer flushes its internal buffer after each record when initialized for a `Writer`. **Check the Upgrade-Guide for details!**
+- `acceptCharsAfterQuotes` in `CsvReaderBuilder` and `IndexedCsvReaderBuilder` changed to default to `false`. **Check the Upgrade-Guide for details!**
 - Replaced record wrapper by moving its methods to `CsvCallbackHandler`
 - Sealed internal class `AbstractInternalCsvCallbackHandler`
 - Changed implementation of `CsvIndex` and `CsvPage` to Java records
@@ -17,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Removed deprecated `Limits` class
 - Removed deprecated constructors of `CsvRecordHandler`, `NamedCsvRecordHandler`, and `StringArrayHandler`
-- Removed deprecated `SimpleFieldModifier` 
+- Removed deprecated `SimpleFieldModifier`
 - Removed deprecated methods `FieldModifiers.lower(Locale)` and `FieldModifiers.upper(Locale)`
 
 ## [Unreleased]
@@ -177,6 +182,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
+[4.0.0-develop]: https://github.com/osiegmar/FastCSV/compare/HEAD...develop
 [Unreleased]: https://github.com/osiegmar/FastCSV/compare/v3.6.0...HEAD
 [3.6.0]: https://github.com/osiegmar/FastCSV/compare/v3.5.0...v3.6.0
 [3.5.0]: https://github.com/osiegmar/FastCSV/compare/v3.4.0...v3.5.0
