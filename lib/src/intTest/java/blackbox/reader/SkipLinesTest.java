@@ -84,7 +84,7 @@ class SkipLinesTest {
     @Test
     void negativeMaxLines() {
         final CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord("A\nB");
-        assertThatThrownBy(() -> csv.skipLines(line -> true, -1))
+        assertThatThrownBy(() -> csv.skipLines(_ -> true, -1))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxLines must be non-negative");
     }
@@ -105,7 +105,7 @@ class SkipLinesTest {
     @Test
     void reachedMaxLines() {
         final CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord("A\nB");
-        assertThatThrownBy(() -> csv.skipLines(line -> false, 1))
+        assertThatThrownBy(() -> csv.skipLines(_ -> false, 1))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("No matching line found within the maximum limit of 1 lines.");
     }
@@ -113,7 +113,7 @@ class SkipLinesTest {
     @Test
     void noMatch() {
         final CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord("A\nB");
-        assertThatThrownBy(() -> csv.skipLines(line -> false, 10))
+        assertThatThrownBy(() -> csv.skipLines(_ -> false, 10))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("No matching line found. Skipped 2 line(s) before reaching end of data.");
     }
@@ -140,7 +140,7 @@ class SkipLinesTest {
     @Test
     void predicateIoException() {
         final CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(new UnreadableReader());
-        assertThatThrownBy(() -> csv.skipLines(line -> true, 1))
+        assertThatThrownBy(() -> csv.skipLines(_ -> true, 1))
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("java.io.IOException: Cannot read");
     }
