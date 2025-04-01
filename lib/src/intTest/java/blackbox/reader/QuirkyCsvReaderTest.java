@@ -17,10 +17,10 @@ class QuirkyCsvReaderTest {
     @Test
     void trimAroundQuotes() {
         final var csv = CsvReader.builder()
-            .lenientSpacesAroundQuotes(true)
+            .lenientWhitespacesAroundQuotes(true)
             .fieldSeparator("~~~")
             .quoteCharacter('\'')
-            .ofCsvRecord(" 'foo~~~bar' ");
+            .ofCsvRecord("\t'foo~~~bar' ");
 
         assertThat(csv.stream()).satisfiesExactly(
             r -> CsvRecordAssert.assertThat(r).fields().containsExactly("foo~~~bar")
@@ -43,7 +43,7 @@ class QuirkyCsvReaderTest {
     @Test
     void charsBeforeQuotes() {
         final var csv = CsvReader.builder()
-            .lenientSpacesAroundQuotes(true)
+            .lenientWhitespacesAroundQuotes(true)
             .quoteCharacter('\'')
             .ofCsvRecord("x'foo,bar'");
 
@@ -55,7 +55,7 @@ class QuirkyCsvReaderTest {
     @Test
     void charsAfterQuotes() {
         final var csv = CsvReader.builder()
-            .lenientSpacesAroundQuotes(true)
+            .lenientWhitespacesAroundQuotes(true)
             .quoteCharacter('\'')
             .ofCsvRecord(" 'foo,bar'x ");
 

@@ -45,7 +45,7 @@ as long as you haven't used `acceptCharsAfterQuotes(boolean)` in `CsvReaderBuild
 In FastCSV 4.x, the default has changed to **not accept** characters after the closing quote of a quoted field.
 As characters after closing quotes are **invalid** according to the CSV specification anyway, this should hopefully not cause any trouble.
 
-This change was necessary as it conflicted with the new `CsvReaderBuilder.lenientSpacesAroundQuotes(boolean)` method.
+This change was necessary as it conflicted with the new `CsvReaderBuilder.lenientWhitespacesAroundQuotes(boolean)` method.
 
 :::caution
 This is a tricky one, as the default has changed but the API has not! Check your code and your desired behavior.

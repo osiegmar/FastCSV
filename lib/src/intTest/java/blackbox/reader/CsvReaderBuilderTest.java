@@ -78,7 +78,8 @@ class CsvReaderBuilderTest {
         assertThat(crb).asString()
             .isEqualTo("CsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
                 + "commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true, acceptCharsAfterQuotes=false, lenientSpacesAroundQuotes=false, "
+                + "ignoreDifferentFieldCount=true, acceptCharsAfterQuotes=false, "
+                + "lenientWhitespacesAroundQuotes=false, "
                 + "detectBomHeader=false, maxBufferSize=16777216]");
     }
 

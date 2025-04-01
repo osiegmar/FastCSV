@@ -31,7 +31,7 @@ final class LooseCsvParser implements CsvParser {
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
-    private final boolean lenientSpacesAroundQuotes;
+    private final boolean lenientWhitespacesAroundQuotes;
     private final CsvCallbackHandler<?> callbackHandler;
     private final int maxBufferSize;
     private final Reader reader;
@@ -43,7 +43,7 @@ final class LooseCsvParser implements CsvParser {
     @SuppressWarnings("checkstyle:ParameterNumber")
     LooseCsvParser(final String fsep, final char qChar,
                    final CommentStrategy cStrat, final char cChar,
-                   final boolean lenientSpacesAroundQuotes,
+                   final boolean lenientWhitespacesAroundQuotes,
                    final CsvCallbackHandler<?> callbackHandler,
                    final int maxBufferSize,
                    final Reader reader) {
@@ -53,7 +53,7 @@ final class LooseCsvParser implements CsvParser {
         this.qChar = qChar;
         this.cStrat = cStrat;
         this.cChar = cChar;
-        this.lenientSpacesAroundQuotes = lenientSpacesAroundQuotes;
+        this.lenientWhitespacesAroundQuotes = lenientWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
         this.reader = new BufferedReader(reader);
@@ -63,7 +63,7 @@ final class LooseCsvParser implements CsvParser {
     @SuppressWarnings("checkstyle:ParameterNumber")
     LooseCsvParser(final String fsep, final char qChar,
                    final CommentStrategy cStrat, final char cChar,
-                   final boolean lenientSpacesAroundQuotes,
+                   final boolean lenientWhitespacesAroundQuotes,
                    final CsvCallbackHandler<?> callbackHandler,
                    final int maxBufferSize,
                    final String data) {
@@ -73,7 +73,7 @@ final class LooseCsvParser implements CsvParser {
         this.qChar = qChar;
         this.cStrat = cStrat;
         this.cChar = cChar;
-        this.lenientSpacesAroundQuotes = lenientSpacesAroundQuotes;
+        this.lenientWhitespacesAroundQuotes = lenientWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
         reader = new StringReader(data);
@@ -140,7 +140,7 @@ final class LooseCsvParser implements CsvParser {
             if (ch == LF) {
                 return materializeField(true, false);
             }
-            if (ch == qChar && lenientSpacesAroundQuotes && currentFieldHasOnlyWhitespace()) {
+            if (ch == qChar && lenientWhitespacesAroundQuotes && currentFieldHasOnlyWhitespace()) {
                 currentFieldIndex = 0;
                 return parseQuoted();
             }
@@ -165,7 +165,7 @@ final class LooseCsvParser implements CsvParser {
 
     private boolean currentFieldHasOnlyWhitespace() {
         for (int i = 0; i < currentFieldIndex; i++) {
-            if (currentField[i] != SPACE) {
+            if (currentField[i] > SPACE) {
                 return false;
             }
         }
@@ -210,7 +210,7 @@ final class LooseCsvParser implements CsvParser {
                             // field separator after closing quote
                             return materializeField(false, true);
                         }
-                        if (!lenientSpacesAroundQuotes || lookAhead != SPACE) {
+                        if (!lenientWhitespacesAroundQuotes || lookAhead > SPACE) {
                             throw new CsvParseException("Unexpected character after closing quote: 0x"
                                 + HexFormat.of().toHexDigits((char) lookAhead));
                         }

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0-develop]
 ### Added
 - `CsvReaderBuilder.fieldSeparator(String)` to set a multi-character field separator
-- `CsvReaderBuilder.lenientSpacesAroundQuotes(boolean)` to handle spaces around quotes
+- `CsvReaderBuilder.lenientWhitespacesAroundQuotes(boolean)` to handle whitespaces around quotes
 
 ### Changed
 - Updated from Java 11 to Java 17
