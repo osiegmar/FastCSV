@@ -1,0 +1,23 @@
+name: Java 17 Compatibility Check (for OSS-Fuzz)
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - uses: gradle/actions/setup-gradle@v4
+    - name: Build with Gradle
+      run: ./gradlew lib:jar
