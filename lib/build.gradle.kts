@@ -4,12 +4,12 @@ plugins {
     id("fastcsv.java-conventions")
     `java-library`
     `maven-publish`
-    signing
     jacoco
     alias(libs.plugins.jmh)
     alias(libs.plugins.pitest)
     alias(libs.plugins.animalsniffer)
     alias(libs.plugins.bnd)
+    alias(libs.plugins.jreleaser)
 }
 
 group = "de.siegmar"
@@ -153,6 +153,7 @@ publishing {
                 name = "FastCSV"
                 description = "Lightning-fast, dependency-free CSV library that conforms to RFC standards."
                 url = "https://fastcsv.org"
+                inceptionYear = "2014"
                 licenses {
                     license {
                         name = "MIT License"
@@ -175,20 +176,37 @@ publishing {
     }
     repositories {
         maven {
-            name = "ossrh"
-            credentials(PasswordCredentials::class)
-            url = if (version.toString().endsWith("SNAPSHOT")) {
-                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            } else {
-                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            }
+            name = "staging"
+            url = uri(layout.buildDirectory.dir("staging-deploy"))
         }
     }
 }
 
-signing {
-    val signingKey: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["maven"])
+jreleaser {
+    project {
+        gitRootSearch.set(true)
+        name.set("FastCSV")
+        description.set("Lightning-fast, dependency-free CSV library that conforms to RFC standards.")
+        authors.set(listOf("Oliver Siegmar"))
+        license.set("MIT")
+        links {
+            homepage.set("https://fastcsv.org")
+            license.set("https://opensource.org/licenses/MIT")
+        }
+    }
+    signing {
+        active.set(org.jreleaser.model.Active.ALWAYS)
+        armored.set(true)
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                create("sonatype") {
+                    active.set(org.jreleaser.model.Active.ALWAYS)
+                    url.set("https://central.sonatype.com")
+                    stagingRepositories.add("build/staging-deploy")
+                }
+            }
+        }
+    }
 }

@@ -11,3 +11,4 @@ jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 pitest = { id = "info.solidsoft.pitest", version = "1.15.0" }
 animalsniffer = { id = "ru.vyarus.animalsniffer", version = "2.0.0" }
 bnd = { id = "biz.aQute.bnd.builder", version = "7.1.0" }
+jreleaser = { id = "org.jreleaser", version = "1.18.0" }
