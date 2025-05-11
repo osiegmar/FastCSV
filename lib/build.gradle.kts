@@ -203,7 +203,7 @@ jreleaser {
             mavenCentral {
                 create("sonatype") {
                     active.set(org.jreleaser.model.Active.ALWAYS)
-                    url.set("https://central.sonatype.com")
+                    url.set("https://central.sonatype.com/api/v1/publisher")
                     stagingRepositories.add("build/staging-deploy")
                 }
             }
