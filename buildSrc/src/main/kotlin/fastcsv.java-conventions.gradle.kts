@@ -16,8 +16,8 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 }
 
 pmd {
-    // Version bundled with Gradle is not able to run on Java 23.
-    toolVersion = "7.10.0"
+    // Version bundled with Gradle is not able to run on Java 24.
+    toolVersion = "7.13.0"
     isConsoleOutput = true
     ruleSets = emptyList()
     ruleSetFiles = files("${project.rootDir}/config/pmd/config.xml")

@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '23'
+        java-version: '24'
     - uses: gradle/actions/setup-gradle@v4
     - name: Build with Gradle
       run: ./gradlew build
