@@ -209,4 +209,16 @@ jreleaser {
             }
         }
     }
+    release {
+        github {
+            changelog {
+                external.set(file("../CHANGELOG.md"))
+                preset.set("conventional-commits")
+                formatted.set(org.jreleaser.model.Active.ALWAYS)
+                append {
+                    enabled.set(true)
+                }
+            }
+        }
+    }
 }
