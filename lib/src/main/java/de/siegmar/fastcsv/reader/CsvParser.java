@@ -86,8 +86,7 @@ final class CsvParser implements Closeable {
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ"
-                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
             fieldSeparator, quoteCharacter, commentCharacter);
     }
 
@@ -448,11 +447,12 @@ final class CsvParser implements Closeable {
 
         private char[] largerBuffer() {
             if (maxBufferSize == buf.length) {
-                throw new CsvParseException(String.format("The maximum buffer size of %d is "
-                        + "insufficient to read the data of a single field. "
-                        + "This issue typically arises when a quotation begins but does not conclude within the "
-                        + "confines of this buffer's maximum limit.",
-                    maxBufferSize));
+                throw new CsvParseException("""
+                    The maximum buffer size of %d is \
+                    insufficient to read the data of a single field. \
+                    This issue typically arises when a quotation begins but does not conclude within the \
+                    confines of this buffer's maximum limit. \
+                    """.formatted(maxBufferSize));
             }
             return new char[Math.min(maxBufferSize, buf.length * 2)];
         }

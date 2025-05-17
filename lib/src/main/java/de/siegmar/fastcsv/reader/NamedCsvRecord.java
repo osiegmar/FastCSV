@@ -61,13 +61,12 @@ public final class NamedCsvRecord extends CsvRecord {
 
         // Check if the field index is valid
         if (fieldIdx == -1) {
-            throw new NoSuchElementException(String.format(
-                "Header does not contain a field '%s'. Valid names are: %s", name, Arrays.toString(header)));
+            throw new NoSuchElementException("Header does not contain a field '%s'. Valid names are: %s"
+                .formatted(name, Arrays.toString(header)));
         }
         if (fieldIdx >= fields.length) {
-            throw new NoSuchElementException(String.format(
-                "Field '%s' is on index %d, but current record only contains %d fields",
-                name, fieldIdx, fields.length));
+            throw new NoSuchElementException("Field '%s' is on index %d, but current record only contains %d fields"
+                .formatted(name, fieldIdx, fields.length));
         }
 
         // Return the value of the field
