@@ -130,7 +130,7 @@ public final class CsvWriter implements Closeable, Flushable {
 
     private void validateNoOpenRecord() {
         if (openRecordWriter) {
-            throw new IllegalStateException("Record already started, call end() on CsvWriterRecord first");
+            throw new IllegalStateException("Record already started, call endRecord() on CsvWriterRecord first");
         }
     }
 
