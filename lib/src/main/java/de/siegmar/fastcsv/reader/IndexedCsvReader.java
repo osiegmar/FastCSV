@@ -498,7 +498,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private final StatusListener statusListener;
         private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
         private final AtomicLong recordCounter = new AtomicLong();
-        private long startingLineNumber = 1;
+        private final AtomicLong startingLineNumber = new AtomicLong(1);
 
         private ScannerListener(final StatusListener statusListener) {
             this.statusListener = statusListener;
@@ -512,19 +512,19 @@ public final class IndexedCsvReader<T> implements Closeable {
         @Override
         public void startOffset(final long offset) {
             if (recordCounter.getAndIncrement() % pageSize == 0) {
-                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber));
+                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber.get()));
             }
         }
 
         @Override
         public void onReadRecord() {
-            startingLineNumber++;
+            startingLineNumber.incrementAndGet();
             statusListener.onReadRecord();
         }
 
         @Override
         public void additionalLine() {
-            startingLineNumber++;
+            startingLineNumber.incrementAndGet();
         }
 
     }
