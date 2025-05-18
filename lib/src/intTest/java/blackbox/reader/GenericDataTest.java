@@ -79,6 +79,7 @@ class GenericDataTest {
 
         return CsvReader.builder()
             .commentStrategy(commentStrategy)
+            .allowExtraCharsAfterClosingQuote(true)
             .skipEmptyLines(settings.skipEmptyLines())
             .ofCsvRecord(input)
             .stream()

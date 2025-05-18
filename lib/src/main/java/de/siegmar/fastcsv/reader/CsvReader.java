@@ -360,7 +360,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Skip empty lines: `true`
     /// - Ignore different field count: `true`
-    /// - Accept characters after quotes: `true`
+    /// - Allow extra characters after closing quotes: `false`
     /// - Detect BOM header: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
@@ -377,7 +377,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private char commentCharacter = '#';
         private boolean skipEmptyLines = true;
         private boolean ignoreDifferentFieldCount = true;
-        private boolean acceptCharsAfterQuotes = true;
+        private boolean allowExtraCharsAfterClosingQuote;
         private boolean detectBomHeader;
         private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
@@ -464,10 +464,10 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// If this is set to `false`, a [CsvParseException] will be thrown.
         ///
-        /// @param acceptCharsAfterQuotes allow characters after quotes (default: `true`).
+        /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        public CsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
-            this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+        public CsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
+            this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
             return this;
         }
 
@@ -781,7 +781,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(reader, "reader must not be null");
 
             final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, callbackHandler, maxBufferSize, reader);
+                commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, maxBufferSize, reader);
 
             return newReader(callbackHandler, csvParser);
         }
@@ -802,7 +802,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(data, "data must not be null");
 
             final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, callbackHandler, data);
+                commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, data);
 
             return newReader(callbackHandler, csvParser);
         }
@@ -864,7 +864,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
                 .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
-                .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
+                .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
                 .add("detectBomHeader=" + detectBomHeader)
                 .add("maxBufferSize=" + maxBufferSize)
                 .toString();

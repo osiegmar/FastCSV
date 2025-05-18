@@ -36,6 +36,24 @@ This change was made to align with the behavior of `CsvWriter` for `OutputStream
 As the default has changed, you may need to check your code and your desired behavior.
 :::
 
+## Handling of characters after closing quote
+
+FastCSV 4.x no longer tolerates characters after the closing quote of a quoted field, by default.
+This is a change in behavior compared to earlier versions of FastCSV. It ensures no erroneous data is read and interpreted without noticing it.
+
+The following examples will now lead to a `CsvParseException`:
+```csv
+"foo"INVALID,"bar"
+"foo" ,"bar"
+```
+
+To restore the old behavior, you can use the `allowExtraCharsAfterClosingQuote(boolean)` method in `CsvReaderBuilder` or `IndexedCsvReaderBuilder`.
+This method was named `acceptCharsAfterQuotes(boolean)` in earlier versions of FastCSV.
+
+:::caution
+As the default has changed, you may need to check your code and your desired behavior.
+:::
+
 ## Changed implementation of `CsvIndex` and `CsvPage` to Java records
 
 The `CsvIndex` and `CsvPage` classes have been changed to Java records. With this change, a few method calls have changed as well.

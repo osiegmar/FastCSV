@@ -52,7 +52,7 @@ CsvReader.builder()
     .commentCharacter('#')
     .skipEmptyLines(true)
     .ignoreDifferentFieldCount(false)
-    .acceptCharsAfterQuotes(false)
+    .allowExtraCharsAfterClosingQuote(false)
     .detectBomHeader(false)
     .maxBufferSize(16777216);
 ```

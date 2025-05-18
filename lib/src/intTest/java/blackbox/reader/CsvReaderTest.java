@@ -125,23 +125,23 @@ class CsvReaderTest {
             .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
-    // accept characters after closing quotes
+    // allow extra characters after closing quotes
 
     @Test
-    void acceptCharsAfterQuotes() {
+    void allowExtraCharsAfterClosingQuote() {
+        crb.allowExtraCharsAfterClosingQuote(true);
         assertThat(crb.ofCsvRecord("foo,\"bar\"baz").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields().containsExactly("foo", "barbaz");
     }
 
     @Test
-    void acceptCharsAfterQuotesNot() {
-        crb.acceptCharsAfterQuotes(false);
+    void allowExtraCharsAfterClosingQuoteNot() {
         assertThatThrownBy(() -> readAll("foo,\"bar\"baz").stream())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Unexpected character after closing quote: b");
+            .hasRootCauseMessage("Unexpected character after closing quote: 'b' (0x62)");
     }
 
     // field by index

@@ -35,7 +35,7 @@ final class CsvParser implements Closeable {
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
-    private final boolean acceptCharsAfterQuotes;
+    private final boolean allowExtraCharsAfterClosingQuote;
     private final CsvCallbackHandler<?> callbackHandler;
     private final CsvBuffer csvBuffer;
 
@@ -48,7 +48,7 @@ final class CsvParser implements Closeable {
     @SuppressWarnings("checkstyle:ParameterNumber")
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean acceptCharsAfterQuotes,
+              final boolean allowExtraCharsAfterClosingQuote,
               final CsvCallbackHandler<?> callbackHandler,
               final int maxBufferSize,
               final Reader reader) {
@@ -59,14 +59,14 @@ final class CsvParser implements Closeable {
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
-        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+        this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(reader, maxBufferSize);
     }
 
     CsvParser(final char fieldSeparator, final char quoteCharacter,
               final CommentStrategy commentStrategy, final char commentCharacter,
-              final boolean acceptCharsAfterQuotes,
+              final boolean allowExtraCharsAfterClosingQuote,
               final CsvCallbackHandler<?> callbackHandler,
               final String data) {
 
@@ -76,7 +76,7 @@ final class CsvParser implements Closeable {
         this.qChar = quoteCharacter;
         this.cStrat = commentStrategy;
         this.cChar = commentCharacter;
-        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+        this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(data);
     }
@@ -234,8 +234,9 @@ final class CsvParser implements Closeable {
                                         break;
                                     }
                                 }
-                            } else if (!acceptCharsAfterQuotes) {
-                                throw new CsvParseException("Unexpected character after closing quote: " + c);
+                            } else if (!allowExtraCharsAfterClosingQuote) {
+                                throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
+                                    .formatted(c, (int) c));
                             }
                         }
                     }

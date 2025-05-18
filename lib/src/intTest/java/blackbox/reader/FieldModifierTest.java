@@ -37,7 +37,7 @@ class FieldModifierTest {
     void trim() {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
 
-        assertThat(crb.acceptCharsAfterQuotes(true).build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.allowExtraCharsAfterClosingQuote(true).build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar\u2000", "baz");
@@ -47,7 +47,7 @@ class FieldModifierTest {
     void strip() {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.STRIP));
 
-        assertThat(crb.acceptCharsAfterQuotes(true).build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
+        assertThat(crb.allowExtraCharsAfterClosingQuote(true).build(cbh, "foo, bar\u2000 ,\" baz \" ").stream())
             .singleElement(CsvRecordAssert.CSV_RECORD)
             .fields()
             .containsExactly("foo", "bar", "baz");

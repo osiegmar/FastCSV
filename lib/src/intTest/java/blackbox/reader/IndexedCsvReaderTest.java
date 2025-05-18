@@ -74,11 +74,12 @@ class IndexedCsvReaderTest {
         final Path file = prepareTestFile("foo");
 
         assertThat(singlePageBuilder().ofCsvRecord(file)).asString()
-            .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
-                    + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, acceptCharsAfterQuotes=true, "
-                    + "pageSize=1, "
-                    + "index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, "
-                    + "commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]",
+            .isEqualTo("""
+                    IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, \
+                    quoteCharacter=", commentStrategy=NONE, commentCharacter=#, \
+                    allowExtraCharsAfterClosingQuote=false, pageSize=1, \
+                    index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, \
+                    commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]""",
                 file);
     }
 
@@ -142,20 +143,20 @@ class IndexedCsvReaderTest {
         }
     }
 
-    // accept characters after closing quotes
+    // allow extra characters after closing quotes
 
     @Test
-    void acceptCharsAfterQuotes() throws IOException {
-        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
+    void allowExtraCharsAfterClosingQuote() throws IOException {
+        final var bldr = singlePageBuilder().allowExtraCharsAfterClosingQuote(true);
+        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             CsvRecordAssert.assertThat(csv.readPage(0).getFirst()).fields()
                 .containsExactly("foo", "barbaz");
         }
     }
 
     @Test
-    void acceptCharsAfterQuotesNot() throws IOException {
-        final var bldr = singlePageBuilder().acceptCharsAfterQuotes(false);
-        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
+    void allowExtraCharsAfterClosingQuoteNot() throws IOException {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             assertThatThrownBy(() -> csv.readPage(0))
                 .isInstanceOf(CsvParseException.class);
         }
