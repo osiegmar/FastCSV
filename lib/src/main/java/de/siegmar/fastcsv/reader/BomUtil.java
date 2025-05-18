@@ -108,9 +108,7 @@ final class BomUtil {
 
         // Return reader with skipped BOM header
         final int bomLength = bomHeader.get().getLength();
-        if (in.skip(bomLength) != bomLength) {
-            throw new IOException("Failed to skip BOM header");
-        }
+        in.skipNBytes(bomLength);
         return new InputStreamReader(in, bomHeader.get().getCharset());
     }
 
