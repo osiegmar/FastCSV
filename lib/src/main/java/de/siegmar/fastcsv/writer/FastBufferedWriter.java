@@ -5,19 +5,14 @@ import java.io.IOException;
 import java.io.Writer;
 
 /// High-performance buffered writer (without synchronization).
-final class FastBufferedWriter extends FilterWriter implements Writable {
+class FastBufferedWriter extends FilterWriter implements Writable {
 
     private final char[] buf;
-    private final boolean autoFlushBuffer;
-    private final boolean autoFlushWriter;
     private int pos;
 
-    FastBufferedWriter(final Writer writer, final int bufferSize,
-                       final boolean autoFlushBuffer, final boolean autoFlushWriter) {
+    FastBufferedWriter(final Writer writer, final int bufferSize) {
         super(writer);
         buf = new char[bufferSize];
-        this.autoFlushBuffer = autoFlushBuffer;
-        this.autoFlushWriter = autoFlushWriter;
     }
 
     @Override
@@ -58,11 +53,6 @@ final class FastBufferedWriter extends FilterWriter implements Writable {
 
     @Override
     public void endRecord() throws IOException {
-        if (autoFlushWriter) {
-            flush();
-        } else if (autoFlushBuffer) {
-            flushBuffer();
-        }
     }
 
     private void flushBuffer() throws IOException {

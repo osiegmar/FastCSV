@@ -28,7 +28,8 @@ import de.siegmar.fastcsv.writer.QuoteStrategies;
 class CsvWriterTest {
 
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()
-        .lineDelimiter(LineDelimiter.LF);
+        .lineDelimiter(LineDelimiter.LF)
+        .bufferSize(0);
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
@@ -210,7 +211,7 @@ class CsvWriterTest {
             new String[]{"value1", "value2"}
         );
         final StringWriter sw = new StringWriter();
-        final CsvWriter csvWriter = CsvWriter.builder().build(sw);
+        final CsvWriter csvWriter = CsvWriter.builder().bufferSize(0).build(sw);
         stream.forEach(csvWriter::writeRecord);
 
         assertThat(sw).asString()
@@ -220,7 +221,7 @@ class CsvWriterTest {
     @Test
     void mixedWriterUsage() {
         final StringWriter stringWriter = new StringWriter();
-        final CsvWriter csvWriter = CsvWriter.builder().build(stringWriter);
+        final CsvWriter csvWriter = CsvWriter.builder().bufferSize(0).build(stringWriter);
         csvWriter.writeRecord("foo", "bar");
         stringWriter.write("# my comment\r\n");
         csvWriter.writeRecord("1", "2");
@@ -305,7 +306,7 @@ class CsvWriterTest {
     void builderToString() {
         assertThat(crw).asString()
             .isEqualTo("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=8192, autoFlush=false]");
+                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=0, autoFlush=false]");
     }
 
     @Test
