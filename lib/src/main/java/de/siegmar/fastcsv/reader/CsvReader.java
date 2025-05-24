@@ -780,7 +780,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(reader, "reader must not be null");
 
-            final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
+            final CsvParser csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, maxBufferSize, reader);
 
             return newReader(callbackHandler, csvParser);
@@ -801,7 +801,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(data, "data must not be null");
 
-            final CsvParser csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy,
+            final CsvParser csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
                 commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, data);
 
             return newReader(callbackHandler, csvParser);

@@ -102,7 +102,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+        csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
             allowExtraCharsAfterClosingQuote, csvRecordHandler, maxBufferSize,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
