@@ -23,7 +23,7 @@ class StrictCsvReaderTest extends AbstractCsvReaderTest {
         assertThat(crb.ofCsvRecord(""))
             .asString()
             .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true, parser=StrictCsvParser]");
+                + "allowExtraFields=false, allowMissingFields=false, parser=StrictCsvParser]");
     }
 
 }

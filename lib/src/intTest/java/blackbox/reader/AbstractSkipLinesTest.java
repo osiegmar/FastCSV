@@ -54,7 +54,7 @@ abstract class AbstractSkipLinesTest {
     @ParameterizedTest
     @ValueSource(strings = {",\nfoo\n", ",,\nfoo\n", "''\nfoo\n", "' '\nfoo\n"})
     void notEmpty(final String input) {
-        crb.quoteCharacter('\'');
+        crb.allowMissingFields(true).quoteCharacter('\'');
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
         assertThat(crb.build(cbh, input).stream()).hasSize(2);
     }
@@ -62,7 +62,7 @@ abstract class AbstractSkipLinesTest {
     @ParameterizedTest
     @ValueSource(strings = {",\nfoo\n", ",,\nfoo\n", "''\nfoo\n", "' '\nfoo\n"})
     void notEmptyCustomCallback(final String input) {
-        crb.quoteCharacter('\'');
+        crb.allowMissingFields(true).quoteCharacter('\'');
         final AbstractBaseCsvCallbackHandler<String[]> cbh = new AbstractBaseCsvCallbackHandler<>() {
             private final List<String> fields = new ArrayList<>();
 

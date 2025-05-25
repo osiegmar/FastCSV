@@ -79,7 +79,7 @@ class CsvReaderBuilderTest {
             .isEqualTo("""
                 CsvReaderBuilder[fieldSeparator=,, quoteCharacter=", \
                 commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, \
-                ignoreDifferentFieldCount=true, allowExtraCharsAfterClosingQuote=false, \
+                allowExtraFields=false, allowMissingFields=false, allowExtraCharsAfterClosingQuote=false, \
                 trimWhitespacesAroundQuotes=false, detectBomHeader=false, maxBufferSize=16777216]""");
     }
 
@@ -128,7 +128,8 @@ class CsvReaderBuilderTest {
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
             .skipEmptyLines(true)
-            .ignoreDifferentFieldCount(false)
+            .allowExtraFields(false)
+            .allowMissingFields(false)
             .allowExtraCharsAfterClosingQuote(false)
             .ofCsvRecord("foo");
 

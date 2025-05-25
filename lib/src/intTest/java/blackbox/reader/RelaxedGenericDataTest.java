@@ -98,6 +98,8 @@ class RelaxedGenericDataTest {
 
         return CsvReader.builder()
             .commentStrategy(commentStrategy)
+            .allowExtraFields(true)
+            .allowMissingFields(true)
             .skipEmptyLines(settings.skipEmptyLines())
             .ofCsvRecord(input)
             .stream()

@@ -80,36 +80,38 @@ abstract class AbstractCsvReaderTest {
             .isInstanceOf(UnsupportedOperationException.class);
     }
 
-    // different field count
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "foo\nbar",
-        "foo\nbar\n",
-        "foo,bar\nfaz,baz",
-        "foo,bar\nfaz,baz\n",
-        "foo,bar\n,baz",
-        ",bar\nfaz,baz"
-    })
-    void differentFieldCountSuccess(final String s) {
-        assertThatNoException().isThrownBy(() -> readAll(s));
-    }
+    // allow extra fields
 
     @Test
-    void differentFieldCountSuccess2() {
-        crb.ignoreDifferentFieldCount(false);
-        assertThatNoException().isThrownBy(() -> readAll("foo\nbar"));
-    }
-
-    @Test
-    void differentFieldCountFail() {
-        crb.ignoreDifferentFieldCount(false);
-
-        assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
+    void allowNoExtraFields() {
+        assertThatThrownBy(() -> readAll("foo\nfoo,bar"))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading record that started in line 2")
             .hasRootCauseInstanceOf(CsvParseException.class)
             .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
+    }
+
+    @Test
+    void allowExtraFields() {
+        crb.allowExtraFields(true);
+        assertThatNoException().isThrownBy(() -> readAll("foo\nfoo,bar"));
+    }
+
+    // allow missing fields
+
+    @Test
+    void allowNoMissingFields() {
+        assertThatThrownBy(() -> readAll("foo,bar\nfoo"))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading record that started in line 2")
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record 2 has 1 fields, but first record had 2 fields");
+    }
+
+    @Test
+    void allowMissingFields() {
+        crb.allowMissingFields(true);
+        assertThatNoException().isThrownBy(() -> readAll("foo,bar\nfoo"));
     }
 
     // allow extra characters after closing quotes
