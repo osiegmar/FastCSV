@@ -1,11 +1,13 @@
 package blackbox.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
@@ -54,6 +56,22 @@ class NamedCsvRecordHandlerTest {
         assertThat(CsvReader.builder().build(handler, TEST_DATA_W_HEADER).stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields().containsExactly(Map.entry("col1", "foo"), Map.entry("col2", "bar"));
+    }
+
+    @Test
+    void noDuplicateHeaderInit() {
+        assertThatThrownBy(() -> NamedCsvRecordHandler.of(c -> c.header("col1", "col2", "col1")))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Header contains duplicate fields: [col1]");
+    }
+
+    @Test
+    void noDuplicateHeaderData() {
+        assertThatThrownBy(() -> CsvReader.builder().ofNamedCsvRecord("col1,col2,col1").stream().count())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading first record")
+            .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage("Header contains duplicate fields: [col1]");
     }
 
 }

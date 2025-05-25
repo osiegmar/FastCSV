@@ -146,13 +146,14 @@ header_a,header_aCRLF
 value_1,value_2CRLF
 ```
 
-The `NamedCsvRecord` of FastCSV offers several options to handle this case:
+The `NamedCsvRecord` class in FastCSV offers several options to handle this scenario:
 
-- `getField("header_a")`, `findField("header_a")` and `getFieldsAsMap()` returns only the **first** value (`"value_1"`).
-- `findFields("header_a")` and `getFieldsAsMapList()` returns a List containing **all** values (`"value_1"`
-  and `"value_2"`).
+- By default, FastCSV does **not** allow duplicate headers to prevent misinterpretation of data.
+  This behavior can be changed by calling `allowDuplicateHeader(true)` on the `NamedCsvRecordHandlerBuilder`.
+- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** value (`"value_1"`).
+- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** values (`"value_1"` and `"value_2"`).
 
-Regardless of the chosen option, FastCSV always handles the header as case-sensitive.
+Regardless of the option chosen, FastCSV always treats headers as case-sensitive.
 
 ### Spaces within fields
 
