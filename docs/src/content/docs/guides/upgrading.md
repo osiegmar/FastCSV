@@ -13,6 +13,27 @@ For a full list of changes, including new features, see the [changelog](https://
 - The minimum Java version has been raised from 11 to 17
 - This also raised the required Android API level from version 33 (Android 13) to 34 (Android 14)
 
+## Ignoring different field counts
+
+FastCSV 4.x no longer ignores different field counts by default, ensuring that data is not misinterpreted.
+
+You can change this behavior by calling `allowExtraFields(true)` and `allowMissingFields(true)` in the `CsvReaderBuilder`.
+These methods provide more control over how to handle different field counts in CSV data than the previous (now removed) `ignoreDifferentFieldCount()` method.
+
+```java title="Example"
+CsvReaderBuilder builder = CsvReader.builder()
+    .allowExtraFields(true)
+    .allowMissingFields(true);
+
+try (CsvReader<CsvRecord> csv = builder.ofCsvRecord(csvFile)) {
+    // ...
+}
+```
+
+:::caution
+As the default has changed, you may need to check your code and your desired behavior.
+:::
+
 ## Internal buffer flushing
 
 In FastCSV 2.x and 3.x, the CsvWriter instantiated via `CsvWriterBuilder.build(Writer)` flushed the internal buffer to the `Writer` after each record.

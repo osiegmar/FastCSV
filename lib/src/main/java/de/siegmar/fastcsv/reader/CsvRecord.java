@@ -101,7 +101,8 @@ public class CsvRecord {
     /// The minimum number of fields is 1, even if the line was empty.
     ///
     /// @return the number of fields in this record
-    /// @see CsvReader.CsvReaderBuilder#ignoreDifferentFieldCount(boolean)
+    /// @see CsvReader.CsvReaderBuilder#allowExtraFields(boolean)
+    /// @see CsvReader.CsvReaderBuilder#allowMissingFields(boolean)
     public int getFieldCount() {
         return fields.length;
     }

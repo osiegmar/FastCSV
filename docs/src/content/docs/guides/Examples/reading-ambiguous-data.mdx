@@ -10,8 +10,8 @@ There are a few widespread ambiguities in CSV files:
    See the [Empty lines section of the CSV Interpretation](/architecture/interpretation/#empty-lines) page for more information.
 2. **Empty fields**: CSV files can contain empty fields, which are fields that contain no data.
    See the [Empty fields / null values section of the CSV Interpretation](/architecture/interpretation/#empty-fields--null-values) page for more information.
-3. **Missing fields**: CSV files can contain missing fields, which are fields that are not present in a record.
-   See the [Different field count of the CSV Interpretation](/architecture/interpretation/#different-field-count) page for more information.
+3. **Extra or missing fields**: CSV files can contain a different number of fields in each record.
+   See the [Extra fields section of the CSV Interpretation](/architecture/interpretation/#extra-fields) page for more information.
 
 FastCSV is very aware of these ambiguities and provides ways to handle them.
 

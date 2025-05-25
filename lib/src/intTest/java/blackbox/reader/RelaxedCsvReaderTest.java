@@ -35,7 +35,7 @@ class RelaxedCsvReaderTest extends AbstractCsvReaderTest {
         assertThat(crb.ofCsvRecord(""))
             .asString()
             .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true, parser=RelaxedCsvParser]");
+                + "allowExtraFields=false, allowMissingFields=false, parser=RelaxedCsvParser]");
     }
 
 }

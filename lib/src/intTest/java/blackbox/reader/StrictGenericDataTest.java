@@ -78,6 +78,8 @@ class StrictGenericDataTest {
 
         return CsvReader.builder()
             .commentStrategy(commentStrategy)
+            .allowExtraFields(true)
+            .allowMissingFields(true)
             .allowExtraCharsAfterClosingQuote(true)
             .skipEmptyLines(settings.skipEmptyLines())
             .ofCsvRecord(input)

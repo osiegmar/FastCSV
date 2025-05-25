@@ -89,15 +89,17 @@ Consider the following CSV snippet as an illustration of varying field counts:
 ```
 header_a,header_bCRLF
 value_a_1CRLF
-value_a_2,value_b_2CRLF
+value_a_2,value_b_2,value_c_2CRLF
 ```
 
 In this example, `value_a_1` likely belongs to `header_a`, and `header_b` does not have a value for the first data
-record. However, this is just an assumption.
+record. However, this is just an assumption. Field `value_c_2` does not even have a corresponding header.
 
-By default, FastCSV handles scenarios with different field counts by ignoring them (see
-`CsvReaderBuilder.ignoreDifferentFieldCount(boolean)`). This is done to accommodate this frequently occurring case. To
-ensure no misinterpretation, you can disable this behavior, causing an exception to be thrown when reading such data.
+To ensure no misinterpretation, FastCSV does not allow extra or missing fields in a record by default.
+This means that the above example would result in a `CsvParseException` when reading it with FastCSV.
+
+However, this behavior can be changed by setting `CsvReaderBuilder.allowExtraFields(boolean)`
+and `CsvReaderBuilder.allowMissingFields(boolean)` to `true`.
 
 ### Empty lines
 

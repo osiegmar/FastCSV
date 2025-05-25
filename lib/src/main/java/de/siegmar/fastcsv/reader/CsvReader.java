@@ -52,7 +52,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private final CsvCallbackHandler<T> callbackHandler;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
-    private final boolean ignoreDifferentFieldCount;
+    private final boolean allowExtraFields;
+    private final boolean allowMissingFields;
     private final CloseableIterator<T> csvRecordIterator = new CsvRecordIterator();
 
     private int firstRecordFieldCount = -1;
@@ -60,13 +61,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler,
               final CommentStrategy commentStrategy, final boolean skipEmptyLines,
-              final boolean ignoreDifferentFieldCount) {
+              final boolean allowExtraFields, final boolean allowMissingFields) {
 
         this.csvParser = csvParser;
         this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
-        this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
+        this.allowExtraFields = allowExtraFields;
+        this.allowMissingFields = allowMissingFields;
     }
 
     /// Constructs a [CsvReaderBuilder] to configure and build instances of this class.
@@ -240,7 +242,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         // check field count consistency
-        if (!ignoreDifferentFieldCount) {
+        if (!allowExtraFields || !allowMissingFields) {
             checkFieldCountConsistency(callbackHandler.getFieldCount());
         }
 
@@ -248,10 +250,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     private void checkFieldCountConsistency(final int fieldCount) {
-        // check the field count consistency on every record
         if (firstRecordFieldCount == -1) {
             firstRecordFieldCount = fieldCount;
-        } else if (fieldCount != firstRecordFieldCount) {
+            return;
+        }
+
+        if (fieldCount > firstRecordFieldCount && !allowExtraFields
+            || fieldCount < firstRecordFieldCount && !allowMissingFields) {
             throw new CsvParseException("Record %d has %d fields, but first record had %d fields"
                 .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
         }
@@ -267,7 +272,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         return new StringJoiner(", ", CsvReader.class.getSimpleName() + "[", "]")
             .add("commentStrategy=" + commentStrategy)
             .add("skipEmptyLines=" + skipEmptyLines)
-            .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+            .add("allowExtraFields=" + allowExtraFields)
+            .add("allowMissingFields=" + allowMissingFields)
             .add("parser=" + csvParser.getClass().getSimpleName())
             .toString();
     }
@@ -360,7 +366,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Skip empty lines: `true`
-    /// - Ignore different field count: `true`
+    /// - Allow extra fields: `false`
+    /// - Allow missing fields: `false`
     /// - Allow extra characters after closing quotes: `false`
     /// - Trim whitespaces around quotes: `false`
     /// - Detect BOM header: `false`
@@ -378,7 +385,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private boolean skipEmptyLines = true;
-        private boolean ignoreDifferentFieldCount = true;
+        private boolean allowExtraFields;
+        private boolean allowMissingFields;
         private boolean allowExtraCharsAfterClosingQuote;
         private boolean trimWhitespacesAroundQuotes;
         private boolean detectBomHeader;
@@ -469,14 +477,30 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return this;
         }
 
-        /// Defines if an [CsvParseException] should be thrown if records do contain a
-        /// different number of fields.
+        /// Defines whether a [CsvParseException] should be thrown if records contain
+        /// more fields than the first record.
+        /// The first record is defined as the first record that is not a comment or an empty line.
         ///
-        /// @param ignoreDifferentFieldCount if exception should be suppressed, when CSV data contains
-        ///                                  different field count (default: `true`).
+        /// @param allowExtraFields Whether extra fields should be allowed (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        public CsvReaderBuilder ignoreDifferentFieldCount(final boolean ignoreDifferentFieldCount) {
-            this.ignoreDifferentFieldCount = ignoreDifferentFieldCount;
+        /// @see #allowMissingFields(boolean)
+        public CsvReaderBuilder allowExtraFields(final boolean allowExtraFields) {
+            this.allowExtraFields = allowExtraFields;
+            return this;
+        }
+
+        /// Defines whether a [CsvParseException] should be thrown if records contain
+        /// fewer fields than the first record.
+        /// The first record is defined as the first record that is not a comment or an empty line.
+        ///
+        /// Empty lines are allowed even if this is set to `false`.
+        ///
+        /// @param allowMissingFields Whether missing fields should be allowed (default: `false`).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @see #allowExtraFields(boolean)
+        /// @see #skipEmptyLines(boolean)
+        public CsvReaderBuilder allowMissingFields(final boolean allowMissingFields) {
+            this.allowMissingFields = allowMissingFields;
             return this;
         }
 
@@ -938,7 +962,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final CsvParser csvParser) {
             return new CsvReader<>(csvParser, callbackHandler,
-                commentStrategy, skipEmptyLines, ignoreDifferentFieldCount);
+                commentStrategy, skipEmptyLines, allowExtraFields, allowMissingFields);
         }
 
         @Override
@@ -949,7 +973,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("commentStrategy=" + commentStrategy)
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
-                .add("ignoreDifferentFieldCount=" + ignoreDifferentFieldCount)
+                .add("allowExtraFields=" + allowExtraFields)
+                .add("allowMissingFields=" + allowMissingFields)
                 .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
                 .add("trimWhitespacesAroundQuotes=" + trimWhitespacesAroundQuotes)
                 .add("detectBomHeader=" + detectBomHeader)
