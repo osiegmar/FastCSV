@@ -46,10 +46,10 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
     /// Constructs a new instance with the given configuration.
     ///
-    /// @param maxFields     the maximum number of fields, must be greater than 0 and
-    /// @param maxFieldSize  the maximum field size, must be greater than 0
-    /// @param maxRecordSize the maximum record size, must be greater than 0
-    /// @param fieldModifier the field modifier, must not be `null`
+    /// @param maxFields     the maximum number of fields; must be > 0
+    /// @param maxFieldSize  the maximum field size; must be > 0
+    /// @param maxRecordSize the maximum record size; must be > 0 and >= `maxFieldSize`
+    /// @param fieldModifier the field modifier; must not be `null`
     /// @throws IllegalArgumentException if the arguments are invalid
     /// @throws NullPointerException     if `null` is passed
     protected AbstractInternalCsvCallbackHandler(final int maxFields,
@@ -57,9 +57,6 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
                                                  final int maxRecordSize,
                                                  final FieldModifier fieldModifier) {
 
-        Preconditions.checkArgument(maxFields > 0, "maxFields must be > 0");
-        Preconditions.checkArgument(maxFieldSize > 0, "maxFieldSize must be > 0");
-        Preconditions.checkArgument(maxRecordSize > 0, "maxRecordSize must be > 0");
         Preconditions.checkArgument(maxRecordSize >= maxFieldSize, "maxRecordSize must be >= maxFieldSize");
 
         this.maxFields = maxFields;
@@ -238,13 +235,13 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         ///
         /// This constraint is enforced for all fields, including the header.
         ///
-        /// @param maxFields the maximum fields a record may have, must be greater than 0
-        ///                                                    (default: {@value %,2d #DEFAULT_MAX_FIELDS})
+        /// @param maxFields the maximum fields a record may have; must be > 0
+        ///                  (default: {@value %,2d #DEFAULT_MAX_FIELDS})
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if the argument is less than 1
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxFields(final int maxFields) {
-            Preconditions.checkArgument(maxFields > 0, "maxFields must be greater than 0");
+            Preconditions.checkArgument(maxFields > 0, "maxFields must be > 0");
             this.maxFields = maxFields;
             return self();
         }
@@ -258,14 +255,14 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// the maximum field size **before** the field modifier is applied, this constraint allows more precise control
         /// over the field size as field modifiers may have a significant impact on the field size.
         ///
-        /// @param maxFieldSize the maximum field size, must be greater than 0
+        /// @param maxFieldSize the maximum field size; must be > 0
         ///                     (default: {@value %,2d #DEFAULT_MAX_FIELD_SIZE})
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if the argument is less than 1
         /// @see de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#maxBufferSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxFieldSize(final int maxFieldSize) {
-            Preconditions.checkArgument(maxFieldSize > 0, "maxFieldSize must be greater than 0");
+            Preconditions.checkArgument(maxFieldSize > 0, "maxFieldSize must be > 0");
             this.maxFieldSize = maxFieldSize;
             return self();
         }
@@ -276,23 +273,23 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// The size of the record is the sum of the sizes of all fields.
         /// The size of each field is determined **after** field modifiers are applied.
         ///
-        /// Make sure that [#maxRecordSize] is greater than or equal to [#maxFieldSize].
+        /// Make sure that [#maxRecordSize] is >= [#maxFieldSize].
         ///
-        /// @param maxRecordSize the maximum record size, must be greater than 0
+        /// @param maxRecordSize the maximum record size; must be > 0
         ///                      (default: {@value %,2d #DEFAULT_MAX_RECORD_SIZE})
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if the argument is less than 1
         /// @see #maxFieldSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxRecordSize(final int maxRecordSize) {
-            Preconditions.checkArgument(maxRecordSize > 0, "maxRecordSize must be greater than 0");
+            Preconditions.checkArgument(maxRecordSize > 0, "maxRecordSize must be > 0");
             this.maxRecordSize = maxRecordSize;
             return self();
         }
 
         /// Sets the field modifier.
         ///
-        /// @param fieldModifier the field modifier, must not be `null` (default: [FieldModifiers#NOP])
+        /// @param fieldModifier the field modifier; must not be `null` (default: [FieldModifiers#NOP])
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws NullPointerException if `null` is passed
         @SuppressWarnings("checkstyle:HiddenField")
