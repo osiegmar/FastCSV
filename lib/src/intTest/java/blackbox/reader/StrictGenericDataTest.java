@@ -23,7 +23,7 @@ import specreader.spec.TestSpecSettings;
 /// The test specs cover all relevant parser branches of FastCSV.
 ///
 /// The test specs can be reused for other CSV parsers as well.
-class GenericDataTest {
+class StrictGenericDataTest {
 
     @ParameterizedTest(name = "{index} - {0}")
     @MethodSource("dataProvider")
@@ -70,7 +70,6 @@ class GenericDataTest {
     /// @param settings the test spec settings
     /// @return the parsed CSV records
     private static List<List<String>> parseCsvRecords(final TestSpecSettings settings, final String input) {
-
         final CommentStrategy commentStrategy = switch (settings.commentMode()) {
             case NONE -> CommentStrategy.NONE;
             case READ -> CommentStrategy.READ;

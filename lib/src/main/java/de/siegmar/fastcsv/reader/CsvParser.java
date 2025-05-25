@@ -3,7 +3,7 @@ package de.siegmar.fastcsv.reader;
 import java.io.Closeable;
 import java.io.IOException;
 
-sealed interface CsvParser extends Closeable permits StrictCsvParser {
+sealed interface CsvParser extends Closeable permits StrictCsvParser, RelaxedCsvParser {
 
     /// Parses the next record from the stream and passes it to the callback handler.
     ///

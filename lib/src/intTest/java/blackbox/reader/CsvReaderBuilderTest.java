@@ -76,10 +76,11 @@ class CsvReaderBuilderTest {
     @Test
     void builderToString() {
         assertThat(crb).asString()
-            .isEqualTo("CsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true, allowExtraCharsAfterClosingQuote=false, "
-                + "detectBomHeader=false, maxBufferSize=16777216]");
+            .isEqualTo("""
+                CsvReaderBuilder[fieldSeparator=,, quoteCharacter=", \
+                commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, \
+                ignoreDifferentFieldCount=true, allowExtraCharsAfterClosingQuote=false, \
+                trimWhitespacesAroundQuotes=false, detectBomHeader=false, maxBufferSize=16777216]""");
     }
 
     @Test

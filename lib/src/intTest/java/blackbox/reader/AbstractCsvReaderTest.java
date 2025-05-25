@@ -32,41 +32,38 @@ import testutil.CsvRecordAssert;
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
     "PMD.AvoidDuplicateLiterals",
-    "PMD.CloseResource"
+    "PMD.CloseResource",
+    "PMD.AbstractClassWithoutAbstractMethod"
 })
-class CsvReaderTest {
+abstract class AbstractCsvReaderTest {
 
-    private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
+    protected final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
-    void configBuilder(final char c) {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(c).ofCsvRecord("foo"))
+    void invalidFieldSeparator(final char c) {
+        crb.fieldSeparator(c).quoteCharacter('"').commentCharacter('#');
+        assertThatThrownBy(() -> crb.ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("fieldSeparator must not be a newline char");
-
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(c).ofCsvRecord("foo"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("quoteCharacter must not be a newline char");
-
-        assertThatThrownBy(() -> CsvReader.builder().commentCharacter(c).ofCsvRecord("foo"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("commentCharacter must not be a newline char");
     }
 
-    @Test
-    void configReader() {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').quoteCharacter(',').ofCsvRecord("foo"))
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    void invalidQuoteCharacter(final char c) {
+        crb.fieldSeparator(',').quoteCharacter(c).commentCharacter('#');
+        assertThatThrownBy(() -> crb.quoteCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=#)");
+            .hasMessage("quoteCharacter must not be a newline char");
+    }
 
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').commentCharacter(',').ofCsvRecord("foo"))
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    void invalidCommentCharacter(final char c) {
+        crb.fieldSeparator(',').quoteCharacter('"').commentCharacter(c);
+        assertThatThrownBy(() -> crb.commentCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
-
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(',').commentCharacter(',').ofCsvRecord("foo"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=,)");
+            .hasMessage("commentCharacter must not be a newline char");
     }
 
     @Test
@@ -81,16 +78,6 @@ class CsvReaderTest {
         final List<String> fields = crb.ofCsvRecord("foo").iterator().next().getFields();
         assertThatThrownBy(() -> fields.add("bar"))
             .isInstanceOf(UnsupportedOperationException.class);
-    }
-
-    // toString()
-
-    @Test
-    void readerToString() {
-        assertThat(crb.ofCsvRecord(""))
-            .asString()
-            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true]");
     }
 
     // different field count
@@ -126,14 +113,6 @@ class CsvReaderTest {
     }
 
     // allow extra characters after closing quotes
-
-    @Test
-    void allowExtraCharsAfterClosingQuote() {
-        crb.allowExtraCharsAfterClosingQuote(true);
-        assertThat(crb.ofCsvRecord("foo,\"bar\"baz").stream())
-            .singleElement(CsvRecordAssert.CSV_RECORD)
-            .fields().containsExactly("foo", "barbaz");
-    }
 
     @Test
     void allowExtraCharsAfterClosingQuoteNot() {
@@ -279,7 +258,7 @@ class CsvReaderTest {
 
     @Test
     void bufferExceedSubsequentRecord() {
-        final char[] buf = new char[16 * 1024 * 1024];
+        final char[] buf = new char[17 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
@@ -292,7 +271,7 @@ class CsvReaderTest {
             .hasMessage("Exception when reading record that started in line 2")
             .rootCause()
                 .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("is insufficient to read the data of a single field");
+                .hasMessageContaining("The maximum buffer size of 16777216 is insufficient");
     }
 
     // record size exceed
