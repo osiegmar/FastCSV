@@ -15,7 +15,6 @@ import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import testutil.CsvRecordAssert;
 
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class FieldModifierTest {
 
     private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();

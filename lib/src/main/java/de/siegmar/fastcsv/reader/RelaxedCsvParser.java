@@ -17,8 +17,7 @@ import de.siegmar.fastcsv.util.Util;
     "checkstyle:ExecutableStatementCount",
     "checkstyle:InnerAssignment",
     "checkstyle:JavaNCSS",
-    "checkstyle:NestedIfDepth",
-    "PMD.UnusedAssignment"
+    "checkstyle:NestedIfDepth"
 })
 final class RelaxedCsvParser implements CsvParser {
 
