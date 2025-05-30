@@ -54,6 +54,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private final boolean skipEmptyLines;
     private final boolean allowExtraFields;
     private final boolean allowMissingFields;
+    private final boolean fieldCountConsistencyCheck;
     private final CloseableIterator<T> csvRecordIterator = new CsvRecordIterator();
 
     private int firstRecordFieldCount = -1;
@@ -69,6 +70,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         this.skipEmptyLines = skipEmptyLines;
         this.allowExtraFields = allowExtraFields;
         this.allowMissingFields = allowMissingFields;
+        fieldCountConsistencyCheck = !allowExtraFields || !allowMissingFields;
     }
 
     /// Constructs a [CsvReaderBuilder] to configure and build instances of this class.
@@ -231,22 +233,17 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return null;
         }
 
-        // handle comment lines
-        if (callbackHandler.isComment()) {
-            return commentStrategy == CommentStrategy.SKIP ? null : csvRecord;
-        }
+        return switch (callbackHandler.getRecordType()) {
+            case DATA -> {
+                if (fieldCountConsistencyCheck) {
+                    checkFieldCountConsistency(callbackHandler.getFieldCount());
+                }
 
-        // handle empty lines
-        if (callbackHandler.isEmptyLine()) {
-            return skipEmptyLines ? null : csvRecord;
-        }
-
-        // check field count consistency
-        if (!allowExtraFields || !allowMissingFields) {
-            checkFieldCountConsistency(callbackHandler.getFieldCount());
-        }
-
-        return csvRecord;
+                yield csvRecord;
+            }
+            case COMMENT -> commentStrategy == CommentStrategy.SKIP ? null : csvRecord;
+            case EMPTY -> skipEmptyLines ? null : csvRecord;
+        };
     }
 
     private void checkFieldCountConsistency(final int fieldCount) {

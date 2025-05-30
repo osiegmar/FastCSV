@@ -42,20 +42,17 @@ class BaseCsvCallbackHandlerTest {
 
         assertThat(it.next()).containsExactly("foo");
         assertThat(handler.getStartingLineNumber()).isOne();
-        assertThat(handler.isComment()).isTrue();
-        assertThat(handler.isEmptyLine()).isFalse();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.COMMENT);
         assertThat(handler.getFieldCount()).isOne();
 
         assertThat(it.next()).containsExactly("");
         assertThat(handler.getStartingLineNumber()).isEqualTo(2);
-        assertThat(handler.isComment()).isFalse();
-        assertThat(handler.isEmptyLine()).isTrue();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.EMPTY);
         assertThat(handler.getFieldCount()).isOne();
 
         assertThat(it.next()).containsExactly("bar");
         assertThat(handler.getStartingLineNumber()).isEqualTo(3);
-        assertThat(handler.isComment()).isFalse();
-        assertThat(handler.isEmptyLine()).isFalse();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.DATA);
         assertThat(handler.getFieldCount()).isOne();
     }
 
@@ -77,6 +74,11 @@ class BaseCsvCallbackHandlerTest {
         @Override
         protected void handleComment(final char[] buf, final int offset, final int len) {
             fields.add(new String(buf, offset, len));
+        }
+
+        @Override
+        protected void handleEmpty() {
+            fields.add("");
         }
 
         @Override

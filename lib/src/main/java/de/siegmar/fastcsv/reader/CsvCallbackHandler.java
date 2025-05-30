@@ -16,21 +16,17 @@ public abstract class CsvCallbackHandler<T> {
     protected CsvCallbackHandler() {
     }
 
-    /// {@return whether the record denotes a comment}
+    /// {@return the type of the record that is built from the CSV data}
     ///
-    /// If this method returns `true`, the record is a comment and cannot be a regular record.
-    /// The [CsvReader] will skip the record if
-    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
-    /// is set to [CommentStrategy#SKIP].
-    protected abstract boolean isComment();
-
-    /// {@return whether the line is empty}
+    /// The [CsvReader] will skip
     ///
-    /// If this method returns `true`, the line is empty.
-    /// The [CsvReader] will skip the record if
-    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)]
-    /// is set to `true`.
-    protected abstract boolean isEmptyLine();
+    /// - records of type [RecordType#COMMENT] if
+    ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
+    ///   is set to [CommentStrategy#SKIP]
+    /// - records of type [RecordType#EMPTY] if
+    ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)]
+    ///   is set to `true`.
+    protected abstract RecordType getRecordType();
 
     /// {@return the number of fields in the record}
     ///
@@ -88,6 +84,9 @@ public abstract class CsvCallbackHandler<T> {
     /// @param offset the offset of the field value in the buffer
     /// @param len    the length of the field value
     protected abstract void setComment(char[] buf, int offset, int len);
+
+    /// Called for each empty line.
+    protected abstract void setEmpty();
 
     /// Called at the end of each CSV record to build the actual record representation.
     ///

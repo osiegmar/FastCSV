@@ -54,7 +54,7 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
 
     @Override
     protected CsvRecord buildRecord() {
-        return new CsvRecord(startingLineNumber, compactFields(), comment);
+        return new CsvRecord(startingLineNumber, compactFields(), recordType == RecordType.COMMENT);
     }
 
     /// A builder for [CsvRecordHandler].

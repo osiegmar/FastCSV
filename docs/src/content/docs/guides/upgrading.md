@@ -137,13 +137,17 @@ The `CsvIndex` and `CsvPage` classes have been changed to Java records. With thi
 + firstPage.startingLineNumber();
 ```
 
-## Record wrapper removal
+## Callback handler refactoring
 
-The `RecordWrapper` class has been removed. It was a wrapper around the `CsvRecord` class that was used to provide parsing context information to the reading process.
+If you implemented a custom callback handler, some major changes have been made in FastCSV 4.0 that you need to be aware of:
 
-If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, all you need to do is to return the `CsvRecord` instance directly instead of wrapping it in a `RecordWrapper`.
+**Record wrapper removal**: The `RecordWrapper` class has been removed. Its `getFieldCount` method has been moved to the `CsvCallbackHandler`. The methods `isComment` and `isEmptyLine` have been combined into a single `getRecordType` method that returns the type of the record (comment, empty line, or regular record). This `getRecordType` method is now also part of the `CsvCallbackHandler` class.
 
-If you implemented a custom callback handler by implementing the `CsvCallbackHandler` interface, you also have to implement three additional methods: `isComment`, `isEmptyLine` and `getFieldCount`. Those methods simply have to return the information that was previously provided by the `RecordWrapper` instance.
+**Handling empty lines**: The CSV parser is emitting empty lines separately from comments and regular records.
+
+If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, your implementation for the `buildRecord` method now needs to return a `CsvRecord` instance instead of a `RecordWrapper`. You may also want to implement the `handleEmpty` method to handle empty lines suiting your needs.
+
+Implementing the lower-level `CsvCallbackHandler` directly requires to implement `getFieldCount` (previously implemented in the RecordWrapper) and `getRecordType` methods.
 
 ## Removed deprecated code
 

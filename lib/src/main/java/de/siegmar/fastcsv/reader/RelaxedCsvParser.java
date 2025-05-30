@@ -103,7 +103,21 @@ final class RelaxedCsvParser implements CsvParser {
             return currentFieldIndex > 0 && materializeField(true, false);
         }
 
-        if (cStrat != CommentStrategy.NONE && ch == cChar) {
+        if (ch == CR) {
+            reader.mark(1);
+            if (reader.read() != LF) {
+                reader.reset();
+            }
+            callbackHandler.setEmpty();
+            return true;
+        }
+
+        if (ch == LF) {
+            callbackHandler.setEmpty();
+            return true;
+        }
+
+        if (ch == cChar && cStrat != CommentStrategy.NONE) {
             parseComment();
             return true;
         }

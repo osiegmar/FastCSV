@@ -97,7 +97,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     @Override
     protected NamedCsvRecord buildRecord() {
-        if (comment) {
+        if (recordType == RecordType.COMMENT) {
             return new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER);
         }
 
