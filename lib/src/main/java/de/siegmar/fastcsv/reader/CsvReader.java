@@ -206,10 +206,6 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             });
     }
 
-    @SuppressWarnings({
-        "PMD.AvoidBranchingStatementAsLastInLoop",
-        "PMD.AssignmentInOperand"
-    })
     private T fetchRecord() throws IOException {
         while (csvParser.parse()) {
             final T csvRecord = processRecord();
@@ -852,7 +848,6 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if callbackHandler or reader is `null`
         /// @throws IllegalArgumentException if argument validation fails.
-        @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(reader, "reader must not be null");
@@ -881,7 +876,6 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return a new CsvReader - never `null`.
         /// @throws NullPointerException if callbackHandler or data is `null`
         /// @throws IllegalArgumentException if argument validation fails.
-        @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(data, "data must not be null");
@@ -929,7 +923,6 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @throws IOException          if an I/O error occurs.
         /// @throws NullPointerException if callbackHandler, file or charset is `null`
         /// @see #build(CsvCallbackHandler, Path)
-        @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                       final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");

@@ -18,8 +18,7 @@ import de.siegmar.fastcsv.util.Util;
     "checkstyle:ExecutableStatementCount",
     "checkstyle:InnerAssignment",
     "checkstyle:JavaNCSS",
-    "checkstyle:NestedIfDepth",
-    "PMD.UnusedAssignment"
+    "checkstyle:NestedIfDepth"
 })
 final class StrictCsvParser implements CsvParser {
 
@@ -133,7 +132,6 @@ final class StrictCsvParser implements CsvParser {
         return false;
     }
 
-    @SuppressWarnings("PMD.EmptyIfStmt")
     boolean consume(final char[] lBuf, final int lLen) {
         int lPos = csvBuffer.pos;
         int lBegin = csvBuffer.begin;
