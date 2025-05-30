@@ -8,8 +8,7 @@ package de.siegmar.fastcsv.reader;
 public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private long startingLineNumber;
-    private boolean comment;
-    private boolean emptyLine;
+    private RecordType recordType;
     private int fieldCount;
 
     /// Constructs a new instance.
@@ -25,16 +24,10 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
         return startingLineNumber;
     }
 
-    /// {@return whether the current record is a comment.}
+    /// {@inheritDoc}
     @Override
-    protected boolean isComment() {
-        return comment;
-    }
-
-    /// {@return whether the current record is an empty line.}
-    @Override
-    protected boolean isEmptyLine() {
-        return emptyLine;
+    protected RecordType getRecordType() {
+        return recordType;
     }
 
     /// {@return the number of fields in the current record.}
@@ -50,8 +43,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     protected final void beginRecord(final long startingLineNumber) {
         this.startingLineNumber = startingLineNumber;
         fieldCount = 0;
-        comment = false;
-        emptyLine = true;
+        recordType = RecordType.DATA;
         handleBegin(startingLineNumber);
     }
 
@@ -66,11 +58,10 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleField(int, char\[\], int, int, boolean)] after updating the
-    /// [#emptyLine] flag and before incrementing the [#fieldCount].
+    /// This implementation delegates to [#handleField(int, char\[\], int, int, boolean)]
+    /// before incrementing the [#fieldCount].
     @Override
     protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
-        emptyLine = emptyLine && fieldCount == 0 && len == 0 && !quoted;
         handleField(fieldCount++, buf, offset, len, quoted);
     }
 
@@ -91,14 +82,13 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the [#comment]
-    /// and [#emptyLine] flag and before incrementing the [#fieldCount].
+    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the [#recordType]
+    /// and before incrementing the [#fieldCount].
     @Override
     protected final void setComment(final char[] buf, final int offset, final int len) {
-        comment = true;
-        emptyLine = false;
+        recordType = RecordType.COMMENT;
         handleComment(buf, offset, len);
-        fieldCount++;
+        fieldCount = 1;
     }
 
     /// Handles a comment.
@@ -111,6 +101,23 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// @param offset the offset of the field value in the buffer
     /// @param len    the length of the field value
     protected void handleComment(final char[] buf, final int offset, final int len) {
+    }
+
+    /// {@inheritDoc}
+    ///
+    /// This implementation delegates to [#handleEmpty()] after updating the [#recordType]
+    /// and before setting the [#fieldCount] to 1.
+    @Override
+    protected final void setEmpty() {
+        recordType = RecordType.EMPTY;
+        handleEmpty();
+        fieldCount = 1;
+    }
+
+    /// Handles an empty line.
+    ///
+    /// This method is called for each empty line.
+    protected void handleEmpty() {
     }
 
 }

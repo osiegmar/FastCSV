@@ -41,6 +41,7 @@ final class StrictCsvParser implements CsvParser {
 
     private long startingLineNumber;
     private int lines = 1;
+    private boolean firstField;
 
     private int status;
     private boolean finished;
@@ -101,6 +102,7 @@ final class StrictCsvParser implements CsvParser {
         startingLineNumber += lines;
         lines = 1;
         callbackHandler.beginRecord(startingLineNumber);
+        firstField = true;
 
         do {
             if (csvBuffer.len == csvBuffer.pos && !csvBuffer.fetchData()) {
@@ -197,15 +199,24 @@ final class StrictCsvParser implements CsvParser {
                             materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
                             lStatus = STATUS_NEW_FIELD;
                             lBegin = lPos;
+                            firstField = false;
                         } else if (c == CR) {
-                            materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
+                            if (firstField && lPos - 1 == lBegin) {
+                                callbackHandler.setEmpty();
+                            } else {
+                                materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
+                            }
                             status = STATUS_LAST_CHAR_WAS_CR;
                             lBegin = lPos;
                             moreDataNeeded = false;
                             break OUTER;
                         } else if (c == LF) {
                             if ((lStatus & STATUS_LAST_CHAR_WAS_CR) == 0) {
-                                materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
+                                if (firstField && lPos - 1 == lBegin) {
+                                    callbackHandler.setEmpty();
+                                } else {
+                                    materialize(lBuf, lBegin, lPos - 1, lStatus, qChar);
+                                }
                                 status = STATUS_RESET;
                                 lBegin = lPos;
                                 moreDataNeeded = false;

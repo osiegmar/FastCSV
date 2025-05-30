@@ -38,11 +38,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// The current index in the internal fields array.
     protected int fieldIdx;
 
-    /// Whether the current record is a comment.
-    protected boolean comment;
-
-    /// Whether the line is empty.
-    protected boolean emptyLine;
+    /// The type of the current record.
+    protected RecordType recordType;
 
     /// Constructs a new instance with the given configuration.
     ///
@@ -67,13 +64,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     }
 
     @Override
-    protected boolean isComment() {
-        return comment;
-    }
-
-    @Override
-    protected boolean isEmptyLine() {
-        return emptyLine;
+    public RecordType getRecordType() {
+        return recordType;
     }
 
     @Override
@@ -89,8 +81,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         this.startingLineNumber = startingLineNumber;
         fieldIdx = 0;
         recordSize = 0;
-        comment = false;
-        emptyLine = true;
+        recordType = RecordType.DATA;
     }
 
     /// {@inheritDoc}
@@ -113,7 +104,6 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
             extendCapacity();
         }
 
-        emptyLine = emptyLine && fieldIdx == 0 && len == 0 && !quoted;
         fields[fieldIdx++] = modifiedField;
         recordSize += modifiedFieldLength;
     }
@@ -143,10 +133,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @throws CsvParseException if the addition exceeds the limit of record size.
     @Override
     protected void setComment(final char[] buf, final int offset, final int len) {
-        if (fieldIdx != 0) {
-            // CsvParser is aware that comments are one-field records, so this should never happen
-            throw new IllegalStateException("Comment must be the first and only field in a record");
-        }
+        recordType = RecordType.COMMENT;
 
         final String modifiedComment = modifyComment(new String(buf, offset, len));
         final int modifiedCommentLength = modifiedComment.length();
@@ -158,9 +145,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         // comments are one-field records
 
         recordSize += modifiedCommentLength;
-        fields[fieldIdx++] = modifiedComment;
-        comment = true;
-        emptyLine = false;
+        fields[0] = modifiedComment;
+        fieldIdx = 1;
     }
 
     /// Modifies comment value.
@@ -169,6 +155,13 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @return the modified comment value
     protected String modifyComment(final String field) {
         return fieldModifier.modifyComment(startingLineNumber, field);
+    }
+
+    @Override
+    protected void setEmpty() {
+        recordType = RecordType.EMPTY;
+        fields[0] = "";
+        fieldIdx = 1;
     }
 
     private void extendCapacity() {
