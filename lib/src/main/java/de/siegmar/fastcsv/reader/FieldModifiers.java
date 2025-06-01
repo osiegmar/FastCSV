@@ -13,7 +13,7 @@ import java.util.function.Function;
 /// List<CsvRecord> records = CsvReader.builder()
 ///     .build(handler, "  foo   ,   bar")
 ///     .stream()
-///     .collect(Collectors.toList());
+///     .toList();
 ///
 /// // fields would be: "FOO" and "BAR"
 /// ```
