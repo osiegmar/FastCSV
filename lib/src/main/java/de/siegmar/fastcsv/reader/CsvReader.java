@@ -584,6 +584,38 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return this;
         }
 
+        /// Convenience method to read a single CSV record from the specified string.
+        ///
+        /// If the string contains multiple records, only the first one is returned.
+        ///
+        /// @param data the CSV data to read; must not be `null`
+        /// @return a single [CsvRecord] instance containing the parsed data
+        /// @throws NullPointerException if data is `null`
+        /// @throws CsvParseException    if the data cannot be parsed
+        /// @see #ofSingleCsvRecord(CsvCallbackHandler, String)
+        public CsvRecord ofSingleCsvRecord(final String data) {
+            return ofSingleCsvRecord(CsvRecordHandler.of(), data);
+        }
+
+        /// Convenience method to read a single CSV record using a custom callback handler.
+        ///
+        /// If the string contains multiple records, only the first one is returned.
+        ///
+        /// @param <T>             the type of the CSV record.
+        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+        /// @param data            the CSV data to read; must not be `null`
+        /// @return a single record as processed by the callback handler
+        /// @throws NullPointerException if callbackHandler or data is `null`
+        /// @throws CsvParseException    if the data cannot be parsed
+        /// @see #ofSingleCsvRecord(String)
+        public <T> T ofSingleCsvRecord(final CsvCallbackHandler<T> callbackHandler, final String data) {
+            final T fetchedRecord = build(callbackHandler, data).fetch();
+            if (fetchedRecord == null) {
+                throw new CsvParseException("No record found in the provided data");
+            }
+            return fetchedRecord;
+        }
+
         /// Constructs a new index-based [CsvReader] for the specified input stream.
         ///
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream)] with
