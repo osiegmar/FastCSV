@@ -27,6 +27,8 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 import testutil.CsvRecordAssert;
 
 @SuppressWarnings({
@@ -377,7 +379,27 @@ abstract class AbstractCsvReaderTest {
 
     @Test
     void fieldCount() {
-        assertThat(crb.ofCsvRecord("foo,bar").iterator().next().getFieldCount()).isEqualTo(2);
+        assertThat(crb.ofSingleCsvRecord("foo,bar").getFieldCount()).isEqualTo(2);
+    }
+
+    @Test
+    void ofSingleCsvRecord() {
+        assertThat(crb.ofSingleCsvRecord("foo,bar"))
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec).fields().containsExactly("foo", "bar"));
+    }
+
+    @Test
+    void ofNamedSingleCsvRecordDataMissing() {
+        assertThatThrownBy(() -> crb.ofSingleCsvRecord(""))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("No record found in the provided data");
+    }
+
+    @Test
+    void ofSingleCsvRecordWithCustomHandler() {
+        final var cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
+        assertThat(crb.ofSingleCsvRecord(cbh, " foo , bar "))
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec).fields().containsExactly("foo", "bar"));
     }
 
     // test helpers
