@@ -27,6 +27,11 @@ tasks.compileJava {
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
+// enable parameter names for tests with @ParameterizedTest
+tasks.compileTestJava {
+    options.compilerArgs.add("-parameters")
+}
+
 tasks.javadoc {
     options.jFlags = listOf("-Duser.language=en", "-Duser.country=US")
 }
