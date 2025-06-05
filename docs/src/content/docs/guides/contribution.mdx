@@ -24,10 +24,13 @@ This will help to avoid wasted effort and ensure that your contribution is in li
 
     See [GitHub's documentation](https://docs.github.com/en/get-started/quickstart/fork-a-repo) for more information.
 
-2. Create a feature branch
+2. Create a feature branch from the `develop` branch
+
+    The `main` branch is reserved for the current released version. Always base your work on the `develop` branch:
 
     ```bash
-    git checkout -b feature/my-feature
+    git fetch origin
+    git checkout -b feature/my-feature origin/develop
     ```
 
 3. Write code and tests
