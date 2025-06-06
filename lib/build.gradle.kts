@@ -142,6 +142,11 @@ tasks.jar {
             "-exportcontents" to "de.siegmar.fastcsv.reader.*, de.siegmar.fastcsv.writer.*"
         )
     }
+    into("META-INF") {
+        from(rootDir) {
+            include("LICENSE")
+        }
+    }
 }
 
 animalsniffer {
