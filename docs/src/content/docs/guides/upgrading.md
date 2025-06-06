@@ -17,10 +17,10 @@ For a full list of changes, including new features, see the [changelog](https://
 
 FastCSV 4.x rejects duplicate headers by default, ensuring that each header field is unique and preventing misinterpretation.
 
-You can change this behavior by calling `allowDuplicateHeader(true)` on the `NamedCsvRecordHandlerBuilder`.
+You can change this behavior by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
 
 ```java title="Example"
-var rh = NamedCsvRecordHandler.of(c -> c.allowDuplicateHeader(true));
+var rh = NamedCsvRecordHandler.of(c -> c.allowDuplicateHeaderFields(true));
 try (CsvReader<NamedCsvRecord> csv = CsvReader.builder().build(rh, csvFile)) {
     // ...
 }

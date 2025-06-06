@@ -20,14 +20,14 @@ import java.util.function.Consumer;
 public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHandler<NamedCsvRecord> {
 
     private static final String[] EMPTY_HEADER = new String[0];
-    private final boolean allowDuplicateHeader;
+    private final boolean allowDuplicateHeaderFields;
     private String[] header;
 
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                                   final FieldModifier fieldModifier,
-                                  final boolean allowDuplicateHeader, final List<String> header) {
+                                  final boolean allowDuplicateHeaderFields, final List<String> header) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
-        this.allowDuplicateHeader = allowDuplicateHeader;
+        this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
         if (header != null) {
             setHeader(header.toArray(new String[0]));
         }
@@ -72,7 +72,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             Objects.requireNonNull(h, "header element must not be null");
         }
 
-        if (!allowDuplicateHeader) {
+        if (!allowDuplicateHeaderFields) {
             checkForDuplicates(header);
         }
 
@@ -114,7 +114,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     public static final class NamedCsvRecordHandlerBuilder
         extends AbstractInternalCsvCallbackHandlerBuilder<NamedCsvRecordHandlerBuilder> {
 
-        private boolean allowDuplicateHeader;
+        private boolean allowDuplicateHeaderFields;
         private List<String> header;
 
         private NamedCsvRecordHandlerBuilder() {
@@ -126,10 +126,10 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         /// When set to `true`, duplicate fields are allowed. See [NamedCsvRecord] for details on how duplicate
         /// headers are handled.
         ///
-        /// @param allowDuplicateHeader whether duplicate header fields are allowed (default: `false`)
+        /// @param allowDuplicateHeaderFields whether duplicate header fields are allowed (default: `false`)
         /// @return This updated object, allowing additional method calls to be chained together.
-        public NamedCsvRecordHandlerBuilder allowDuplicateHeader(final boolean allowDuplicateHeader) {
-            this.allowDuplicateHeader = allowDuplicateHeader;
+        public NamedCsvRecordHandlerBuilder allowDuplicateHeaderFields(final boolean allowDuplicateHeaderFields) {
+            this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
             return this;
         }
 
@@ -175,7 +175,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         ///     (see [AbstractInternalCsvCallbackHandler])
         public NamedCsvRecordHandler build() {
             return new NamedCsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier,
-                allowDuplicateHeader, header);
+                allowDuplicateHeaderFields, header);
         }
 
     }
