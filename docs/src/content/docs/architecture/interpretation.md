@@ -149,7 +149,7 @@ value_1,value_2CRLF
 The `NamedCsvRecord` class in FastCSV offers several options to handle this scenario:
 
 - By default, FastCSV does **not** allow duplicate headers to prevent misinterpretation of data.
-  This behavior can be changed by calling `allowDuplicateHeader(true)` on the `NamedCsvRecordHandlerBuilder`.
+  This behavior can be changed by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
 - Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** value (`"value_1"`).
 - Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** values (`"value_1"` and `"value_2"`).
 

@@ -54,7 +54,7 @@ class NamedCsvReaderTest {
     @Test
     void findFieldsByName() {
         final var cbh = NamedCsvRecordHandler
-            .of(c -> c.allowDuplicateHeader(true));
+            .of(c -> c.allowDuplicateHeaderFields(true));
         assertThat(CsvReader.builder().build(cbh, "foo,xoo,foo\nbar,moo,baz").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .findFields("foo").containsExactly("bar", "baz");
@@ -100,7 +100,7 @@ class NamedCsvReaderTest {
     @Test
     void fieldMap() {
         final var cbh = NamedCsvRecordHandler
-            .of(c -> c.allowDuplicateHeader(true));
+            .of(c -> c.allowDuplicateHeaderFields(true));
         assertThat(CsvReader.builder().build(cbh, "headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
@@ -110,7 +110,7 @@ class NamedCsvReaderTest {
     @Test
     void allFieldsMap() {
         final var cbh = NamedCsvRecordHandler
-            .of(c -> c.allowDuplicateHeader(true));
+            .of(c -> c.allowDuplicateHeaderFields(true));
         assertThat(CsvReader.builder().build(cbh, "headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .allFields()
