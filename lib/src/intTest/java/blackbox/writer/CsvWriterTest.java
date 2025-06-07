@@ -306,14 +306,14 @@ class CsvWriterTest {
     void builderToString() {
         assertThat(crw).asString()
             .isEqualTo("CsvWriterBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentCharacter=#, quoteStrategy=null, lineDelimiter=\n, bufferSize=0, autoFlush=false]");
+                + "commentCharacter=#, quoteStrategy=REQUIRED, lineDelimiter=\n, bufferSize=0, autoFlush=false]");
     }
 
     @Test
     void writerToString() {
         assertThat(crw.build(new StringWriter())).asString()
             .isEqualTo("CsvWriter[fieldSeparator=,, quoteCharacter=\", commentCharacter=#, "
-                + "quoteStrategy=null, lineDelimiter='\n']");
+                + "quoteStrategy=REQUIRED, lineDelimiter='\n']");
     }
 
     private String write(final String... cols) {

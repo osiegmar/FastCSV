@@ -92,6 +92,14 @@ This method was named `acceptCharsAfterQuotes(boolean)` in earlier versions of F
 As the default has changed, you may need to check your code and your desired behavior.
 :::
 
+## Quote strategies
+
+Quote strategies received two breaking changes in FastCSV 4:
+
+- The method `quoteNonEmpty` of `de.siegmar.fastcsv.writer.QuoteStrategy` has been renamed to `quoteValue` to better reflect its purpose.
+- Two explicitly define that quoting only happens if required, the `quoteStrategy` method in `CsvWriterBuilder` no longer accepts a `null` value.
+  Instead, you can use the `QuoteStrategies.REQUIRED` constant to indicate that quoting should only happen if required.
+
 ## Changed implementation of `CsvIndex` and `CsvPage` to Java records
 
 The `CsvIndex` and `CsvPage` classes have been changed to Java records. With this change, a few method calls have changed as well.
