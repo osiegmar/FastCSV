@@ -58,7 +58,7 @@ public final class CsvWriter implements Closeable, Flushable {
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
-        this.lineDelimiter = Objects.requireNonNull(lineDelimiter);
+        this.lineDelimiter = lineDelimiter;
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
@@ -141,7 +141,7 @@ public final class CsvWriter implements Closeable, Flushable {
         }
 
         if (value == null) {
-            if (quoteStrategy != null && quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
+            if (quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
@@ -150,15 +150,14 @@ public final class CsvWriter implements Closeable, Flushable {
         final int length = value.length();
 
         if (length == 0) {
-            if (quoteStrategy != null && quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
+            if (quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
 
         final boolean needsEscape = containsControlCharacter(value, fieldIdx, length);
-        final boolean needsQuotes = needsEscape
-            || quoteStrategy != null && quoteStrategy.quoteNonEmpty(currentLineNo, fieldIdx, value);
+        final boolean needsQuotes = needsEscape || quoteStrategy.quoteValue(currentLineNo, fieldIdx, value);
 
         if (needsQuotes) {
             writer.write(quoteCharacter);
@@ -316,7 +315,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// - field separator: `,` (comma)
     /// - quote character: `"` (double quote)
     /// - comment character: `#` (hash/number)
-    /// - quote strategy: `null` (only required quoting)
+    /// - quote strategy: [QuoteStrategies#REQUIRED]
     /// - line delimiter: [LineDelimiter#CRLF]
     /// - buffer size: 8,192 bytes
     /// - auto flush: `false`
@@ -328,7 +327,7 @@ public final class CsvWriter implements Closeable, Flushable {
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
-        private QuoteStrategy quoteStrategy;
+        private QuoteStrategy quoteStrategy = QuoteStrategies.REQUIRED;
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
         private int bufferSize = DEFAULT_BUFFER_SIZE;
         private boolean autoFlush;
@@ -366,22 +365,26 @@ public final class CsvWriter implements Closeable, Flushable {
             return this;
         }
 
-        /// Sets the strategy that defines when optional quoting has to be performed – default: none.
+        /// Sets the strategy that defines when optional quoting has to be performed
+        /// (default: [QuoteStrategies#REQUIRED]).
         ///
         /// @param quoteStrategy the strategy when fields should be enclosed using the `quoteCharacter`,
-        ///                      even if not strictly required.
+        ///                      even if not strictly required; must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if quoteStrategy is `null`
+        /// @see QuoteStrategies
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
-            this.quoteStrategy = quoteStrategy;
+            this.quoteStrategy = Objects.requireNonNull(quoteStrategy, "quoteStrategy must not be null");
             return this;
         }
 
         /// Sets the delimiter used to separate lines (default: [LineDelimiter#CRLF]).
         ///
-        /// @param lineDelimiter the line delimiter to be used.
+        /// @param lineDelimiter the line delimiter to be used; must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if lineDelimiter is `null`
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
-            this.lineDelimiter = lineDelimiter;
+            this.lineDelimiter = Objects.requireNonNull(lineDelimiter, "lineDelimiter must not be null");
             return this;
         }
 

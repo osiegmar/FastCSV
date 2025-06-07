@@ -49,7 +49,7 @@ public class ExampleCsvWriterWithQuoteStrategy {
             }
 
             @Override
-            public boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
+            public boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
                 // Default implementation returns false
                 return "value1".equals(value);
             }
