@@ -55,10 +55,10 @@ final class StrictCsvParser implements CsvParser {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.fsep = fieldSeparator;
-        this.qChar = quoteCharacter;
-        this.cStrat = commentStrategy;
-        this.cChar = commentCharacter;
+        fsep = fieldSeparator;
+        qChar = quoteCharacter;
+        cStrat = commentStrategy;
+        cChar = commentCharacter;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(reader, maxBufferSize);
@@ -72,10 +72,10 @@ final class StrictCsvParser implements CsvParser {
 
         assertFields(fieldSeparator, quoteCharacter, commentCharacter);
 
-        this.fsep = fieldSeparator;
-        this.qChar = quoteCharacter;
-        this.cStrat = commentStrategy;
-        this.cChar = commentCharacter;
+        fsep = fieldSeparator;
+        qChar = quoteCharacter;
+        cStrat = commentStrategy;
+        cChar = commentCharacter;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(data);

@@ -69,7 +69,7 @@ public class CollectingStatusListener implements StatusListener {
 
     @Override
     public void onError(final Throwable throwable) {
-        this.failedThrowable.set(throwable);
+        failedThrowable.set(throwable);
     }
 
     /// Get the throwable that occurred while indexing.

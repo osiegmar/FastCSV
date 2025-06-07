@@ -13,7 +13,7 @@ final class BomInputStream extends InputStream {
     private int remainingBuffer;
 
     BomInputStream(final InputStream inputStream, final Charset defaultCharset) throws IOException {
-        this.delegate = inputStream;
+        delegate = inputStream;
 
         final int bufCnt = delegate.readNBytes(buffer, 0, BomUtil.POTENTIAL_BOM_SIZE);
         final Optional<BomHeader> optHeader = BomUtil.detectCharset(buffer);
