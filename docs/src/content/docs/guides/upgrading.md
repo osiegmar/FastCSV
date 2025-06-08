@@ -216,26 +216,26 @@ In version 4.0.0 those deprecated properties were removed.
 
 The `SimpleFieldModifier` class has been deprecated in 3.7.0 and removed in 4.0.0.
 
-Use `FieldModifiers.modify` instead.
+Use `FieldModifier.modify` instead, which has moved from `FieldModifiers` to the `FieldModifier` interface.
 
 ```diff lang="java"
   FieldModifier normalizeWhitespaces =
 -     (SimpleFieldModifier) field -> field.replaceAll("\\s", " ");
-+     FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
++     FieldModifier.modify(field -> field.replaceAll("\\s", " "));
 ```
 
 ### Upper and lower case field modifiers
 
 The edge-case methods `FieldModifiers.lower(Locale)` and `FieldModifiers.upper(Locale)` were deprecated in 3.7.0 and removed in 4.0.0.
 
-Use `FieldModifiers.modify` instead.
+Use `FieldModifier.modify` instead, which has moved from `FieldModifiers` to the `FieldModifier` interface.
 
 ```diff lang="java"
   FieldModifier toLowerFieldModifier =
 -     FieldModifiers.lower(Locale.ENGLISH);
-+     FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
++     FieldModifier.modify(field -> field.toLowerCase(Locale.ENGLISH));
 
   FieldModifier toUpperFieldModifier =
 -     FieldModifiers.upper(Locale.ENGLISH);
-+     FieldModifiers.modify(field -> field.toUpperCase(Locale.ENGLISH));
++     FieldModifier.modify(field -> field.toUpperCase(Locale.ENGLISH));
 ```
