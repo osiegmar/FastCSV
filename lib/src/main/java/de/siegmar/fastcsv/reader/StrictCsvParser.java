@@ -342,6 +342,10 @@ final class StrictCsvParser implements CsvParser {
 
     @Override
     public String peekLine() throws IOException {
+        if (csvBuffer.pos == csvBuffer.len && !csvBuffer.fetchData()) {
+            return null;
+        }
+
         final int savedPos = csvBuffer.pos;
 
         for (; csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData(); csvBuffer.pos++) {

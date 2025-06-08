@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -114,6 +115,16 @@ abstract class AbstractSkipLinesTest {
                 .isStartingLineNumber(3).fields().containsExactly("C"));
     }
 
+    @Test
+    void skipUntilLast() {
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("A\nB\nC");
+
+        csv.skipLines(3);
+
+        assertThat(csv.stream())
+            .isEmpty();
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"A\r\nB\r\nC", "A\nB\nC", "A\rB\rC"})
     void tooMany(final String input) {
@@ -182,6 +193,17 @@ abstract class AbstractSkipLinesTest {
             .hasMessage("No matching line found. Skipped 2 line(s) before reaching end of data.");
     }
 
+    @Test
+    void lastMatch() {
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("A\nB");
+        final int linesSkipped = csv.skipLines("B"::equals, 10);
+        assertThat(linesSkipped).isEqualTo(1);
+        assertThat(csv.stream())
+            .singleElement()
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec)
+                .isStartingLineNumber(2).fields().containsExactly("B"));
+    }
+
     @ValueSource(strings = {
         "some arbitrary text\r\nbefore the actual data\r\n\r\nheader1,header2\r\nvalue1,value2\r\n",
         "some arbitrary text\rbefore the actual data\r\rheader1,header2\rvalue1,value2\r",
@@ -207,6 +229,21 @@ abstract class AbstractSkipLinesTest {
         assertThatThrownBy(() -> csv.skipLines(_ -> true, 1))
             .isInstanceOf(UncheckedIOException.class)
             .hasMessage("java.io.IOException: Cannot read");
+    }
+
+    @Test
+    void predicateNotCalledForEmptyLine() {
+        final Predicate<String> p = line -> {
+            if (!"A".equals(line)) {
+                throw new IllegalArgumentException("Expected line 'A', but got '" + line + "'");
+            }
+            return false;
+        };
+
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("A\n");
+        assertThatThrownBy(() -> csv.skipLines(p, 10))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("No matching line found. Skipped %d line(s) before reaching end of data.".formatted(1));
     }
 
 }

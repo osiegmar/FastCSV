@@ -282,29 +282,29 @@ final class RelaxedCsvParser implements CsvParser {
         return reader.peekLine();
     }
 
-    @SuppressWarnings({
-        "checkstyle:MultipleVariableDeclarations",
-        "PMD.OneDeclarationPerLine",
-        "PMD.AssignmentInOperand"
-    })
+    @SuppressWarnings("checkstyle:MultipleVariableDeclarations")
     @Override
     public boolean skipLine(final int numCharsToSkip) throws IOException {
         reader.skip(numCharsToSkip);
 
-        int i, c;
-        for (i = 0; (c = reader.read()) != EOF; i++) {
+        int c = reader.read();
+        if (c == EOF) {
+            return false;
+        }
+
+        do {
             if (c == CR) {
                 reader.consumeIf(LF);
                 startingLineNumber++;
-                return true;
+                break;
             }
             if (c == LF) {
                 startingLineNumber++;
-                return true;
+                break;
             }
-        }
+        } while ((c = reader.read()) != EOF);
 
-        return numCharsToSkip + i > 0;
+        return true;
     }
 
     @Override
@@ -368,8 +368,7 @@ final class RelaxedCsvParser implements CsvParser {
         String peekLine() throws IOException {
             ensureBuffered(buffer.length);
             if (start >= len) {
-                // Keep consistent with StrictCsvParser.peekLine()
-                return "";
+                return null;
             }
             int endIndex = start;
             while (endIndex < len && buffer[endIndex] != CR && buffer[endIndex] != LF) {

@@ -128,17 +128,21 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return 0;
         }
 
+        int i = 0;
         try {
-            for (int i = 0; i < maxLines; i++) {
+            for (; i < maxLines; i++) {
                 final String line = csvParser.peekLine();
+
+                if (line == null) {
+                    throw new CsvParseException(
+                        "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i));
+                }
+
                 if (predicate.test(line)) {
                     return i;
                 }
 
-                if (!csvParser.skipLine(line.length())) {
-                    throw new CsvParseException(
-                        "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i));
-                }
+                csvParser.skipLine(line.length());
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
