@@ -3,7 +3,7 @@ package de.siegmar.fastcsv.reader;
 import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
 
-import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -25,14 +25,15 @@ final class RelaxedCsvParser implements CsvParser {
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
-    private final char[] fsep;
+    private final char fsep;
+    private final char[] fsepRemainder;
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
     private final boolean trimWhitespacesAroundQuotes;
     private final CsvCallbackHandler<?> callbackHandler;
     private final int maxBufferSize;
-    private final Reader reader;
+    private final LookaheadReader reader;
     private long startingLineNumber;
     private char[] currentField;
     private int currentFieldIndex;
@@ -47,14 +48,15 @@ final class RelaxedCsvParser implements CsvParser {
                      final Reader reader) {
         assertFields(fsep, qChar, cChar);
 
-        this.fsep = fsep.toCharArray();
+        this.fsep = fsep.charAt(0);
+        fsepRemainder = extractFsepRemainder(fsep);
         this.qChar = qChar;
         this.cStrat = cStrat;
         this.cChar = cChar;
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
-        this.reader = new BufferedReader(reader);
+        this.reader = new LookaheadReader(reader, DEFAULT_BUFFER_SIZE);
         currentField = new char[Math.min(maxBufferSize, DEFAULT_BUFFER_SIZE)];
     }
 
@@ -67,14 +69,15 @@ final class RelaxedCsvParser implements CsvParser {
                      final String data) {
         assertFields(fsep, qChar, cChar);
 
-        this.fsep = fsep.toCharArray();
+        this.fsep = fsep.charAt(0);
+        fsepRemainder = extractFsepRemainder(fsep);
         this.qChar = qChar;
         this.cStrat = cStrat;
         this.cChar = cChar;
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
-        reader = new StringReader(data);
+        reader = new LookaheadReader(new StringReader(data), Math.max(data.length(), 1));
         currentField = new char[Math.min(maxBufferSize, data.length())];
     }
 
@@ -87,6 +90,16 @@ final class RelaxedCsvParser implements CsvParser {
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator.charAt(0), quoteCharacter, commentCharacter),
             "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
             fieldSeparator.charAt(0), quoteCharacter, commentCharacter);
+    }
+
+    @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.ReturnEmptyCollectionRatherThanNull"})
+    private static char[] extractFsepRemainder(final String fsep) {
+        if (fsep.length() <= 1) {
+            return null;
+        }
+        final char[] fsepRemainder = new char[fsep.length() - 1];
+        fsep.getChars(1, fsep.length(), fsepRemainder, 0);
+        return fsepRemainder;
     }
 
     @SuppressWarnings({"checkstyle:ReturnCount", "checkstyle:NPathComplexity"})
@@ -106,10 +119,7 @@ final class RelaxedCsvParser implements CsvParser {
             return true;
         }
         if (ch == CR) {
-            reader.mark(1);
-            if (reader.read() != LF) {
-                reader.reset();
-            }
+            reader.consumeIf(LF);
             callbackHandler.setEmpty();
             return true;
         }
@@ -140,15 +150,12 @@ final class RelaxedCsvParser implements CsvParser {
     })
     private boolean parseUnquoted(int ch) throws IOException {
         do {
-            if (ch == fsep[0] && (fsep.length == 1 || fieldSeparatorMatch())) {
+            if (ch == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
                 materializeField(false);
                 return false;
             }
             if (ch == CR) {
-                reader.mark(1);
-                if (reader.read() != LF) {
-                    reader.reset();
-                }
+                reader.consumeIf(LF);
                 materializeField(false);
                 return true;
             }
@@ -168,17 +175,6 @@ final class RelaxedCsvParser implements CsvParser {
         return true;
     }
 
-    private boolean fieldSeparatorMatch() throws IOException {
-        reader.mark(fsep.length - 1);
-        for (int i = 1; i < fsep.length; i++) {
-            if (fsep[i] != reader.read()) {
-                reader.reset();
-                return false;
-            }
-        }
-        return true;
-    }
-
     private boolean currentFieldHasOnlyWhitespace() {
         for (int i = 0; i < currentFieldIndex; i++) {
             if (currentField[i] > SPACE) {
@@ -194,28 +190,21 @@ final class RelaxedCsvParser implements CsvParser {
         while ((ch = reader.read()) != EOF) {
             if (ch == CR) {
                 appendChar(ch);
-                reader.mark(1);
-                if (reader.read() == LF) {
+                if (reader.consumeIf(LF)) {
                     appendChar(LF);
-                } else {
-                    reader.reset();
                 }
                 lines++;
             } else if (ch == LF) {
                 appendChar(ch);
                 lines++;
             } else if (ch == qChar) {
-                reader.mark(1);
                 int lookAhead = reader.read();
                 if (lookAhead != qChar) {
                     // closing quote
                     for (; lookAhead != EOF; lookAhead = reader.read()) {
                         if (lookAhead == CR) {
                             // CR right after closing quote
-                            reader.mark(1);
-                            if (reader.read() != LF) {
-                                reader.reset();
-                            }
+                            reader.consumeIf(LF);
                             materializeField(true);
                             return true;
                         }
@@ -224,7 +213,7 @@ final class RelaxedCsvParser implements CsvParser {
                             materializeField(true);
                             return true;
                         }
-                        if (lookAhead == fsep[0] && (fsep.length == 1 || fieldSeparatorMatch())) {
+                        if (lookAhead == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
                             // field separator after closing quote
                             materializeField(true);
                             return false;
@@ -253,14 +242,12 @@ final class RelaxedCsvParser implements CsvParser {
     @SuppressWarnings("PMD.AssignmentInOperand")
     private void parseComment() throws IOException {
         int ch;
-        while ((ch = reader.read()) != EOF && ch != CR && ch != LF) {
-            appendChar(ch);
-        }
-        if (ch == CR) {
-            reader.mark(1);
-            if (reader.read() != LF) {
-                reader.reset();
+        while ((ch = reader.read()) != EOF && ch != LF) {
+            if (ch == CR) {
+                reader.consumeIf(LF);
+                break;
             }
+            appendChar(ch);
         }
 
         callbackHandler.setComment(currentField, 0, currentFieldIndex);
@@ -290,20 +277,9 @@ final class RelaxedCsvParser implements CsvParser {
         currentFieldIndex = 0;
     }
 
-    @SuppressWarnings("PMD.AssignmentInOperand")
     @Override
     public String peekLine() throws IOException {
-        reader.mark(DEFAULT_BUFFER_SIZE);
-
-        int c;
-        while ((c = reader.read()) != EOF && c != CR && c != LF) {
-            appendChar(c);
-        }
-        reader.reset();
-
-        final String s = new String(currentField, 0, currentFieldIndex);
-        currentFieldIndex = 0;
-        return s;
+        return reader.peekLine();
     }
 
     @SuppressWarnings({
@@ -313,17 +289,12 @@ final class RelaxedCsvParser implements CsvParser {
     })
     @Override
     public boolean skipLine(final int numCharsToSkip) throws IOException {
-        if (reader.skip(numCharsToSkip) < numCharsToSkip) {
-            throw new IllegalStateException("Could not skip " + numCharsToSkip + " characters");
-        }
+        reader.skip(numCharsToSkip);
 
         int i, c;
         for (i = 0; (c = reader.read()) != EOF; i++) {
             if (c == CR) {
-                reader.mark(1);
-                if (reader.read() != LF) {
-                    reader.reset();
-                }
+                reader.consumeIf(LF);
                 startingLineNumber++;
                 return true;
             }
@@ -351,6 +322,101 @@ final class RelaxedCsvParser implements CsvParser {
     @Override
     public void close() throws IOException {
         reader.close();
+    }
+
+    private static final class LookaheadReader implements Closeable {
+
+        private final Reader reader;
+        private final char[] buffer;
+        private int start;
+        private int len;
+
+        LookaheadReader(final Reader reader, final int bufferSize) {
+            this.reader = reader;
+            buffer = new char[bufferSize];
+        }
+
+        int read() throws IOException {
+            ensureBuffered(1);
+            return start >= len ? -1 : buffer[start++];
+        }
+
+        boolean consumeIf(final char c) throws IOException {
+            ensureBuffered(1);
+            if (start >= len || buffer[start] != c) {
+                return false;
+            }
+            start++;
+            return true;
+        }
+
+        @SuppressWarnings("PMD.UseVarargs")
+        boolean consumeIf(final char[] chars) throws IOException {
+            ensureBuffered(chars.length);
+            if (len - start < chars.length) {
+                return false;
+            }
+            for (int i = 0; i < chars.length; i++) {
+                if (buffer[start + i] != chars[i]) {
+                    return false;
+                }
+            }
+            start += chars.length;
+            return true;
+        }
+
+        String peekLine() throws IOException {
+            ensureBuffered(buffer.length);
+            if (start >= len) {
+                // Keep consistent with StrictCsvParser.peekLine()
+                return "";
+            }
+            int endIndex = start;
+            while (endIndex < len && buffer[endIndex] != CR && buffer[endIndex] != LF) {
+                endIndex++;
+            }
+            return new String(buffer, start, endIndex - start);
+        }
+
+        private void ensureBuffered(final int required) throws IOException {
+            final int available = len - start;
+            if (len == -1 || required <= available) {
+                return;
+            }
+
+            if (required > buffer.length) {
+                throw new IllegalArgumentException(
+                    "Required characters (%d) exceed buffer size (%d)".formatted(required, buffer.length));
+            }
+
+            // relocate the buffer if necessary
+            if (start > 0 && required > buffer.length - start) {
+                final int remaining = len - start;
+                System.arraycopy(buffer, start, buffer, 0, remaining);
+                start = 0;
+                len = remaining;
+            }
+
+            // fetch more data
+            while (len - start < required) {
+                final int count = reader.read(buffer, len, buffer.length - len);
+                if (count == -1) {
+                    len = (start >= len) ? -1 : len;
+                    break;
+                }
+                len += count;
+            }
+        }
+
+        void skip(final int numCharsToSkip) {
+            start += numCharsToSkip;
+        }
+
+        @Override
+        public void close() throws IOException {
+            reader.close();
+        }
+
     }
 
 }
