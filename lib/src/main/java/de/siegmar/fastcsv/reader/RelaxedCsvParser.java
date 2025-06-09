@@ -193,38 +193,33 @@ final class RelaxedCsvParser implements CsvParser {
             } else if (ch == LF) {
                 appendChar(ch);
                 lines++;
-            } else if (ch == qChar) {
-                int lookAhead = reader.read();
-                if (lookAhead != qChar) {
-                    // closing quote
-                    for (; lookAhead != EOF; lookAhead = reader.read()) {
-                        if (lookAhead == CR) {
-                            // CR right after closing quote
-                            reader.consumeIf(LF);
-                            materializeField(true);
-                            return true;
-                        }
-                        if (lookAhead == LF) {
-                            // LF right after closing quote
-                            materializeField(true);
-                            return true;
-                        }
-                        if (lookAhead == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
-                            // field separator after closing quote
-                            materializeField(true);
-                            return false;
-                        }
-                        if (!trimWhitespacesAroundQuotes || lookAhead > SPACE) {
-                            throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
-                                .formatted(lookAhead, lookAhead));
-                        }
+            } else if (ch == qChar && (ch = reader.read()) != qChar) {
+                // closing quote
+                for (; ch != EOF; ch = reader.read()) {
+                    if (ch == CR) {
+                        // CR right after closing quote
+                        reader.consumeIf(LF);
+                        materializeField(true);
+                        return true;
                     }
-
-                    materializeField(true);
-                    return true;
-                } else {
-                    appendChar(ch);
+                    if (ch == LF) {
+                        // LF right after closing quote
+                        materializeField(true);
+                        return true;
+                    }
+                    if (ch == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
+                        // field separator after closing quote
+                        materializeField(true);
+                        return false;
+                    }
+                    if (!trimWhitespacesAroundQuotes || ch > SPACE) {
+                        throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
+                            .formatted(ch, ch));
+                    }
                 }
+
+                materializeField(true);
+                return true;
             } else {
                 appendChar(ch);
             }
