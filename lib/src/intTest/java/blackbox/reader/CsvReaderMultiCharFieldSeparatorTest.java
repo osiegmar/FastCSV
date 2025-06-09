@@ -76,6 +76,19 @@ class CsvReaderMultiCharFieldSeparatorTest {
     }
 
     @Test
+    void charsAfterQuotesAndIncompleteSeparator() {
+        final var csv = CsvReader.builder()
+            .quoteCharacter('\'')
+            .fieldSeparator(";;")
+            .ofCsvRecord("'foo'; bar");
+
+        assertThatThrownBy(() -> csv.stream().count())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessageContaining("Exception when reading first record")
+            .hasRootCauseMessage("Unexpected character after closing quote: ';' (0x3b)");
+    }
+
+    @Test
     void multiCharFieldSeparator() {
         final var csv = CsvReader.builder()
             .fieldSeparator("~~~")
@@ -105,6 +118,17 @@ class CsvReaderMultiCharFieldSeparatorTest {
 
         assertThat(csv.stream()).satisfiesExactly(
             r -> CsvRecordAssert.assertThat(r).fields().containsExactly("foo~~~bar", "baz")
+        );
+    }
+
+    @Test
+    void incompleteTrailingSeparator() {
+        final var csv = CsvReader.builder()
+            .fieldSeparator("|||")
+            .ofCsvRecord("foo|||bar||");
+
+        assertThat(csv.stream()).satisfiesExactly(
+            r -> CsvRecordAssert.assertThat(r).fields().containsExactly("foo", "bar||")
         );
     }
 

@@ -69,6 +69,27 @@ abstract class AbstractCsvReaderTest {
     }
 
     @Test
+    void dupeQuoteCharacter() {
+        assertThatThrownBy(() -> crb.quoteCharacter(',').ofCsvRecord("foo"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=#)");
+    }
+
+    @Test
+    void dupeCommentCharacter() {
+        assertThatThrownBy(() -> crb.commentCharacter(',').ofCsvRecord("foo"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
+    }
+
+    @Test
+    void dupeCommentQuoteCharacter() {
+        assertThatThrownBy(() -> crb.commentCharacter('"').ofCsvRecord("foo"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=\")");
+    }
+
+    @Test
     void empty() {
         assertThat(crb.ofCsvRecord("").iterator())
             .isExhausted()
