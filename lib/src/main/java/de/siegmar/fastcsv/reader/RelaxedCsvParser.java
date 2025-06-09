@@ -112,11 +112,7 @@ final class RelaxedCsvParser implements CsvParser {
         int ch = reader.read();
 
         if (ch == EOF) {
-            if (currentFieldIndex == 0) {
-                return false;
-            }
-            materializeField(false);
-            return true;
+            return false;
         }
         if (ch == CR) {
             reader.consumeIf(LF);
@@ -381,11 +377,6 @@ final class RelaxedCsvParser implements CsvParser {
             final int available = len - start;
             if (len == -1 || required <= available) {
                 return;
-            }
-
-            if (required > buffer.length) {
-                throw new IllegalArgumentException(
-                    "Required characters (%d) exceed buffer size (%d)".formatted(required, buffer.length));
             }
 
             // relocate the buffer if necessary
