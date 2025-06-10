@@ -152,7 +152,7 @@ class CsvReaderMultiCharFieldSeparatorTest {
             .allowExtraCharsAfterClosingQuote(true).fieldSeparator(";;").ofCsvRecord("foo")
             .stream().count()
         )
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(IllegalStateException.class)
             .hasMessage("allowExtraCharsAfterClosingQuote is not supported in relaxed mode");
     }
 

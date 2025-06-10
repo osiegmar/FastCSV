@@ -976,7 +976,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             final boolean relaxed = isForceRelaxedParser()
                 || fieldSeparator.length() > 1 || trimWhitespacesAroundQuotes;
             if (relaxed && allowExtraCharsAfterClosingQuote) {
-                throw new IllegalArgumentException("allowExtraCharsAfterClosingQuote is not supported in relaxed mode");
+                throw new IllegalStateException("allowExtraCharsAfterClosingQuote is not supported in relaxed mode");
             }
             return relaxed;
         }

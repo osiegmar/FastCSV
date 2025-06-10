@@ -23,7 +23,7 @@ class RelaxedCsvReaderTest extends AbstractCsvReaderTest {
     void allowExtraCharsAfterClosingQuote() {
         crb.allowExtraCharsAfterClosingQuote(true);
         assertThatThrownBy(() -> crb.ofCsvRecord("foo,\"bar\"baz").stream())
-            .isInstanceOf(IllegalArgumentException.class)
+            .isInstanceOf(IllegalStateException.class)
             .hasMessage("allowExtraCharsAfterClosingQuote is not supported in relaxed mode");
     }
 
