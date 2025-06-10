@@ -94,6 +94,8 @@ tasks.check {
 }
 
 pitest {
+    // Ensure Java 24 compatibility
+    pitestVersion = "1.19.5"
     junit5PluginVersion = "1.2.2"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
