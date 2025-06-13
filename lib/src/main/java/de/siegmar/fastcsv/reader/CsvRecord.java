@@ -1,6 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -92,7 +93,7 @@ public class CsvRecord {
     ///
     /// @return all fields of this record, never `null`
     public List<String> getFields() {
-        return List.of(fields);
+        return Collections.unmodifiableList(Arrays.asList(fields));
     }
 
     /// Gets the count of fields in this record.

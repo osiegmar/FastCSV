@@ -2,6 +2,7 @@ package de.siegmar.fastcsv.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -40,7 +41,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return the header names, never `null`
     public List<String> getHeader() {
-        return List.of(header);
+        return Collections.unmodifiableList(Arrays.asList(header));
     }
 
     /// Retrieves the value of a field by its case-sensitive name, considering the first occurrence in case of
