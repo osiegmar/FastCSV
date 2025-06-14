@@ -6,11 +6,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
+import de.siegmar.fastcsv.util.Nullable;
+
 /// InputStreamReader that is capable of detecting and handling BOM headers.
 final class BomInputStreamReader extends Reader {
 
     private final InputStream inputStream;
     private final Charset defaultCharset;
+
+    @Nullable
     private Reader reader;
 
     BomInputStreamReader(final InputStream inputStream, final Charset defaultCharset) {

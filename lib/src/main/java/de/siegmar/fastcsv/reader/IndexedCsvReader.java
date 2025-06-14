@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -64,7 +65,8 @@ public final class IndexedCsvReader<T> implements Closeable {
                      final boolean allowExtraCharsAfterClosingQuote,
                      final int maxBufferSize,
                      final int pageSize,
-                     final CsvCallbackHandler<T> csvRecordHandler, final CsvIndex csvIndex,
+                     final CsvCallbackHandler<T> csvRecordHandler,
+                     @Nullable final CsvIndex csvIndex,
                      final StatusListener statusListener)
         throws IOException {
 
@@ -278,9 +280,15 @@ public final class IndexedCsvReader<T> implements Closeable {
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private boolean allowExtraCharsAfterClosingQuote;
+
+        @Nullable
         private StatusListener statusListener;
+
         private int pageSize = DEFAULT_PAGE_SIZE;
+
+        @Nullable
         private CsvIndex csvIndex;
+
         private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
         private IndexedCsvReaderBuilder() {

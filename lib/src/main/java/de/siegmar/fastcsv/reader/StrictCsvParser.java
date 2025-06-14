@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 
+import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -341,6 +342,7 @@ final class StrictCsvParser implements CsvParser {
         csvBuffer.close();
     }
 
+    @Nullable
     @Override
     public String peekLine() throws IOException {
         if (csvBuffer.pos == csvBuffer.len && !csvBuffer.fetchData()) {
@@ -399,7 +401,9 @@ final class StrictCsvParser implements CsvParser {
         int begin;
         int pos;
 
+        @Nullable
         private final Reader reader;
+
         private final int maxBufferSize;
         private final int readSize;
 

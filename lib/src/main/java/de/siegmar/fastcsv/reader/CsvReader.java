@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 
 /// This is the main class for reading CSV data.
@@ -210,6 +211,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             });
     }
 
+    @Nullable
     private T fetchRecord() throws IOException {
         while (csvParser.parse()) {
             final T csvRecord = processRecord();
@@ -224,6 +226,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         return null;
     }
 
+    @Nullable
     @SuppressWarnings("checkstyle:ReturnCount")
     private T processRecord() {
         final T csvRecord = callbackHandler.buildRecord();
@@ -275,6 +278,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             .toString();
     }
 
+    @Nullable
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
     private T fetch() {
         try {
@@ -304,6 +308,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return false;
         }
 
+        @Nullable
         @Override
         public Spliterator<T> trySplit() {
             return null;
@@ -323,7 +328,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     private class CsvRecordIterator implements CloseableIterator<T> {
 
+        @Nullable
         private T fetchedRecord;
+
         private boolean fetched;
 
         @Override

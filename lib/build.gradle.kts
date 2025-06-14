@@ -1,5 +1,6 @@
 @file:Suppress("StringLiteralDuplication")
 import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.kotlin.dsl.errorprone
 
 plugins {
     id("fastcsv.java-conventions")
@@ -27,12 +28,19 @@ java {
 tasks.withType<JavaCompile>().configureEach {
     if (name == "compileJmhJava") {
         options.errorprone.isEnabled.set(false)
+    } else if (name == "compileTestJava" || name == "compileIntTestJava") {
+        options.errorprone.disable("NullAway")
+    } else {
+        options.errorprone {
+            option("NullAway:AnnotatedPackages", "de.siegmar.fastcsv")
+        }
     }
 }
 
 tasks.compileJava {
     options.release.set(17)
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+    options.errorprone.error("NullAway")
 }
 
 // enable parameter names for tests with @ParameterizedTest
@@ -68,6 +76,7 @@ configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.
 
 dependencies {
     errorprone(libs.errorprone)
+    errorprone(libs.nullaway)
 
     commonImplementation(libs.assertj.core)
 

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -26,7 +27,10 @@ final class RelaxedCsvParser implements CsvParser {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
     private final char fsep;
+
+    @Nullable
     private final char[] fsepRemainder;
+
     private final char qChar;
     private final CommentStrategy cStrat;
     private final char cChar;
@@ -91,6 +95,7 @@ final class RelaxedCsvParser implements CsvParser {
             fieldSeparator.charAt(0), quoteCharacter, commentCharacter));
     }
 
+    @Nullable
     @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.ReturnEmptyCollectionRatherThanNull"})
     private static char[] extractFsepRemainder(final String fsep) {
         if (fsep.length() <= 1) {
@@ -267,6 +272,7 @@ final class RelaxedCsvParser implements CsvParser {
         currentFieldIndex = 0;
     }
 
+    @Nullable
     @Override
     public String peekLine() throws IOException {
         return reader.peekLine();
@@ -355,6 +361,7 @@ final class RelaxedCsvParser implements CsvParser {
             return true;
         }
 
+        @Nullable
         String peekLine() throws IOException {
             ensureBuffered(buffer.length);
             if (start >= len) {

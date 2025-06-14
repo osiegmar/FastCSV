@@ -39,7 +39,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     protected int fieldIdx;
 
     /// The type of the current record.
-    protected RecordType recordType;
+    protected RecordType recordType = RecordType.DATA;
 
     /// Constructs a new instance with the given configuration.
     ///

@@ -6,6 +6,7 @@ gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0
 spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.1.11" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.18.3" }
 errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.38.0" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.7" }
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }

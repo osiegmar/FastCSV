@@ -8,7 +8,7 @@ package de.siegmar.fastcsv.reader;
 public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private long startingLineNumber;
-    private RecordType recordType;
+    private RecordType recordType = RecordType.DATA;
     private int fieldCount;
 
     /// Constructs a new instance.

@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import de.siegmar.fastcsv.util.Nullable;
+
 /// This class defines the methods that are called during the CSV reading process.
 ///
 /// Implementations highly affect the behavior of the [CsvReader]. With great power comes great responsibility.
@@ -91,6 +93,7 @@ public abstract class CsvCallbackHandler<T> {
     /// Called at the end of each CSV record to build the actual record representation.
     ///
     /// @return the record or `null` if the record should be ignored/skipped as it is consumed by the callback handler.
+    @Nullable
     protected abstract T buildRecord();
 
     /// Called at the end of the CSV reading process.

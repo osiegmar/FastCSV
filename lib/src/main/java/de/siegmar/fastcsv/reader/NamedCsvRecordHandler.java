@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import de.siegmar.fastcsv.util.Nullable;
+
 /// A callback handler that returns a [NamedCsvRecord] for each record.
 ///
 /// Example:
@@ -21,11 +23,14 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     private static final String[] EMPTY_HEADER = new String[0];
     private final boolean allowDuplicateHeaderFields;
+
+    @Nullable
     private String[] header;
 
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                                   final FieldModifier fieldModifier,
-                                  final boolean allowDuplicateHeaderFields, final List<String> header) {
+                                  final boolean allowDuplicateHeaderFields,
+                                  @Nullable final List<String> header) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
         this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
         if (header != null) {
@@ -95,6 +100,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
     }
 
+    @Nullable
     @Override
     protected NamedCsvRecord buildRecord() {
         if (recordType == RecordType.COMMENT) {
@@ -115,6 +121,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         extends AbstractInternalCsvCallbackHandlerBuilder<NamedCsvRecordHandlerBuilder> {
 
         private boolean allowDuplicateHeaderFields;
+
+        @Nullable
         private List<String> header;
 
         private NamedCsvRecordHandlerBuilder() {
