@@ -177,7 +177,7 @@
         <!--<module name="MultipleStringLiterals"/>-->
         <module name="MultipleVariableDeclarations"/>
         <!--<module name="RequireThis"/>-->
-        <module name="UnnecessaryParentheses"/>
+        <!--<module name="UnnecessaryParentheses"/>-->
         <module name="OneStatementPerLine"/>
         <module name="VariableDeclarationUsageDistance"/>
         <module name="OverloadMethodsDeclarationOrder"/>

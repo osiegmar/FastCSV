@@ -1,10 +1,12 @@
 @file:Suppress("StringLiteralDuplication")
+import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     id("fastcsv.java-conventions")
     `java-library`
     `maven-publish`
     jacoco
+    alias(libs.plugins.errorprone)
     alias(libs.plugins.jmh)
     alias(libs.plugins.pitest)
     alias(libs.plugins.animalsniffer)
@@ -20,6 +22,12 @@ project.base.archivesName = "fastcsv"
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    if (name == "compileJmhJava") {
+        options.errorprone.isEnabled.set(false)
+    }
 }
 
 tasks.compileJava {
@@ -59,6 +67,8 @@ configurations[intTest.implementationConfigurationName].extendsFrom(configuratio
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
+    errorprone(libs.errorprone)
+
     commonImplementation(libs.assertj.core)
 
     testImplementation(libs.junit.jupiter)

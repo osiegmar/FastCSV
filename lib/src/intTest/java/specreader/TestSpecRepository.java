@@ -37,6 +37,7 @@ public final class TestSpecRepository {
             .flatMap(TestSpecRepository::flattenCheckVariants);
     }
 
+    @SuppressWarnings("StreamResourceLeak")
     public static Stream<TestSpecFile> loadTestSpecs(final Path specPath) {
         try {
             return Files.list(specPath)

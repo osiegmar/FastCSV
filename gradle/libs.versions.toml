@@ -5,6 +5,7 @@ fastdoubleparser = { module = "ch.randelshofer:fastdoubleparser", version = "2.0
 gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0.12.0" }
 spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.1.11" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.18.3" }
+errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.38.0" }
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
@@ -12,3 +13,4 @@ pitest = { id = "info.solidsoft.pitest", version = "1.15.0" }
 animalsniffer = { id = "ru.vyarus.animalsniffer", version = "2.0.0" }
 bnd = { id = "biz.aQute.bnd.builder", version = "7.1.0" }
 jreleaser = { id = "org.jreleaser", version = "1.18.0" }
+errorprone = { id = "net.ltgt.errorprone", version = "4.2.0" }

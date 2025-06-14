@@ -252,8 +252,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return;
         }
 
-        if (fieldCount > firstRecordFieldCount && !allowExtraFields
-            || fieldCount < firstRecordFieldCount && !allowMissingFields) {
+        if ((fieldCount > firstRecordFieldCount && !allowExtraFields)
+            || (fieldCount < firstRecordFieldCount && !allowMissingFields)) {
             throw new CsvParseException("Record %d has %d fields, but first record had %d fields"
                 .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
         }

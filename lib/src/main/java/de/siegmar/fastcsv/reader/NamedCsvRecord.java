@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -160,7 +159,7 @@ public final class NamedCsvRecord extends CsvRecord {
             final String key = header[i];
             List<String> val = map.get(key);
             if (val == null) {
-                val = new LinkedList<>();
+                val = new ArrayList<>();
                 map.put(key, val);
             }
             val.add(fields[i]);

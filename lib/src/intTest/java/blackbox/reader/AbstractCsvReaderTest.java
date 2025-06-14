@@ -47,7 +47,7 @@ abstract class AbstractCsvReaderTest {
         crb.fieldSeparator(c).quoteCharacter('"').commentCharacter('#');
         assertThatThrownBy(() -> crb.ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("fieldSeparator must not be a newline char");
+            .hasMessage("fieldSeparator must not contain newline chars");
     }
 
     @ParameterizedTest
@@ -159,7 +159,7 @@ abstract class AbstractCsvReaderTest {
                 .isInstanceOf(IndexOutOfBoundsException.class));
     }
 
-    @SuppressWarnings("PMD.UnusedFormalParameter")
+    @SuppressWarnings({"UnusedVariable", "PMD.UnusedFormalParameter"})
     private void spotbugs(final String foo) {
         // Prevent RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT
     }

@@ -50,8 +50,8 @@ public final class CsvWriter implements Closeable, Flushable {
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-                fieldSeparator, quoteCharacter, commentCharacter);
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+                fieldSeparator, quoteCharacter, commentCharacter));
 
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;

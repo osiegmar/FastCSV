@@ -82,12 +82,12 @@ final class StrictCsvParser implements CsvParser {
     }
 
     private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
-        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not be a newline char");
+        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not contain newline chars");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-            fieldSeparator, quoteCharacter, commentCharacter);
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+            fieldSeparator, quoteCharacter, commentCharacter));
     }
 
     @SuppressWarnings("checkstyle:ReturnCount")
@@ -132,6 +132,7 @@ final class StrictCsvParser implements CsvParser {
         return false;
     }
 
+    @SuppressWarnings("LabelledBreakTarget")
     boolean consume(final char[] lBuf, final int lLen) {
         int lPos = csvBuffer.pos;
         int lBegin = csvBuffer.begin;

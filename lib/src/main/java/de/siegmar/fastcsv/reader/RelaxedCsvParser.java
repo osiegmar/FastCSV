@@ -82,14 +82,13 @@ final class RelaxedCsvParser implements CsvParser {
     }
 
     private void assertFields(final String fieldSeparator, final char quoteCharacter, final char commentCharacter) {
-        for (final char fs : fieldSeparator.toCharArray()) {
-            Preconditions.checkArgument(!Util.isNewline(fs), "fieldSeparator must not be a newline char");
-        }
+        Preconditions.checkArgument(!Util.containsNewline(fieldSeparator),
+            "fieldSeparator must not contain newline chars");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator.charAt(0), quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-            fieldSeparator.charAt(0), quoteCharacter, commentCharacter);
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+            fieldSeparator.charAt(0), quoteCharacter, commentCharacter));
     }
 
     @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.ReturnEmptyCollectionRatherThanNull"})

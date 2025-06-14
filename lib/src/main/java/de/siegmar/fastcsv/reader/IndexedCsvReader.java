@@ -68,9 +68,9 @@ public final class IndexedCsvReader<T> implements Closeable {
                      final StatusListener statusListener)
         throws IOException {
 
-        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-            fieldSeparator, quoteCharacter, commentCharacter);
+        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () ->
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+            fieldSeparator, quoteCharacter, commentCharacter));
 
         this.file = file;
         this.fieldSeparator = fieldSeparator;
@@ -138,9 +138,9 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("commentCharacter=" + csvIndex.commentCharacter())
             .toString();
 
-        Preconditions.checkArgument(expectedSignature.equals(actualSignature),
-            "Index does not match! Expected: %s; Actual: %s",
-            expectedSignature, actualSignature);
+        Preconditions.checkArgument(expectedSignature.equals(actualSignature), () ->
+            "Index does not match! Expected: %s; Actual: %s".formatted(
+            expectedSignature, actualSignature));
 
         return csvIndex;
     }
@@ -205,9 +205,8 @@ public final class IndexedCsvReader<T> implements Closeable {
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
+        fileLock.lock();
         try {
-            fileLock.lock();
-
             raf.seek(page.offset());
             csvParser.reset(page.startingLineNumber() - 1);
 
@@ -374,8 +373,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param pageSize the maximum size of pages.
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
-            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE,
-                "pageSize must be >= %d", MIN_PAGE_SIZE);
+            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, () ->
+                "pageSize must be >= %d".formatted(MIN_PAGE_SIZE));
             this.pageSize = pageSize;
             return this;
         }
@@ -413,9 +412,9 @@ public final class IndexedCsvReader<T> implements Closeable {
         private static void checkControlCharacter(final char controlChar) {
             Preconditions.checkArgument(!Util.isNewline(controlChar),
                 "A newline character must not be used as control character");
-            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII,
-                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
-                controlChar, (int) controlChar);
+            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII, () ->
+                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)".formatted(
+                controlChar, (int) controlChar));
         }
 
         /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified path using UTF-8
