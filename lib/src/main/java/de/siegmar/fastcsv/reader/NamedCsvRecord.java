@@ -41,6 +41,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @return the header names, never `null`
     public List<String> getHeader() {
+        // Not using List.of() here for performance reasons, as it copies the array.
         return Collections.unmodifiableList(Arrays.asList(header));
     }
 

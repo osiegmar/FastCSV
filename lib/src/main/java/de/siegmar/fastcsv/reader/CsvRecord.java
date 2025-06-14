@@ -93,6 +93,7 @@ public class CsvRecord {
     ///
     /// @return all fields of this record, never `null`
     public List<String> getFields() {
+        // Not using List.of() here for performance reasons, as it copies the array.
         return Collections.unmodifiableList(Arrays.asList(fields));
     }
 
