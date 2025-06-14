@@ -157,6 +157,10 @@ If you implemented a custom callback handler by extending `AbstractBaseCsvCallba
 
 Implementing the lower-level `CsvCallbackHandler` directly requires to implement `getFieldCount` (previously implemented in the RecordWrapper) and `getRecordType` methods.
 
+## Null-free refactoring in CollectingStatusListener
+
+The method `getThrowable` of `CollectingStatusListener` no longer returns `null` when no exception has occurred. Instead, it returns an `Optional<Throwable>`. This aligns with the null-free design of FastCSV.
+
 ## Removed deprecated code
 
 In FastCSV 4.0 some deprecated code was removed.

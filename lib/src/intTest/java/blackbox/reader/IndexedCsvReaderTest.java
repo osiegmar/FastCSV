@@ -1,6 +1,7 @@
 package blackbox.reader;
 
 import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -19,6 +20,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -306,6 +308,7 @@ class IndexedCsvReaderTest {
                 .ofCsvRecord(Path.of(NON_EXISTENT_FILENAME)));
 
             assertThat(statusListener.getThrowable())
+                .get(as(InstanceOfAssertFactories.THROWABLE))
                 .isInstanceOf(NoSuchFileException.class)
                 .hasMessage(NON_EXISTENT_FILENAME);
         }
@@ -445,7 +448,7 @@ class IndexedCsvReaderTest {
                 assertThat(statusListener.getRecordCount()).isEqualTo(2L);
                 assertThat(statusListener.getByteCount()).isEqualTo(7L);
                 assertThat(statusListener.isCompleted()).isTrue();
-                assertThat(statusListener.getThrowable()).isNull();
+                assertThat(statusListener.getThrowable()).isEmpty();
                 assertThat(statusListener).asString()
                     .isEqualTo("Read %,d records and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }

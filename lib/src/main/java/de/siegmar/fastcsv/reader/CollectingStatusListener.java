@@ -1,5 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -74,9 +75,9 @@ public class CollectingStatusListener implements StatusListener {
 
     /// Get the throwable that occurred while indexing.
     ///
-    /// @return the throwable that occurred while indexing, `null` otherwise.
-    public Throwable getThrowable() {
-        return failedThrowable.get();
+    /// @return the throwable that occurred while indexing.
+    public Optional<Throwable> getThrowable() {
+        return Optional.ofNullable(failedThrowable.get());
     }
 
     @Override
