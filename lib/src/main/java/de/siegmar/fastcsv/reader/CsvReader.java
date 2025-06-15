@@ -1,6 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -133,18 +134,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         try {
             for (; i < maxLines; i++) {
                 final String line = csvParser.peekLine();
-
-                if (line == null) {
-                    throw new CsvParseException(
-                        "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i));
-                }
-
                 if (predicate.test(line)) {
                     return i;
                 }
-
                 csvParser.skipLine(line.length());
             }
+        } catch (final EOFException e) {
+            throw new CsvParseException(
+                "No matching line found. Skipped %d line(s) before reaching end of data.".formatted(i), e);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

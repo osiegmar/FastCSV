@@ -3,8 +3,6 @@ package de.siegmar.fastcsv.reader;
 import java.io.Closeable;
 import java.io.IOException;
 
-import de.siegmar.fastcsv.util.Nullable;
-
 sealed interface CsvParser extends Closeable permits StrictCsvParser, RelaxedCsvParser {
 
     /// Parses the next record from the stream and passes it to the callback handler.
@@ -13,7 +11,6 @@ sealed interface CsvParser extends Closeable permits StrictCsvParser, RelaxedCsv
     boolean parse() throws IOException;
 
     /// {@return the next line from the stream without consuming it.}
-    @Nullable
     String peekLine() throws IOException;
 
     /// Skips a line in the stream after skipping the specified number of characters.

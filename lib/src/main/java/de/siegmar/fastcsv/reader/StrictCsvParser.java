@@ -4,6 +4,7 @@ import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 
@@ -342,11 +343,10 @@ final class StrictCsvParser implements CsvParser {
         csvBuffer.close();
     }
 
-    @Nullable
     @Override
     public String peekLine() throws IOException {
         if (csvBuffer.pos == csvBuffer.len && !csvBuffer.fetchData()) {
-            return null;
+            throw new EOFException();
         }
 
         final int savedPos = csvBuffer.pos;

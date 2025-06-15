@@ -4,6 +4,7 @@ import static de.siegmar.fastcsv.util.Util.CR;
 import static de.siegmar.fastcsv.util.Util.LF;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -272,7 +273,6 @@ final class RelaxedCsvParser implements CsvParser {
         currentFieldIndex = 0;
     }
 
-    @Nullable
     @Override
     public String peekLine() throws IOException {
         return reader.peekLine();
@@ -361,11 +361,10 @@ final class RelaxedCsvParser implements CsvParser {
             return true;
         }
 
-        @Nullable
         String peekLine() throws IOException {
             ensureBuffered(buffer.length);
             if (start >= len) {
-                return null;
+                throw new EOFException();
             }
             int endIndex = start;
             while (endIndex < len && buffer[endIndex] != CR && buffer[endIndex] != LF) {
