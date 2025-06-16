@@ -265,7 +265,14 @@ abstract class AbstractCsvReaderTest {
     void bufferExceed() {
         final int limit = 512;
 
-        final char[] buf = new char[limit];
+        int bufSize = limit;
+        if (this instanceof RelaxedCsvReaderTest) {
+            // Strict parser operates directly on the buffer, while the relaxed parser stores data separately.
+            // Therefore, to cause a buffer overflow in the relaxed parser, the buffer size must be larger.
+            bufSize++;
+        }
+
+        final char[] buf = new char[bufSize];
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
 

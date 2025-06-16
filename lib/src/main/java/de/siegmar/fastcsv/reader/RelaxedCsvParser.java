@@ -251,7 +251,7 @@ final class RelaxedCsvParser implements CsvParser {
     }
 
     private void appendChar(final int ch) {
-        if (currentField.length == currentFieldIndex + 1) {
+        if (currentField.length == currentFieldIndex) {
             if (currentField.length == maxBufferSize) {
                 throw new CsvParseException("""
                     The maximum buffer size of %d is \
