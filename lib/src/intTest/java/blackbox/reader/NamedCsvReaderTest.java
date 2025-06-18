@@ -144,6 +144,46 @@ class NamedCsvReaderTest {
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
     }
 
+    // return header
+
+    @Test
+    void returnHeaderSingleRecord() {
+        final var rh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
+
+        NamedCsvRecordAssert.assertThat(CsvReader.builder().ofSingleCsvRecord(rh, "foo,bar"))
+            .isStartingLineNumber(1)
+            .isNotComment()
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("foo", "bar"))
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).fields().containsExactly(
+                entry("foo", "foo"),
+                entry("bar", "bar")
+            ));
+    }
+
+    @Test
+    void returnHeaderMultipleRecords() {
+        final var rh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
+
+        assertThat(CsvReader.builder().build(rh, "foo,bar\nfaz,baz").stream())
+            .satisfiesExactly(
+                rec -> NamedCsvRecordAssert.assertThat(rec).fields().containsExactly(
+                    entry("foo", "foo"),
+                    entry("bar", "bar")
+                ),
+                rec -> NamedCsvRecordAssert.assertThat(rec).fields().containsExactly(
+                    entry("foo", "faz"),
+                    entry("bar", "baz")
+                )
+            );
+    }
+
+    @Test
+    void returnHeaderPredefined() {
+        assertThatThrownBy(() -> NamedCsvRecordHandler.of(c -> c.returnHeader(true).header("foo")))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Predefined headers cannot be used with returnHeader=true");
+    }
+
     // comments
 
     @Test

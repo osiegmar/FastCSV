@@ -23,6 +23,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     private static final String[] EMPTY_HEADER = new String[0];
     private final boolean allowDuplicateHeaderFields;
+    private final boolean returnHeader;
 
     @Nullable
     private String[] header;
@@ -30,11 +31,13 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                                   final FieldModifier fieldModifier,
                                   final boolean allowDuplicateHeaderFields,
+                                  final boolean returnHeader,
                                   @Nullable final List<String> header) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
         this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
+        this.returnHeader = returnHeader;
         if (header != null) {
-            setHeader(header.toArray(new String[0]));
+            this.header = validateHeader(header.toArray(new String[0]));
         }
     }
 
@@ -71,17 +74,17 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     }
 
     @SuppressWarnings("PMD.UseVarargs")
-    private void setHeader(final String[] header) {
-        Objects.requireNonNull(header, "header must not be null");
-        for (final String h : header) {
+    private String[] validateHeader(final String[] fields) {
+        Objects.requireNonNull(fields, "header must not be null");
+        for (final String h : fields) {
             Objects.requireNonNull(h, "header element must not be null");
         }
 
         if (!allowDuplicateHeaderFields) {
-            checkForDuplicates(header);
+            checkForDuplicates(fields);
         }
 
-        this.header = header.clone();
+        return fields;
     }
 
     @SuppressWarnings("PMD.UseVarargs")
@@ -103,16 +106,20 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     @Nullable
     @Override
     protected NamedCsvRecord buildRecord() {
+        final String[] compactFields = compactFields();
+
         if (recordType == RecordType.COMMENT) {
-            return new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER);
+            return new NamedCsvRecord(startingLineNumber, compactFields, true, EMPTY_HEADER);
         }
 
         if (header == null) {
-            setHeader(compactFields());
-            return null;
+            header = validateHeader(compactFields);
+            if (!returnHeader) {
+                return null;
+            }
         }
 
-        return new NamedCsvRecord(startingLineNumber, compactFields(), false, header);
+        return new NamedCsvRecord(startingLineNumber, compactFields, false, header);
     }
 
     /// A builder for [NamedCsvRecordHandler].
@@ -121,6 +128,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         extends AbstractInternalCsvCallbackHandlerBuilder<NamedCsvRecordHandlerBuilder> {
 
         private boolean allowDuplicateHeaderFields;
+        private boolean returnHeader;
 
         @Nullable
         private List<String> header;
@@ -171,6 +179,18 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             return this;
         }
 
+        /// Sets whether the header itself should be returned as the first record.
+        ///
+        /// When enabled, the first record returned will be a [NamedCsvRecord] with the header fields as its fields
+        /// and as the header.
+        ///
+        /// @param returnHeader whether the header should be returned as the first record (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public NamedCsvRecordHandlerBuilder returnHeader(final boolean returnHeader) {
+            this.returnHeader = returnHeader;
+            return this;
+        }
+
         @Override
         protected NamedCsvRecordHandlerBuilder self() {
             return this;
@@ -182,8 +202,11 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         /// @throws IllegalArgumentException if argument constraints are violated
         ///     (see [AbstractInternalCsvCallbackHandler])
         public NamedCsvRecordHandler build() {
+            if (returnHeader && header != null) {
+                throw new IllegalArgumentException("Predefined headers cannot be used with returnHeader=true");
+            }
             return new NamedCsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier,
-                allowDuplicateHeaderFields, header);
+                allowDuplicateHeaderFields, returnHeader, header);
         }
 
     }
