@@ -970,7 +970,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             Objects.requireNonNull(charset, "charset must not be null");
 
             final Reader reader = detectBomHeader
-                ? BomUtil.openReader(file, charset)
+                ? new BomInputStreamReader(Files.newInputStream(file), charset)
                 : new InputStreamReader(Files.newInputStream(file), charset);
 
             return build(callbackHandler, reader);
