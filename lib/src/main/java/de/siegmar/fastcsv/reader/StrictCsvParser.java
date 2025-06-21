@@ -364,11 +364,18 @@ final class StrictCsvParser implements CsvParser {
     }
 
     @Override
-    public boolean skipLine(final int numCharsToSkip) throws IOException {
+    public void skipLine(final int numCharsToSkip) throws IOException {
         // Skip chars that have been peeked already
         csvBuffer.pos += numCharsToSkip;
 
-        while (csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData()) {
+        if (csvBuffer.pos >= csvBuffer.len && !csvBuffer.fetchData()) {
+            if (numCharsToSkip == 0) {
+                throw new EOFException();
+            }
+            return;
+        }
+
+        do {
             final char c = csvBuffer.buf[csvBuffer.pos++];
             if (c == CR) {
                 if ((csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData())
@@ -380,15 +387,12 @@ final class StrictCsvParser implements CsvParser {
             } else if (c == LF) {
                 break;
             }
-        }
+        } while (csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData());
 
         if (csvBuffer.begin < csvBuffer.pos) {
             csvBuffer.begin = csvBuffer.pos;
             startingLineNumber++;
-            return true;
         }
-
-        return false;
     }
 
     @SuppressWarnings("checkstyle:visibilitymodifier")

@@ -280,12 +280,15 @@ final class RelaxedCsvParser implements CsvParser {
 
     @SuppressWarnings("checkstyle:MultipleVariableDeclarations")
     @Override
-    public boolean skipLine(final int numCharsToSkip) throws IOException {
+    public void skipLine(final int numCharsToSkip) throws IOException {
         reader.skip(numCharsToSkip);
 
         int c = reader.read();
         if (c == EOF) {
-            return false;
+            if (numCharsToSkip == 0) {
+                throw new EOFException();
+            }
+            return;
         }
 
         do {
@@ -299,8 +302,6 @@ final class RelaxedCsvParser implements CsvParser {
                 break;
             }
         } while ((c = reader.read()) != EOF);
-
-        return true;
     }
 
     @Override

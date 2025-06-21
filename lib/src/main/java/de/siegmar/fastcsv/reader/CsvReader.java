@@ -95,12 +95,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             throw new IllegalArgumentException("lineCount must be non-negative");
         }
 
+        int i = 0;
         try {
-            for (int i = 0; i < lineCount; i++) {
-                if (!csvParser.skipLine(0)) {
-                    throw new CsvParseException("Not enough lines to skip. Skipped only %d line(s).".formatted(i));
-                }
+            for (; i < lineCount; i++) {
+                csvParser.skipLine(0);
             }
+        } catch (final EOFException e) {
+            throw new CsvParseException("Not enough lines to skip. Skipped only %d line(s).".formatted(i), e);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
