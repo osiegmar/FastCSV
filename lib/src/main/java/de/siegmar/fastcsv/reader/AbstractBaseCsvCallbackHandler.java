@@ -1,7 +1,5 @@
 package de.siegmar.fastcsv.reader;
 
-import java.util.Objects;
-
 /// Base class for [CsvCallbackHandler] implementations that handles their own field storage and record building.
 ///
 /// This implementation is stateful and must not be reused.
@@ -10,8 +8,7 @@ import java.util.Objects;
 public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandler<T> {
 
     private long startingLineNumber;
-    private boolean comment;
-    private boolean emptyLine;
+    private RecordType recordType = RecordType.DATA;
     private int fieldCount;
 
     /// Constructs a new instance.
@@ -27,17 +24,14 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
         return startingLineNumber;
     }
 
-    /// {@return whether the current record is a comment.}
-    protected boolean isComment() {
-        return comment;
-    }
-
-    /// {@return whether the current record is an empty line.}
-    protected boolean isEmptyLine() {
-        return emptyLine;
+    /// {@inheritDoc}
+    @Override
+    protected RecordType getRecordType() {
+        return recordType;
     }
 
     /// {@return the number of fields in the current record.}
+    @Override
     protected int getFieldCount() {
         return fieldCount;
     }
@@ -49,8 +43,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     protected final void beginRecord(final long startingLineNumber) {
         this.startingLineNumber = startingLineNumber;
         fieldCount = 0;
-        comment = false;
-        emptyLine = true;
+        recordType = RecordType.DATA;
         handleBegin(startingLineNumber);
     }
 
@@ -65,11 +58,10 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleField(int, char\[\], int, int, boolean)] after updating the
-    /// [#emptyLine] flag and before incrementing the [#fieldCount].
+    /// This implementation delegates to [#handleField(int, char\[\], int, int, boolean)]
+    /// before incrementing the [#fieldCount].
     @Override
     protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
-        emptyLine = emptyLine && fieldCount == 0 && len == 0 && !quoted;
         handleField(fieldCount++, buf, offset, len, quoted);
     }
 
@@ -90,14 +82,13 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the [#comment]
-    /// and [#emptyLine] flag and before incrementing the [#fieldCount].
+    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the [#recordType]
+    /// and before incrementing the [#fieldCount].
     @Override
     protected final void setComment(final char[] buf, final int offset, final int len) {
-        comment = true;
-        emptyLine = false;
+        recordType = RecordType.COMMENT;
         handleComment(buf, offset, len);
-        fieldCount++;
+        fieldCount = 1;
     }
 
     /// Handles a comment.
@@ -112,15 +103,21 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     protected void handleComment(final char[] buf, final int offset, final int len) {
     }
 
-    /// Builds a wrapper for the record that contains information necessary for the [CsvReader] in order to
-    /// determine how to process the record.
+    /// {@inheritDoc}
     ///
-    /// @param record the actual record to be returned by the [CsvReader], must not be `null`
-    /// @return the wrapper for the actual record
-    /// @throws NullPointerException if `null` is passed for `record`
-    protected RecordWrapper<T> wrapRecord(final T record) {
-        return new RecordWrapper<>(comment, emptyLine, fieldCount,
-            Objects.requireNonNull(record, "record must not be null"));
+    /// This implementation delegates to [#handleEmpty()] after updating the [#recordType]
+    /// and before setting the [#fieldCount] to 1.
+    @Override
+    protected final void setEmpty() {
+        recordType = RecordType.EMPTY;
+        handleEmpty();
+        fieldCount = 1;
+    }
+
+    /// Handles an empty line.
+    ///
+    /// This method is called for each empty line.
+    protected void handleEmpty() {
     }
 
 }

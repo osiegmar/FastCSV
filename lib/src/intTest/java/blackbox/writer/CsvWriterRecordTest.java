@@ -59,7 +59,7 @@ class CsvWriterRecordTest {
         final CsvWriter csv = crw.build(new StringWriter());
         csv.writeRecord();
 
-        final String exptectedMessage = "Record already started, call end() on CsvWriterRecord first";
+        final String exptectedMessage = "Record already started, call endRecord() on CsvWriterRecord first";
 
         assertThatThrownBy(csv::writeRecord)
             .isInstanceOf(IllegalStateException.class)

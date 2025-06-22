@@ -37,21 +37,28 @@ class CsvCallbackHandlerTest {
     void invalidMaxFields() {
         Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFields(0)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("maxFields must be greater than 0");
+            .hasMessage("maxFields must be > 0");
     }
 
     @Test
     void invalidMaxFieldSize() {
         Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFieldSize(0)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("maxFieldSize must be greater than 0");
+            .hasMessage("maxFieldSize must be > 0");
     }
 
     @Test
     void invalidMaxRecordSize() {
         Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(0)))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("maxRecordSize must be greater than 0");
+            .hasMessage("maxRecordSize must be > 0");
+    }
+
+    @Test
+    void invalidMaxRecordSize2() {
+        Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(1).maxFieldSize(2)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("maxRecordSize must be >= maxFieldSize");
     }
 
     @Test

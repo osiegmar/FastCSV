@@ -13,22 +13,6 @@ class StringArrayHandlerTest {
     private static final String TEST_DATA = " foo , bar ";
 
     @Test
-    void defaultConstructor() {
-        @SuppressWarnings("removal")
-        final StringArrayHandler handler = new StringArrayHandler();
-        assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())
-            .containsExactly(new String[]{" foo ", " bar "});
-    }
-
-    @Test
-    void fieldModifierConstructor() {
-        @SuppressWarnings("removal")
-        final StringArrayHandler handler = new StringArrayHandler(FieldModifiers.TRIM);
-        assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())
-            .containsExactly(new String[]{"foo", "bar"});
-    }
-
-    @Test
     void defaultHandler() {
         final StringArrayHandler handler = StringArrayHandler.of();
         assertThat(CsvReader.builder().build(handler, TEST_DATA).stream())

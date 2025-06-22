@@ -53,7 +53,9 @@ class NamedCsvReaderTest {
 
     @Test
     void findFieldsByName() {
-        assertThat(parse("foo,xoo,foo\nbar,moo,baz").stream())
+        final var cbh = NamedCsvRecordHandler
+            .of(c -> c.allowDuplicateHeaderFields(true));
+        assertThat(CsvReader.builder().build(cbh, "foo,xoo,foo\nbar,moo,baz").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .findFields("foo").containsExactly("bar", "baz");
     }
@@ -86,18 +88,20 @@ class NamedCsvReaderTest {
 
     @Test
     void headerToString() {
-        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
+        assertThat(parse("headerA,headerB,headerC\nfieldA,fieldB,fieldC\n").stream())
             .singleElement()
             .asString()
             .isEqualTo("NamedCsvRecord[startingLineNumber=2, "
                 + "fields=[fieldA, fieldB, fieldC], "
                 + "comment=false, "
-                + "header=[headerA, headerB, headerA]]");
+                + "header=[headerA, headerB, headerC]]");
     }
 
     @Test
     void fieldMap() {
-        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
+        final var cbh = NamedCsvRecordHandler
+            .of(c -> c.allowDuplicateHeaderFields(true));
+        assertThat(CsvReader.builder().build(cbh, "headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("headerA", "fieldA"), entry("headerB", "fieldB"));
@@ -105,7 +109,9 @@ class NamedCsvReaderTest {
 
     @Test
     void allFieldsMap() {
-        assertThat(parse("headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
+        final var cbh = NamedCsvRecordHandler
+            .of(c -> c.allowDuplicateHeaderFields(true));
+        assertThat(CsvReader.builder().build(cbh, "headerA,headerB,headerA\nfieldA,fieldB,fieldC\n").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .allFields()
             .containsOnly(entry("headerA", List.of("fieldA", "fieldC")), entry("headerB", List.of("fieldB")));
@@ -136,6 +142,46 @@ class NamedCsvReaderTest {
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .fields()
             .containsExactly(entry("h1", "foo"), entry("h2", "bar"));
+    }
+
+    // return header
+
+    @Test
+    void returnHeaderSingleRecord() {
+        final var rh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
+
+        NamedCsvRecordAssert.assertThat(CsvReader.builder().ofSingleCsvRecord(rh, "foo,bar"))
+            .isStartingLineNumber(1)
+            .isNotComment()
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("foo", "bar"))
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).fields().containsExactly(
+                entry("foo", "foo"),
+                entry("bar", "bar")
+            ));
+    }
+
+    @Test
+    void returnHeaderMultipleRecords() {
+        final var rh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
+
+        assertThat(CsvReader.builder().build(rh, "foo,bar\nfaz,baz").stream())
+            .satisfiesExactly(
+                rec -> NamedCsvRecordAssert.assertThat(rec).fields().containsExactly(
+                    entry("foo", "foo"),
+                    entry("bar", "bar")
+                ),
+                rec -> NamedCsvRecordAssert.assertThat(rec).fields().containsExactly(
+                    entry("foo", "faz"),
+                    entry("bar", "baz")
+                )
+            );
+    }
+
+    @Test
+    void returnHeaderPredefined() {
+        assertThatThrownBy(() -> NamedCsvRecordHandler.of(c -> c.returnHeader(true).header("foo")))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Predefined headers cannot be used with returnHeader=true");
     }
 
     // comments

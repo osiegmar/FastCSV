@@ -1,9 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -88,30 +85,6 @@ final class BomUtil {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
             return detectCharset(in.readNBytes(POTENTIAL_BOM_SIZE));
         }
-    }
-
-    /// Opens a Reader for the given file, skipping a BOM header if present.
-    /// If no BOM header is present, the `defaultCharset` is used.
-    ///
-    /// @param file           the file to open a Reader for
-    /// @param defaultCharset the default charset to use if no BOM header is present
-    /// @return a Reader for the given file
-    /// @throws IOException if an I/O error occurs opening the file
-    static Reader openReader(final Path file, final Charset defaultCharset) throws IOException {
-        final var bomHeader = detectCharset(file);
-        final var in = Files.newInputStream(file);
-
-        // No BOM header found
-        if (bomHeader.isEmpty()) {
-            return new InputStreamReader(in, defaultCharset);
-        }
-
-        // Return reader with skipped BOM header
-        final int bomLength = bomHeader.get().getLength();
-        if (in.skip(bomLength) != bomLength) {
-            throw new IOException("Failed to skip BOM header");
-        }
-        return new InputStreamReader(in, bomHeader.get().getCharset());
     }
 
 }

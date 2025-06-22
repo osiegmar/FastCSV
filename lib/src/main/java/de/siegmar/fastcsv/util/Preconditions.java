@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.util;
 
+import java.util.function.Supplier;
+
 /// Internal utility class.
 ///
 /// It is **not** a part of the API!
@@ -22,14 +24,12 @@ public final class Preconditions {
     /// Checks the given argument and throws an exception if not met.
     ///
     /// @param expression           the expression that has to be `true`
-    /// @param errorMessageTemplate the exception message template (format [String#format(String, Object...)])
-    ///                             to be thrown
-    /// @param errorMessageArgs     the exception message arguments
+    /// @param errorMessageSupplier a supplier for the exception message to be thrown
     /// @throws IllegalArgumentException if the `expression` is `false`.
-    public static void checkArgument(final boolean expression, final String errorMessageTemplate,
-                                     final Object... errorMessageArgs) {
+    @SuppressWarnings("AnnotateFormatMethod")
+    public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) {
         if (!expression) {
-            throw new IllegalArgumentException(String.format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalArgumentException(errorMessageSupplier.get());
         }
     }
 

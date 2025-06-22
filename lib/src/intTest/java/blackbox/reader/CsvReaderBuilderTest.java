@@ -76,10 +76,11 @@ class CsvReaderBuilderTest {
     @Test
     void builderToString() {
         assertThat(crb).asString()
-            .isEqualTo("CsvReaderBuilder[fieldSeparator=,, quoteCharacter=\", "
-                + "commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true, acceptCharsAfterQuotes=true, "
-                + "detectBomHeader=false, maxBufferSize=16777216]");
+            .isEqualTo("""
+                CsvReaderBuilder[fieldSeparator=,, quoteCharacter=", \
+                commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, \
+                allowExtraFields=false, allowMissingFields=false, allowExtraCharsAfterClosingQuote=false, \
+                trimWhitespacesAroundQuotes=false, detectBomHeader=false, maxBufferSize=16777216]""");
     }
 
     @Test
@@ -127,8 +128,9 @@ class CsvReaderBuilderTest {
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
             .skipEmptyLines(true)
-            .ignoreDifferentFieldCount(false)
-            .acceptCharsAfterQuotes(false)
+            .allowExtraFields(false)
+            .allowMissingFields(false)
+            .allowExtraCharsAfterClosingQuote(false)
             .ofCsvRecord("foo");
 
         assertThat(reader).isNotNull();

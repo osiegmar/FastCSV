@@ -1,5 +1,7 @@
 package de.siegmar.fastcsv.reader;
 
+import de.siegmar.fastcsv.util.Nullable;
+
 /// This class defines the methods that are called during the CSV reading process.
 ///
 /// Implementations highly affect the behavior of the [CsvReader]. With great power comes great responsibility.
@@ -15,6 +17,27 @@ public abstract class CsvCallbackHandler<T> {
     /// Default constructor.
     protected CsvCallbackHandler() {
     }
+
+    /// {@return the type of the record that is built from the CSV data}
+    ///
+    /// The [CsvReader] will skip
+    ///
+    /// - records of type [RecordType#COMMENT] if
+    ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
+    ///   is set to [CommentStrategy#SKIP]
+    /// - records of type [RecordType#EMPTY] if
+    ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)]
+    ///   is set to `true`.
+    protected abstract RecordType getRecordType();
+
+    /// {@return the number of fields in the record}
+    ///
+    /// The [CsvReader] will verify that the number of fields in each record matches the number of fields in the
+    /// first record unless
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#allowExtraFields(boolean)] or
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#allowMissingFields(boolean)]
+    /// are set to `true`.
+    protected abstract int getFieldCount();
 
     /// Called at the beginning of each record.
     ///
@@ -64,12 +87,14 @@ public abstract class CsvCallbackHandler<T> {
     /// @param len    the length of the field value
     protected abstract void setComment(char[] buf, int offset, int len);
 
-    /// Called at the end of each CSV record to build an object representation of the record.
+    /// Called for each empty line.
+    protected abstract void setEmpty();
+
+    /// Called at the end of each CSV record to build the actual record representation.
     ///
-    /// The returned wrapper is used by the [CsvReader] in order to determine how to process the record.
-    ///
-    /// @return the record wrapper or `null` if the record should be ignored/skipped
-    protected abstract RecordWrapper<T> buildRecord();
+    /// @return the record or `null` if the record should be ignored/skipped as it is consumed by the callback handler.
+    @Nullable
+    protected abstract T buildRecord();
 
     /// Called at the end of the CSV reading process.
     protected void terminate() {

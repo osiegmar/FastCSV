@@ -1,14 +1,17 @@
 [libraries]
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.11.4" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.13.1" }
 assertj-core = { module = "org.assertj:assertj-core", version = "3.27.3" }
 fastdoubleparser = { module = "ch.randelshofer:fastdoubleparser", version = "2.0.1" }
-gummy-bears = { module = "com.toasttab.android:gummy-bears-api-33", version = "0.10.0" }
-spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.1.2" }
-jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.18.2" }
+gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0.12.0" }
+spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.2.0" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.19.1" }
+errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.38.0" }
+nullaway = { module = "com.uber.nullaway:nullaway", version = "0.12.7" }
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version = "0.7.3" }
-pitest = { id = "info.solidsoft.pitest", version = "1.15.0" }
-animalsniffer = { id = "ru.vyarus.animalsniffer", version = "2.0.0" }
+pitest = { id = "info.solidsoft.pitest", version = "1.19.0-rc.1" }
+animalsniffer = { id = "ru.vyarus.animalsniffer", version = "2.0.1" }
 bnd = { id = "biz.aQute.bnd.builder", version = "7.1.0" }
 jreleaser = { id = "org.jreleaser", version = "1.18.0" }
+errorprone = { id = "net.ltgt.errorprone", version = "4.2.0" }

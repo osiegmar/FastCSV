@@ -1,5 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,14 +70,14 @@ public class CollectingStatusListener implements StatusListener {
 
     @Override
     public void onError(final Throwable throwable) {
-        this.failedThrowable.set(throwable);
+        failedThrowable.set(throwable);
     }
 
     /// Get the throwable that occurred while indexing.
     ///
-    /// @return the throwable that occurred while indexing, `null` otherwise.
-    public Throwable getThrowable() {
-        return failedThrowable.get();
+    /// @return the throwable that occurred while indexing.
+    public Optional<Throwable> getThrowable() {
+        return Optional.ofNullable(failedThrowable.get());
     }
 
     @Override
@@ -84,8 +85,8 @@ public class CollectingStatusListener implements StatusListener {
         final long byteCntVal = byteCount.longValue();
         final long currentFileSize = fileSize.get();
         final double percentage = byteCntVal * 100.0 / currentFileSize;
-        return String.format("Read %,d records and %,d of %,d bytes (%.2f %%)",
-            recordCount.longValue(), byteCntVal, currentFileSize, percentage);
+        return "Read %,d records and %,d of %,d bytes (%.2f %%)"
+            .formatted(recordCount.longValue(), byteCntVal, currentFileSize, percentage);
     }
 
 }

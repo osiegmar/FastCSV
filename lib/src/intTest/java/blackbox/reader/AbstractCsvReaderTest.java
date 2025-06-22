@@ -27,46 +27,66 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldModifiers;
 import testutil.CsvRecordAssert;
 
 @SuppressWarnings({
     "checkstyle:ClassFanOutComplexity",
     "PMD.AvoidDuplicateLiterals",
-    "PMD.CloseResource"
+    "PMD.CloseResource",
+    "PMD.AbstractClassWithoutAbstractMethod"
 })
-class CsvReaderTest {
+abstract class AbstractCsvReaderTest {
 
-    private final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
+    protected final CsvReader.CsvReaderBuilder crb = CsvReader.builder();
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
-    void configBuilder(final char c) {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(c).ofCsvRecord("foo"))
+    void invalidFieldSeparator(final char c) {
+        crb.fieldSeparator(c).quoteCharacter('"').commentCharacter('#');
+        assertThatThrownBy(() -> crb.ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("fieldSeparator must not be a newline char");
+            .hasMessage("fieldSeparator must not contain newline chars");
+    }
 
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(c).ofCsvRecord("foo"))
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    void invalidQuoteCharacter(final char c) {
+        crb.fieldSeparator(',').quoteCharacter(c).commentCharacter('#');
+        assertThatThrownBy(() -> crb.quoteCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("quoteCharacter must not be a newline char");
+    }
 
-        assertThatThrownBy(() -> CsvReader.builder().commentCharacter(c).ofCsvRecord("foo"))
+    @ParameterizedTest
+    @ValueSource(chars = {'\r', '\n'})
+    void invalidCommentCharacter(final char c) {
+        crb.fieldSeparator(',').quoteCharacter('"').commentCharacter(c);
+        assertThatThrownBy(() -> crb.commentCharacter(c).ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("commentCharacter must not be a newline char");
     }
 
     @Test
-    void configReader() {
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').quoteCharacter(',').ofCsvRecord("foo"))
+    void dupeQuoteCharacter() {
+        assertThatThrownBy(() -> crb.quoteCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=#)");
+    }
 
-        assertThatThrownBy(() -> CsvReader.builder().fieldSeparator(',').commentCharacter(',').ofCsvRecord("foo"))
+    @Test
+    void dupeCommentCharacter() {
+        assertThatThrownBy(() -> crb.commentCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
+    }
 
-        assertThatThrownBy(() -> CsvReader.builder().quoteCharacter(',').commentCharacter(',').ofCsvRecord("foo"))
+    @Test
+    void dupeCommentQuoteCharacter() {
+        assertThatThrownBy(() -> crb.commentCharacter('"').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=,)");
+            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=\")");
     }
 
     @Test
@@ -83,65 +103,49 @@ class CsvReaderTest {
             .isInstanceOf(UnsupportedOperationException.class);
     }
 
-    // toString()
+    // allow extra fields
 
     @Test
-    void readerToString() {
-        assertThat(crb.ofCsvRecord(""))
-            .asString()
-            .isEqualTo("CsvReader[commentStrategy=NONE, skipEmptyLines=true, "
-                + "ignoreDifferentFieldCount=true]");
-    }
-
-    // different field count
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "foo\nbar",
-        "foo\nbar\n",
-        "foo,bar\nfaz,baz",
-        "foo,bar\nfaz,baz\n",
-        "foo,bar\n,baz",
-        ",bar\nfaz,baz"
-    })
-    void differentFieldCountSuccess(final String s) {
-        assertThatNoException().isThrownBy(() -> readAll(s));
-    }
-
-    @Test
-    void differentFieldCountSuccess2() {
-        crb.ignoreDifferentFieldCount(false);
-        assertThatNoException().isThrownBy(() -> readAll("foo\nbar"));
-    }
-
-    @Test
-    void differentFieldCountFail() {
-        crb.ignoreDifferentFieldCount(false);
-
-        assertThatThrownBy(() -> readAll("foo\nbar,\"baz\nbax\""))
+    void allowNoExtraFields() {
+        assertThatThrownBy(() -> readAll("foo\nfoo,bar"))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading record that started in line 2")
             .hasRootCauseInstanceOf(CsvParseException.class)
             .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
-    // accept characters after closing quotes
+    @Test
+    void allowExtraFields() {
+        crb.allowExtraFields(true);
+        assertThatNoException().isThrownBy(() -> readAll("foo\nfoo,bar"));
+    }
+
+    // allow missing fields
 
     @Test
-    void acceptCharsAfterQuotes() {
-        assertThat(crb.ofCsvRecord("foo,\"bar\"baz").stream())
-            .singleElement(CsvRecordAssert.CSV_RECORD)
-            .fields().containsExactly("foo", "barbaz");
+    void allowNoMissingFields() {
+        assertThatThrownBy(() -> readAll("foo,bar\nfoo"))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading record that started in line 2")
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record 2 has 1 fields, but first record had 2 fields");
     }
 
     @Test
-    void acceptCharsAfterQuotesNot() {
-        crb.acceptCharsAfterQuotes(false);
+    void allowMissingFields() {
+        crb.allowMissingFields(true);
+        assertThatNoException().isThrownBy(() -> readAll("foo,bar\nfoo"));
+    }
+
+    // allow extra characters after closing quotes
+
+    @Test
+    void allowExtraCharsAfterClosingQuoteNot() {
         assertThatThrownBy(() -> readAll("foo,\"bar\"baz").stream())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Unexpected character after closing quote: b");
+            .hasRootCauseMessage("Unexpected character after closing quote: 'b' (0x62)");
     }
 
     // field by index
@@ -155,7 +159,7 @@ class CsvReaderTest {
                 .isInstanceOf(IndexOutOfBoundsException.class));
     }
 
-    @SuppressWarnings("PMD.UnusedFormalParameter")
+    @SuppressWarnings({"UnusedVariable", "PMD.UnusedFormalParameter"})
     private void spotbugs(final String foo) {
         // Prevent RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT
     }
@@ -261,7 +265,14 @@ class CsvReaderTest {
     void bufferExceed() {
         final int limit = 512;
 
-        final char[] buf = new char[limit];
+        int bufSize = limit;
+        if (this instanceof RelaxedCsvReaderTest) {
+            // Strict parser operates directly on the buffer, while the relaxed parser stores data separately.
+            // Therefore, to cause a buffer overflow in the relaxed parser, the buffer size must be larger.
+            bufSize++;
+        }
+
+        final char[] buf = new char[bufSize];
         Arrays.fill(buf, 'X');
         buf[buf.length - 1] = ',';
 
@@ -279,7 +290,7 @@ class CsvReaderTest {
 
     @Test
     void bufferExceedSubsequentRecord() {
-        final char[] buf = new char[16 * 1024 * 1024];
+        final char[] buf = new char[17 * 1024 * 1024];
         Arrays.fill(buf, 'X');
         final String s = "a,b,c\n\"";
         System.arraycopy(s.toCharArray(), 0, buf, 0, s.length());
@@ -292,7 +303,7 @@ class CsvReaderTest {
             .hasMessage("Exception when reading record that started in line 2")
             .rootCause()
                 .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("is insufficient to read the data of a single field");
+                .hasMessageContaining("The maximum buffer size of 16777216 is insufficient");
     }
 
     // record size exceed
@@ -396,7 +407,27 @@ class CsvReaderTest {
 
     @Test
     void fieldCount() {
-        assertThat(crb.ofCsvRecord("foo,bar").iterator().next().getFieldCount()).isEqualTo(2);
+        assertThat(crb.ofSingleCsvRecord("foo,bar").getFieldCount()).isEqualTo(2);
+    }
+
+    @Test
+    void ofSingleCsvRecord() {
+        assertThat(crb.ofSingleCsvRecord("foo,bar"))
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec).fields().containsExactly("foo", "bar"));
+    }
+
+    @Test
+    void ofNamedSingleCsvRecordDataMissing() {
+        assertThatThrownBy(() -> crb.ofSingleCsvRecord(""))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("No record found in the provided data");
+    }
+
+    @Test
+    void ofSingleCsvRecordWithCustomHandler() {
+        final var cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
+        assertThat(crb.ofSingleCsvRecord(cbh, " foo , bar "))
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec).fields().containsExactly("foo", "bar"));
     }
 
     // test helpers

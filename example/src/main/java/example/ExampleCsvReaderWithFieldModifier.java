@@ -31,11 +31,11 @@ public class ExampleCsvReaderWithFieldModifier {
 
     private static FieldModifier combinedModifier() {
         final FieldModifier toLower =
-            FieldModifiers.modify(field -> field.toLowerCase(Locale.ENGLISH));
+            FieldModifier.modify(field -> field.toLowerCase(Locale.ENGLISH));
         return FieldModifiers.TRIM.andThen(toLower);
     }
 
-    private static class CustomModifier implements FieldModifier {
+    private static final class CustomModifier implements FieldModifier {
 
         @Override
         public String modify(final long startingLineNumber, final int fieldIdx,

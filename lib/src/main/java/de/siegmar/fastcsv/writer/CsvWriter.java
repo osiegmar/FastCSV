@@ -50,15 +50,15 @@ public final class CsvWriter implements Closeable, Flushable {
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-                fieldSeparator, quoteCharacter, commentCharacter);
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+                fieldSeparator, quoteCharacter, commentCharacter));
 
         this.writer = writer;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentCharacter = commentCharacter;
         this.quoteStrategy = quoteStrategy;
-        this.lineDelimiter = Objects.requireNonNull(lineDelimiter);
+        this.lineDelimiter = lineDelimiter;
 
         emptyFieldValue = new char[] {quoteCharacter, quoteCharacter};
         lineDelimiterChars = lineDelimiter.toString().toCharArray();
@@ -130,7 +130,7 @@ public final class CsvWriter implements Closeable, Flushable {
 
     private void validateNoOpenRecord() {
         if (openRecordWriter) {
-            throw new IllegalStateException("Record already started, call end() on CsvWriterRecord first");
+            throw new IllegalStateException("Record already started, call endRecord() on CsvWriterRecord first");
         }
     }
 
@@ -141,7 +141,7 @@ public final class CsvWriter implements Closeable, Flushable {
         }
 
         if (value == null) {
-            if (quoteStrategy != null && quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
+            if (quoteStrategy.quoteNull(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
@@ -150,15 +150,14 @@ public final class CsvWriter implements Closeable, Flushable {
         final int length = value.length();
 
         if (length == 0) {
-            if (quoteStrategy != null && quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
+            if (quoteStrategy.quoteEmpty(currentLineNo, fieldIdx)) {
                 writer.write(emptyFieldValue, 0, emptyFieldValue.length);
             }
             return;
         }
 
         final boolean needsEscape = containsControlCharacter(value, fieldIdx, length);
-        final boolean needsQuotes = needsEscape
-            || quoteStrategy != null && quoteStrategy.quoteNonEmpty(currentLineNo, fieldIdx, value);
+        final boolean needsQuotes = needsEscape || quoteStrategy.quoteValue(currentLineNo, fieldIdx, value);
 
         if (needsQuotes) {
             writer.write(quoteCharacter);
@@ -316,7 +315,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// - field separator: `,` (comma)
     /// - quote character: `"` (double quote)
     /// - comment character: `#` (hash/number)
-    /// - quote strategy: `null` (only required quoting)
+    /// - quote strategy: [QuoteStrategies#REQUIRED]
     /// - line delimiter: [LineDelimiter#CRLF]
     /// - buffer size: 8,192 bytes
     /// - auto flush: `false`
@@ -328,7 +327,7 @@ public final class CsvWriter implements Closeable, Flushable {
         private char fieldSeparator = ',';
         private char quoteCharacter = '"';
         private char commentCharacter = '#';
-        private QuoteStrategy quoteStrategy;
+        private QuoteStrategy quoteStrategy = QuoteStrategies.REQUIRED;
         private LineDelimiter lineDelimiter = LineDelimiter.CRLF;
         private int bufferSize = DEFAULT_BUFFER_SIZE;
         private boolean autoFlush;
@@ -366,22 +365,26 @@ public final class CsvWriter implements Closeable, Flushable {
             return this;
         }
 
-        /// Sets the strategy that defines when optional quoting has to be performed – default: none.
+        /// Sets the strategy that defines when optional quoting has to be performed
+        /// (default: [QuoteStrategies#REQUIRED]).
         ///
         /// @param quoteStrategy the strategy when fields should be enclosed using the `quoteCharacter`,
-        ///                      even if not strictly required.
+        ///                      even if not strictly required; must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if quoteStrategy is `null`
+        /// @see QuoteStrategies
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
-            this.quoteStrategy = quoteStrategy;
+            this.quoteStrategy = Objects.requireNonNull(quoteStrategy, "quoteStrategy must not be null");
             return this;
         }
 
         /// Sets the delimiter used to separate lines (default: [LineDelimiter#CRLF]).
         ///
-        /// @param lineDelimiter the line delimiter to be used.
+        /// @param lineDelimiter the line delimiter to be used; must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if lineDelimiter is `null`
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
-            this.lineDelimiter = lineDelimiter;
+            this.lineDelimiter = Objects.requireNonNull(lineDelimiter, "lineDelimiter must not be null");
             return this;
         }
 
@@ -417,21 +420,14 @@ public final class CsvWriter implements Closeable, Flushable {
 
         /// Constructs a [CsvWriter] for the specified OutputStream.
         ///
-        /// This is a convenience method for calling [#build(OutputStream, Charset)]
-        /// with the default charset [StandardCharsets#UTF_8].
-        ///
-        /// This build method wraps the given `outputStream` with an [OutputStreamWriter].
-        /// Both this library's internal buffer and the used [OutputStreamWriter] cause deferred writes to the
-        /// underlying stream. This ensures good performance but also means that **you must call [#flush()] or
-        /// [#close()] to ensure that all data is written to the stream!**
+        /// See [#build(OutputStream, Charset)] for details. This is just a convenience method
+        /// for calling it with `charset` set to [StandardCharsets#UTF_8].
         ///
         /// @param outputStream the OutputStream to write CSV data to.
-        /// @return a new CsvWriter instance - never `null`.
+        /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws NullPointerException if outputStream is `null`
         /// @see #build(OutputStream, Charset)
         public CsvWriter build(final OutputStream outputStream) {
-            Objects.requireNonNull(outputStream, "outputStream must not be null");
-
             return build(outputStream, StandardCharsets.UTF_8);
         }
 
@@ -439,40 +435,47 @@ public final class CsvWriter implements Closeable, Flushable {
         ///
         /// This build method wraps the given `outputStream` with an [OutputStreamWriter].
         /// Both this library's internal buffer and the used [OutputStreamWriter] cause deferred writes to the
-        /// underlying stream. This ensures good performance but also means that you **must call [#flush()] or
-        /// [#close()] to ensure that all data is written to the stream!**
+        /// underlying stream.
+        /// You typically do not need to wrap the given `outputStream` in a [java.io.BufferedOutputStream].
+        /// This ensures good performance but also means that you **must call [#flush()] or [#close()]**
+        /// to ensure that all data is written to the underlying `outputStream`!
         ///
         /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files!
         ///
         /// @param outputStream the OutputStream to write CSV data to.
         /// @param charset      the character set to be used for writing data to the output stream.
-        /// @return a new CsvWriter instance - never `null`.
+        /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws NullPointerException if outputStream or charset is `null`
         /// @see #build(OutputStream)
         public CsvWriter build(final OutputStream outputStream, final Charset charset) {
             Objects.requireNonNull(outputStream, "outputStream must not be null");
             Objects.requireNonNull(charset, "charset must not be null");
 
-            return csvWriter(new OutputStreamWriter(outputStream, charset), bufferSize, false, autoFlush);
+            return csvWriter(new OutputStreamWriter(outputStream, charset), bufferSize, autoFlush);
         }
 
         /// Constructs a [CsvWriter] for the specified Writer.
         ///
-        /// This library uses built-in buffering (unless [#bufferSize(int)] is used to disable it) but writes
-        /// its internal buffer to the given `writer` at the end of every record write operation. Therefore,
-        /// you probably want to pass in a [java.io.BufferedWriter] to retain good performance.
+        /// This library uses built-in buffering, unless [#bufferSize(int)] is used to disable it.
+        /// You typically do not need to wrap the given `writer` in an [java.io.BufferedWriter].
+        /// This ensures good performance but also means that you **must call [#flush()] or [#close()]**
+        /// to ensure that all data is written to the underlying `writer`!
+        ///
         /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files!
         ///
         /// @param writer the Writer to use for writing CSV data.
-        /// @return a new CsvWriter instance - never `null`.
+        /// @return a new CsvWriter instance - never `null`. Remember to close it!
         /// @throws NullPointerException if writer is `null`
         public CsvWriter build(final Writer writer) {
             Objects.requireNonNull(writer, "writer must not be null");
 
-            return csvWriter(writer, bufferSize, true, autoFlush);
+            return csvWriter(writer, bufferSize, autoFlush);
         }
 
         /// Constructs a [CsvWriter] for the specified Path.
+        ///
+        /// See [#build(Path,Charset,OpenOption...)] for details. This is just a convenience method
+        /// for calling it with `charset` set to [StandardCharsets#UTF_8].
         ///
         /// @param file        the file to write data to.
         /// @param openOptions options specifying how the file is opened.
@@ -502,7 +505,7 @@ public final class CsvWriter implements Closeable, Flushable {
             Objects.requireNonNull(charset, "charset must not be null");
 
             return csvWriter(new OutputStreamWriter(Files.newOutputStream(file, openOptions),
-                charset), bufferSize, false, autoFlush);
+                charset), bufferSize, autoFlush);
         }
 
         /// Convenience method to write to the console (standard output).
@@ -511,7 +514,6 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Data is directly written to standard output and flushed after each record.
         ///
         /// Example use:
-        ///
         /// ```
         /// CsvWriter.builder().toConsole()
         ///     .writeRecord("Hello", "world");
@@ -522,17 +524,22 @@ public final class CsvWriter implements Closeable, Flushable {
         @SuppressWarnings("checkstyle:RegexpMultiline")
         public CsvWriter toConsole() {
             final Writer writer = new NoCloseWriter(new OutputStreamWriter(System.out, Charset.defaultCharset()));
-            return csvWriter(writer, 0, false, true);
+            return csvWriter(writer, 0, true);
         }
 
         private CsvWriter csvWriter(final Writer writer, final int bufferSize,
-                                    final boolean autoFlushBuffer, final boolean autoFlushWriter) {
-            final Writable writable = bufferSize > 0
-                ? new FastBufferedWriter(writer, bufferSize, autoFlushBuffer, autoFlushWriter)
-                : new UnbufferedWriter(writer, autoFlushWriter);
-
-            return new CsvWriter(writable,
+                                    final boolean autoFlushWriter) {
+            return new CsvWriter(wrapWriter(writer, bufferSize, autoFlushWriter),
                 fieldSeparator, quoteCharacter, commentCharacter, quoteStrategy, lineDelimiter);
+        }
+
+        private static Writable wrapWriter(final Writer writer, final int bufferSize, final boolean autoFlushWriter) {
+            if (bufferSize == 0) {
+                return new UnbufferedWriter(writer, autoFlushWriter);
+            }
+            return autoFlushWriter
+                ? new AutoflushingFastBufferedWriter(writer, bufferSize)
+                : new FastBufferedWriter(writer, bufferSize);
         }
 
         @Override

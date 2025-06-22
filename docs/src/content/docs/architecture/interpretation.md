@@ -89,15 +89,17 @@ Consider the following CSV snippet as an illustration of varying field counts:
 ```
 header_a,header_bCRLF
 value_a_1CRLF
-value_a_2,value_b_2CRLF
+value_a_2,value_b_2,value_c_2CRLF
 ```
 
 In this example, `value_a_1` likely belongs to `header_a`, and `header_b` does not have a value for the first data
-record. However, this is just an assumption.
+record. However, this is just an assumption. Field `value_c_2` does not even have a corresponding header.
 
-By default, FastCSV handles scenarios with different field counts by ignoring them (see
-`CsvReaderBuilder.ignoreDifferentFieldCount(boolean)`). This is done to accommodate this frequently occurring case. To
-ensure no misinterpretation, you can disable this behavior, causing an exception to be thrown when reading such data.
+To ensure no misinterpretation, FastCSV does not allow extra or missing fields in a record by default.
+This means that the above example would result in a `CsvParseException` when reading it with FastCSV.
+
+However, this behavior can be changed by setting `CsvReaderBuilder.allowExtraFields(boolean)`
+and `CsvReaderBuilder.allowMissingFields(boolean)` to `true`.
 
 ### Empty lines
 
@@ -144,13 +146,14 @@ header_a,header_aCRLF
 value_1,value_2CRLF
 ```
 
-The `NamedCsvRecord` of FastCSV offers several options to handle this case:
+The `NamedCsvRecord` class in FastCSV offers several options to handle this scenario:
 
-- `getField("header_a")`, `findField("header_a")` and `getFieldsAsMap()` returns only the **first** value (`"value_1"`).
-- `findFields("header_a")` and `getFieldsAsMapList()` returns a List containing **all** values (`"value_1"`
-  and `"value_2"`).
+- By default, FastCSV does **not** allow duplicate headers to prevent misinterpretation of data.
+  This behavior can be changed by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
+- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** value (`"value_1"`).
+- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** values (`"value_1"` and `"value_2"`).
 
-Regardless of the chosen option, FastCSV always handles the header as case-sensitive.
+Regardless of the option chosen, FastCSV always treats headers as case-sensitive.
 
 ### Spaces within fields
 
@@ -187,10 +190,10 @@ In this case, we observe:
 1. A proper quoted field `"value 1"`
 2. A quoted field with a trailing whitespace `"value 2"_` (the underscore represents the whitespace)
 
-   FastCSV would concatenate any trailing characters (including whitespaces) to the field. The Java value for this field
-   would be `"value 2 "` (**without** the quotes). This lenient behavior can be disabled by configuring
-   `CsvReaderBuilder.acceptCharsAfterQuotes(false)`. In this case, FastCSV would throw an exception when reading this
-   field.
+   By default, FastCSV throws a `CsvParseException` when reading this field.
+   This behavior can be changed by setting `CsvReaderBuilder.allowExtraCharsAfterClosingQuote(boolean)` to `true`.
+   In this case, FastCSV concatenates any trailing characters (including whitespaces) to the field.
+   The Java value for this field would be `"value 2 "` (**without** the quotes).
 
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
 

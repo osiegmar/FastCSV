@@ -8,34 +8,27 @@ public class ExampleCsvReaderWithFaultyData {
 
     private static final String DATA = """
         foo,bar
-        only one field followed by some empty lines
-
-
-        bar,foo
+        foo
+        foo,bar,baz
         """;
 
     public static void main(final String[] args) {
-        System.out.println("Reading data with lenient (default) settings:");
-        CsvReader.builder()
-            .ofCsvRecord(DATA)
-            .forEach(System.out::println);
-
-        System.out.println("Reading data while not skipping empty lines:");
-        CsvReader.builder()
-            .skipEmptyLines(false)
-            .ofCsvRecord(DATA)
-            .forEach(System.out::println);
-
-        System.out.println("Reading data while not ignoring different field counts:");
+        System.out.println("Reading data with default settings:");
         try {
             CsvReader.builder()
-                .ignoreDifferentFieldCount(false)
                 .ofCsvRecord(DATA)
                 .forEach(System.out::println);
         } catch (final CsvParseException e) {
-            System.out.println(e.getMessage());
-            System.out.println(e.getCause().getMessage());
+            System.out.println("Exception expected due to different field counts:");
+            e.printStackTrace(System.out);
         }
+
+        System.out.println("Reading data while not ignoring different field counts:");
+        CsvReader.builder()
+            .allowExtraFields(true)
+            .allowMissingFields(true)
+            .ofCsvRecord(DATA)
+            .forEach(System.out::println);
     }
 
 }

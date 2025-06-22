@@ -33,6 +33,18 @@ final class CsvConstants {
         + "two columns"
         + "\n";
 
+    /// Data with multi-character field separator to read CSV.
+    public static final String DATA_WITH_MULTI_CHAR_SEPARATOR = "Simple field||"
+        + "||"
+        + "\"Example with separator ||\"||"
+        + "\"Example with delimiter \"\"\"||"
+        + "\"Example with\nnewline\"||"
+        + "\"Example with || and \"\" and \nnewline\""
+        + "\n"
+        + "Example row with only||"
+        + "two columns"
+        + "\n";
+
     private CsvConstants() {
     }
 

@@ -1,6 +1,7 @@
 package blackbox.reader;
 
 import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -19,6 +20,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -57,10 +59,10 @@ class IndexedCsvReaderTest {
         try (var csv = buildSinglePage("")) {
             final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.getPageCount())
+            softly.assertThat(index.pages().size())
                 .isZero();
 
-            softly.assertThat(index.getRecordCount())
+            softly.assertThat(index.recordCount())
                 .isZero();
 
             softly.assertThatThrownBy(() -> csv.readPage(0))
@@ -74,11 +76,12 @@ class IndexedCsvReaderTest {
         final Path file = prepareTestFile("foo");
 
         assertThat(singlePageBuilder().ofCsvRecord(file)).asString()
-            .isEqualTo("IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, "
-                    + "quoteCharacter=\", commentStrategy=NONE, commentCharacter=#, acceptCharsAfterQuotes=true, "
-                    + "pageSize=1, "
-                    + "index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, "
-                    + "commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]",
+            .isEqualTo("""
+                    IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, \
+                    quoteCharacter=", commentStrategy=NONE, commentCharacter=#, \
+                    allowExtraCharsAfterClosingQuote=false, pageSize=1, \
+                    index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, \
+                    commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]""",
                 file);
     }
 
@@ -88,10 +91,10 @@ class IndexedCsvReaderTest {
         try (var csv = buildSinglePage("abc\nüöä\nabc")) {
             final CsvIndex index = csv.getIndex();
 
-            softly.assertThat(index.getPageCount())
+            softly.assertThat(index.pages().size())
                 .isEqualTo(3);
 
-            softly.assertThat(index.getRecordCount())
+            softly.assertThat(index.recordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -113,7 +116,7 @@ class IndexedCsvReaderTest {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), StandardCharsets.UTF_8)) {
             final CsvIndex index = csv.getIndex();
 
-            assertThat(index.getPageCount())
+            assertThat(index.pages().size())
                 .isEqualTo(3);
         }
     }
@@ -126,10 +129,10 @@ class IndexedCsvReaderTest {
         try (var csv = icrb.build(cbh, prepareTestFile("h1\nv1\nv2"))) {
             final CsvIndex index = csv.getIndex();
 
-            assertThat(index.getPageCount())
+            assertThat(index.pages().size())
                 .isEqualTo(2);
 
-            assertThat(index.getRecordCount())
+            assertThat(index.recordCount())
                 .isEqualTo(3L);
 
             assertThat(csv.readPage(0))
@@ -142,20 +145,20 @@ class IndexedCsvReaderTest {
         }
     }
 
-    // accept characters after closing quotes
+    // allow extra characters after closing quotes
 
     @Test
-    void acceptCharsAfterQuotes() throws IOException {
-        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
+    void allowExtraCharsAfterClosingQuote() throws IOException {
+        final var bldr = singlePageBuilder().allowExtraCharsAfterClosingQuote(true);
+        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             CsvRecordAssert.assertThat(csv.readPage(0).getFirst()).fields()
                 .containsExactly("foo", "barbaz");
         }
     }
 
     @Test
-    void acceptCharsAfterQuotesNot() throws IOException {
-        final var bldr = singlePageBuilder().acceptCharsAfterQuotes(false);
-        try (var csv = bldr.ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
+    void allowExtraCharsAfterClosingQuoteNot() throws IOException {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             assertThatThrownBy(() -> csv.readPage(0))
                 .isInstanceOf(CsvParseException.class);
         }
@@ -305,6 +308,7 @@ class IndexedCsvReaderTest {
                 .ofCsvRecord(Path.of(NON_EXISTENT_FILENAME)));
 
             assertThat(statusListener.getThrowable())
+                .get(as(InstanceOfAssertFactories.THROWABLE))
                 .isInstanceOf(NoSuchFileException.class)
                 .hasMessage(NON_EXISTENT_FILENAME);
         }
@@ -320,7 +324,7 @@ class IndexedCsvReaderTest {
         void pageOutOfBounds() {
             assertThatThrownBy(() -> buildSinglePage("foo").readPage(10))
                 .isInstanceOf(IndexOutOfBoundsException.class)
-                .hasMessage("Index 10 out of bounds for length 1");
+                .hasMessage("Index: 10 Size: 1");
         }
 
         @ParameterizedTest
@@ -444,7 +448,7 @@ class IndexedCsvReaderTest {
                 assertThat(statusListener.getRecordCount()).isEqualTo(2L);
                 assertThat(statusListener.getByteCount()).isEqualTo(7L);
                 assertThat(statusListener.isCompleted()).isTrue();
-                assertThat(statusListener.getThrowable()).isNull();
+                assertThat(statusListener.getThrowable()).isEmpty();
                 assertThat(statusListener).asString()
                     .isEqualTo("Read %,d records and %,d of %,d bytes (%.2f %%)", 2, 7, 7, 100.0);
             }
@@ -475,9 +479,9 @@ class IndexedCsvReaderTest {
             try (var csv = buildSinglePage("012")) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount()).isOne();
+                assertThat(index.pages().size()).isOne();
 
-                assertThat(index.getRecordCount()).isOne();
+                assertThat(index.recordCount()).isOne();
 
                 assertThat(csv.readPage(0))
                     .singleElement(CsvRecordAssert.CSV_RECORD)
@@ -493,10 +497,10 @@ class IndexedCsvReaderTest {
             try (var csv = buildSinglePage("012,foo\n345,bar")) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount())
+                assertThat(index.pages().size())
                     .isEqualTo(2);
 
-                assertThat(index.getRecordCount())
+                assertThat(index.recordCount())
                     .isEqualTo(2L);
 
                 assertThat(csv.readPage(0))
@@ -534,10 +538,10 @@ class IndexedCsvReaderTest {
             try (csv) {
                 final CsvIndex index = csv.getIndex();
 
-                assertThat(index.getPageCount())
+                assertThat(index.pages().size())
                     .isEqualTo(3);
 
-                assertThat(index.getRecordCount())
+                assertThat(index.recordCount())
                     .isEqualTo(5L);
 
                 assertThat(csv.readPage(0))

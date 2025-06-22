@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import de.siegmar.fastcsv.util.Limits;
+import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
@@ -50,7 +50,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final char quoteCharacter;
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
-    private final boolean acceptCharsAfterQuotes;
+    private final boolean allowExtraCharsAfterClosingQuote;
     private final int pageSize;
     private final RandomAccessFile raf;
     private final Lock fileLock = new ReentrantLock();
@@ -62,24 +62,24 @@ public final class IndexedCsvReader<T> implements Closeable {
     IndexedCsvReader(final Path file, final Charset defaultCharset,
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
-                     final boolean acceptCharsAfterQuotes,
+                     final boolean allowExtraCharsAfterClosingQuote,
                      final int maxBufferSize,
                      final int pageSize,
-                     final CsvCallbackHandler<T> csvRecordHandler, final CsvIndex csvIndex,
+                     final CsvCallbackHandler<T> csvRecordHandler,
+                     @Nullable final CsvIndex csvIndex,
                      final StatusListener statusListener)
         throws IOException {
 
-        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ"
-                + " (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)",
-            fieldSeparator, quoteCharacter, commentCharacter);
+        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () ->
+            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+            fieldSeparator, quoteCharacter, commentCharacter));
 
         this.file = file;
         this.fieldSeparator = fieldSeparator;
         this.quoteCharacter = quoteCharacter;
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
-        this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+        this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.pageSize = pageSize;
         this.csvRecordHandler = csvRecordHandler;
 
@@ -104,8 +104,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         }
 
         raf = new RandomAccessFile(file.toFile(), "r");
-        csvParser = new CsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            acceptCharsAfterQuotes, csvRecordHandler, maxBufferSize,
+        csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
+            allowExtraCharsAfterClosingQuote, csvRecordHandler, maxBufferSize,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
@@ -132,17 +132,17 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("commentCharacter=" + commentCharacter)
             .toString();
         final var actualSignature = new StringJoiner(", ")
-            .add("bomHeaderLength=" + csvIndex.getBomHeaderLength())
-            .add("fileSize=" + csvIndex.getFileSize())
-            .add("fieldSeparator=" + csvIndex.getFieldSeparator())
-            .add("quoteCharacter=" + csvIndex.getQuoteCharacter())
-            .add("commentStrategy=" + csvIndex.getCommentStrategy())
-            .add("commentCharacter=" + csvIndex.getCommentCharacter())
+            .add("bomHeaderLength=" + csvIndex.bomHeaderLength())
+            .add("fileSize=" + csvIndex.fileSize())
+            .add("fieldSeparator=" + csvIndex.fieldSeparator())
+            .add("quoteCharacter=" + csvIndex.quoteCharacter())
+            .add("commentStrategy=" + csvIndex.commentStrategy())
+            .add("commentCharacter=" + csvIndex.commentCharacter())
             .toString();
 
-        Preconditions.checkArgument(expectedSignature.equals(actualSignature),
-            "Index does not match! Expected: %s; Actual: %s",
-            expectedSignature, actualSignature);
+        Preconditions.checkArgument(expectedSignature.equals(actualSignature), () ->
+            "Index does not match! Expected: %s; Actual: %s".formatted(
+            expectedSignature, actualSignature));
 
         return csvIndex;
     }
@@ -201,22 +201,21 @@ public final class IndexedCsvReader<T> implements Closeable {
     /// @throws IndexOutOfBoundsException if the file does not contain the specified page
     public List<T> readPage(final int page) throws IOException {
         Preconditions.checkArgument(page >= 0, "page must be >= 0");
-        return readPage(csvIndex.getPage(page));
+        return readPage(csvIndex.pages().get(page));
     }
 
     @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
+        fileLock.lock();
         try {
-            fileLock.lock();
-
-            raf.seek(page.getOffset());
-            csvParser.reset(page.getStartingLineNumber() - 1);
+            raf.seek(page.offset());
+            csvParser.reset(page.startingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
-                final RecordWrapper<T> rec = csvRecordHandler.buildRecord();
+                final T rec = csvRecordHandler.buildRecord();
                 if (rec != null) {
-                    ret.add(rec.getWrappedRecord());
+                    ret.add(rec);
                 }
             }
         } catch (final IOException e) {
@@ -232,8 +231,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private String buildExceptionMessage() {
         return (csvParser.getStartingLineNumber() == 1)
             ? "Exception when reading first record"
-            : String.format("Exception when reading record that started in line %d",
-            csvParser.getStartingLineNumber());
+            : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
     @Override
@@ -250,7 +248,7 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("quoteCharacter=" + quoteCharacter)
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
-            .add("acceptCharsAfterQuotes=" + acceptCharsAfterQuotes)
+            .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
             .add("pageSize=" + pageSize)
             .add("index=" + csvIndex)
             .toString();
@@ -263,7 +261,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     /// - Quote character: `"` (double quotes)
     /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
-    /// - Accept characters after quotes: `true`
+    /// - Allow extra characters after closing quotes: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
     /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
@@ -281,12 +279,17 @@ public final class IndexedCsvReader<T> implements Closeable {
         private char quoteCharacter = '"';
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
-        private boolean acceptCharsAfterQuotes = true;
+        private boolean allowExtraCharsAfterClosingQuote;
+
+        @Nullable
         private StatusListener statusListener;
+
         private int pageSize = DEFAULT_PAGE_SIZE;
+
+        @Nullable
         private CsvIndex csvIndex;
-        @SuppressWarnings("removal")
-        private int maxBufferSize = Math.min(DEFAULT_MAX_BUFFER_SIZE, Limits.MAX_FIELD_SIZE);
+
+        private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
         private IndexedCsvReaderBuilder() {
         }
@@ -346,10 +349,11 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///
         /// If this is set to `false`, a [CsvParseException] will be thrown.
         ///
-        /// @param acceptCharsAfterQuotes allow characters after quotes (default: `true`).
+        /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        public IndexedCsvReaderBuilder acceptCharsAfterQuotes(final boolean acceptCharsAfterQuotes) {
-            this.acceptCharsAfterQuotes = acceptCharsAfterQuotes;
+        public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(
+            final boolean allowExtraCharsAfterClosingQuote) {
+            this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
             return this;
         }
 
@@ -377,8 +381,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @param pageSize the maximum size of pages.
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder pageSize(final int pageSize) {
-            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE,
-                "pageSize must be >= %d", MIN_PAGE_SIZE);
+            Preconditions.checkArgument(pageSize >= MIN_PAGE_SIZE, () ->
+                "pageSize must be >= %d".formatted(MIN_PAGE_SIZE));
             this.pageSize = pageSize;
             return this;
         }
@@ -416,9 +420,9 @@ public final class IndexedCsvReader<T> implements Closeable {
         private static void checkControlCharacter(final char controlChar) {
             Preconditions.checkArgument(!Util.isNewline(controlChar),
                 "A newline character must not be used as control character");
-            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII,
-                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)",
-                controlChar, (int) controlChar);
+            Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII, () ->
+                "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)".formatted(
+                controlChar, (int) controlChar));
         }
 
         /// Constructs a new [IndexedCsvReader] of [CsvRecord] for the specified path using UTF-8
@@ -487,7 +491,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, acceptCharsAfterQuotes, maxBufferSize, pageSize, callbackHandler,
+                commentCharacter, allowExtraCharsAfterClosingQuote, maxBufferSize, pageSize, callbackHandler,
                 csvIndex, sl);
         }
 
@@ -498,7 +502,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private final StatusListener statusListener;
         private final List<CsvIndex.CsvPage> pageOffsets = new ArrayList<>();
         private final AtomicLong recordCounter = new AtomicLong();
-        private long startingLineNumber = 1;
+        private final AtomicLong startingLineNumber = new AtomicLong(1);
 
         private ScannerListener(final StatusListener statusListener) {
             this.statusListener = statusListener;
@@ -512,19 +516,19 @@ public final class IndexedCsvReader<T> implements Closeable {
         @Override
         public void startOffset(final long offset) {
             if (recordCounter.getAndIncrement() % pageSize == 0) {
-                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber));
+                pageOffsets.add(new CsvIndex.CsvPage(offset, startingLineNumber.get()));
             }
         }
 
         @Override
         public void onReadRecord() {
-            startingLineNumber++;
+            startingLineNumber.incrementAndGet();
             statusListener.onReadRecord();
         }
 
         @Override
         public void additionalLine() {
-            startingLineNumber++;
+            startingLineNumber.incrementAndGet();
         }
 
     }

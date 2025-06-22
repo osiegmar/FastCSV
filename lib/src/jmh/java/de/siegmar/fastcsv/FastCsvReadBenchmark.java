@@ -27,6 +27,7 @@ public class FastCsvReadBenchmark {
         @Setup
         public void setup() {
             it = CsvReader.builder()
+                .allowMissingFields(true)
                 .ofCsvRecord(new InfiniteDataReader(CsvConstants.DATA))
                 .iterator();
         }

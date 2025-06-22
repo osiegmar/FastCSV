@@ -26,13 +26,13 @@ public interface QuoteStrategy {
         return false;
     }
 
-    /// Determine if a data containing field should be quoted.
+    /// Determine if a data containing field (neither `null` nor empty) should be quoted.
     ///
     /// @param lineNo   the line number (1-based)
     /// @param fieldIdx the field index (0-based)
-    /// @param value    the field value
+    /// @param value    the field value; never `null`
     /// @return `true`, if a data containing field should be quoted
-    default boolean quoteNonEmpty(final int lineNo, final int fieldIdx, final String value) {
+    default boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
         return false;
     }
 

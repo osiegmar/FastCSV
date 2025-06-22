@@ -37,4 +37,12 @@ public final class Util {
         return character == CR || character == LF;
     }
 
+    /// Checks if the given string contains any newline characters.
+    ///
+    /// @param str the string to check for newlines
+    /// @return `true` if the string contains either [#CR] or [#LF], `false` otherwise
+    public static boolean containsNewline(final String str) {
+        return str.indexOf(CR) >= 0 || str.indexOf(LF) >= 0;
+    }
+
 }

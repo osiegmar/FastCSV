@@ -1,10 +1,13 @@
 @file:Suppress("StringLiteralDuplication")
+import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.kotlin.dsl.errorprone
 
 plugins {
     id("fastcsv.java-conventions")
     `java-library`
     `maven-publish`
     jacoco
+    alias(libs.plugins.errorprone)
     alias(libs.plugins.jmh)
     alias(libs.plugins.pitest)
     alias(libs.plugins.animalsniffer)
@@ -13,7 +16,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "3.7.0"
+version = "4.0.0-SNAPSHOT"
 
 project.base.archivesName = "fastcsv"
 
@@ -22,9 +25,27 @@ java {
     withSourcesJar()
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    if (name == "compileJmhJava") {
+        options.errorprone.isEnabled.set(false)
+    } else if (name == "compileTestJava" || name == "compileIntTestJava") {
+        options.errorprone.disable("NullAway")
+    } else {
+        options.errorprone {
+            option("NullAway:AnnotatedPackages", "de.siegmar.fastcsv")
+        }
+    }
+}
+
 tasks.compileJava {
-    options.release.set(11)
+    options.release.set(17)
     options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
+    options.errorprone.error("NullAway")
+}
+
+// enable parameter names for tests with @ParameterizedTest
+tasks.compileTestJava {
+    options.compilerArgs.add("-parameters")
 }
 
 tasks.javadoc {
@@ -54,6 +75,9 @@ configurations[intTest.implementationConfigurationName].extendsFrom(configuratio
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
 dependencies {
+    errorprone(libs.errorprone)
+    errorprone(libs.nullaway)
+
     commonImplementation(libs.assertj.core)
 
     testImplementation(libs.junit.jupiter)
@@ -89,7 +113,9 @@ tasks.check {
 }
 
 pitest {
-    junit5PluginVersion = "1.2.1"
+    // Ensure Java 24 compatibility
+    pitestVersion = "1.19.5"
+    junit5PluginVersion = "1.2.2"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
 }
@@ -133,9 +159,15 @@ tasks.jmh {
 tasks.jar {
     manifest {
         attributes(
+            "SPDX-License-Identifier" to "MIT",
             "Bundle-SymbolicName" to "de.siegmar.fastcsv",
             "-exportcontents" to "de.siegmar.fastcsv.reader.*, de.siegmar.fastcsv.writer.*"
         )
+    }
+    into("META-INF") {
+        from(rootDir) {
+            include("LICENSE")
+        }
     }
 }
 
@@ -205,6 +237,18 @@ jreleaser {
                     active.set(org.jreleaser.model.Active.ALWAYS)
                     url.set("https://central.sonatype.com/api/v1/publisher")
                     stagingRepositories.add("build/staging-deploy")
+                }
+            }
+        }
+    }
+    release {
+        github {
+            changelog {
+                external.set(file("../CHANGELOG.md"))
+                preset.set("conventional-commits")
+                formatted.set(org.jreleaser.model.Active.ALWAYS)
+                append {
+                    enabled.set(true)
                 }
             }
         }

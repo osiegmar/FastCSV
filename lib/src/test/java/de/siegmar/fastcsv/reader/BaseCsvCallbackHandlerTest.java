@@ -15,8 +15,8 @@ class BaseCsvCallbackHandlerTest {
     void onlyAbstract() {
         final var handler = new AbstractBaseCsvCallbackHandler<String>() {
             @Override
-            protected RecordWrapper<String> buildRecord() {
-                return wrapRecord("ignored");
+            protected String buildRecord() {
+                return "ignored";
             }
         };
 
@@ -42,24 +42,21 @@ class BaseCsvCallbackHandlerTest {
 
         assertThat(it.next()).containsExactly("foo");
         assertThat(handler.getStartingLineNumber()).isOne();
-        assertThat(handler.isComment()).isTrue();
-        assertThat(handler.isEmptyLine()).isFalse();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.COMMENT);
         assertThat(handler.getFieldCount()).isOne();
 
         assertThat(it.next()).containsExactly("");
         assertThat(handler.getStartingLineNumber()).isEqualTo(2);
-        assertThat(handler.isComment()).isFalse();
-        assertThat(handler.isEmptyLine()).isTrue();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.EMPTY);
         assertThat(handler.getFieldCount()).isOne();
 
         assertThat(it.next()).containsExactly("bar");
         assertThat(handler.getStartingLineNumber()).isEqualTo(3);
-        assertThat(handler.isComment()).isFalse();
-        assertThat(handler.isEmptyLine()).isFalse();
+        assertThat(handler.getRecordType()).isEqualTo(RecordType.DATA);
         assertThat(handler.getFieldCount()).isOne();
     }
 
-    private static class SimpleFieldCollector extends AbstractBaseCsvCallbackHandler<List<String>> {
+    private static final class SimpleFieldCollector extends AbstractBaseCsvCallbackHandler<List<String>> {
 
         private final List<String> fields = new ArrayList<>();
 
@@ -80,8 +77,13 @@ class BaseCsvCallbackHandlerTest {
         }
 
         @Override
-        public RecordWrapper<List<String>> buildRecord() {
-            return wrapRecord(List.copyOf(fields));
+        protected void handleEmpty() {
+            fields.add("");
+        }
+
+        @Override
+        public List<String> buildRecord() {
+            return List.copyOf(fields);
         }
 
     }

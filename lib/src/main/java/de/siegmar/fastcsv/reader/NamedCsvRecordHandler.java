@@ -1,8 +1,12 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import de.siegmar.fastcsv.util.Nullable;
 
 /// A callback handler that returns a [NamedCsvRecord] for each record.
 ///
@@ -18,80 +22,22 @@ import java.util.function.Consumer;
 public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHandler<NamedCsvRecord> {
 
     private static final String[] EMPTY_HEADER = new String[0];
+    private final boolean allowDuplicateHeaderFields;
+    private final boolean returnHeader;
+
+    @Nullable
     private String[] header;
 
-    /// Constructs a new [NamedCsvRecordHandler] with an empty header.
-    ///
-    /// @deprecated Use [#of()] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler() {
-    }
-
-    /// Constructs a new [NamedCsvRecordHandler] with the given header.
-    ///
-    /// @param header the header, must not be `null` or contain `null` elements
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler(final List<String> header) {
-        setHeader(header.toArray(new String[0]));
-    }
-
-    /// Constructs a new [NamedCsvRecordHandler] with the given header.
-    ///
-    /// @param header the header, must not be `null` or contain `null` elements
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler(final String... header) {
-        setHeader(header);
-    }
-
-    /// Constructs a new [NamedCsvRecordHandler] with the given field modifier.
-    ///
-    /// @param fieldModifier the field modifier, must not be `null`
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler(final FieldModifier fieldModifier) {
-        super(fieldModifier);
-    }
-
-    /// Constructs a new [NamedCsvRecordHandler] with the given header and field modifier.
-    ///
-    /// @param fieldModifier the field modifier, must not be `null`
-    /// @param header        the header, must not be `null` or contain `null` elements
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler(final FieldModifier fieldModifier, final List<String> header) {
-        super(fieldModifier);
-        setHeader(header.toArray(new String[0]));
-    }
-
-    /// Constructs a new [NamedCsvRecordHandler] with the given header and field modifier.
-    ///
-    /// @param fieldModifier the field modifier, must not be `null`
-    /// @param header        the header, must not be `null` or contain `null` elements
-    /// @throws NullPointerException if `null` is passed
-    /// @deprecated Use [#builder()] or [#of(Consumer)] instead.
-    @SuppressWarnings("removal")
-    @Deprecated(since = "3.6.0", forRemoval = true)
-    public NamedCsvRecordHandler(final FieldModifier fieldModifier, final String... header) {
-        super(fieldModifier);
-        setHeader(header);
-    }
-
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
-                                  final FieldModifier fieldModifier, final List<String> header) {
+                                  final FieldModifier fieldModifier,
+                                  final boolean allowDuplicateHeaderFields,
+                                  final boolean returnHeader,
+                                  @Nullable final List<String> header) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
+        this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
+        this.returnHeader = returnHeader;
         if (header != null) {
-            setHeader(header.toArray(new String[0]));
+            this.header = validateHeader(header.toArray(new String[0]));
         }
     }
 
@@ -117,7 +63,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     ///
     /// @param configurer the configuration, must not be `null`
     /// @return the new instance
-    /// @throws NullPointerException if `null` is passed
+    /// @throws NullPointerException     if `null` is passed
     /// @throws IllegalArgumentException if argument constraints are violated
     /// @see #builder()
     public static NamedCsvRecordHandler of(final Consumer<NamedCsvRecordHandlerBuilder> configurer) {
@@ -127,36 +73,80 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         return builder.build();
     }
 
-    private void setHeader(final String... header) {
-        Objects.requireNonNull(header, "header must not be null");
-        for (final String h : header) {
+    @SuppressWarnings("PMD.UseVarargs")
+    private String[] validateHeader(final String[] fields) {
+        Objects.requireNonNull(fields, "header must not be null");
+        for (final String h : fields) {
             Objects.requireNonNull(h, "header element must not be null");
         }
-        this.header = header.clone();
+
+        if (!allowDuplicateHeaderFields) {
+            checkForDuplicates(fields);
+        }
+
+        return fields;
     }
 
+    @SuppressWarnings("PMD.UseVarargs")
+    private static void checkForDuplicates(final String[] header) {
+        final var duplicateHeaders = new LinkedHashSet<String>();
+        final var seen = new HashSet<String>();
+        for (final String h : header) {
+            if (!seen.add(h)) {
+                duplicateHeaders.add(h);
+            }
+        }
+
+        if (!duplicateHeaders.isEmpty()) {
+            throw new IllegalArgumentException("Header contains duplicate fields: "
+                + duplicateHeaders);
+        }
+    }
+
+    @Nullable
     @Override
-    protected RecordWrapper<NamedCsvRecord> buildRecord() {
-        if (comment) {
-            return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), true, EMPTY_HEADER));
+    protected NamedCsvRecord buildRecord() {
+        final String[] compactFields = compactFields();
+
+        if (recordType == RecordType.COMMENT) {
+            return new NamedCsvRecord(startingLineNumber, compactFields, true, EMPTY_HEADER);
         }
 
         if (header == null) {
-            setHeader(compactFields());
-            return null;
+            header = validateHeader(compactFields);
+            if (!returnHeader) {
+                return null;
+            }
         }
 
-        return buildWrapper(new NamedCsvRecord(startingLineNumber, compactFields(), false, header));
+        return new NamedCsvRecord(startingLineNumber, compactFields, false, header);
     }
 
     /// A builder for [NamedCsvRecordHandler].
-    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+    @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class NamedCsvRecordHandlerBuilder
         extends AbstractInternalCsvCallbackHandlerBuilder<NamedCsvRecordHandlerBuilder> {
 
+        private boolean allowDuplicateHeaderFields;
+        private boolean returnHeader;
+
+        @Nullable
         private List<String> header;
 
         private NamedCsvRecordHandlerBuilder() {
+        }
+
+        /// Sets whether duplicate header fields are allowed.
+        ///
+        /// When set to `false`, an [IllegalArgumentException] is thrown if the header contains duplicate fields.
+        /// When set to `true`, duplicate fields are allowed. See [NamedCsvRecord] for details on how duplicate
+        /// headers are handled.
+        ///
+        /// @param allowDuplicateHeaderFields whether duplicate header fields are allowed (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public NamedCsvRecordHandlerBuilder allowDuplicateHeaderFields(final boolean allowDuplicateHeaderFields) {
+            this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
+            return this;
         }
 
         /// Sets a predefined header.
@@ -189,6 +179,18 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             return this;
         }
 
+        /// Sets whether the header itself should be returned as the first record.
+        ///
+        /// When enabled, the first record returned will be a [NamedCsvRecord] with the header fields as its fields
+        /// and as the header.
+        ///
+        /// @param returnHeader whether the header should be returned as the first record (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public NamedCsvRecordHandlerBuilder returnHeader(final boolean returnHeader) {
+            this.returnHeader = returnHeader;
+            return this;
+        }
+
         @Override
         protected NamedCsvRecordHandlerBuilder self() {
             return this;
@@ -200,7 +202,11 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         /// @throws IllegalArgumentException if argument constraints are violated
         ///     (see [AbstractInternalCsvCallbackHandler])
         public NamedCsvRecordHandler build() {
-            return new NamedCsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier, header);
+            if (returnHeader && header != null) {
+                throw new IllegalArgumentException("Predefined headers cannot be used with returnHeader=true");
+            }
+            return new NamedCsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier,
+                allowDuplicateHeaderFields, returnHeader, header);
         }
 
     }
