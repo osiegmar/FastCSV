@@ -35,7 +35,7 @@ public class ExampleCsvReaderWithFieldModifier {
         return FieldModifiers.TRIM.andThen(toLower);
     }
 
-    private static class CustomModifier implements FieldModifier {
+    private static final class CustomModifier implements FieldModifier {
 
         @Override
         public String modify(final long startingLineNumber, final int fieldIdx,

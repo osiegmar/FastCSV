@@ -82,7 +82,7 @@ class FieldModifierTest {
             .isInstanceOf(NullPointerException.class);
     }
 
-    private static class NullFieldModifier implements FieldModifier {
+    private static final class NullFieldModifier implements FieldModifier {
         @Override
         public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,
                              final String field) {

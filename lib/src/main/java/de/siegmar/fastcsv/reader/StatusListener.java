@@ -11,7 +11,7 @@ public interface StatusListener {
     /// Called on initialization.
     ///
     /// @param fileSize the total file size.
-    default void onInit(long fileSize) {
+    default void onInit(final long fileSize) {
     }
 
     /// Called when a new record has been read.
@@ -21,7 +21,7 @@ public interface StatusListener {
     /// Called when a new read operation has been performend.
     ///
     /// @param bytes number of bytes read.
-    default void onReadBytes(int bytes) {
+    default void onReadBytes(final int bytes) {
     }
 
     /// Called when the indexing finished successfully (without an exception).
@@ -31,7 +31,7 @@ public interface StatusListener {
     /// Called when there was an error while indexing.
     ///
     /// @param throwable the exception thrown.
-    default void onError(Throwable throwable) {
+    default void onError(final Throwable throwable) {
     }
 
 }

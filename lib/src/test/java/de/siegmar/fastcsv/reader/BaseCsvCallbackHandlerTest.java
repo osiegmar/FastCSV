@@ -56,7 +56,7 @@ class BaseCsvCallbackHandlerTest {
         assertThat(handler.getFieldCount()).isOne();
     }
 
-    private static class SimpleFieldCollector extends AbstractBaseCsvCallbackHandler<List<String>> {
+    private static final class SimpleFieldCollector extends AbstractBaseCsvCallbackHandler<List<String>> {
 
         private final List<String> fields = new ArrayList<>();
 

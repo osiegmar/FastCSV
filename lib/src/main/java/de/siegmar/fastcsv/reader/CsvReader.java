@@ -294,7 +294,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             : "Exception when reading record that started in line %d".formatted(csvParser.getStartingLineNumber());
     }
 
-    private class CsvSpliterator implements Spliterator<T> {
+    private final class CsvSpliterator implements Spliterator<T> {
 
         @Override
         public boolean tryAdvance(final Consumer<? super T> action) {
@@ -324,7 +324,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     }
 
-    private class CsvRecordIterator implements CloseableIterator<T> {
+    private final class CsvRecordIterator implements CloseableIterator<T> {
 
         @Nullable
         private T fetchedRecord;
