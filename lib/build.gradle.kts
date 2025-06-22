@@ -12,11 +12,7 @@ plugins {
     alias(libs.plugins.pitest)
     alias(libs.plugins.animalsniffer)
     alias(libs.plugins.bnd)
-    alias(libs.plugins.jreleaser)
 }
-
-group = "de.siegmar"
-version = "4.0.0"
 
 project.base.archivesName = "fastcsv"
 
@@ -210,47 +206,6 @@ publishing {
         maven {
             name = "staging"
             url = uri(layout.buildDirectory.dir("staging-deploy"))
-        }
-    }
-}
-
-jreleaser {
-    project {
-        gitRootSearch.set(true)
-        name.set("FastCSV")
-        description.set("Lightning-fast, dependency-free CSV library that conforms to RFC standards.")
-        authors.set(listOf("Oliver Siegmar"))
-        license.set("MIT")
-        links {
-            homepage.set("https://fastcsv.org")
-            license.set("https://opensource.org/licenses/MIT")
-        }
-    }
-    signing {
-        active.set(org.jreleaser.model.Active.ALWAYS)
-        armored.set(true)
-    }
-    deploy {
-        maven {
-            mavenCentral {
-                create("sonatype") {
-                    active.set(org.jreleaser.model.Active.ALWAYS)
-                    url.set("https://central.sonatype.com/api/v1/publisher")
-                    stagingRepositories.add("build/staging-deploy")
-                }
-            }
-        }
-    }
-    release {
-        github {
-            changelog {
-                external.set(file("../CHANGELOG.md"))
-                preset.set("conventional-commits")
-                formatted.set(org.jreleaser.model.Active.ALWAYS)
-                append {
-                    enabled.set(true)
-                }
-            }
         }
     }
 }
