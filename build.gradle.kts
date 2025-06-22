@@ -6,6 +6,11 @@ plugins {
 group = "de.siegmar"
 version = "4.0.0"
 
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+}
+
 jreleaser {
     project {
         gitRootSearch.set(true)
@@ -28,7 +33,7 @@ jreleaser {
                 create("sonatype") {
                     active.set(org.jreleaser.model.Active.ALWAYS)
                     url.set("https://central.sonatype.com/api/v1/publisher")
-                    stagingRepositories.add("build/staging-deploy")
+                    stagingRepositories.add("lib/build/staging-deploy")
                 }
             }
         }
