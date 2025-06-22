@@ -159,6 +159,7 @@ tasks.jmh {
 tasks.jar {
     manifest {
         attributes(
+            "SPDX-License-Identifier" to "MIT",
             "Bundle-SymbolicName" to "de.siegmar.fastcsv",
             "-exportcontents" to "de.siegmar.fastcsv.reader.*, de.siegmar.fastcsv.writer.*"
         )
