@@ -6,6 +6,80 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- JRELEASER_CHANGELOG_APPEND - Do not remove or modify this section -->
+## [v4.0.0] - 2025-06-22
+
+## 🚀 Features
+- 18688cc add returnHeader to NamedCsvRecordHandler to allow early-access to the header #147, closes #147
+- e006347 add `ofSingleCsvRecord` methods to `CsvReader` for convenience
+- 60774d3 🚨 enforce unique headers by default
+- bd9991f introduce relaxed parsing mode for CsvReader
+
+## 🐛 Fixes
+- 76dff29 don't call peek line predicate with empty string if reached EOF
+
+## 🔄️ Changes
+- a565316 add missing finals
+- 57da808 optimize performance of relaxed parser
+- 77b986c change skipLine method to void and handle EOF exceptions
+- c815d3e simplify BOM handling in CsvReader #149, closes #149
+- 52fe46d add class retention to allow incremental builds
+- cef4a2b later buffer expansion
+- 47cca27 refactor EOF handling when peeking lines
+- bba1412 introduce Nullable annotation
+- 98aeaab 🚨 return Optional for throwable in status listener
+- 1130197 use errorprone
+- ef14cb7 change exception type from IllegalArgumentException to IllegalStateException for relaxed mode validation
+- b1b5f23 simplify quoted parsing logic in RelaxedCsvParser
+- 08194a4 remove dead code
+- ced8dd3 introduce LookaheadReader to improve the performance of RelaxedCsvParser
+- 1bc5f26 🚨 convert FieldModifiers class to enum and move modify method to FieldModifier interface
+- d1e5943 remove unnecessary 'this' keyword in variable assignments
+- cb5a999 🚨 rename quoteNonEmpty method to quoteValue and made quoteStrategy non-nullable
+- 5fbfe91 update method name for allowing duplicate header fields in NamedCsvRecordHandler
+- 5980793 simplify materializeField logic and adjust return flow
+- 056c865 🚨 CSV callback handling and record type logic
+- 85bbfdf 🚨 Refactor field count handling in CsvReader
+- 4107892 simplify validation error messages and add a new test
+- dd00979 extract csv parser interface to allow multiple implementations
+- 3ac07d1 🚨 strict handling of characters after closing quote, by default
+- 9d8511b seal AbstractInternalCsvCallbackHandler for internal use (as documented before)
+- a33384e use unnamed variables (_) in lambdas to simplify tests
+- 2babea6 🚨 disable automatic buffer flushing for writer use
+- 403c2f6 use skipNBytes for skipping a detected BOM
+- 0d05add 🚨 removed deprecated code (Limits and SimpleFieldModifier)
+- 9e620a3 corrected method name in error message
+- 006380c 🚨 remove the RecordWrapper
+- 430adef add @Serial annotation
+- 724bc38 🚨 changed implementation of CsvIndex and CsvPage to Java records
+- 3e11bfc use formatted Strings
+- 01f5cb3 use switch expression
+
+## 🧪 Tests
+- 6e43efb add benchmark for relaxed parser
+- 150b68e add missing tests
+
+## 🧰 Tasks
+- 3e3edcb update dependencies for test and build; refactor internal code to keep SpotBugs happy
+- 0a0136c prepare (clean) upgrading.md for a new major release
+- ba1a894 bump version to 4.0.0-SNAPSHOT
+
+## 🛠  Build
+- f990d39 update resolver plugin
+- 03f4a49 bump version to 4.0.0
+- f14dab0 updated Gradle
+- 0d97d92 updated build/test dependencies
+- 2cd4ac1 add SPDX-License-Identifier to MANIFEST.MF
+- a3aafac update pitest version for Java 24 compatibility
+- 541b39e include LICENSE file in META-INF directory for use in dependent libraries
+- d14aef6 enable parameter names for tests with @ParameterizedTest
+- 7584ab9 update PMD and remove unnecessary suppressions
+- d8fadf0 🚨 require Java 17 / Android 34
+- 280ab79 let JReleaser manage the CHANGELOG.md
+
+## 📝 Documentation
+- c248a38 document array wrapping usage
+- f10e7ea update copyright year in LICENSE file
+- e5fff5a align with Java 17
 
 ## [3.7.0] - 2025-05-11
 ### Added
@@ -164,7 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v3.7.0...HEAD
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v4.0.0...HEAD
+[v4.0.0]: https://github.com/osiegmar/FastCSV/compare/v3.7.0...v4.0.0
 [3.7.0]: https://github.com/osiegmar/FastCSV/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/osiegmar/FastCSV/compare/v3.5.0...v3.6.0
 [3.5.0]: https://github.com/osiegmar/FastCSV/compare/v3.4.0...v3.5.0
