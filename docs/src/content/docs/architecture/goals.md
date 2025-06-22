@@ -17,7 +17,7 @@ It achieves high performance without compromising on CSV specification complianc
 
 FastCSV is designed to be lightweight. It has no external dependencies and ensures a small memory footprint.
 
-The Jar-File of version 3.2.0 has a size of only barely above 64 KiB.
+The Jar-File of version 4.0.0 has a size of only 90 KiB.
 
 ## Compliant
 
