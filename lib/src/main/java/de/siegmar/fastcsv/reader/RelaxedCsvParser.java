@@ -120,7 +120,7 @@ final class RelaxedCsvParser implements CsvParser {
             return false;
         }
         if (ch == CR) {
-            reader.consumeIf(LF);
+            reader.consumeLF();
             callbackHandler.setEmpty();
             return true;
         }
@@ -139,7 +139,8 @@ final class RelaxedCsvParser implements CsvParser {
             }
         } while ((ch = reader.read()) != EOF);
 
-        materializeField(false);
+        callbackHandler.addField(currentField, 0, currentFieldIndex, false);
+        currentFieldIndex = 0;
         return true;
     }
 
@@ -147,22 +148,31 @@ final class RelaxedCsvParser implements CsvParser {
         "checkstyle:ReturnCount",
         "checkstyle:FinalParameters",
         "checkstyle:ParameterAssignment",
+        "checkstyle:NPathComplexity",
+        "checkstyle:BooleanExpressionComplexity",
         "PMD.AvoidReassigningParameters"
     })
     private boolean parseUnquoted(int ch) throws IOException {
+        boolean endOfRecord = true;
+
         do {
+            // fast-forward
+            while (currentFieldIndex < currentField.length && reader.len > reader.start
+                && ch != CR && ch != LF && ch != fsep && ch != qChar) {
+                currentField[currentFieldIndex++] = (char) ch;
+                ch = reader.buffer[reader.start++];
+            }
+
             if (ch == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
-                materializeField(false);
-                return false;
+                endOfRecord = false;
+                break;
             }
             if (ch == CR) {
-                reader.consumeIf(LF);
-                materializeField(false);
-                return true;
+                reader.consumeLF();
+                break;
             }
             if (ch == LF) {
-                materializeField(false);
-                return true;
+                break;
             }
             if (ch == qChar && trimWhitespacesAroundQuotes && currentFieldHasOnlyWhitespace()) {
                 currentFieldIndex = 0;
@@ -172,8 +182,9 @@ final class RelaxedCsvParser implements CsvParser {
             appendChar(ch);
         } while ((ch = reader.read()) != EOF);
 
-        materializeField(false);
-        return true;
+        callbackHandler.addField(currentField, 0, currentFieldIndex, false);
+        currentFieldIndex = 0;
+        return endOfRecord;
     }
 
     private boolean currentFieldHasOnlyWhitespace() {
@@ -185,37 +196,40 @@ final class RelaxedCsvParser implements CsvParser {
         return true;
     }
 
-    @SuppressWarnings({"checkstyle:NPathComplexity", "checkstyle:ReturnCount", "PMD.AssignmentInOperand"})
+    @SuppressWarnings({
+        "checkstyle:NPathComplexity",
+        "checkstyle:ReturnCount",
+        "checkstyle:BooleanExpressionComplexity",
+        "PMD.AssignmentInOperand"
+    })
     private boolean parseQuoted() throws IOException {
+        boolean endOfRecord = true;
+
         int ch;
-        while ((ch = reader.read()) != EOF) {
-            if (ch == CR) {
-                appendChar(ch);
-                if (reader.consumeIf(LF)) {
-                    appendChar(LF);
-                }
-                lines++;
-            } else if (ch == LF) {
-                appendChar(ch);
-                lines++;
-            } else if (ch == qChar && (ch = reader.read()) != qChar) {
+        OUTER: while ((ch = reader.read()) != EOF) {
+            // fast-forward
+            while (currentFieldIndex < currentField.length && reader.len > reader.start
+                && ch != CR && ch != LF && ch != qChar) {
+                currentField[currentFieldIndex++] = (char) ch;
+                ch = reader.buffer[reader.start++];
+            }
+
+            if (ch == qChar && (ch = reader.read()) != qChar) {
                 // closing quote
                 for (; ch != EOF; ch = reader.read()) {
                     if (ch == CR) {
                         // CR right after closing quote
-                        reader.consumeIf(LF);
-                        materializeField(true);
-                        return true;
+                        reader.consumeLF();
+                        break OUTER;
                     }
                     if (ch == LF) {
                         // LF right after closing quote
-                        materializeField(true);
-                        return true;
+                        break OUTER;
                     }
                     if (ch == fsep && (fsepRemainder == null || reader.consumeIf(fsepRemainder))) {
                         // field separator after closing quote
-                        materializeField(true);
-                        return false;
+                        endOfRecord = false;
+                        break OUTER;
                     }
                     if (!trimWhitespacesAroundQuotes || ch > SPACE) {
                         throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
@@ -223,16 +237,23 @@ final class RelaxedCsvParser implements CsvParser {
                     }
                 }
 
-                materializeField(true);
-                return true;
-            } else {
-                appendChar(ch);
+                break;
+            }
+
+            appendChar(ch);
+            if (ch == CR) {
+                if (reader.consumeLF()) {
+                    appendChar(LF);
+                }
+                lines++;
+            } else if (ch == LF) {
+                lines++;
             }
         }
 
-        // EOF before closing quote
-        materializeField(true);
-        return true;
+        callbackHandler.addField(currentField, 0, currentFieldIndex, true);
+        currentFieldIndex = 0;
+        return endOfRecord;
     }
 
     @SuppressWarnings("PMD.AssignmentInOperand")
@@ -240,7 +261,7 @@ final class RelaxedCsvParser implements CsvParser {
         int ch;
         while ((ch = reader.read()) != EOF && ch != LF) {
             if (ch == CR) {
-                reader.consumeIf(LF);
+                reader.consumeLF();
                 break;
             }
             appendChar(ch);
@@ -268,11 +289,6 @@ final class RelaxedCsvParser implements CsvParser {
         currentField[currentFieldIndex++] = (char) ch;
     }
 
-    private void materializeField(final boolean quoted) {
-        callbackHandler.addField(currentField, 0, currentFieldIndex, quoted);
-        currentFieldIndex = 0;
-    }
-
     @Override
     public String peekLine() throws IOException {
         return reader.peekLine();
@@ -293,7 +309,7 @@ final class RelaxedCsvParser implements CsvParser {
 
         do {
             if (c == CR) {
-                reader.consumeIf(LF);
+                reader.consumeLF();
                 startingLineNumber++;
                 break;
             }
@@ -338,9 +354,9 @@ final class RelaxedCsvParser implements CsvParser {
             return start >= len ? -1 : buffer[start++];
         }
 
-        boolean consumeIf(final char c) throws IOException {
+        boolean consumeLF() throws IOException {
             ensureBuffered(1);
-            if (start >= len || buffer[start] != c) {
+            if (start >= len || buffer[start] != LF) {
                 return false;
             }
             start++;
