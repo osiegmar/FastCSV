@@ -1,0 +1,22 @@
+---
+title: Reading null values
+---
+
+import SourceExample from '../../../../components/SourceExample.astro';
+
+The concept of **null values** is not part of the CSV standard (per [RFC 4180](https://datatracker.ietf.org/doc/html/rfc4180)).
+
+In some situations, however, it is necessary to interpret certain fields as null values and differentiate them from empty fields.
+One common example is database imports and exports, where the differentiation between null and empty fields is often required.
+
+A core principle of FastCSV is to provide a null-free API, meaning that no public function ever returns null.
+This design choice helps prevent `NullPointerException` and makes user code more robust.
+
+This feature comes with a trade-off: if you absolutely need null values, you will have to implement a workaround.
+
+## Example
+
+The following example demonstrates how to interpret unquoted empty fields as null values by using a custom `FieldModifier`
+that carries the information of `null` in a special marker String value.
+
+<SourceExample filename="ExampleNamedCsvReaderWithNullFields.java"/>
