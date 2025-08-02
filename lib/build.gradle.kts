@@ -48,6 +48,13 @@ tasks.javadoc {
     options.jFlags = listOf("-Duser.language=en", "-Duser.country=US")
 }
 
+// Workaround for Gradle 9 support of Bnd https://github.com/bndtools/bnd/issues/6346
+tasks.jar {
+    bundle {
+        properties.put("project.group", provider { project.group })
+    }
+}
+
 sourceSets {
     create("common") {
         compileClasspath += sourceSets.main.get().output
