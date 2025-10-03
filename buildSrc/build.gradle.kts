@@ -3,8 +3,9 @@ plugins {
 }
 
 kotlin {
-    // Kotlin does not yet support 25 JDK target
-    jvmToolchain(24)
+    // Kotlin does not yet support 25 JDK target,
+    // OSS-Fuzz requires JDK 17
+    jvmToolchain(17)
 }
 
 repositories {
