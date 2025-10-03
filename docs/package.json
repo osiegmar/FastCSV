@@ -10,10 +10,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.35.2",
-    "astro": "^5.13.5",
-    "sharp": "^0.34.3",
-    "starlight-links-validator": "^0.17.2"
+    "@astrojs/starlight": "^0.36.0",
+    "astro": "^5.14.1",
+    "sharp": "^0.34.4",
+    "starlight-links-validator": "^0.18.0"
   },
   "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b",
   "pnpm": {
