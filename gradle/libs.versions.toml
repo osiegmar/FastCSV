@@ -1,5 +1,5 @@
 [libraries]
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.13.1" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version = "6.0.0" }
 assertj-core = { module = "org.assertj:assertj-core", version = "3.27.3" }
 fastdoubleparser = { module = "ch.randelshofer:fastdoubleparser", version = "2.0.1" }
 gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0.12.0" }
