@@ -56,13 +56,13 @@ tasks.jar {
 }
 
 sourceSets {
-    create("common") {
+    create("common", Action<SourceSet> {
         compileClasspath += sourceSets.main.get().output
-    }
-    create("intTest") {
+    })
+    create("intTest", Action<SourceSet> {
         compileClasspath += sourceSets["common"].output
         runtimeClasspath += sourceSets["common"].output
-    }
+    })
     test {
         compileClasspath += sourceSets["common"].output
         runtimeClasspath += sourceSets["common"].output
@@ -116,9 +116,9 @@ tasks.check {
 }
 
 pitest {
-    // Ensure Java 24 compatibility
-    pitestVersion = "1.19.5"
-    junit5PluginVersion = "1.2.2"
+    // Ensure Java 25 compatibility
+    pitestVersion = "1.20.3"
+    junit5PluginVersion = "1.2.3"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
 }
@@ -176,6 +176,9 @@ tasks.jar {
 
 animalsniffer {
     sourceSets = listOf(project.sourceSets.main.get())
+
+    // fixes warning: The ReportingExtension.file(String) method has been deprecated
+    reportsDir = file(layout.buildDirectory.dir("reports/animalsniffer"))
 }
 
 publishing {
