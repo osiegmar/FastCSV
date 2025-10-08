@@ -55,7 +55,7 @@ final class StrictCsvParser implements CsvParser {
                     final int maxBufferSize,
                     final Reader reader) {
 
-        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter, commentStrategy);
 
         fsep = fieldSeparator;
         qChar = quoteCharacter;
@@ -72,7 +72,7 @@ final class StrictCsvParser implements CsvParser {
                     final CsvCallbackHandler<?> callbackHandler,
                     final String data) {
 
-        assertFields(fieldSeparator, quoteCharacter, commentCharacter);
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter, commentStrategy);
 
         fsep = fieldSeparator;
         qChar = quoteCharacter;
@@ -83,13 +83,22 @@ final class StrictCsvParser implements CsvParser {
         csvBuffer = new CsvBuffer(data);
     }
 
-    private void assertFields(final char fieldSeparator, final char quoteCharacter, final char commentCharacter) {
+    private static void assertFields(final char fieldSeparator, final char quoteCharacter,
+                              final char commentCharacter, final CommentStrategy commentStrategy) {
         Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not contain newline chars");
         Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
         Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
-        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
-            fieldSeparator, quoteCharacter, commentCharacter));
+
+        if (commentStrategy == CommentStrategy.NONE) {
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter),
+                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s)".formatted(
+                    fieldSeparator, quoteCharacter));
+        } else {
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter),
+                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+                    fieldSeparator, quoteCharacter, commentCharacter));
+
+        }
     }
 
     @SuppressWarnings("checkstyle:ReturnCount")

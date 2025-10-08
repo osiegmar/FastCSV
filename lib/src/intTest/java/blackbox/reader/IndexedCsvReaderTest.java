@@ -271,14 +271,16 @@ class IndexedCsvReaderTest {
             softly.assertThatThrownBy(() -> singlePageBuilder().fieldSeparator('"').ofCsvRecord(emptyFile))
                 .as("fieldSeparator")
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(expectedMessage, "\"", "\"", "#");
+                .hasMessage("Control characters must differ (fieldSeparator=\", quoteCharacter=\")");
 
-            softly.assertThatThrownBy(() -> singlePageBuilder().quoteCharacter('#').ofCsvRecord(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentStrategy(CommentStrategy.READ)
+                    .quoteCharacter('#').ofCsvRecord(emptyFile))
                 .as("quoteCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "#", "#");
 
-            softly.assertThatThrownBy(() -> singlePageBuilder().commentCharacter(',').ofCsvRecord(emptyFile))
+            softly.assertThatThrownBy(() -> singlePageBuilder().commentStrategy(CommentStrategy.READ)
+                    .commentCharacter(',').ofCsvRecord(emptyFile))
                 .as("commentCharacter")
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(expectedMessage, ",", "\"", ",");

@@ -106,7 +106,7 @@ class CsvReaderMultiCharFieldSeparatorTest {
             .stream().count()
         )
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=~, quoteCharacter=~, commentCharacter=#)");
+            .hasMessage("Control characters must differ (fieldSeparator=~, quoteCharacter=~)");
     }
 
     @Test

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import de.siegmar.fastcsv.reader.CloseableIterator;
@@ -72,21 +73,37 @@ abstract class AbstractCsvReaderTest {
     void dupeQuoteCharacter() {
         assertThatThrownBy(() -> crb.quoteCharacter(',').ofCsvRecord("foo"))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,, commentCharacter=#)");
+            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=,)");
     }
 
-    @Test
-    void dupeCommentCharacter() {
-        assertThatThrownBy(() -> crb.commentCharacter(',').ofCsvRecord("foo"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
+    @ParameterizedTest
+    @EnumSource(CommentStrategy.class)
+    void dupeCommentCharacter(final CommentStrategy commentStrategy) {
+        crb.commentStrategy(commentStrategy).commentCharacter(',');
+
+        if (commentStrategy == CommentStrategy.NONE) {
+            assertThatCode(() -> crb.ofCsvRecord("foo"))
+                .doesNotThrowAnyException();
+        } else {
+            assertThatThrownBy(() -> crb.ofCsvRecord("foo"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=,)");
+        }
     }
 
-    @Test
-    void dupeCommentQuoteCharacter() {
-        assertThatThrownBy(() -> crb.commentCharacter('"').ofCsvRecord("foo"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Control characters must differ (fieldSeparator=,, quoteCharacter=\", commentCharacter=\")");
+    @ParameterizedTest
+    @EnumSource(CommentStrategy.class)
+    void dupeCommentQuoteCharacter(final CommentStrategy commentStrategy) {
+        crb.commentStrategy(commentStrategy).commentCharacter('"');
+        if (commentStrategy == CommentStrategy.NONE) {
+            assertThatCode(() -> crb.ofCsvRecord("foo"))
+                .doesNotThrowAnyException();
+        } else {
+            assertThatThrownBy(() -> crb.ofCsvRecord("foo"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Control characters must differ "
+                    + "(fieldSeparator=,, quoteCharacter=\", commentCharacter=\")");
+        }
     }
 
     @Test

@@ -70,9 +70,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                      final StatusListener statusListener)
         throws IOException {
 
-        Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () ->
-            "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
-            fieldSeparator, quoteCharacter, commentCharacter));
+        assertFields(fieldSeparator, quoteCharacter, commentCharacter, commentStrategy);
 
         this.file = file;
         this.fieldSeparator = fieldSeparator;
@@ -107,6 +105,19 @@ public final class IndexedCsvReader<T> implements Closeable {
         csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
             allowExtraCharsAfterClosingQuote, csvRecordHandler, maxBufferSize,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
+    }
+
+    private static void assertFields(final char fieldSeparator, final char quoteCharacter,
+                                     final char commentCharacter, final CommentStrategy commentStrategy) {
+        if (commentStrategy == CommentStrategy.NONE) {
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter), () ->
+                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s)".formatted(
+                    fieldSeparator, quoteCharacter));
+        } else {
+            Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter, commentCharacter), () ->
+                "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
+                    fieldSeparator, quoteCharacter, commentCharacter));
+        }
     }
 
     private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
