@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- JRELEASER_CHANGELOG_APPEND - Do not remove or modify this section -->
+## [v4.1.0] - 2025-10-09
+## Release v4.1.0
+
+## 🚀 Features
+- 960d8c8 ignore same comment character if comments are ignored
+
 ## [v4.0.0] - 2025-06-22
 
 ## 🚀 Features
