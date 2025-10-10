@@ -96,9 +96,8 @@ export default defineConfig({
                 {
                     tag: 'script',
                     attrs: {
-                        src: 'https://plausible.io/js/script.js',
-                        'data-domain': 'fastcsv.org',
-                        defer: true,
+                        src: 'https://plausible.io/js/pa-Qud0x2AyRvZLwCR2FLK77.js',
+                        async: true
                     },
                 },
             ],
