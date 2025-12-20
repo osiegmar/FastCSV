@@ -1,0 +1,22 @@
+---
+title: Reading as String Arrays
+---
+
+import SourceExample from '../../../../components/SourceExample.astro';
+
+The typical way to read CSV data with FastCSV is to use one of the `CsvReaderBuilder` methods `ofCsvRecord()` or `ofNamedCsvRecord()`.
+These methods provide convenient access to CSV data as a stream of `CsvRecord` or `NamedCsvRecord` objects.
+
+Under the hood, FastCSV uses a callback handler to process CSV data and create the objects that represent each CSV record.
+The callback handlers `CsvRecordHandler` and `NamedCsvRecordHandler` back the convenience methods `ofCsvRecord()` and `ofNamedCsvRecord()`.
+
+Although `CsvRecord` and `NamedCsvRecord` are convenient, they introduce some overhead because they are designed as immutable objects that
+encapsulate the read CSV data and provide access only through unmodifiable lists or maps.
+This overhead is usually negligible, but if object allocation becomes a bottleneck, and you prefer not to implement a
+[custom callback handler](/guides/examples/custom-callback-handler/), FastCSV offers the built-in `StringArrayHandler`.
+
+## Example
+
+The following example demonstrates how to read CSV data as string arrays.
+
+<SourceExample filename="ExampleCsvReaderWithStringArrayAccess.java"/>

@@ -4,12 +4,16 @@ title: Custom callback handler
 
 import SourceExample from '../../../../components/SourceExample.astro';
 
-The typical way to read CSV data with FastCSV is to either use one of the `ofCsvRecord()` or `ofNamedCsvRecord()`
-methods of the `CsvReader` class. Those methods provide convenient access to the CSV data as a stream of
-`CsvRecord` or `NamedCsvRecord` objects.
+The typical way to read CSV data with FastCSV is to use one of the `CsvReaderBuilder` methods `ofCsvRecord()` or `ofNamedCsvRecord()`.
+These methods provide convenient access to CSV data as a stream of `CsvRecord` or `NamedCsvRecord` objects.
 
-Under the hood, FastCSV uses a callback handler to process the CSV data. The callback handler is responsible for
-processing the CSV data and to materialize the objects that represent the CSV records.
+Under the hood, FastCSV uses a callback handler to process CSV data and create the objects that represent each CSV record.
+The callback handlers `CsvRecordHandler` and `NamedCsvRecordHandler` back the convenience methods `ofCsvRecord()` and `ofNamedCsvRecord()`.
+
+FastCSV also provides the `StringArrayHandler` (see [Reading as String Arrays](/guides/examples/reading-as-string-array/)),
+which allows you to read CSV data as string arrays directly.
+
+If none of the built-in callback handlers meets your requirements, you can implement your own custom callback handler.
 
 ## Example
 
