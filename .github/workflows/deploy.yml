@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install, build, and upload your site
         uses: withastro/action@v4
         with:
