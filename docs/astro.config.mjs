@@ -105,6 +105,13 @@ export default defineConfig({
                     content: 'window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init();'
                 },
             ],
+            expressiveCode: {
+                shiki: {
+                    langs: [
+                        JSON.parse(fs.readFileSync('./grammars/ABNF.tmLanguage.json', 'utf-8'))
+                    ],
+                },
+            },
         }),
     ]
 });

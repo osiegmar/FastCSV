@@ -304,7 +304,7 @@ files. The CsvReader, on the other hand, automatically detects the end-of-line c
 
 When comment handling is disabled (default), FastCSV adheres to the ABNF grammar of RFC 4180-bis.
 
-```abnf
+```ABNF
 file = [header] *(record)
 
 header = [field] *(COMMA field) linebreak
@@ -337,7 +337,7 @@ UTF8-data = UTF8-2 / UTF8-3 / UTF8-4 ; as per section 4 of [RFC3629]
 
 When comment handling is enabled, FastCSV adheres to the following ABNF grammar:
 
-```abnf
+```ABNF
 file = *((comment / record) linebreak)
 
 comment = HASH *comment-data
