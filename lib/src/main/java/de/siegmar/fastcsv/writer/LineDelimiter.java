@@ -21,10 +21,13 @@ public enum LineDelimiter {
         this.str = str;
     }
 
-    /// Build an enum based on the given string.
+    /// Maps a line delimiter string to the corresponding enum constant.
     ///
-    /// @param str the string to convert to an enum.
-    /// @return the enum representation of the given string.
+    /// Accepted values are `"\r\n"` ([#CRLF]), `"\n"` ([#LF]) and `"\r"` ([#CR]).
+    /// The [#PLATFORM] constant is never returned by this method.
+    ///
+    /// @param str the line delimiter string to look up.
+    /// @return the matching enum constant.
     /// @throws IllegalArgumentException if the string is not a known line delimiter.
     public static LineDelimiter of(final String str) {
         return switch (str) {

@@ -28,7 +28,7 @@ IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
 
 try (csv) {
     // Find the last page in the index
-    int lastPage = csv.getIndex().getPageCount() - 1;
+    int lastPage = csv.getIndex().pages().size() - 1;
 
     // Output the last page
     List<CsvRecord> lastPageRecords = csv.readPage(lastPage);

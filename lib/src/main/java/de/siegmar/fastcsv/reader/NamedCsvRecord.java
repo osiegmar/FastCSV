@@ -38,7 +38,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// If you need to collect all fields with the same name (duplicate header), use [#getFieldsAsMapList()].
     ///
     /// Note that records for commented lines ([#isComment()]) do not have an empty header.
-    /// To retrieve the comment value, user [#getField(int)] with index 0.
+    /// To retrieve the comment value, use [#getField(int)] with index 0.
     ///
     /// @return the header names, never `null`
     public List<String> getHeader() {

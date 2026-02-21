@@ -31,6 +31,12 @@ import de.siegmar.fastcsv.util.Preconditions;
 ///
 /// This class is not thread-safe and must not be shared between threads.
 ///
+/// **Exception handling:**
+/// - [IOException] is thrown by file/path-based build methods if the file cannot be opened.
+/// - [java.io.UncheckedIOException] wraps I/O errors that occur during iteration or streaming.
+/// - [CsvParseException] signals structural CSV errors (e.g., malformed quoting, field count mismatch,
+///   or exceeded size limits).
+///
 /// Example use:
 /// ```
 /// try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {

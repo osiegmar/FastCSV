@@ -190,6 +190,14 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     ///
     /// This class is for **internal use only** and should not be used directly. It will be sealed in a future release.
     ///
+    /// Three size limits protect against excessive memory usage:
+    /// - [#maxFields(int)] — maximum number of fields per record.
+    /// - [#maxFieldSize(int)] — maximum characters per field (checked **after** field modifiers).
+    /// - [#maxRecordSize(int)] — maximum total characters per record (sum of all fields, checked **after** modifiers).
+    ///
+    /// These limits are independent of [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#maxBufferSize(int)],
+    /// which caps the raw parser buffer **before** field modifiers are applied.
+    ///
     /// @param <T> the type of the actual builder
     @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     public abstract static class AbstractInternalCsvCallbackHandlerBuilder

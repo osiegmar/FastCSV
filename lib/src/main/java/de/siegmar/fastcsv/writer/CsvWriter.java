@@ -27,7 +27,7 @@ import de.siegmar.fastcsv.util.Util;
 ///
 /// Example use:
 /// ```
-/// try (CsvWriter csv = CsvWriter.builder().build(file)) {
+/// try (CsvWriter csv = CsvWriter.builder().build(Path.of("output.csv"))) {
 ///     csv.writeRecord("Hello", "world");
 /// }
 /// ```
@@ -290,11 +290,17 @@ public final class CsvWriter implements Closeable, Flushable {
         return this;
     }
 
+    /// Closes the underlying writer. Any buffered data is flushed before closing.
+    ///
+    /// @throws IOException if an I/O error occurs
     @Override
     public void close() throws IOException {
         writer.close();
     }
 
+    /// Flushes any buffered data to the underlying writer.
+    ///
+    /// @throws IOException if an I/O error occurs
     @Override
     public void flush() throws IOException {
         writer.flush();
@@ -401,6 +407,7 @@ public final class CsvWriter implements Closeable, Flushable {
         ///
         /// @param bufferSize the buffer size to be used (must be &ge; 0).
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws IllegalArgumentException if bufferSize is negative
         public CsvWriterBuilder bufferSize(final int bufferSize) {
             Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
             this.bufferSize = bufferSize;
@@ -561,7 +568,18 @@ public final class CsvWriter implements Closeable, Flushable {
 
     /// This class is used to write a record field by field.
     ///
-    /// The record is ended by calling [#endRecord()].
+    /// Obtain an instance via [CsvWriter#writeRecord()] (no-arg), write fields with [#writeField(String)],
+    /// and complete the record with [#endRecord()].
+    ///
+    /// Example use:
+    /// ```
+    /// csv.writeRecord()
+    ///     .writeField("field1")
+    ///     .writeField("field2")
+    ///     .endRecord();
+    /// ```
+    ///
+    /// This class is not thread-safe.
     public final class CsvWriterRecord {
 
         private int fieldIdx;

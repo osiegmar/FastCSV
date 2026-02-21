@@ -104,7 +104,7 @@ The following code snippet demonstrates how to read the last page of a CSV file:
 Path file = Paths.get("input.csv");
 try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().pageSize(10).ofCsvRecord(file)) {
     CsvIndex index = csv.getIndex();
-    int lastPage = index.getPageCount() - 1;
+    int lastPage = index.pages().size() - 1;
     List<CsvRecord> csvRecords = csv.readPage(lastPage);
 }
 ```

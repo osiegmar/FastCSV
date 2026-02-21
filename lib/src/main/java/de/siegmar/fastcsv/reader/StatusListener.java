@@ -18,7 +18,7 @@ public interface StatusListener {
     default void onReadRecord() {
     }
 
-    /// Called when a new read operation has been performend.
+    /// Called when a new read operation has been performed.
     ///
     /// @param bytes number of bytes read.
     default void onReadBytes(final int bytes) {

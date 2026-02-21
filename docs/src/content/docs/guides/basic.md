@@ -67,7 +67,7 @@ try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(fi
     CsvIndex index = csv.getIndex();
 
     System.out.println("Items of last page:");
-    int lastPage = index.getPageCount() - 1;
+    int lastPage = index.pages().size() - 1;
     List<CsvRecord> csvRecords = csv.readPage(lastPage);
     csvRecords.forEach(System.out::println);
 }

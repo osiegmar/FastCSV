@@ -33,12 +33,12 @@ import de.siegmar.fastcsv.util.Util;
 ///
 /// Example use:
 /// ```
-/// try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)){
+/// try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder().ofCsvRecord(file)) {
 ///     CsvIndex index = csv.getIndex();
-///     int lastPage = index.getPageCount() - 1;
+///     int lastPage = index.pages().size() - 1;
 ///     List<CsvRecord> csvRecords = csv.readPage(lastPage);
-///}
-///```
+/// }
+/// ```
 ///
 /// @param <T> the type of the CSV record.
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:ClassDataAbstractionCoupling"})

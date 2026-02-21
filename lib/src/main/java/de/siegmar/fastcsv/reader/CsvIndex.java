@@ -9,6 +9,10 @@ import java.util.StringJoiner;
 ///
 /// Instances of this class are immutable and safe for use by multiple threads.
 ///
+/// This class implements [Serializable], so an index can be persisted and reloaded
+/// to avoid re-indexing the same file. A previously built index can be passed to
+/// [IndexedCsvReader.IndexedCsvReaderBuilder#index(CsvIndex)] for reuse.
+///
 /// Even if the constructor is public (mandatory for record classes),
 /// this class is **not intended to be instantiated directly!**
 ///
