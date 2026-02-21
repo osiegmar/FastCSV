@@ -34,8 +34,8 @@ final class StrictCsvParser implements CsvParser {
 
     private final char fsep;
     private final char qChar;
-    private final CommentStrategy cStrat;
     private final char cChar;
+    private final boolean commentsEnabled;
     private final boolean allowExtraCharsAfterClosingQuote;
     private final CsvCallbackHandler<?> callbackHandler;
     private final CsvBuffer csvBuffer;
@@ -59,8 +59,8 @@ final class StrictCsvParser implements CsvParser {
 
         fsep = fieldSeparator;
         qChar = quoteCharacter;
-        cStrat = commentStrategy;
         cChar = commentCharacter;
+        commentsEnabled = commentStrategy != CommentStrategy.NONE;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(reader, maxBufferSize);
@@ -76,8 +76,8 @@ final class StrictCsvParser implements CsvParser {
 
         fsep = fieldSeparator;
         qChar = quoteCharacter;
-        cStrat = commentStrategy;
         cChar = commentCharacter;
+        commentsEnabled = commentStrategy != CommentStrategy.NONE;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(data);
@@ -235,7 +235,7 @@ final class StrictCsvParser implements CsvParser {
 
                             lStatus = STATUS_RESET;
                             lBegin = lPos;
-                        } else if (cStrat != CommentStrategy.NONE && c == cChar
+                        } else if (commentsEnabled && c == cChar
                             && (lStatus == STATUS_RESET || lStatus == STATUS_LAST_CHAR_WAS_CR)) {
                             lBegin = lPos;
                             lStatus = STATUS_COMMENTED_RECORD;
