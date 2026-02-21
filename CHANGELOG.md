@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- JRELEASER_CHANGELOG_APPEND - Do not remove or modify this section -->
 ## [v4.1.0] - 2025-10-09
-## Release v4.1.0
 
 ## 🚀 Features
 - 960d8c8 ignore same comment character if comments are ignored
@@ -244,7 +243,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/osiegmar/FastCSV/compare/v4.1.0...HEAD
+[v4.1.0]: https://github.com/osiegmar/FastCSV/compare/v4.0.0...v4.1.0
 [v4.0.0]: https://github.com/osiegmar/FastCSV/compare/v3.7.0...v4.0.0
 [3.7.0]: https://github.com/osiegmar/FastCSV/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/osiegmar/FastCSV/compare/v3.5.0...v3.6.0

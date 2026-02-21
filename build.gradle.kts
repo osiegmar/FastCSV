@@ -43,11 +43,15 @@ jreleaser {
             changelog {
                 formatted.set(org.jreleaser.model.Active.ALWAYS)
                 preset.set("conventional-commits")
+                hide {
+                    categories.set(listOf("merge", "Build", "Documentation"))
+                    contributors.set(listOf("[bot]"))
+                }
                 append {
                     enabled.set(true)
                     target.set(file("CHANGELOG.md"))
                     title = "## [{{tagName}}] - {{#f_now}}YYYY-MM-dd{{/f_now}}"
-                    content = "{{changelogTitle}}\n{{changelogContent}}"
+                    content = "{{changelogContent}}"
                 }
             }
         }
