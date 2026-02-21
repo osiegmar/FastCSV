@@ -5,7 +5,8 @@ fastdoubleparser = { module = "ch.randelshofer:fastdoubleparser", version = "2.0
 gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0.12.0" }
 spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.4.8" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version = "2.21.0" }
-errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.47.0" }
+# Do not update – Error Prone 2.43.0+ requires Java 21, but OSS-Fuzz uses Java 17
+errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
 nullaway = { module = "com.uber.nullaway:nullaway", version = "0.13.1" }
 
 [plugins]
