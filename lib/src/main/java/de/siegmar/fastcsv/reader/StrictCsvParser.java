@@ -175,7 +175,7 @@ final class StrictCsvParser implements CsvParser {
                             // fast-forward
                             for (; lPos < lLen; lPos++) {
                                 final char lookAhead = lBuf[lPos];
-                                if (lookAhead == qChar || lookAhead == LF || lookAhead == CR) {
+                                if (lookAhead <= CR || lookAhead == qChar) {
                                     break;
                                 }
                             }
@@ -252,7 +252,7 @@ final class StrictCsvParser implements CsvParser {
                                 // fast-forward
                                 for (; lPos < lLen; lPos++) {
                                     final char lookAhead = lBuf[lPos];
-                                    if (lookAhead == fsep || lookAhead == LF || lookAhead == CR) {
+                                    if (lookAhead <= CR || lookAhead == fsep) {
                                         break;
                                     }
                                 }
