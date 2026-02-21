@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
@@ -332,7 +331,7 @@ class IndexedCsvReaderTest {
         @ParameterizedTest
         @NullSource
         void nullCharset(final Charset charset) {
-            assertThatThrownBy(() -> singlePageBuilder().ofCsvRecord(Paths.get("/tmp"), charset))
+            assertThatThrownBy(() -> singlePageBuilder().ofCsvRecord(Path.of("/tmp"), charset))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("charset must not be null");
         }

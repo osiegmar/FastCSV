@@ -10,7 +10,6 @@ import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +64,7 @@ class CsvScannerTest {
     static List<Arguments> genericData() throws IOException {
         final List<Arguments> list = new ArrayList<>();
 
-        final Path file = Paths.get("src/intTest/resources/scanner.txt");
+        final Path file = Path.of("src/intTest/resources/scanner.txt");
         final List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
         int lineNo = 0;
         for (final String line : lines) {
