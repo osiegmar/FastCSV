@@ -15,6 +15,8 @@ import java.util.StringJoiner;
 ///
 /// The field values are never `null`. Empty fields are represented as empty strings.
 ///
+/// Instances of this class are immutable and safe for use by multiple threads.
+///
 /// @see CsvReader
 @SuppressWarnings("PMD.ArrayIsStoredDirectly")
 public final class NamedCsvRecord extends CsvRecord {

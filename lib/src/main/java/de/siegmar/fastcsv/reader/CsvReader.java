@@ -29,6 +29,8 @@ import de.siegmar.fastcsv.util.Preconditions;
 /// Once all records are read, the data is consumed. If you need to repeatedly read records, you should collect the
 /// records in a List or another collection.
 ///
+/// This class is not thread-safe and must not be shared between threads.
+///
 /// Example use:
 /// ```
 /// try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {

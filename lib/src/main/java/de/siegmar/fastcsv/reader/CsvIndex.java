@@ -7,6 +7,8 @@ import java.util.StringJoiner;
 
 /// Index built by [IndexedCsvReader] to access large CSV data files.
 ///
+/// Instances of this class are immutable and safe for use by multiple threads.
+///
 /// Even if the constructor is public (mandatory for record classes),
 /// this class is **not intended to be instantiated directly!**
 ///

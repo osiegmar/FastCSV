@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// Implementation of [StatusListener] that collects updates.
+///
+/// This class is thread-safe.
 public class CollectingStatusListener implements StatusListener {
 
     private final AtomicLong fileSize = new AtomicLong();

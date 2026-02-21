@@ -9,6 +9,8 @@ import java.util.StringJoiner;
 ///
 /// The field values are never `null`. Empty fields are represented as empty strings.
 ///
+/// Instances of this class are immutable and safe for use by multiple threads.
+///
 /// CSV records are created by [CsvReader] or [IndexedCsvReader].
 ///
 /// @see CsvReader

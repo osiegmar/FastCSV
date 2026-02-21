@@ -23,6 +23,8 @@ import de.siegmar.fastcsv.util.Util;
 
 /// This is the main class for writing CSV data.
 ///
+/// This class is not thread-safe and must not be shared between threads.
+///
 /// Example use:
 /// ```
 /// try (CsvWriter csv = CsvWriter.builder().build(file)) {
