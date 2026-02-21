@@ -97,7 +97,7 @@ As the default has changed, you may need to check your code and your desired beh
 Quote strategies received two breaking changes in FastCSV 4:
 
 - The method `quoteNonEmpty` of `de.siegmar.fastcsv.writer.QuoteStrategy` has been renamed to `quoteValue` to better reflect its purpose.
-- Two explicitly define that quoting only happens if required, the `quoteStrategy` method in `CsvWriterBuilder` no longer accepts a `null` value.
+- To explicitly define that quoting only happens if required, the `quoteStrategy` method in `CsvWriterBuilder` no longer accepts a `null` value.
   Instead, you can use the `QuoteStrategies.REQUIRED` constant to indicate that quoting should only happen if required.
 
 ## Changed implementation of `CsvIndex` and `CsvPage` to Java records
@@ -149,13 +149,68 @@ The `CsvIndex` and `CsvPage` classes have been changed to Java records. With thi
 
 If you implemented a custom callback handler, some major changes have been made in FastCSV 4.0 that you need to be aware of:
 
-**Record wrapper removal**: The `RecordWrapper` class has been removed. Its `getFieldCount` method has been moved to the `CsvCallbackHandler`. The methods `isComment` and `isEmptyLine` have been combined into a single `getRecordType` method that returns the type of the record (comment, empty line, or regular record). This `getRecordType` method is now also part of the `CsvCallbackHandler` class.
+**Record wrapper removal**: The `RecordWrapper` class has been removed (remove any `import de.siegmar.fastcsv.reader.RecordWrapper` statements). Its responsibilities have been absorbed by the `CsvCallbackHandler`:
+- `RecordWrapper.getFieldCount()` → new abstract method `CsvCallbackHandler.getFieldCount()`
+- `RecordWrapper.isComment()` / `isEmptyLine()` → new abstract method `CsvCallbackHandler.getRecordType()` returning a `RecordType` enum
+- `buildRecord()` now returns `T` directly (or `null` to skip) instead of `RecordWrapper<T>`
 
-**Handling empty lines**: The CSV parser is emitting empty lines separately from comments and regular records.
+**Handling empty lines**: The CSV parser now emits empty lines via a dedicated `setEmpty()` callback, separately from comments and regular records.
 
-If you implemented a custom callback handler by extending `AbstractBaseCsvCallbackHandler`, your implementation for the `buildRecord` method now needs to return a `CsvRecord` instance instead of a `RecordWrapper`. You may also want to implement the `handleEmpty` method to handle empty lines suiting your needs.
+### Migrating `AbstractBaseCsvCallbackHandler` subclasses
 
-Implementing the lower-level `CsvCallbackHandler` directly requires to implement `getFieldCount` (previously implemented in the RecordWrapper) and `getRecordType` methods.
+If you extended `AbstractBaseCsvCallbackHandler`, your `buildRecord` method must now return the record directly instead of wrapping it, and `isComment()`/`isEmptyLine()` are replaced by `getRecordType()`. You may also want to override `handleEmpty()` to handle empty lines.
+
+```diff lang="java"
+  @Override
+- protected RecordWrapper<MyRecord> buildRecord() {
+-     if (isComment()) {
++ protected MyRecord buildRecord() {
++     if (getRecordType() == RecordType.COMMENT) {
+          // handle comment...
+      }
+-     if (isEmptyLine()) {
++     if (getRecordType() == RecordType.EMPTY) {
+          // handle empty line...
+      }
+      MyRecord record = new MyRecord(/* ... */);
+-     return wrapRecord(record);
++     return record;
+  }
+```
+
+### Migrating direct `CsvCallbackHandler` subclasses
+
+If you extended the lower-level `CsvCallbackHandler` directly, you must implement three new abstract methods: `getRecordType()`, `getFieldCount()`, and `setEmpty()`.
+
+```diff lang="java"
+  public class MyHandler extends CsvCallbackHandler<MyRecord> {
+
++     private RecordType recordType = RecordType.DATA;
++     private int fieldCount;
+
++     @Override
++     protected RecordType getRecordType() {
++         return recordType;
++     }
+
++     @Override
++     protected int getFieldCount() {
++         return fieldCount;
++     }
+
++     @Override
++     protected void setEmpty() {
++         recordType = RecordType.EMPTY;
++     }
+
+      @Override
+-     protected RecordWrapper<MyRecord> buildRecord() {
+-         return new RecordWrapper<>(isComment, isEmpty, fieldCount, record);
++     protected MyRecord buildRecord() {
++         return record;
+      }
+  }
+```
 
 ## Null-free refactoring in CollectingStatusListener
 
@@ -216,15 +271,20 @@ In version 4.0.0 those deprecated properties were removed.
 +    .build(handler, file);
 ```
 
-### SimpleFieldModifier
+### FieldModifiers.modify moved to FieldModifier.modify
 
-The `SimpleFieldModifier` class has been deprecated in 3.7.0 and removed in 4.0.0.
-
-Use `FieldModifier.modify` instead, which has moved from `FieldModifiers` to the `FieldModifier` interface.
+The `FieldModifiers.modify(Function)` method has been moved to the `FieldModifier` interface.
+This also replaces the `SimpleFieldModifier` class, which was deprecated in 3.7.0 and removed in 4.0.0.
 
 ```diff lang="java"
+  // If you used SimpleFieldModifier (deprecated since 3.7.0):
   FieldModifier normalizeWhitespaces =
 -     (SimpleFieldModifier) field -> field.replaceAll("\\s", " ");
++     FieldModifier.modify(field -> field.replaceAll("\\s", " "));
+
+  // If you used FieldModifiers.modify (added in 3.7.0):
+  FieldModifier normalizeWhitespaces =
+-     FieldModifiers.modify(field -> field.replaceAll("\\s", " "));
 +     FieldModifier.modify(field -> field.replaceAll("\\s", " "));
 ```
 
