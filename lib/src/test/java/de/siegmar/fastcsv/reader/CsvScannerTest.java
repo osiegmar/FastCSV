@@ -190,7 +190,7 @@ class CsvScannerTest {
 
         }
 
-        public List<Integer> getOffsets() {
+        List<Integer> getOffsets() {
             return offsets;
         }
     }
