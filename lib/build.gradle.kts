@@ -23,7 +23,7 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     if (name == "compileJmhJava") {
-        options.errorprone.isEnabled.set(false)
+        options.errorprone.enabled.set(false)
     } else if (name == "compileTestJava" || name == "compileIntTestJava") {
         options.errorprone.disable("NullAway")
     } else {
