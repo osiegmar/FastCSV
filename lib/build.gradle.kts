@@ -189,7 +189,7 @@ publishing {
 
             pom {
                 name = "FastCSV"
-                description = "Lightning-fast, dependency-free CSV library that conforms to RFC standards."
+                description = "Fast, lightweight, RFC 4180 compliant CSV library for Java with zero dependencies."
                 url = "https://fastcsv.org"
                 inceptionYear = "2014"
                 licenses {

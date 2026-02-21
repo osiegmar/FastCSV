@@ -15,7 +15,7 @@ jreleaser {
     project {
         gitRootSearch.set(true)
         name.set("FastCSV")
-        description.set("Lightning-fast, dependency-free CSV library that conforms to RFC standards.")
+        description.set("Fast, lightweight, RFC 4180 compliant CSV library for Java with zero dependencies.")
         authors.set(listOf("Oliver Siegmar"))
         license.set("MIT")
         links {

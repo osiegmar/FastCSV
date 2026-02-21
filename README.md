@@ -3,7 +3,8 @@
 </p>
 
 <p align="center">
-  FastCSV is a lightning-fast, dependency-free CSV library for Java that adheres to RFC standards.
+  <strong>FastCSV</strong>: fast, lightweight, and easy to use — the production-proven CSV library for Java.<br/>
+  It’s the most-starred CSV library for Java and trusted by leading open-source projects such as Apache NiFi, JUnit and Neo4j.
 </p>
 
 <p align="center">
@@ -19,19 +20,51 @@
   <a href="https://www.bestpractices.dev/projects/9141"><img src="https://www.bestpractices.dev/projects/9141/badge" alt="OpenSSF"></a>
 </p>
 
-------
+## Features
 
-<div align="center">
-  <h2>:trophy: FastCSV: The Number One CSV Library for Java! :trophy:</h2>
-  <p>I am thrilled to announce that among all actively maintained CSV libraries for Java, FastCSV has become the most popular, based on GitHub stars.</p>
-  <p>This remarkable achievement is a testament to your invaluable contributions and feedback.</p>
-  <p><strong>Thank you for your continued support! :thumbsup:</strong></p>
-</div>
+_Here are the top reasons to choose FastCSV — see [fastcsv.org](https://fastcsv.org) for the full feature list._
 
-------
+- **Fast CSV processing** — optimized for high-speed reading and writing
+- **Tiny footprint** — only ~90 KiB, with zero runtime dependencies
+- **Developer-friendly API** — clean, intuitive, and easy to integrate
+- **Well-documented** — Quickstart guides and complete Javadoc
+- **High test coverage** — including mutation testing for reliability
+- **RFC 4180 compliant** — handles edge cases correctly
+- **Robust & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle to ensure code quality; never returns null unexpectedly
+- **Secure** — fuzz-tested via OSS-Fuzz and following OpenSSF best practices
+- **Production-proven** — trusted by open-source projects like JUnit
+- **Java 17+, Android 34+** compatible — including GraalVM Native Image and OSGi
 
-<p align="center">
-  Visit our website at <a href="https://fastcsv.org">fastcsv.org</a> for more information.
-  <br><br>
-  <strong>Don't forget to leave a :star: if you like FastCSV!</strong>
-</p>
+## Performance
+
+![Benchmark](docs/src/assets/benchmark.png "Benchmark")
+Based on the [Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite).
+
+## Quick Start
+
+### Writing CSV
+
+```java
+try (CsvWriter csv = CsvWriter.builder().build(Path.of("output.csv"))) {
+    csv
+        .writeRecord("header 1", "header 2")
+        .writeRecord("value 1", "value 2");
+}
+```
+
+### Reading CSV
+
+```java
+try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(Path.of("input.csv"))) {
+    csv.forEach(IO::println);
+}
+```
+
+---
+
+For more examples and detailed documentation, visit [fastcsv.org](https://fastcsv.org).
+If you find FastCSV useful, consider leaving a [star](https://github.com/osiegmar/FastCSV)!
+
+## License
+
+[MIT](LICENSE)
