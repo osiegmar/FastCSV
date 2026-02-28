@@ -1,5 +1,6 @@
 ---
 title: Design Goals
+description: "Learn about FastCSV's core design goals: performance, lightweight footprint, RFC 4180 compliance, simplicity, robustness, and security."
 sidebar:
   order: 1
 ---

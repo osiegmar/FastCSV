@@ -1,5 +1,6 @@
 ---
 title: Overview
+description: Browse practical code examples for FastCSV covering reading, writing, compression, bean mapping, and more.
 ---
 
 This section provides a variety of examples to help you get started with FastCSV.

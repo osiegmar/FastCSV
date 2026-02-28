@@ -1,10 +1,14 @@
 import {defineConfig} from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import rehypeFaqSchema from './plugins/rehype-faq-schema.mjs';
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://fastcsv.org',
+    markdown: {
+        rehypePlugins: [rehypeFaqSchema],
+    },
     integrations: [
         starlight({
             plugins: [starlightLinksValidator()],
@@ -92,6 +96,31 @@ export default defineConfig({
                         property: 'og:image',
                         content: 'https://fastcsv.org/fastcsv-og.png'
                     },
+                },
+                {
+                    tag: 'meta',
+                    attrs: {
+                        property: 'og:image:alt',
+                        content: 'FastCSV – Fast, lightweight CSV library for Java'
+                    },
+                },
+                {
+                    tag: 'script',
+                    attrs: {
+                        type: 'application/ld+json',
+                    },
+                    content: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'SoftwareSourceCode',
+                        'name': 'FastCSV',
+                        'description': 'Fast, lightweight, and easy to use — the production-proven CSV library for Java. RFC 4180 compliant with zero runtime dependencies.',
+                        'url': 'https://fastcsv.org',
+                        'codeRepository': 'https://github.com/osiegmar/FastCSV',
+                        'programmingLanguage': 'Java',
+                        'license': 'https://opensource.org/licenses/MIT',
+                        'applicationCategory': 'Library',
+                        'runtimePlatform': 'Java 17+',
+                    }),
                 },
                 {
                     tag: 'script',

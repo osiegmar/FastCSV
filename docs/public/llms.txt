@@ -1,0 +1,82 @@
+# FastCSV
+
+> Fast, lightweight, and easy to use — the production-proven CSV library for Java.
+
+FastCSV is the most-starred CSV library for Java. It is a high-performance CSV parser and writer, licensed under MIT. Requires Java 17+ (Android 14 / API level 34).
+
+## Key Features
+
+- **Fast CSV processing** — optimized for high-speed reading and writing
+- **Tiny footprint** — only ~90 KiB, with zero runtime dependencies
+- **Developer-friendly API** — clean, intuitive, null-free, and easy to integrate
+- **Well-documented** — quickstart guides and complete Javadoc
+- **High test coverage** — including mutation testing for reliability
+- **RFC 4180 compliant** — handles edge cases correctly
+- **Robust & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle; never returns null unexpectedly
+- **Secure** — fuzz-tested via OSS-Fuzz and following OpenSSF best practices
+- **Production-proven** — trusted by open-source projects like JUnit, Apache NiFi, and Neo4j
+- **Java 17+, Android 34+ compatible** — including GraalVM Native Image and OSGi
+- Configurable field separators, quote strategies, and comment handling
+- BOM (Byte Order Mark) support (UTF-8, UTF-16, UTF-32)
+- Header record support with named field access
+- Random access reading via IndexedCsvReader
+- Flexible callback handlers for custom record types
+- Field modifiers for trimming and transforming values during parsing
+
+## Quick Start
+
+Writing CSV:
+
+```java
+try (CsvWriter csv = CsvWriter.builder().build(Path.of("output.csv"))) {
+    csv
+        .writeRecord("header 1", "header 2")
+        .writeRecord("value 1", "value 2");
+}
+```
+
+Reading CSV:
+
+```java
+try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(Path.of("input.csv"))) {
+    csv.forEach(IO::println);
+}
+```
+
+## Documentation
+
+- [Quick Start Guide](https://fastcsv.org/guides/quickstart/): Add the Maven/Gradle dependency and write your first CSV reader and writer in Java.
+- [Basic Tutorial](https://fastcsv.org/guides/basic/): Learn reading and writing CSV files with CsvReader, IndexedCsvReader, and CsvWriter.
+- [Design Goals](https://fastcsv.org/architecture/goals/): Core design goals — performance, lightweight, compliance, simplicity, robustness, security.
+- [Architecture](https://fastcsv.org/architecture/architecture/): Technical architecture covering reader and writer components.
+- [CSV Interpretation](https://fastcsv.org/architecture/interpretation/): How FastCSV interprets CSV data per RFC 4180-bis.
+- [FAQ](https://fastcsv.org/faq/): Frequently asked questions about FastCSV.
+- [Upgrading](https://fastcsv.org/guides/upgrading/): Guide for migrating from FastCSV 3.x to 4.x.
+- [Compliance Report](https://fastcsv.org/compliance/): RFC 4180 compliance verification results.
+- [Other Libraries](https://fastcsv.org/other-libraries/): Comparison with alternative Java CSV libraries.
+- [Contribution Guide](https://fastcsv.org/guides/contribution/): How to contribute to FastCSV.
+
+## Examples
+
+- [Bean Mapping](https://fastcsv.org/guides/examples/bean-mapping/): Map CSV records to Java beans using NamedCsvRecord.
+- [Byte Order Mark](https://fastcsv.org/guides/examples/byte-order-mark/): Handle BOM headers when reading CSV files.
+- [Compressed CSV](https://fastcsv.org/guides/examples/compressed-csv/): Read and write GZIP-compressed CSV files.
+- [Custom Callback Handler](https://fastcsv.org/guides/examples/custom-callback-handler/): Build custom record types with CsvCallbackHandler.
+- [Handle Comments](https://fastcsv.org/guides/examples/handle-comments/): Read and write CSV files with comment lines.
+- [Indexed Reading](https://fastcsv.org/guides/examples/indexed-read/): Random access and paginated reading of large CSV files.
+- [Modifying Input](https://fastcsv.org/guides/examples/modifying-input/): Trim and transform field values during parsing.
+- [Non-standard Control Characters](https://fastcsv.org/guides/examples/non-standard-control-characters/): Configure custom separators and enclosure characters.
+- [Quote Strategies](https://fastcsv.org/guides/examples/quote-strategies/): Control quoting behavior with QuoteStrategy API.
+- [Read from Classpath](https://fastcsv.org/guides/examples/read-from-classpath/): Read CSV files from the Java classpath.
+- [Reading Ambiguous Data](https://fastcsv.org/guides/examples/reading-ambiguous-data/): Handle empty lines, missing fields, and extra fields.
+- [Reading as String Arrays](https://fastcsv.org/guides/examples/reading-as-string-array/): Reduce overhead with StringArrayHandler.
+- [Reading Null Values](https://fastcsv.org/guides/examples/reading-null/): Handle null and empty values with FieldModifier.
+- [Skip Non-CSV Head](https://fastcsv.org/guides/examples/skip-non-csv-head/): Skip non-CSV header lines at the beginning of files.
+- [PostgreSQL Interoperability](https://fastcsv.org/guides/examples/postgresql-interoperability/): Import/export CSV data with PostgreSQL COPY command.
+- [Writing Rolling Files](https://fastcsv.org/guides/examples/writing-rolling-files/): Split large CSV output across multiple files.
+
+## API Reference
+
+- [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/): Full API documentation.
+- [Maven Central](https://central.sonatype.com/artifact/de.siegmar/fastcsv): Maven artifact `de.siegmar:fastcsv`.
+- [GitHub Repository](https://github.com/osiegmar/FastCSV): Source code, issues, and changelog.
