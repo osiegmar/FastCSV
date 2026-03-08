@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.1](https://github.com/osiegmar/FastCSV/compare/v4.1.0...v4.1.1) (2026-03-08)
+
+
+### Bug Fixes
+
+* correct BomInputStream buffer offset for short inputs ([#174](https://github.com/osiegmar/FastCSV/issues/174)) ([1275474](https://github.com/osiegmar/FastCSV/commit/12754742eef3751135fb3a7c4c0a3fe44ea48497))
+
+
+### Performance Improvements
+
+* precompute comment strategy check in parser ([6d6e874](https://github.com/osiegmar/FastCSV/commit/6d6e8746efbba84d8f65164bd826760ce3714835))
+* use range check in fast-forward loops ([85eb73f](https://github.com/osiegmar/FastCSV/commit/85eb73f1577f1939d3ef0c3ae5424a75e37eaf07))
+
 ## [v4.1.0] - 2025-10-09
 
 ## 🚀 Features
