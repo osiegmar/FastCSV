@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.siegmar"
-version = "4.1.1" // x-release-please-version
+version = "4.2.0-SNAPSHOT" // x-release-please-version
 
 subprojects {
     group = rootProject.group
