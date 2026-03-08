@@ -5,7 +5,9 @@ sidebar:
   order: 1
 ---
 
-import {Tabs, TabItem, LinkCard} from '@astrojs/starlight/components';
+import {Tabs, TabItem, LinkCard, Code} from '@astrojs/starlight/components';
+
+export const version = "4.1.0"; // x-release-please-version
 
 ## Declare dependency
 
@@ -13,30 +15,30 @@ To get started with FastCSV, add the following dependency to your project:
 
 <Tabs>
     <TabItem label="Gradle/Kotlin">
-        ```kotlin
-        // build.gradle.kts
-        dependencies {
-            implementation("de.siegmar:fastcsv:4.1.0")
-        }
-        ```
+        <Code code={`
+// build.gradle.kts
+dependencies {
+    implementation("de.siegmar:fastcsv:${version}")
+}
+        `.trim()} lang="kotlin" />
     </TabItem>
     <TabItem label="Gradle/Groovy">
-        ```groovy
-        // build.gradle
-        dependencies {
-            implementation 'de.siegmar:fastcsv:4.1.0'
-        }
-        ```
+        <Code code={`
+// build.gradle
+dependencies {
+    implementation 'de.siegmar:fastcsv:${version}'
+}
+        `.trim()} lang="groovy" />
     </TabItem>
     <TabItem label="Maven">
-        ```xml
-        // pom.xml
-        <dependency>
-            <groupId>de.siegmar</groupId>
-            <artifactId>fastcsv</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        ```
+        <Code code={`
+<!-- pom.xml -->
+<dependency>
+    <groupId>de.siegmar</groupId>
+    <artifactId>fastcsv</artifactId>
+    <version>${version}</version>
+</dependency>
+        `.trim()} lang="xml" />
     </TabItem>
 </Tabs>
 

@@ -1,0 +1,35 @@
+name: Reproducible build
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  pull_request:
+    branches:
+      - '**'
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+
+permissions: {}
+
+jobs:
+  check_build_reproducibility:
+    name: Check build reproducibility
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+      - name: Build and compare checksums
+        run: ./.github/scripts/check-build-reproducibility.sh

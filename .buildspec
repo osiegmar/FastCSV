@@ -1,0 +1,13 @@
+groupId=de.siegmar
+artifactId=fastcsv
+version=4.1.0 # x-release-please-version
+gitRepo=https://github.com/osiegmar/FastCSV.git
+gitTag=v${version}
+tool=gradle
+jdk=25
+toolchains="25|17"
+newline=lf
+#command="./gradlew --no-daemon clean assemble publishToMavenLocal -x test"
+command="./gradlew jar"
+buildinfo=${artifactId}-${version}.buildinfo
+issue=
