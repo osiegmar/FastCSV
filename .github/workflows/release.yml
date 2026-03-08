@@ -1,8 +1,18 @@
 name: Publish
 
 on:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. v4.1.1)'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. v4.1.1)'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -39,7 +49,7 @@ jobs:
             build/jreleaser/output.properties
       - name: Bump to next SNAPSHOT version
         run: |
-          RELEASED_VERSION="${{ github.event.release.tag_name }}"
+          RELEASED_VERSION="${{ inputs.tag_name }}"
           RELEASED_VERSION="${RELEASED_VERSION#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "${RELEASED_VERSION}"
           NEXT_VERSION="${MAJOR}.$((MINOR + 1)).0-SNAPSHOT"
