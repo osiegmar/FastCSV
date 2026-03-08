@@ -10,7 +10,8 @@ final class BomInputStream extends InputStream {
     private final InputStream delegate;
     private final Charset charset;
     private final byte[] buffer = new byte[BomUtil.POTENTIAL_BOM_SIZE];
-    private int remainingBuffer;
+    private int bufferPos;
+    private int bufferLen;
 
     BomInputStream(final InputStream inputStream, final Charset defaultCharset) throws IOException {
         delegate = inputStream;
@@ -19,11 +20,13 @@ final class BomInputStream extends InputStream {
         final Optional<BomHeader> optHeader = BomUtil.detectCharset(buffer);
 
         if (optHeader.isEmpty()) {
-            remainingBuffer = bufCnt;
+            bufferPos = 0;
+            bufferLen = bufCnt;
             charset = defaultCharset;
         } else {
             final BomHeader bomHeader = optHeader.get();
-            remainingBuffer = bufCnt - bomHeader.getLength();
+            bufferPos = bomHeader.getLength();
+            bufferLen = bufCnt;
             charset = bomHeader.getCharset();
         }
     }
@@ -34,7 +37,7 @@ final class BomInputStream extends InputStream {
 
     @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
-        return remainingBuffer > 0 ? readBuffer(b, off, len) : delegate.read(b, off, len);
+        return bufferPos < bufferLen ? readBuffer(b, off, len) : delegate.read(b, off, len);
     }
 
     @Override
@@ -44,9 +47,9 @@ final class BomInputStream extends InputStream {
     }
 
     private int readBuffer(final byte[] b, final int off, final int len) {
-        final int toCopy = Math.min(remainingBuffer, len);
-        System.arraycopy(buffer, buffer.length - remainingBuffer, b, off, toCopy);
-        remainingBuffer -= toCopy;
+        final int toCopy = Math.min(bufferLen - bufferPos, len);
+        System.arraycopy(buffer, bufferPos, b, off, toCopy);
+        bufferPos += toCopy;
         return toCopy;
     }
 

@@ -24,6 +24,12 @@ class BomInputStreamTest {
     }
 
     @Test
+    void shortInputWithoutBom() throws IOException {
+        assertThat(read(new byte[]{1, 2, 3}))
+            .isEqualTo(new byte[]{1, 2, 3});
+    }
+
+    @Test
     void bomOnly() throws IOException {
         assertThat(read(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}))
             .isEmpty();
