@@ -30,6 +30,6 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
       - name: Build and compare checksums
         run: ./.github/scripts/check-build-reproducibility.sh
