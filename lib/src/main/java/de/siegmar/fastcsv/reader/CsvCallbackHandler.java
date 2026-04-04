@@ -34,9 +34,9 @@ public abstract class CsvCallbackHandler<T> {
     ///
     /// The [CsvReader] will verify that the number of fields in each record matches the number of fields in the
     /// first record unless
-    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#allowExtraFields(boolean)] or
-    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#allowMissingFields(boolean)]
-    /// are set to `true`.
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#extraFieldStrategy(FieldMismatchStrategy)] or
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#missingFieldStrategy(FieldMismatchStrategy)]
+    /// are set to [FieldMismatchStrategy#IGNORE] or [FieldMismatchStrategy#SKIP].
     protected abstract int getFieldCount();
 
     /// Called at the beginning of each record.

@@ -19,6 +19,7 @@ import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import testutil.CsvRecordAssert;
@@ -55,7 +56,7 @@ abstract class AbstractSkipLinesTest {
     @ParameterizedTest
     @ValueSource(strings = {",\nfoo\n", ",,\nfoo\n", "''\nfoo\n", "' '\nfoo\n"})
     void notEmpty(final String input) {
-        crb.allowMissingFields(true).quoteCharacter('\'');
+        crb.missingFieldStrategy(FieldMismatchStrategy.IGNORE).quoteCharacter('\'');
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
         assertThat(crb.build(cbh, input).stream()).hasSize(2);
     }
@@ -63,7 +64,7 @@ abstract class AbstractSkipLinesTest {
     @ParameterizedTest
     @ValueSource(strings = {",\nfoo\n", ",,\nfoo\n", "''\nfoo\n", "' '\nfoo\n"})
     void notEmptyCustomCallback(final String input) {
-        crb.allowMissingFields(true).quoteCharacter('\'');
+        crb.missingFieldStrategy(FieldMismatchStrategy.IGNORE).quoteCharacter('\'');
         final AbstractBaseCsvCallbackHandler<String[]> cbh = new AbstractBaseCsvCallbackHandler<>() {
             private final List<String> fields = new ArrayList<>();
 

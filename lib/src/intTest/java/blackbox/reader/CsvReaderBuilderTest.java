@@ -19,6 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import testutil.CsvRecordAssert;
 
 @SuppressWarnings("PMD.CloseResource")
@@ -79,7 +80,7 @@ class CsvReaderBuilderTest {
             .isEqualTo("""
                 CsvReaderBuilder[fieldSeparator=,, quoteCharacter=", \
                 commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, \
-                allowExtraFields=false, allowMissingFields=false, allowExtraCharsAfterClosingQuote=false, \
+                extraFieldStrategy=STRICT, missingFieldStrategy=STRICT, allowExtraCharsAfterClosingQuote=false, \
                 trimWhitespacesAroundQuotes=false, detectBomHeader=false, maxBufferSize=16777216]""");
     }
 
@@ -128,12 +129,28 @@ class CsvReaderBuilderTest {
             .commentStrategy(CommentStrategy.NONE)
             .commentCharacter('#')
             .skipEmptyLines(true)
-            .allowExtraFields(false)
-            .allowMissingFields(false)
+            .extraFieldStrategy(FieldMismatchStrategy.STRICT)
+            .missingFieldStrategy(FieldMismatchStrategy.STRICT)
             .allowExtraCharsAfterClosingQuote(false)
             .ofCsvRecord("foo");
 
         assertThat(reader).isNotNull();
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void deprecatedAllowExtraFields() {
+        assertThat(CsvReader.builder().allowExtraFields(true)
+            .ofCsvRecord("foo\nfoo,bar").stream())
+            .hasSize(2);
+    }
+
+    @SuppressWarnings("removal")
+    @Test
+    void deprecatedAllowMissingFields() {
+        assertThat(CsvReader.builder().allowMissingFields(true)
+            .ofCsvRecord("foo,bar\nfoo").stream())
+            .hasSize(2);
     }
 
 }

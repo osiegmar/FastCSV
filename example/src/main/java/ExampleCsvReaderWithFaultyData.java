@@ -1,5 +1,6 @@
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 
 /// Example for reading CSV data with faulty (or ambiguous) data.
 ///
@@ -22,10 +23,17 @@ void main() {
         e.printStackTrace(System.out);
     }
 
-    IO.println("Reading data while not ignoring different field counts:");
+    IO.println("Reading data while ignoring different field counts:");
     CsvReader.builder()
-        .allowExtraFields(true)
-        .allowMissingFields(true)
+        .extraFieldStrategy(FieldMismatchStrategy.IGNORE)
+        .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
+        .ofCsvRecord(data)
+        .forEach(IO::println);
+
+    IO.println("Reading data while skipping records with different field counts:");
+    CsvReader.builder()
+        .extraFieldStrategy(FieldMismatchStrategy.SKIP)
+        .missingFieldStrategy(FieldMismatchStrategy.SKIP)
         .ofCsvRecord(data)
         .forEach(IO::println);
 }

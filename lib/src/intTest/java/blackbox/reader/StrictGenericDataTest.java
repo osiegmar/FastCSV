@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import specreader.CheckVariant;
 import specreader.CheckVariantWrapper;
 import specreader.TestSpecRepository;
@@ -78,8 +79,8 @@ class StrictGenericDataTest {
 
         return CsvReader.builder()
             .commentStrategy(commentStrategy)
-            .allowExtraFields(true)
-            .allowMissingFields(true)
+            .extraFieldStrategy(FieldMismatchStrategy.IGNORE)
+            .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
             .allowExtraCharsAfterClosingQuote(true)
             .skipEmptyLines(settings.skipEmptyLines())
             .ofCsvRecord(input)

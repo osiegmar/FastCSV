@@ -2,7 +2,6 @@ package blackbox.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.CharArrayReader;
@@ -29,6 +28,7 @@ import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import testutil.CsvRecordAssert;
 
@@ -120,10 +120,11 @@ abstract class AbstractCsvReaderTest {
             .isInstanceOf(UnsupportedOperationException.class);
     }
 
-    // allow extra fields
+    // extra field strategy
 
     @Test
-    void allowNoExtraFields() {
+    void extraFieldStrategyStrict() {
+        crb.extraFieldStrategy(FieldMismatchStrategy.STRICT);
         assertThatThrownBy(() -> readAll("foo\nfoo,bar"))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading record that started in line 2")
@@ -132,15 +133,34 @@ abstract class AbstractCsvReaderTest {
     }
 
     @Test
-    void allowExtraFields() {
-        crb.allowExtraFields(true);
-        assertThatNoException().isThrownBy(() -> readAll("foo\nfoo,bar"));
+    void extraFieldStrategyIgnore() {
+        crb.extraFieldStrategy(FieldMismatchStrategy.IGNORE);
+        assertThat(readAll("foo\nfoo,bar"))
+            .satisfiesExactly(
+                item1 -> CsvRecordAssert.assertThat(item1)
+                    .fields().containsExactly("foo"),
+                item2 -> CsvRecordAssert.assertThat(item2)
+                    .fields().containsExactly("foo", "bar")
+            );
     }
 
-    // allow missing fields
+    @Test
+    void extraFieldStrategySkip() {
+        crb.extraFieldStrategy(FieldMismatchStrategy.SKIP);
+        assertThat(readAll("foo\nfoo,bar\nbaz"))
+            .satisfiesExactly(
+                item1 -> CsvRecordAssert.assertThat(item1)
+                    .fields().containsExactly("foo"),
+                item2 -> CsvRecordAssert.assertThat(item2)
+                    .fields().containsExactly("baz")
+            );
+    }
+
+    // missing field strategy
 
     @Test
-    void allowNoMissingFields() {
+    void missingFieldStrategyStrict() {
+        crb.missingFieldStrategy(FieldMismatchStrategy.STRICT);
         assertThatThrownBy(() -> readAll("foo,bar\nfoo"))
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Exception when reading record that started in line 2")
@@ -149,9 +169,44 @@ abstract class AbstractCsvReaderTest {
     }
 
     @Test
-    void allowMissingFields() {
-        crb.allowMissingFields(true);
-        assertThatNoException().isThrownBy(() -> readAll("foo,bar\nfoo"));
+    void missingFieldStrategyIgnore() {
+        crb.missingFieldStrategy(FieldMismatchStrategy.IGNORE);
+        assertThat(readAll("foo,bar\nfoo"))
+            .satisfiesExactly(
+                item1 -> CsvRecordAssert.assertThat(item1)
+                    .fields().containsExactly("foo", "bar"),
+                item2 -> CsvRecordAssert.assertThat(item2)
+                    .fields().containsExactly("foo")
+            );
+    }
+
+    @Test
+    void missingFieldStrategySkip() {
+        crb.missingFieldStrategy(FieldMismatchStrategy.SKIP);
+        assertThat(readAll("foo,bar\nbaz\nfoo,bar"))
+            .satisfiesExactly(
+                item1 -> CsvRecordAssert.assertThat(item1)
+                    .fields().containsExactly("foo", "bar"),
+                item2 -> CsvRecordAssert.assertThat(item2)
+                    .fields().containsExactly("foo", "bar")
+            );
+    }
+
+    // combined strategies
+
+    @Test
+    void skipExtraIgnoreMissing() {
+        crb.extraFieldStrategy(FieldMismatchStrategy.SKIP)
+            .missingFieldStrategy(FieldMismatchStrategy.IGNORE);
+        assertThat(readAll("a,b\nc\nd,e,f\ng,h"))
+            .satisfiesExactly(
+                item1 -> CsvRecordAssert.assertThat(item1)
+                    .fields().containsExactly("a", "b"),
+                item2 -> CsvRecordAssert.assertThat(item2)
+                    .fields().containsExactly("c"),
+                item3 -> CsvRecordAssert.assertThat(item3)
+                    .fields().containsExactly("g", "h")
+            );
     }
 
     // allow extra characters after closing quotes

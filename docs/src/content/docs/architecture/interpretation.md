@@ -98,8 +98,8 @@ record. However, this is just an assumption. Field `value_c_2` does not even hav
 To ensure no misinterpretation, FastCSV does not allow extra or missing fields in a record by default.
 This means that the above example would result in a `CsvParseException` when reading it with FastCSV.
 
-However, this behavior can be changed by setting `CsvReaderBuilder.allowExtraFields(boolean)`
-and `CsvReaderBuilder.allowMissingFields(boolean)` to `true`.
+However, this behavior can be changed by setting `CsvReaderBuilder.extraFieldStrategy(FieldMismatchStrategy)`
+and `CsvReaderBuilder.missingFieldStrategy(FieldMismatchStrategy)` to `IGNORE` or `SKIP`.
 
 ### Empty lines
 

@@ -62,8 +62,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private final CsvCallbackHandler<T> callbackHandler;
     private final CommentStrategy commentStrategy;
     private final boolean skipEmptyLines;
-    private final boolean allowExtraFields;
-    private final boolean allowMissingFields;
+    private final FieldMismatchStrategy extraFieldStrategy;
+    private final FieldMismatchStrategy missingFieldStrategy;
     private final boolean fieldCountConsistencyCheck;
     private final CloseableIterator<T> csvRecordIterator = new CsvRecordIterator();
 
@@ -72,15 +72,18 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler,
               final CommentStrategy commentStrategy, final boolean skipEmptyLines,
-              final boolean allowExtraFields, final boolean allowMissingFields) {
+              final FieldMismatchStrategy extraFieldStrategy,
+              final FieldMismatchStrategy missingFieldStrategy) {
 
         this.csvParser = csvParser;
         this.callbackHandler = callbackHandler;
         this.commentStrategy = commentStrategy;
         this.skipEmptyLines = skipEmptyLines;
-        this.allowExtraFields = allowExtraFields;
-        this.allowMissingFields = allowMissingFields;
-        fieldCountConsistencyCheck = !allowExtraFields || !allowMissingFields;
+        this.extraFieldStrategy = extraFieldStrategy;
+        this.missingFieldStrategy = missingFieldStrategy;
+        fieldCountConsistencyCheck =
+            extraFieldStrategy != FieldMismatchStrategy.IGNORE
+            || missingFieldStrategy != FieldMismatchStrategy.IGNORE;
     }
 
     /// Constructs a [CsvReaderBuilder] to configure and build instances of this class.
@@ -244,8 +247,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         return switch (callbackHandler.getRecordType()) {
             case DATA -> {
-                if (fieldCountConsistencyCheck) {
-                    checkFieldCountConsistency(callbackHandler.getFieldCount());
+                if (fieldCountConsistencyCheck
+                    && !checkFieldCountConsistency(callbackHandler.getFieldCount())) {
+                    yield null;
                 }
 
                 yield csvRecord;
@@ -255,17 +259,32 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         };
     }
 
-    private void checkFieldCountConsistency(final int fieldCount) {
+    @SuppressWarnings("checkstyle:ReturnCount")
+    private boolean checkFieldCountConsistency(final int fieldCount) {
         if (firstRecordFieldCount == -1) {
             firstRecordFieldCount = fieldCount;
-            return;
+            return true;
         }
 
-        if ((fieldCount > firstRecordFieldCount && !allowExtraFields)
-            || (fieldCount < firstRecordFieldCount && !allowMissingFields)) {
-            throw new CsvParseException("Record %d has %d fields, but first record had %d fields"
-                .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+        if (fieldCount > firstRecordFieldCount) {
+            return handleMismatch(extraFieldStrategy, fieldCount);
         }
+
+        if (fieldCount < firstRecordFieldCount) {
+            return handleMismatch(missingFieldStrategy, fieldCount);
+        }
+
+        return true;
+    }
+
+    private boolean handleMismatch(final FieldMismatchStrategy strategy, final int fieldCount) {
+        return switch (strategy) {
+            case STRICT -> throw new CsvParseException(
+                "Record %d has %d fields, but first record had %d fields"
+                    .formatted(csvParser.getStartingLineNumber(), fieldCount, firstRecordFieldCount));
+            case IGNORE -> true;
+            case SKIP -> false;
+        };
     }
 
     @Override
@@ -278,8 +297,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         return new StringJoiner(", ", CsvReader.class.getSimpleName() + "[", "]")
             .add("commentStrategy=" + commentStrategy)
             .add("skipEmptyLines=" + skipEmptyLines)
-            .add("allowExtraFields=" + allowExtraFields)
-            .add("allowMissingFields=" + allowMissingFields)
+            .add("extraFieldStrategy=" + extraFieldStrategy)
+            .add("missingFieldStrategy=" + missingFieldStrategy)
             .add("parser=" + csvParser.getClass().getSimpleName())
             .toString();
     }
@@ -376,8 +395,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Skip empty lines: `true`
-    /// - Allow extra fields: `false`
-    /// - Allow missing fields: `false`
+    /// - Extra field strategy: [FieldMismatchStrategy#STRICT]
+    /// - Missing field strategy: [FieldMismatchStrategy#STRICT]
     /// - Allow extra characters after closing quotes: `false`
     /// - Trim whitespaces around quotes: `false`
     /// - Detect BOM header: `false`
@@ -395,8 +414,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private boolean skipEmptyLines = true;
-        private boolean allowExtraFields;
-        private boolean allowMissingFields;
+        private FieldMismatchStrategy extraFieldStrategy = FieldMismatchStrategy.STRICT;
+        private FieldMismatchStrategy missingFieldStrategy = FieldMismatchStrategy.STRICT;
         private boolean allowExtraCharsAfterClosingQuote;
         private boolean trimWhitespacesAroundQuotes;
         private boolean detectBomHeader;
@@ -487,15 +506,47 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return this;
         }
 
+        /// Defines the strategy for handling records that contain more fields than the first record.
+        /// The first record is defined as the first record that is not a comment or an empty line.
+        ///
+        /// @param extraFieldStrategy the strategy for extra fields (default: [FieldMismatchStrategy#STRICT]).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if extraFieldStrategy is `null`
+        /// @see #missingFieldStrategy(FieldMismatchStrategy)
+        public CsvReaderBuilder extraFieldStrategy(final FieldMismatchStrategy extraFieldStrategy) {
+            this.extraFieldStrategy =
+                Objects.requireNonNull(extraFieldStrategy, "extraFieldStrategy must not be null");
+            return this;
+        }
+
+        /// Defines the strategy for handling records that contain fewer fields than the first record.
+        /// The first record is defined as the first record that is not a comment or an empty line.
+        ///
+        /// Empty lines are allowed even if this is set to [FieldMismatchStrategy#STRICT].
+        ///
+        /// @param missingFieldStrategy the strategy for missing fields
+        ///                             (default: [FieldMismatchStrategy#STRICT]).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if missingFieldStrategy is `null`
+        /// @see #extraFieldStrategy(FieldMismatchStrategy)
+        /// @see #skipEmptyLines(boolean)
+        public CsvReaderBuilder missingFieldStrategy(final FieldMismatchStrategy missingFieldStrategy) {
+            this.missingFieldStrategy =
+                Objects.requireNonNull(missingFieldStrategy, "missingFieldStrategy must not be null");
+            return this;
+        }
+
         /// Defines whether a [CsvParseException] should be thrown if records contain
         /// more fields than the first record.
         /// The first record is defined as the first record that is not a comment or an empty line.
         ///
         /// @param allowExtraFields Whether extra fields should be allowed (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        /// @see #allowMissingFields(boolean)
+        /// @deprecated Use [#extraFieldStrategy(FieldMismatchStrategy)] instead.
+        @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowExtraFields(final boolean allowExtraFields) {
-            this.allowExtraFields = allowExtraFields;
+            this.extraFieldStrategy = allowExtraFields
+                ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
             return this;
         }
 
@@ -507,10 +558,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// @param allowMissingFields Whether missing fields should be allowed (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
-        /// @see #allowExtraFields(boolean)
-        /// @see #skipEmptyLines(boolean)
+        /// @deprecated Use [#missingFieldStrategy(FieldMismatchStrategy)] instead.
+        @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowMissingFields(final boolean allowMissingFields) {
-            this.allowMissingFields = allowMissingFields;
+            this.missingFieldStrategy = allowMissingFields
+                ? FieldMismatchStrategy.IGNORE : FieldMismatchStrategy.STRICT;
             return this;
         }
 
@@ -1001,7 +1053,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         private <T> CsvReader<T> newReader(final CsvCallbackHandler<T> callbackHandler, final CsvParser csvParser) {
             return new CsvReader<>(csvParser, callbackHandler,
-                commentStrategy, skipEmptyLines, allowExtraFields, allowMissingFields);
+                commentStrategy, skipEmptyLines, extraFieldStrategy, missingFieldStrategy);
         }
 
         @Override
@@ -1012,8 +1064,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("commentStrategy=" + commentStrategy)
                 .add("commentCharacter=" + commentCharacter)
                 .add("skipEmptyLines=" + skipEmptyLines)
-                .add("allowExtraFields=" + allowExtraFields)
-                .add("allowMissingFields=" + allowMissingFields)
+                .add("extraFieldStrategy=" + extraFieldStrategy)
+                .add("missingFieldStrategy=" + missingFieldStrategy)
                 .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
                 .add("trimWhitespacesAroundQuotes=" + trimWhitespacesAroundQuotes)
                 .add("detectBomHeader=" + detectBomHeader)

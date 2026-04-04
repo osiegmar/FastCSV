@@ -34,13 +34,13 @@ As the default has changed, you may need to check your code and your desired beh
 
 FastCSV 4.x no longer ignores different field counts by default, ensuring that data is not misinterpreted.
 
-You can change this behavior by calling `allowExtraFields(true)` and `allowMissingFields(true)` in the `CsvReaderBuilder`.
+You can change this behavior by calling `extraFieldStrategy(FieldMismatchStrategy.IGNORE)` and `missingFieldStrategy(FieldMismatchStrategy.IGNORE)` in the `CsvReaderBuilder`.
 These methods provide more control over how to handle different field counts in CSV data than the previous (now removed) `ignoreDifferentFieldCount()` method.
 
 ```java title="Example"
 CsvReaderBuilder builder = CsvReader.builder()
-    .allowExtraFields(true)
-    .allowMissingFields(true);
+    .extraFieldStrategy(FieldMismatchStrategy.IGNORE)
+    .missingFieldStrategy(FieldMismatchStrategy.IGNORE);
 
 try (CsvReader<CsvRecord> csv = builder.ofCsvRecord(csvFile)) {
     // ...

@@ -24,7 +24,7 @@ The main problem with those files is:
 
 - When working with named fields, the very first line (`This is an example of a CSV file that contains`)
   would be interpreted as the actual header line.
-- An exception would be thrown unless the options `allowExtraFields(true)` is set, as some lines have
+- An exception would be thrown with the default `extraFieldStrategy(FieldMismatchStrategy.STRICT)`, as some lines have
   more fields than the first line.
 
 FastCSV comes with two features to handle such files:

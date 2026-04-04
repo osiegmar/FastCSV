@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import de.siegmar.fastcsv.reader.CloseableIterator;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 
 public class FastCsvReadRelaxedBenchmark {
 
@@ -27,7 +28,7 @@ public class FastCsvReadRelaxedBenchmark {
         @Setup
         public void setup() {
             it = CsvReader.builder()
-                .allowMissingFields(true)
+                .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
                 .fieldSeparator("||")
                 .ofCsvRecord(new InfiniteDataReader(CsvConstants.DATA_WITH_MULTI_CHAR_SEPARATOR))
                 .iterator();
