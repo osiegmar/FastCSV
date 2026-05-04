@@ -1,0 +1,47 @@
+This file contains the OpenPGP public keys used to sign FastCSV
+releases published to Maven Central (https://central.sonatype.com/artifact/de.siegmar/fastcsv).
+
+To verify a release artifact:
+
+    gpg --import KEYS
+    gpg --verify fastcsv-<version>.jar.asc fastcsv-<version>.jar
+
+The output should report a "Good signature" from one of the keys
+listed below. The key fingerprint reported by gpg must match the
+fingerprint published in this file.
+
+-------------------------------------------------------------------
+
+pub   rsa2048/0xFF844A3256C7FB01 2016-03-05 [SC]
+      Key fingerprint: 206D F7C4 8E3D 6CB1 45DD  A835 FF84 4A32 56C7 FB01
+uid   Oliver Siegmar <oliver@siegmar.de>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mQENBFbajE4BCADV9z1xH9nDt2u0VIkDjgGu2lynAiRxoPy8eysPwx8f863rohmI
+3rZOXuBRnWvm+v31P0kLGNFi+107dqpco1KmYJYPc2TUa4NFamUOtSE7jWAJAKFR
+vivtDWITIJYPscwvJHsalYhOSrqSgCKw9+kNyoNQEXKKNPBLvMzDtpw3Z/YzJKZ3
+2zrFInxdxBykHgFyD9g4NQONdpFdUCEsjDKbw8lk/CvNTcWsPhCpHzbYlW+thhgF
+9YS9CvW5fQ7GskJMlzU0ntvJ5cJ23opVTetWcldgZIczkc5GZ/ivE4r6GiPRA3z4
+eJTvydsi5tnr3WPLY1xxUDYqhLb/9M7jexrHABEBAAG0Ik9saXZlciBTaWVnbWFy
+IDxvbGl2ZXJAc2llZ21hci5kZT6JATgEEwECACIFAlbajE4CGwMGCwkIBwMCBhUI
+AgkKCwQWAgMBAh4BAheAAAoJEP+ESjJWx/sBznAH/2bvXeFQYfgHwEN1PPMhIsao
+tdKYXsJVRu1W/GmNuW+jWKoww9N5kvvaNxOVvZu1PkQQC/eLYE25ofVw1u1Sakku
+QgjjIcJ5xHyTw4nlf7HbXmBf6F8QSSu5qlCqlZrfXLMKW+th9OOqHpxIgMYZ9d3Y
+qyFxa6Scph+qEs4tb4dCJMJTZPBsR2WPP5Y+evgocFilOLC/bd9oYCWsmUiKwzlg
+smX9JPMhh/qLA3/hAtVdZWwHaoYkBzmFz/EYeuHh8osuhdiVm6PThOzYszHDLEZW
+6gUreHY8YZAXmfkaFSKmlcSvlN89JiD4XHot/Custdgg4yArcwbE5ucG3t5psJC5
+AQ0EVtqMTgEIAMZYLk0Xsy4eA5F2Iz1fR6w71tMW1P/bqcBzmU/Fq8QtomHrlgLx
+lutLvW00vAc0sFLtl4Do04uEueGgJKahfUVzf7NmsVoBuKKL+yFCevlWZ515wFSe
+2ArKu+8aDt1H1qQX0FClHuYtd1U892Xd6FqECCOctw5R4T5IfEm3ecTDhnrtKOxf
+ILeWEVP1W2NTjFvRPoDVNimU6uNZmjADjET3hM5YlQa/sNmhfIzeFqDQPES4ccBt
+U5FEMXTySeRG0/G5cLbdmbWGiT/cRBY3HATr3wT2qSCQ9L7AwS7BvfV7pZR8WNdl
+3v/5wbOdAxFWYutRL8ntCHL6hyTtyISXNGMAEQEAAYkBHwQYAQIACQUCVtqMTgIb
+DAAKCRD/hEoyVsf7ASHQB/4ybW6nbMKzYkzkB+KzitPEh767HsYmDpS7rrYtk2ga
+a9TvXu019WanJ3IN5a87wAlUC3KTqHJ5AVJL7vFWshgcV1ZqmQzKPmnYLbzvbMMv
+3zxxSZWkYSJ+ZgLAt8eTUIG4uOY/0TJusquM4Fs3Q72zRN45VJ5wyVqerYxCZzXU
+nzrSNjt8gCboCzCEQetzL2TwVyffYgGRZbLJ7C30NEDaJfMVEohO7Dr+9Zwp/AAn
+fOy286UWC04IKudUF01bifwv2zCnN6pjYV1op6XGPCA8mL2Ab2TeNrrjNuJOTt18
+pDX6+XSEim731CgDdWXkMpP2sF5UgeJ5ccecPYdG6WC+
+=xM4A
+-----END PGP PUBLIC KEY BLOCK-----
