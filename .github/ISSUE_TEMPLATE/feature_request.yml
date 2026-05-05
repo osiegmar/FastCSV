@@ -1,0 +1,54 @@
+name: Feature Request
+description: Suggest a concrete feature or API change.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Not sure yet if your idea fits, or asking whether something is already
+        possible? Please start a [discussion](https://github.com/osiegmar/FastCSV/discussions)
+        first — feature request issues are for concrete, well-scoped proposals.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Before submitting
+      options:
+        - label: >
+            I've searched [existing issues](https://github.com/osiegmar/FastCSV/issues?q=is%3Aissue)
+            and [discussions](https://github.com/osiegmar/FastCSV/discussions) and found no duplicate.
+          required: true
+        - label: >
+            I've checked the [API documentation](https://javadoc.io/doc/de.siegmar/fastcsv)
+            for existing functionality.
+          required: true
+        - label: >
+            I've reviewed the [examples](https://www.fastcsv.org/guides/examples/)
+            for existing patterns that solve the same problem.
+          required: true
+        - label: >
+            I've considered how this feature aligns with the
+            [goals of FastCSV](https://www.fastcsv.org/architecture/goals/).
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: A clear and concise description of any alternative solutions or features you've considered.

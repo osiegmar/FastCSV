@@ -1,62 +1,60 @@
 ---
 title: Contribution
-description: "How to contribute to FastCSV: prerequisites, project setup, code quality requirements, and pull request guidelines."
+description: >
+  How to contribute to FastCSV: reporting bugs, suggesting ideas,
+  improving documentation, and supporting the project.
 ---
 
-import { Steps } from '@astrojs/starlight/components';
+Are you considering contributing to this project?
+That's great; help is always welcome — and contributing is about much more than writing code.
 
-Are you considering contributing to this project? That's great; help is always welcome.
+:::note
+FastCSV does not accept pull requests.
+Maintaining a small, focused, high-quality library means every change has to fit the project's
+[goals](/architecture/goals/) and [architecture](/architecture/architecture/),
+and meet strict requirements for performance, test coverage, and API design.
+In practice, very few drive-by PRs clear that bar, and reviewing them takes time away from moving the project forward.
 
-:::tip
-If you are not contributing a very obvious bug fix or documentation update, please start a
-[discussion](https://github.com/osiegmar/FastCSV/discussions) about your idea first.
-This will help to avoid wasted effort and ensure that your contribution is in line with the project's goals.
+Please use the channels below instead.
 :::
 
-<Steps>
-0. Prerequisites
+## Reporting a bug
 
-    - Understand and respect the [goals of the project](/architecture/goals/)
-    - Get familiar with the [architecture](/architecture/architecture/)
-    - Accept the [MIT license](https://opensource.org/license/mit) that will also apply to your contributions
-    - Have Java 25 on your path
+Found something that looks like a bug?
+[Open a bug report](https://github.com/osiegmar/FastCSV/issues/new?template=bug_report.yml).
+The template will ask for everything needed to reproduce and diagnose it —
+the more of those fields you can fill in concretely, the faster a fix can land.
 
-1. Fork the [repository](https://github.com/osiegmar/FastCSV) and clone it to your local machine
+## Suggesting an idea
 
-    See [GitHub's documentation](https://docs.github.com/en/get-started/quickstart/fork-a-repo) for more information.
+For concrete feature requests, API changes, or behavior tweaks,
+[open a feature request](https://github.com/osiegmar/FastCSV/issues/new?template=feature_request.yml).
+The template asks you to describe the problem, the solution you'd like, and alternatives you've considered.
 
-2. Create a feature branch from the `develop` branch
+If you're not sure yet whether your idea fits — or you just want to think out loud about a use case —
+a [discussion](https://github.com/osiegmar/FastCSV/discussions) is the better starting point.
+FastCSV deliberately stays small, fast, and dependency-free,
+so many reasonable-sounding features turn out to be out of scope.
 
-    The `main` branch is reserved for the current released version. Always base your work on the `develop` branch:
+## Improving the documentation
 
-    ```bash
-    git fetch origin
-    git checkout -b feature/my-feature origin/develop
-    ```
+Documentation issues — unclear wording, missing examples, broken links, outdated information — are very welcome.
+[Open a documentation issue](https://github.com/osiegmar/FastCSV/issues/new?template=documentation.yml)
+describing what you'd like to see changed and where.
 
-3. Write code and tests
+## Helping other users
 
-    FastCSV enforces top-notch test coverage. Make sure to write proper tests for your code.
+Answering questions in [discussions](https://github.com/osiegmar/FastCSV/discussions)
+is one of the most valuable ways to contribute.
+If you've solved a tricky problem with FastCSV, sharing how you did it helps the next person who hits the same wall.
 
-4. Build the project, run tests and static code analysis
+## Sharing how you use FastCSV
 
-    ```bash
-    ./gradlew build
-    ```
+If FastCSV is part of something you've built — an open-source project, a blog post, a benchmark, a talk —
+I'd love to hear about it in the [discussions](https://github.com/osiegmar/FastCSV/discussions).
+Real-world usage shapes the project's direction.
 
-    To prevent performance degradation, run and compare benchmarks:
+## Spreading the word
 
-    ```bash
-    ./gradlew jmh
-    ```
-
-5. Update documentation
-
-    - Add your change to the `CHANGELOG.md`
-    - Check documentation `/docs/` for required updates or create new documentation
-    - Update the `README.md` if necessary
-
-6. Commit, push and create a pull request
-
-    See [GitHub's documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) for more information.
-</Steps>
+Starring the [repository](https://github.com/osiegmar/FastCSV), recommending FastCSV where it fits,
+or mentioning it to a colleague who's wrestling with CSV all help the project stay healthy.

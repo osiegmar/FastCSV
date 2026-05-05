@@ -1,0 +1,25 @@
+name: Documentation
+description: Report unclear, missing, or incorrect documentation.
+labels: [documentation]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page or section
+      description: URL or file path of the documentation page in question.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's unclear, wrong, or missing
+      description: Describe the issue concretely. Quote the specific wording if helpful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: How would you phrase or structure it instead?

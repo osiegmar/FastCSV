@@ -1,0 +1,84 @@
+name: Bug Report
+description: Report a bug to help us improve FastCSV.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thanks for taking the time to report a bug. Please fill in the fields below as
+        concretely as possible — the more detail, the faster a fix can land.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Before submitting
+      options:
+        - label: >
+            I've searched [existing issues](https://github.com/osiegmar/FastCSV/issues?q=is%3Aissue)
+            and [discussions](https://github.com/osiegmar/FastCSV/discussions) and found no duplicate.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current behavior
+      description: Describe what is currently happening.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen. If not obvious, please tell why you expected that behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: >
+        Share a code snippet (ideally a unit test) to reproduce the issue.
+        Include or attach the input data if needed.
+      render: java
+    validations:
+      required: true
+
+  - type: input
+    id: fastcsv-version
+    attributes:
+      label: FastCSV version
+      placeholder: e.g. 4.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java or Android version
+      description: For Java, the output of `java -version`. For Android, the Android version (and API level if known).
+      placeholder: e.g. Java 21.0.5 or Android 14 (API 34)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Android
+        - Other
+    validations:
+      required: true

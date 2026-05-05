@@ -2,4 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Discussions
     url: https://github.com/osiegmar/FastCSV/discussions
-    about: For questions and general discussions please use Discussions and do not open an issue.
+    about: >
+      Have a question, want to check if something is already possible, or want to
+      discuss an idea before formalizing it? Please use Discussions instead of
+      opening an issue.
