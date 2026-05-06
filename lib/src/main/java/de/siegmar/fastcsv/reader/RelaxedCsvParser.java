@@ -164,12 +164,16 @@ final class RelaxedCsvParser implements CsvParser {
     })
     private boolean parseUnquoted(int ch) throws IOException {
         boolean endOfRecord = true;
+        boolean onlyWhitespace = true;
 
         do {
             // fast-forward
             while (currentFieldIndex < currentField.length && reader.len > reader.start
                 && ch != CR && ch != LF && ch != fsep && ch != qChar) {
                 currentField[currentFieldIndex++] = (char) ch;
+                if (onlyWhitespace && ch > SPACE) {
+                    onlyWhitespace = false;
+                }
                 ch = reader.buffer[reader.start++];
             }
 
@@ -184,26 +188,20 @@ final class RelaxedCsvParser implements CsvParser {
             if (ch == LF) {
                 break;
             }
-            if (ch == qChar && trimWhitespacesAroundQuotes && currentFieldHasOnlyWhitespace()) {
+            if (ch == qChar && trimWhitespacesAroundQuotes && onlyWhitespace) {
                 currentFieldIndex = 0;
                 return parseQuoted();
             }
 
             appendChar(ch);
+            if (onlyWhitespace && ch > SPACE) {
+                onlyWhitespace = false;
+            }
         } while ((ch = reader.read()) != EOF);
 
         callbackHandler.addField(currentField, 0, currentFieldIndex, false);
         currentFieldIndex = 0;
         return endOfRecord;
-    }
-
-    private boolean currentFieldHasOnlyWhitespace() {
-        for (int i = 0; i < currentFieldIndex; i++) {
-            if (currentField[i] > SPACE) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @SuppressWarnings({
