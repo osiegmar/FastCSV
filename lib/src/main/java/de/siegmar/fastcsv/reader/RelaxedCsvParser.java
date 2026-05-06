@@ -362,13 +362,11 @@ final class RelaxedCsvParser implements CsvParser {
         }
 
         int read() throws IOException {
-            ensureBuffered(1);
-            return start >= len ? -1 : buffer[start++];
+            return ensureBuffered(1) ? buffer[start++] : -1;
         }
 
         boolean consumeLF() throws IOException {
-            ensureBuffered(1);
-            if (start >= len || buffer[start] != LF) {
+            if (!ensureBuffered(1) || buffer[start] != LF) {
                 return false;
             }
             start++;
@@ -377,8 +375,7 @@ final class RelaxedCsvParser implements CsvParser {
 
         @SuppressWarnings("PMD.UseVarargs")
         boolean consumeIf(final char[] chars) throws IOException {
-            ensureBuffered(chars.length);
-            if (len - start < chars.length) {
+            if (!ensureBuffered(chars.length)) {
                 return false;
             }
             for (int i = 0; i < chars.length; i++) {
@@ -391,29 +388,28 @@ final class RelaxedCsvParser implements CsvParser {
         }
 
         String peekLine() throws IOException {
+            if (!ensureBuffered(1)) {
+                throw new EOFException();
+            }
             int scan = 0;
-            while (true) {
+            do {
                 while (start + scan < len
                     && buffer[start + scan] != CR && buffer[start + scan] != LF) {
                     scan++;
                 }
-                if (start + scan < len) {
-                    return new String(buffer, start, scan);
-                }
-                ensureBuffered(scan + 1);
-                if (start + scan >= len) {
-                    if (scan == 0) {
-                        throw new EOFException();
-                    }
-                    return new String(buffer, start, scan);
-                }
-            }
+            } while (start + scan >= len && ensureBuffered(scan + 1));
+            return new String(buffer, start, scan);
         }
 
-        private void ensureBuffered(final int required) throws IOException {
+        /// Ensures `required` characters are available in the buffer.
+        /// Returns `true` if so, `false` if EOF was reached before that count was met.
+        private boolean ensureBuffered(final int required) throws IOException {
+            if (len == -1) {
+                return false;
+            }
             final int available = len - start;
-            if (len == -1 || required <= available) {
-                return;
+            if (required <= available) {
+                return true;
             }
 
             if (required > buffer.length) {
@@ -427,7 +423,7 @@ final class RelaxedCsvParser implements CsvParser {
                 buffer = newBuf;
                 start = 0;
                 len = available;
-            } else if (start > 0 && required > buffer.length - start) {
+            } else if (required > buffer.length - start) {
                 // compact
                 System.arraycopy(buffer, start, buffer, 0, available);
                 start = 0;
@@ -438,11 +434,14 @@ final class RelaxedCsvParser implements CsvParser {
             while (len - start < required) {
                 final int count = reader.read(buffer, len, buffer.length - len);
                 if (count == -1) {
-                    len = (start >= len) ? -1 : len;
+                    if (start >= len) {
+                        len = -1;
+                    }
                     break;
                 }
                 len += count;
             }
+            return len - start >= required;
         }
 
         void skip(final int numCharsToSkip) {
