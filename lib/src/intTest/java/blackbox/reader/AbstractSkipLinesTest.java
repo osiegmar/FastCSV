@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -222,6 +223,55 @@ abstract class AbstractSkipLinesTest {
             .satisfies(rec -> NamedCsvRecordAssert.assertThat(rec)
                 .isStartingLineNumber(5).fields()
                 .containsExactly(entry("header1", "value1"), entry("header2", "value2")));
+    }
+
+    @Test
+    void peekLineSeesContentBeyondInternalBuffer() {
+        // The relaxed parser's lookahead buffer is 8 KiB; ensure peekLine still returns
+        // the full line so a predicate can inspect content past that boundary.
+        final String filler = "X".repeat(9000);
+        final String marker = "=END=";
+        final String longField = filler + marker;
+        final String data = longField + ",aux\nheader1,header2\nvalue1,value2\n";
+
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(new StringReader(data));
+
+        final int linesSkipped = csv.skipLines(line -> line.contains(marker), 5);
+
+        assertThat(linesSkipped).isZero();
+        assertThat(csv.stream()).satisfiesExactly(
+            rec1 -> CsvRecordAssert.assertThat(rec1)
+                .isStartingLineNumber(1).fields().containsExactly(longField, "aux"),
+            rec2 -> CsvRecordAssert.assertThat(rec2)
+                .isStartingLineNumber(2).fields().containsExactly("header1", "header2"),
+            rec3 -> CsvRecordAssert.assertThat(rec3)
+                .isStartingLineNumber(3).fields().containsExactly("value1", "value2"));
+    }
+
+    // Probe lengths around the 8 KiB lookahead boundary (8190..8194) with both LF and CRLF.
+    // A predicate that matches only on the *exact* line content fails if peekLine
+    // truncates at the boundary or splits CR/LF across a refill.
+    @ParameterizedTest
+    @ValueSource(ints = {8190, 8191, 8192, 8193, 8194})
+    void peekLineAtBufferBoundaryLf(final int lineLen) {
+        assertPeekLineExact(lineLen, "\n");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {8190, 8191, 8192, 8193, 8194})
+    void peekLineAtBufferBoundaryCrLf(final int lineLen) {
+        assertPeekLineExact(lineLen, "\r\n");
+    }
+
+    private void assertPeekLineExact(final int lineLen, final String terminator) {
+        final String line = "X".repeat(lineLen);
+        final String data = line + terminator + "trailing\n";
+
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(new StringReader(data));
+
+        final int linesSkipped = csv.skipLines(line::equals, 5);
+
+        assertThat(linesSkipped).isZero();
     }
 
     @Test

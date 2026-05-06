@@ -634,11 +634,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// The size of the internal buffer is automatically adjusted to the needs of the parser.
         /// To protect against out-of-memory errors, its maximum size is limited.
         ///
-        /// The buffer is used for two purposes:
+        /// The buffer is used for several purposes:
         ///   - Reading data from the underlying stream of data in chunks
         ///   - Storing the data of a single field before it is passed to the callback handler
+        ///   - Buffering a full physical line when peeking ahead for
+        ///     [CsvReader#skipLines(Predicate, int)]
         ///
-        /// Set a larger value only if you expect to read fields larger than the default limit.
+        /// Set a larger value only if you expect to read fields or lines larger than the default limit.
         /// In that case you probably **also need to adjust** the maximum field size of the callback handler.
         ///
         /// Set a smaller value if your runtime environment has not enough memory available for the default value.

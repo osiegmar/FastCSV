@@ -61,8 +61,9 @@ final class RelaxedCsvParser implements CsvParser {
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
-        this.reader = new LookaheadReader(reader, DEFAULT_BUFFER_SIZE);
-        currentField = new char[Math.min(maxBufferSize, DEFAULT_BUFFER_SIZE)];
+        final int initialBufferSize = Math.min(maxBufferSize, DEFAULT_BUFFER_SIZE);
+        this.reader = new LookaheadReader(reader, initialBufferSize, maxBufferSize);
+        currentField = new char[initialBufferSize];
     }
 
     @SuppressWarnings("checkstyle:ParameterNumber")
@@ -82,7 +83,8 @@ final class RelaxedCsvParser implements CsvParser {
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
-        reader = new LookaheadReader(new StringReader(data), Math.max(data.length(), 1));
+        final int dataSize = Math.max(data.length(), 1);
+        reader = new LookaheadReader(new StringReader(data), dataSize, dataSize);
         currentField = new char[Math.min(maxBufferSize, data.length())];
     }
 
@@ -348,12 +350,14 @@ final class RelaxedCsvParser implements CsvParser {
     private static final class LookaheadReader implements Closeable {
 
         private final Reader reader;
-        private final char[] buffer;
+        private final int maxBufferSize;
+        private char[] buffer;
         private int start;
         private int len;
 
-        LookaheadReader(final Reader reader, final int bufferSize) {
+        LookaheadReader(final Reader reader, final int bufferSize, final int maxBufferSize) {
             this.reader = reader;
+            this.maxBufferSize = maxBufferSize;
             buffer = new char[bufferSize];
         }
 
@@ -387,15 +391,23 @@ final class RelaxedCsvParser implements CsvParser {
         }
 
         String peekLine() throws IOException {
-            ensureBuffered(buffer.length);
-            if (start >= len) {
-                throw new EOFException();
+            int scan = 0;
+            while (true) {
+                while (start + scan < len
+                    && buffer[start + scan] != CR && buffer[start + scan] != LF) {
+                    scan++;
+                }
+                if (start + scan < len) {
+                    return new String(buffer, start, scan);
+                }
+                ensureBuffered(scan + 1);
+                if (start + scan >= len) {
+                    if (scan == 0) {
+                        throw new EOFException();
+                    }
+                    return new String(buffer, start, scan);
+                }
             }
-            int endIndex = start;
-            while (endIndex < len && buffer[endIndex] != CR && buffer[endIndex] != LF) {
-                endIndex++;
-            }
-            return new String(buffer, start, endIndex - start);
         }
 
         private void ensureBuffered(final int required) throws IOException {
@@ -404,12 +416,22 @@ final class RelaxedCsvParser implements CsvParser {
                 return;
             }
 
-            // relocate the buffer if necessary
-            if (start > 0 && required > buffer.length - start) {
-                final int remaining = len - start;
-                System.arraycopy(buffer, start, buffer, 0, remaining);
+            if (required > buffer.length) {
+                // grow (relocates `start` to 0 along the way)
+                if (required > maxBufferSize) {
+                    throw new CsvParseException("The maximum buffer size of %d is insufficient to read a single line."
+                        .formatted(maxBufferSize));
+                }
+                final char[] newBuf = new char[Math.min(maxBufferSize, Math.max(buffer.length * 2, required))];
+                System.arraycopy(buffer, start, newBuf, 0, available);
+                buffer = newBuf;
                 start = 0;
-                len = remaining;
+                len = available;
+            } else if (start > 0 && required > buffer.length - start) {
+                // compact
+                System.arraycopy(buffer, start, buffer, 0, available);
+                start = 0;
+                len = available;
             }
 
             // fetch more data
