@@ -160,7 +160,7 @@ final class StrictCsvParser implements CsvParser {
                         final char c = lBuf[lPos++];
 
                         if (c == qChar) {
-                            lStatus &= ~STATUS_QUOTED_MODE;
+                            lStatus &= ~(STATUS_QUOTED_MODE | STATUS_LAST_CHAR_WAS_CR);
                             continue mode_check;
                         } else if (c == CR) {
                             lStatus |= STATUS_LAST_CHAR_WAS_CR;

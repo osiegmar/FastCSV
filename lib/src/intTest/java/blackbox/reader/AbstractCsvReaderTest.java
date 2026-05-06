@@ -267,6 +267,20 @@ abstract class AbstractCsvReaderTest {
             );
     }
 
+    @Test
+    void crInsideQuotedFieldDoesNotSwallowSubsequentLf() {
+        // Bare CR inside a quoted field must not poison the LF check that follows
+        // the closing quote — the LF is a record terminator, not the second half
+        // of a CRLF pair belonging to the in-field CR.
+        final Stream<CsvRecord> stream = crb.ofCsvRecord("\"a\rb\"\nc").stream();
+
+        assertThat(stream).satisfiesExactly(
+            rec1 -> CsvRecordAssert.assertThat(rec1).isStartingLineNumber(1)
+                .fields().containsExactly("a\rb"),
+            rec2 -> CsvRecordAssert.assertThat(rec2).isStartingLineNumber(3)
+                .fields().containsExactly("c"));
+    }
+
     // comment
 
     @Test
