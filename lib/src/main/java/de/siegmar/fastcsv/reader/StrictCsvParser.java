@@ -358,8 +358,6 @@ final class StrictCsvParser implements CsvParser {
             throw new EOFException();
         }
 
-        final int savedPos = csvBuffer.pos;
-
         for (; csvBuffer.pos < csvBuffer.len || csvBuffer.fetchData(); csvBuffer.pos++) {
             final char c = csvBuffer.buf[csvBuffer.pos];
             if (c == CR || c == LF) {
@@ -368,7 +366,7 @@ final class StrictCsvParser implements CsvParser {
         }
 
         final String s = new String(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos - csvBuffer.begin);
-        csvBuffer.pos = savedPos;
+        csvBuffer.pos = csvBuffer.begin;
         return s;
     }
 

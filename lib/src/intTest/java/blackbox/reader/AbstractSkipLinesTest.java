@@ -248,6 +248,23 @@ abstract class AbstractSkipLinesTest {
                 .isStartingLineNumber(3).fields().containsExactly("value1", "value2"));
     }
 
+    @Test
+    void peekLineSurvivesBufferCompaction() {
+        // Force buffer compaction during peekLine's scan: skip a long first line
+        // (so begin advances past the internal readSize), then peek a second long line
+        // (so the scan exhausts the buffered tail and triggers compact-then-fetch).
+        // A bug that captures `pos` as an absolute index and restores it post-compact
+        // would leave the parser positioned mid-record afterwards.
+        final int chunk = 8500;
+        final String data = "S".repeat(chunk) + "\n" + "P".repeat(chunk) + "\nlast";
+
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(new StringReader(data));
+
+        // Predicate matches the 3rd line. Forces peekLine on the 2nd (compaction-triggering)
+        // line to be skipped past, exercising the post-peek pos/begin invariants.
+        assertThat(csv.skipLines("last"::equals, 5)).isEqualTo(2);
+    }
+
     // Probe lengths around the 8 KiB lookahead boundary (8190..8194) with both LF and CRLF.
     // A predicate that matches only on the *exact* line content fails if peekLine
     // truncates at the boundary or splits CR/LF across a refill.
