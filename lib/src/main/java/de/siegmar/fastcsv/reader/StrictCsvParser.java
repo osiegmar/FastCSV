@@ -345,6 +345,9 @@ final class StrictCsvParser implements CsvParser {
     public void reset(final long startingLineNumber) {
         this.startingLineNumber = startingLineNumber;
         csvBuffer.reset();
+        lines = 1;
+        status = STATUS_RESET;
+        finished = false;
     }
 
     @Override

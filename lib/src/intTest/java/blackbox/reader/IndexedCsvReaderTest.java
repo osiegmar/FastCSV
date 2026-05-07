@@ -111,6 +111,40 @@ class IndexedCsvReaderTest {
     }
 
     @Test
+    void resetClearsLineCounterBetweenPages() throws IOException {
+        // Page 0 contains a 2-line quoted field, so the parser bumps `lines` to 2.
+        // Page 1 must report its record's startingLineNumber from a fresh state,
+        // not inherit the leaked `lines` from the previous page.
+        try (var csv = buildSinglePage("\"a\nb\"\nc")) {
+            assertThat(csv.readPage(0))
+                .singleElement(CsvRecordAssert.CSV_RECORD)
+                .isStartingLineNumber(1).fields().containsExactly("a\nb");
+            assertThat(csv.readPage(1))
+                .singleElement(CsvRecordAssert.CSV_RECORD)
+                .isStartingLineNumber(3).fields().containsExactly("c");
+        }
+    }
+
+    @Test
+    void resetClearsFinishedFlag() throws IOException {
+        // Reading the partial last page calls parse() pageSize times;
+        // the trailing call hits EOF and sets parser.finished = true.
+        // A subsequent re-read of any page must still succeed; the leaked
+        // `finished` flag would otherwise cause parse() to short-circuit
+        // and return an empty list.
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+        try (var csv = icrb.ofCsvRecord(prepareTestFile("a\nb\nc"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(CsvRecordAssert.CSV_RECORD)
+                .fields().containsExactly("c");
+            assertThat(csv.readPage(0))
+                .satisfiesExactly(
+                    rec1 -> CsvRecordAssert.assertThat(rec1).fields().containsExactly("a"),
+                    rec2 -> CsvRecordAssert.assertThat(rec2).fields().containsExactly("b"));
+        }
+    }
+
+    @Test
     void explicitCharset() throws IOException {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("abc\nüöä\nabc"), StandardCharsets.UTF_8)) {
             final CsvIndex index = csv.getIndex();
