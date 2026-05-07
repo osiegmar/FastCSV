@@ -68,6 +68,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private final CloseableIterator<T> csvRecordIterator = new CsvRecordIterator();
 
     private int firstRecordFieldCount = -1;
+    private boolean parsingStarted;
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     CsvReader(final CsvParser csvParser, final CsvCallbackHandler<T> callbackHandler,
@@ -95,15 +96,25 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     /// Skips the specified number of lines.
     ///
+    /// **Note:** "lines" here means *physical* lines terminated by `CR`, `LF`, or `CRLF` —
+    /// not CSV records. This method is intended for skipping non-CSV preamble lines that
+    /// appear before the actual CSV data starts and must therefore be called before any
+    /// records are read; once iteration has begun this method throws
+    /// [IllegalStateException].
+    ///
     /// The setting [CsvReaderBuilder#skipEmptyLines(boolean)] has no effect on this method.
     ///
     /// @param lineCount the number of lines to skip.
     /// @throws IllegalArgumentException if lineCount is negative.
+    /// @throws IllegalStateException    if any CSV records have already been read.
     /// @throws UncheckedIOException     if an I/O error occurs.
     /// @throws CsvParseException        unless enough lines are available to skip.
     public void skipLines(final int lineCount) {
         if (lineCount < 0) {
             throw new IllegalArgumentException("lineCount must be non-negative");
+        }
+        if (parsingStarted) {
+            throw new IllegalStateException("skipLines must be called before any CSV records are read");
         }
 
         int i = 0;
@@ -123,6 +134,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     ///
     /// The method returns the number of lines actually skipped.
     ///
+    /// **Note:** "lines" here means *physical* lines terminated by `CR`, `LF`, or `CRLF` —
+    /// not CSV records. The predicate sees each physical line as a plain string, with no
+    /// awareness of quoting or escaping. This method is intended for skipping non-CSV
+    /// preamble lines that appear before the actual CSV data starts and must therefore be
+    /// called before any records are read; once iteration has begun this method throws
+    /// [IllegalStateException].
+    ///
     /// The setting [CsvReaderBuilder#skipEmptyLines(boolean)] has no effect on this method.
     ///
     /// @param predicate the predicate to match the lines.
@@ -130,12 +148,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// @return the number of lines actually skipped.
     /// @throws NullPointerException if predicate is `null`.
     /// @throws IllegalArgumentException if maxLines is negative.
+    /// @throws IllegalStateException if any CSV records have already been read.
     /// @throws UncheckedIOException if an I/O error occurs.
     /// @throws CsvParseException if no matching line is found within the maximum limit of maxLines.
     public int skipLines(final Predicate<String> predicate, final int maxLines) {
         Objects.requireNonNull(predicate, "predicate must not be null");
         if (maxLines < 0) {
             throw new IllegalArgumentException("maxLines must be non-negative");
+        }
+        if (parsingStarted) {
+            throw new IllegalStateException("skipLines must be called before any CSV records are read");
         }
 
         if (maxLines == 0) {
@@ -222,6 +244,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     @Nullable
     private T fetchRecord() throws IOException {
+        parsingStarted = true;
         while (csvParser.parse()) {
             final T csvRecord = processRecord();
 

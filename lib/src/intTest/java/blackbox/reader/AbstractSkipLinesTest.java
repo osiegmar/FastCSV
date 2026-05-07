@@ -300,6 +300,24 @@ abstract class AbstractSkipLinesTest {
     }
 
     @Test
+    void skipLinesCountAfterIterationStartedThrows() {
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("a\nb\nc");
+        assertThat(csv.iterator()).hasNext();
+        assertThatThrownBy(() -> csv.skipLines(1))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("skipLines must be called before any CSV records are read");
+    }
+
+    @Test
+    void skipLinesPredicateAfterIterationStartedThrows() {
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("a\nb\nc");
+        assertThat(csv.iterator()).hasNext();
+        assertThatThrownBy(() -> csv.skipLines(_ -> true, 1))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("skipLines must be called before any CSV records are read");
+    }
+
+    @Test
     void predicateNotCalledForEmptyLine() {
         final Predicate<String> p = line -> {
             if (!"A".equals(line)) {
