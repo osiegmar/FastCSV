@@ -440,6 +440,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         private FieldMismatchStrategy extraFieldStrategy = FieldMismatchStrategy.STRICT;
         private FieldMismatchStrategy missingFieldStrategy = FieldMismatchStrategy.STRICT;
         private boolean allowExtraCharsAfterClosingQuote;
+        private boolean allowUnclosedQuote = true;
         private boolean trimWhitespacesAroundQuotes;
         private boolean detectBomHeader;
         private int maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
@@ -602,6 +603,25 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
             this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
+            return this;
+        }
+
+        /// Defines whether input that ends inside a quoted field (EOF before a closing quote) is tolerated.
+        ///
+        /// Example: `"foo,bar`
+        ///
+        /// If this is set to `true`, the value `foo,bar` will be returned as a single field; otherwise,
+        /// a [CsvParseException] will be thrown.
+        ///
+        /// Independent of this flag, a [CsvParseException] is thrown if the unclosed region exceeds
+        /// [#maxBufferSize(int)].
+        ///
+        /// **The default will change to `false` in version 5.0.**
+        ///
+        /// @param allowUnclosedQuote allow input ending inside a quoted field (default: `true`).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public CsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
+            this.allowUnclosedQuote = allowUnclosedQuote;
             return this;
         }
 
@@ -981,12 +1001,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             final CsvParser csvParser;
             if (isRelaxedConfiguration()) {
                 csvParser = new RelaxedCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                    commentCharacter, trimWhitespacesAroundQuotes, callbackHandler,
+                    commentCharacter, trimWhitespacesAroundQuotes, allowUnclosedQuote, callbackHandler,
                     maxBufferSize, reader
                 );
             } else {
                 csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
-                    commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, maxBufferSize, reader);
+                    commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
+                    callbackHandler, maxBufferSize, reader);
             }
 
             return newReader(callbackHandler, csvParser);
@@ -1009,12 +1030,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             final CsvParser csvParser;
             if (isRelaxedConfiguration()) {
                 csvParser = new RelaxedCsvParser(fieldSeparator, quoteCharacter, commentStrategy,
-                    commentCharacter, trimWhitespacesAroundQuotes, callbackHandler,
+                    commentCharacter, trimWhitespacesAroundQuotes, allowUnclosedQuote, callbackHandler,
                     maxBufferSize, data
                 );
             } else {
                 csvParser = new StrictCsvParser(fieldSeparator.charAt(0), quoteCharacter, commentStrategy,
-                    commentCharacter, allowExtraCharsAfterClosingQuote, callbackHandler, data);
+                    commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
+                    callbackHandler, data);
             }
 
             return newReader(callbackHandler, csvParser);
@@ -1092,6 +1114,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
                 .add("extraFieldStrategy=" + extraFieldStrategy)
                 .add("missingFieldStrategy=" + missingFieldStrategy)
                 .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
+                .add("allowUnclosedQuote=" + allowUnclosedQuote)
                 .add("trimWhitespacesAroundQuotes=" + trimWhitespacesAroundQuotes)
                 .add("detectBomHeader=" + detectBomHeader)
                 .add("maxBufferSize=" + maxBufferSize)

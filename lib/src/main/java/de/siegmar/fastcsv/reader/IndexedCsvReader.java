@@ -51,6 +51,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final CommentStrategy commentStrategy;
     private final char commentCharacter;
     private final boolean allowExtraCharsAfterClosingQuote;
+    private final boolean allowUnclosedQuote;
     private final int pageSize;
     private final RandomAccessFile raf;
     private final Lock fileLock = new ReentrantLock();
@@ -63,6 +64,7 @@ public final class IndexedCsvReader<T> implements Closeable {
                      final char fieldSeparator, final char quoteCharacter,
                      final CommentStrategy commentStrategy, final char commentCharacter,
                      final boolean allowExtraCharsAfterClosingQuote,
+                     final boolean allowUnclosedQuote,
                      final int maxBufferSize,
                      final int pageSize,
                      final CsvCallbackHandler<T> csvRecordHandler,
@@ -78,6 +80,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         this.commentStrategy = commentStrategy;
         this.commentCharacter = commentCharacter;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
+        this.allowUnclosedQuote = allowUnclosedQuote;
         this.pageSize = pageSize;
         this.csvRecordHandler = csvRecordHandler;
 
@@ -103,7 +106,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         raf = new RandomAccessFile(file.toFile(), "r");
         csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            allowExtraCharsAfterClosingQuote, csvRecordHandler, maxBufferSize,
+            allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize,
             new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
     }
 
@@ -260,6 +263,7 @@ public final class IndexedCsvReader<T> implements Closeable {
             .add("commentStrategy=" + commentStrategy)
             .add("commentCharacter=" + commentCharacter)
             .add("allowExtraCharsAfterClosingQuote=" + allowExtraCharsAfterClosingQuote)
+            .add("allowUnclosedQuote=" + allowUnclosedQuote)
             .add("pageSize=" + pageSize)
             .add("index=" + csvIndex)
             .toString();
@@ -291,6 +295,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         private CommentStrategy commentStrategy = CommentStrategy.NONE;
         private char commentCharacter = '#';
         private boolean allowExtraCharsAfterClosingQuote;
+        private boolean allowUnclosedQuote = true;
 
         @Nullable
         private StatusListener statusListener;
@@ -365,6 +370,25 @@ public final class IndexedCsvReader<T> implements Closeable {
         public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(
             final boolean allowExtraCharsAfterClosingQuote) {
             this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
+            return this;
+        }
+
+        /// Defines whether input that ends inside a quoted field (EOF before a closing quote) is tolerated.
+        ///
+        /// Example: `"foo,bar`
+        ///
+        /// If this is set to `true`, the value `foo,bar` will be returned as a single field; otherwise,
+        /// a [CsvParseException] will be thrown.
+        ///
+        /// Independent of this flag, a [CsvParseException] is thrown if the unclosed region exceeds
+        /// [#maxBufferSize(int)].
+        ///
+        /// **The default will change to `false` in version 5.0.**
+        ///
+        /// @param allowUnclosedQuote allow input ending inside a quoted field (default: `true`).
+        /// @return This updated object, allowing additional method calls to be chained together.
+        public IndexedCsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
+            this.allowUnclosedQuote = allowUnclosedQuote;
             return this;
         }
 
@@ -502,8 +526,8 @@ public final class IndexedCsvReader<T> implements Closeable {
                 : new StatusListener() { };
 
             return new IndexedCsvReader<>(file, charset, fieldSeparator, quoteCharacter, commentStrategy,
-                commentCharacter, allowExtraCharsAfterClosingQuote, maxBufferSize, pageSize, callbackHandler,
-                csvIndex, sl);
+                commentCharacter, allowExtraCharsAfterClosingQuote, allowUnclosedQuote,
+                maxBufferSize, pageSize, callbackHandler, csvIndex, sl);
         }
 
     }

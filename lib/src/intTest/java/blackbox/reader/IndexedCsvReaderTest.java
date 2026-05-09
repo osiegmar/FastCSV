@@ -78,7 +78,7 @@ class IndexedCsvReaderTest {
             .isEqualTo("""
                     IndexedCsvReader[file=%s, charset=UTF-8, fieldSeparator=,, \
                     quoteCharacter=", commentStrategy=NONE, commentCharacter=#, \
-                    allowExtraCharsAfterClosingQuote=false, pageSize=1, \
+                    allowExtraCharsAfterClosingQuote=false, allowUnclosedQuote=true, pageSize=1, \
                     index=CsvIndex[bomHeaderLength=0, fileSize=3, fieldSeparator=44, quoteCharacter=34, \
                     commentStrategy=NONE, commentCharacter=35, recordCount=1, pageCount=1]]""",
                 file);
@@ -194,6 +194,26 @@ class IndexedCsvReaderTest {
         try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("foo,\"bar\"baz"), StandardCharsets.UTF_8)) {
             assertThatThrownBy(() -> csv.readPage(0))
                 .isInstanceOf(CsvParseException.class);
+        }
+    }
+
+    // allow unclosed quote at end of input
+
+    @Test
+    void allowUnclosedQuoteLenientByDefault() throws IOException {
+        try (var csv = singlePageBuilder().ofCsvRecord(prepareTestFile("\"abc"), StandardCharsets.UTF_8)) {
+            CsvRecordAssert.assertThat(csv.readPage(0).getFirst()).fields().containsExactly("abc");
+        }
+    }
+
+    @Test
+    void allowUnclosedQuoteStrictThrows() throws IOException {
+        final var bldr = singlePageBuilder().allowUnclosedQuote(false);
+        try (var csv = bldr.ofCsvRecord(prepareTestFile("\"abc"), StandardCharsets.UTF_8)) {
+            assertThatThrownBy(() -> csv.readPage(0))
+                .isInstanceOf(CsvParseException.class)
+                .hasRootCauseInstanceOf(CsvParseException.class)
+                .hasRootCauseMessage("Unclosed quoted field at end of input (record starting at line 1)");
         }
     }
 

@@ -208,6 +208,24 @@ In this case, we observe:
     - For performance reasons, FastCSV switches to unquoted-field-parsing when the first character is not a quote
       character. It's not reasonable to slow down the parser in order to guess which broken format is used.
 
+### Unclosed quoted fields
+
+A quoted field may be unintentionally truncated, leaving an opening quote without a matching close before end-of-file:
+
+```
+"value 1,value 2CRLF
+value 3CRLF
+```
+
+By default, FastCSV consumes the remaining bytes (including any newlines) as the content of the final field, in line with its tolerance of real-world malformed input.
+
+This behavior can be made strict by setting `CsvReaderBuilder.allowUnclosedQuote(false)` (also available
+on `IndexedCsvReaderBuilder`). FastCSV then throws a `CsvParseException` that references the starting line of the
+offending record.
+
+The default of this flag will change to `false` in version 5.0. To preserve the current lenient behavior across the
+upgrade, set it explicitly to `true`.
+
 ### Other field enclosures
 
 The RFC does not mention any field enclosures other than double quotes.

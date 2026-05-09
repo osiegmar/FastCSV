@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 class RelaxedCsvParserTest {
 
     private final RelaxedCsvParser parser =
-        new RelaxedCsvParser(",", '"', CommentStrategy.NONE, '#', true, CsvRecordHandler.of(), 1024, "foo");
+        new RelaxedCsvParser(",", '"', CommentStrategy.NONE, '#', true, true,
+            CsvRecordHandler.of(), 1024, "foo");
 
     @Test
     void unsupportedReset() {

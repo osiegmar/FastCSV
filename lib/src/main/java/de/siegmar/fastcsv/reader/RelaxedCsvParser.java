@@ -36,6 +36,7 @@ final class RelaxedCsvParser implements CsvParser {
     private final CommentStrategy cStrat;
     private final char cChar;
     private final boolean trimWhitespacesAroundQuotes;
+    private final boolean allowUnclosedQuote;
     private final CsvCallbackHandler<?> callbackHandler;
     private final int maxBufferSize;
     private final LookaheadReader reader;
@@ -48,6 +49,7 @@ final class RelaxedCsvParser implements CsvParser {
     RelaxedCsvParser(final String fsep, final char qChar,
                      final CommentStrategy cStrat, final char cChar,
                      final boolean trimWhitespacesAroundQuotes,
+                     final boolean allowUnclosedQuote,
                      final CsvCallbackHandler<?> callbackHandler,
                      final int maxBufferSize,
                      final Reader reader) {
@@ -59,6 +61,7 @@ final class RelaxedCsvParser implements CsvParser {
         this.cStrat = cStrat;
         this.cChar = cChar;
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
+        this.allowUnclosedQuote = allowUnclosedQuote;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
         final int initialBufferSize = Math.min(maxBufferSize, DEFAULT_BUFFER_SIZE);
@@ -70,6 +73,7 @@ final class RelaxedCsvParser implements CsvParser {
     RelaxedCsvParser(final String fsep, final char qChar,
                      final CommentStrategy cStrat, final char cChar,
                      final boolean trimWhitespacesAroundQuotes,
+                     final boolean allowUnclosedQuote,
                      final CsvCallbackHandler<?> callbackHandler,
                      final int maxBufferSize,
                      final String data) {
@@ -81,6 +85,7 @@ final class RelaxedCsvParser implements CsvParser {
         this.cStrat = cStrat;
         this.cChar = cChar;
         this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
+        this.allowUnclosedQuote = allowUnclosedQuote;
         this.callbackHandler = callbackHandler;
         this.maxBufferSize = maxBufferSize;
         final int dataSize = Math.max(data.length(), 1);
@@ -214,7 +219,17 @@ final class RelaxedCsvParser implements CsvParser {
         boolean endOfRecord = true;
 
         int ch;
-        OUTER: while ((ch = reader.read()) != EOF) {
+        OUTER: while (true) {
+            ch = reader.read();
+            if (ch == EOF) {
+                if (!allowUnclosedQuote) {
+                    throw new CsvParseException(
+                        "Unclosed quoted field at end of input (record starting at line %d)"
+                            .formatted(startingLineNumber));
+                }
+                break;
+            }
+
             // fast-forward
             while (currentFieldIndex < currentField.length && reader.len > reader.start
                 && ch != CR && ch != LF && ch != qChar) {

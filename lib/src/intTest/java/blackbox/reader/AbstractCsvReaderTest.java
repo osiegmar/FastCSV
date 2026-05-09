@@ -8,6 +8,7 @@ import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,6 +30,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
+import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import testutil.CsvRecordAssert;
 
@@ -218,6 +220,61 @@ abstract class AbstractCsvReaderTest {
             .hasMessage("Exception when reading first record")
             .hasRootCauseInstanceOf(CsvParseException.class)
             .hasRootCauseMessage("Unexpected character after closing quote: 'b' (0x62)");
+    }
+
+    // allow unclosed quote at end of input
+
+    @Test
+    void allowUnclosedQuoteLenient() {
+        assertThat(readAll("\"abc"))
+            .singleElement(CsvRecordAssert.CSV_RECORD)
+            .fields().containsExactly("abc");
+    }
+
+    @Test
+    void allowUnclosedQuoteStrict() {
+        // Throw must reference the record's starting line, not the EOF line; second record's start
+        // (line 2) verifies cross-record line tracking too.
+        crb.allowUnclosedQuote(false);
+        assertThatThrownBy(() -> readAll("a,b\n\"c"))
+            .isInstanceOf(CsvParseException.class)
+            .hasRootCauseInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Unclosed quoted field at end of input (record starting at line 2)");
+    }
+
+    @Test
+    void allowUnclosedQuoteStrictAcceptsClosedAtEof() {
+        // Guard against false positives on the closing-quote-immediately-before-EOF path.
+        crb.allowUnclosedQuote(false);
+        assertThatCode(() -> readAll("\"closed\"")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void allowUnclosedQuoteIgnoresComments() {
+        // Comment paths are quote-agnostic — an unbalanced quote inside a comment must stay a comment.
+        crb.allowUnclosedQuote(false).commentStrategy(CommentStrategy.READ);
+        assertThat(readAll("#abc\"def"))
+            .singleElement(CsvRecordAssert.CSV_RECORD)
+            .isComment()
+            .fields().containsExactly("abc\"def");
+    }
+
+    @Test
+    void allowUnclosedQuoteThrowsBeforeFieldModifier() {
+        // The throw must happen before addField is called, so a registered FieldModifier
+        // never sees a phantom field for the failing record.
+        final List<String> seen = new ArrayList<>();
+        final var handler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifier.modify(value -> {
+            seen.add(value);
+            return value;
+        })));
+
+        crb.allowUnclosedQuote(false);
+
+        assertThatThrownBy(() -> crb.build(handler, "a,b\n\"c").stream().toList())
+            .isInstanceOf(CsvParseException.class);
+
+        assertThat(seen).containsExactly("a", "b");
     }
 
     // field by index

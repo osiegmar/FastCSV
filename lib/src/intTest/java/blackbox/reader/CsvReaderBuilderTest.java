@@ -81,7 +81,8 @@ class CsvReaderBuilderTest {
                 CsvReaderBuilder[fieldSeparator=,, quoteCharacter=", \
                 commentStrategy=NONE, commentCharacter=#, skipEmptyLines=true, \
                 extraFieldStrategy=STRICT, missingFieldStrategy=STRICT, allowExtraCharsAfterClosingQuote=false, \
-                trimWhitespacesAroundQuotes=false, detectBomHeader=false, maxBufferSize=16777216]""");
+                allowUnclosedQuote=true, trimWhitespacesAroundQuotes=false, detectBomHeader=false, \
+                maxBufferSize=16777216]""");
     }
 
     @Test
@@ -132,6 +133,7 @@ class CsvReaderBuilderTest {
             .extraFieldStrategy(FieldMismatchStrategy.STRICT)
             .missingFieldStrategy(FieldMismatchStrategy.STRICT)
             .allowExtraCharsAfterClosingQuote(false)
+            .allowUnclosedQuote(true)
             .ofCsvRecord("foo");
 
         assertThat(reader).isNotNull();

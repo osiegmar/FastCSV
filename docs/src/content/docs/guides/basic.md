@@ -55,6 +55,7 @@ CsvReader.builder()
     .extraFieldStrategy(FieldMismatchStrategy.STRICT)
     .missingFieldStrategy(FieldMismatchStrategy.STRICT)
     .allowExtraCharsAfterClosingQuote(false)
+    .allowUnclosedQuote(true)
     .detectBomHeader(false)
     .maxBufferSize(16777216);
 ```

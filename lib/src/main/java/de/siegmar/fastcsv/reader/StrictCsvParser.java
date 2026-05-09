@@ -37,6 +37,7 @@ final class StrictCsvParser implements CsvParser {
     private final char cChar;
     private final boolean commentsEnabled;
     private final boolean allowExtraCharsAfterClosingQuote;
+    private final boolean allowUnclosedQuote;
     private final CsvCallbackHandler<?> callbackHandler;
     private final CsvBuffer csvBuffer;
 
@@ -51,6 +52,7 @@ final class StrictCsvParser implements CsvParser {
     StrictCsvParser(final char fieldSeparator, final char quoteCharacter,
                     final CommentStrategy commentStrategy, final char commentCharacter,
                     final boolean allowExtraCharsAfterClosingQuote,
+                    final boolean allowUnclosedQuote,
                     final CsvCallbackHandler<?> callbackHandler,
                     final int maxBufferSize,
                     final Reader reader) {
@@ -62,13 +64,16 @@ final class StrictCsvParser implements CsvParser {
         cChar = commentCharacter;
         commentsEnabled = commentStrategy != CommentStrategy.NONE;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
+        this.allowUnclosedQuote = allowUnclosedQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(reader, maxBufferSize);
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     StrictCsvParser(final char fieldSeparator, final char quoteCharacter,
                     final CommentStrategy commentStrategy, final char commentCharacter,
                     final boolean allowExtraCharsAfterClosingQuote,
+                    final boolean allowUnclosedQuote,
                     final CsvCallbackHandler<?> callbackHandler,
                     final String data) {
 
@@ -79,6 +84,7 @@ final class StrictCsvParser implements CsvParser {
         cChar = commentCharacter;
         commentsEnabled = commentStrategy != CommentStrategy.NONE;
         this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
+        this.allowUnclosedQuote = allowUnclosedQuote;
         this.callbackHandler = callbackHandler;
         csvBuffer = new CsvBuffer(data);
     }
@@ -129,6 +135,11 @@ final class StrictCsvParser implements CsvParser {
     private boolean processBufferTail() {
         if (csvBuffer.begin < csvBuffer.pos) {
             // we have unconsumed data in the buffer
+            if (!allowUnclosedQuote && (status & STATUS_QUOTED_MODE) != 0) {
+                throw new CsvParseException(
+                    "Unclosed quoted field at end of input (record starting at line %d)"
+                        .formatted(startingLineNumber));
+            }
             materialize(csvBuffer.buf, csvBuffer.begin, csvBuffer.pos, status, qChar);
             return true;
         }
