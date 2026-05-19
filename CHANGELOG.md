@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0](https://github.com/osiegmar/FastCSV/compare/v4.2.0...v4.3.0) (2026-05-09)
+
+
+### Features
+
+* add allowUnclosedQuote flag to reader builders ([#173](https://github.com/osiegmar/FastCSV/issues/173)) ([171101a](https://github.com/osiegmar/FastCSV/commit/171101a75cab840fb23165bccd50ffa3106dadad))
+* lock skipLines once CSV parsing has started ([fb018d2](https://github.com/osiegmar/FastCSV/commit/fb018d24236c0f60bf477c5ee48bca41137b147b))
+
+
+### Bug Fixes
+
+* clear stale CR flag on closing quote in StrictCsvParser ([a6d3de5](https://github.com/osiegmar/FastCSV/commit/a6d3de5cdae666bc83d6239e027419b2a1a5bc37))
+* peekLine in RelaxedCsvParser truncated long lines ([ce86205](https://github.com/osiegmar/FastCSV/commit/ce862056344d0781f41e223a5fbe4c59bc0bee1e))
+* peekLine left buffer in inconsistent state after compaction ([0819c4f](https://github.com/osiegmar/FastCSV/commit/0819c4ff5d34aab2d7217acbe44598e6d9783e14))
+* reset() in StrictCsvParser left parser-state fields stale ([9c0d607](https://github.com/osiegmar/FastCSV/commit/9c0d6071600d56ec0abd06c07b4bbab45d8e544c))
+
 ## [4.2.0](https://github.com/osiegmar/FastCSV/compare/v4.1.1...v4.2.0) (2026-04-04)
 
 

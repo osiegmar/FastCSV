@@ -1,6 +1,6 @@
 groupId=de.siegmar
 artifactId=fastcsv
-version=4.2.0 # x-release-please-version
+version=4.3.0 # x-release-please-version
 gitRepo=https://github.com/osiegmar/FastCSV.git
 gitTag=v${version}
 tool=gradle
