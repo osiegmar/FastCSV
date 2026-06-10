@@ -29,6 +29,7 @@ final class BomUtil {
     /// See <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>.
     ///
     /// @param buf the byte array to detect the character encoding from
+    /// @param n   the number of valid bytes in `buf` (bytes beyond this index are ignored)
     /// @return an Optional containing the detected BomHeader if a BOM header is found,
     ///     or an empty Optional if no BOM header is found
     @SuppressWarnings({
@@ -38,9 +39,7 @@ final class BomUtil {
         "checkstyle:ReturnCount",
         "PMD.AvoidLiteralsInIfCondition"
     })
-    static Optional<BomHeader> detectCharset(final byte[] buf) {
-        final int n = buf.length;
-
+    static Optional<BomHeader> detectCharset(final byte[] buf, final int n) {
         if (n < 2) {
             // Not enough bytes to be a BOM header
             return Optional.empty();
@@ -83,7 +82,8 @@ final class BomUtil {
     static Optional<BomHeader> detectCharset(final Path file)
         throws IOException {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
-            return detectCharset(in.readNBytes(POTENTIAL_BOM_SIZE));
+            final byte[] buf = in.readNBytes(POTENTIAL_BOM_SIZE);
+            return detectCharset(buf, buf.length);
         }
     }
 

@@ -15,9 +15,9 @@ class BomUtilTest {
     @MethodSource
     void charset(final String charset, final int len, final byte[] data) {
         if (charset == null) {
-            assertThat(BomUtil.detectCharset(data)).isEmpty();
+            assertThat(BomUtil.detectCharset(data, data.length)).isEmpty();
         } else {
-            assertThat(BomUtil.detectCharset(data))
+            assertThat(BomUtil.detectCharset(data, data.length))
                 .get()
                 .satisfies(
                     bh -> assertThat(bh.getCharset()).hasToString(charset),

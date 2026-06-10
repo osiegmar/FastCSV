@@ -1,11 +1,13 @@
 package de.siegmar.fastcsv.reader;
 
+import static java.nio.charset.StandardCharsets.UTF_16LE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,8 +43,20 @@ class BomInputStreamTest {
             .isEqualTo(new byte[]{0});
     }
 
+    @Test
+    void truncatedUtf16LeBomNotMisdetectedAsUtf32Le() throws IOException {
+        // A stream of exactly FF FE must be detected as UTF-16 LE, not zero-padded to
+        // FF FE 00 00 and misdetected as UTF-32 LE.
+        assertThat(charset(new byte[]{(byte) 0xFF, (byte) 0xFE}))
+            .isEqualTo(UTF_16LE);
+    }
+
     private byte[] read(final byte[] src) throws IOException {
         return new BomInputStream(new ByteArrayInputStream(src), UTF_8).readAllBytes();
+    }
+
+    private Charset charset(final byte[] src) throws IOException {
+        return new BomInputStream(new ByteArrayInputStream(src), UTF_8).getCharset();
     }
 
     @Test
