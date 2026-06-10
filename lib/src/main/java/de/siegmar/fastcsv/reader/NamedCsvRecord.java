@@ -113,7 +113,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @return the field values (empty list if record doesn't contain that field), never `null`
     /// @throws NullPointerException if name is `null`
     public List<String> findFields(final String name) {
-        final int bound = header.length;
+        final int bound = commonSize();
         final List<String> ret = new ArrayList<>(bound);
         for (int i = 0; i < bound; i++) {
             if (name.equals(header[i])) {

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifiers;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
@@ -58,6 +59,16 @@ class NamedCsvReaderTest {
         assertThat(CsvReader.builder().build(cbh, "foo,xoo,foo\nbar,moo,baz").stream())
             .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
             .findFields("foo").containsExactly("bar", "baz");
+    }
+
+    @Test
+    void findFieldsForMissingField() {
+        final var reader = CsvReader.builder()
+            .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
+            .ofNamedCsvRecord("a,b,c\n1,2");
+        assertThat(reader.stream())
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+            .findFields("c").isEmpty();
     }
 
     @Test
