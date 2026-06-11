@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +29,11 @@ import de.siegmar.fastcsv.util.Util;
 /// indexing the file.
 /// This process is optimized on performance and low memory usage – no CSV data is stored in memory.
 /// The current status can be monitored via [IndexedCsvReaderBuilder#statusListener(StatusListener)].
+///
+/// As indexing is performed on a byte level, only ASCII-compatible charsets (where ASCII characters map to
+/// single, identical bytes – such as UTF-8, ISO-8859-1 or US-ASCII) are supported. Charsets that encode ASCII
+/// as multiple bytes (such as UTF-16 and UTF-32) are rejected with an [IllegalArgumentException] – this also
+/// applies to a charset detected via a BOM header.
 ///
 /// This class is thread-safe.
 ///
@@ -96,6 +102,10 @@ public final class IndexedCsvReader<T> implements Closeable {
             bomHeaderLength = bomHeader.getLength();
         }
 
+        // The byte-oriented index scanner (CsvScanner) requires an ASCII-compatible charset; reject
+        // both the user-supplied and the BOM-detected charset if it is not (e.g. UTF-16 / UTF-32).
+        assertAsciiCompatibleCharset(charset);
+
         if (csvIndex != null) {
             this.csvIndex = validatePrebuiltIndex(file, bomHeaderLength,
                 (byte) fieldSeparator, (byte) quoteCharacter, commentStrategy, (byte) commentCharacter,
@@ -121,6 +131,21 @@ public final class IndexedCsvReader<T> implements Closeable {
                 "Control characters must differ (fieldSeparator=%s, quoteCharacter=%s, commentCharacter=%s)".formatted(
                     fieldSeparator, quoteCharacter, commentCharacter));
         }
+    }
+
+    /*
+     * The CsvScanner that builds the index operates on raw bytes and assumes the structural ASCII
+     * characters (field separator, quote, comment, CR, LF) are encoded as single, identical bytes.
+     * Charsets such as UTF-16 and UTF-32 encode ASCII as multiple bytes, which corrupts both the
+     * index and the decoded data. Such charsets are therefore rejected up front.
+     */
+    private static void assertAsciiCompatibleCharset(final Charset charset) {
+        final byte[] probe = "\r\n\",#".getBytes(charset);
+        final byte[] expected = {'\r', '\n', '"', ',', '#'};
+        Preconditions.checkArgument(Arrays.equals(probe, expected), () ->
+            ("Charset '%s' is not supported by IndexedCsvReader. Only ASCII-compatible charsets, "
+                + "where ASCII characters map to single identical bytes, are supported; "
+                + "UTF-16 and UTF-32 are not.").formatted(charset.name()));
     }
 
     private static Optional<BomHeader> detectBom(final Path file, final StatusListener statusListener)
@@ -508,14 +533,18 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         /// Constructs a new [IndexedCsvReader] for the specified arguments.
         ///
+        /// Only ASCII-compatible charsets are supported; UTF-16 and UTF-32 (whether passed explicitly or
+        /// detected via a BOM header) are rejected with an [IllegalArgumentException].
+        ///
         /// @param <T>             the type of the CSV record.
         /// @param callbackHandler the callback handler to use.
         /// @param file            the file to read data from.
-        /// @param charset         the character set to use.
+        /// @param charset         the character set to use (must be ASCII-compatible).
         /// @return a new IndexedCsvReader - never `null`. Remember to close it!
         /// @throws IOException              if an I/O error occurs.
         /// @throws NullPointerException     if callbackHandler, file or charset is `null`
-        /// @throws IllegalArgumentException if argument validation fails.
+        /// @throws IllegalArgumentException if argument validation fails, or the (supplied or BOM-detected)
+        ///                                  charset is not ASCII-compatible (e.g. UTF-16 or UTF-32).
         public <T> IndexedCsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                              final Path file, final Charset charset) throws IOException {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
