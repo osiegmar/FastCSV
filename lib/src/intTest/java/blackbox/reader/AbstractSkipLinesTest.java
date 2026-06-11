@@ -196,6 +196,20 @@ abstract class AbstractSkipLinesTest {
     }
 
     @Test
+    void noPhantomRecordAfterSkippingLastLine() {
+        // Regression: skipping past an unterminated last line must not resurrect it as a record.
+        // The strict parser previously left the skipped data in the buffer, so a subsequent
+        // iteration materialized a phantom record. Both parsers must agree: nothing is left.
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord("abc\ndef");
+
+        assertThatThrownBy(() -> csv.skipLines(_ -> false, 10))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("No matching line found. Skipped 2 line(s) before reaching end of data.");
+
+        assertThat(csv.stream()).isEmpty();
+    }
+
+    @Test
     void lastMatch() {
         final CsvReader<CsvRecord> csv = crb.ofCsvRecord("A\nB");
         final int linesSkipped = csv.skipLines("B"::equals, 10);
