@@ -393,6 +393,10 @@ final class StrictCsvParser implements CsvParser {
             if (numCharsToSkip == 0) {
                 throw new EOFException();
             }
+            // An unterminated last line was skipped: consume it so a subsequent parse() does
+            // not resurrect it as a phantom record, and count it like any other skipped line.
+            csvBuffer.begin = csvBuffer.pos;
+            startingLineNumber++;
             return;
         }
 

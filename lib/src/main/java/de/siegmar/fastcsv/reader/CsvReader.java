@@ -97,7 +97,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// Skips the specified number of lines.
     ///
     /// **Note:** "lines" here means *physical* lines terminated by `CR`, `LF`, or `CRLF` —
-    /// not CSV records. This method is intended for skipping non-CSV preamble lines that
+    /// not CSV records. A non-empty final segment that is not terminated by a line break
+    /// (for example, the last line of a file without a trailing newline) is also counted as
+    /// one line. This method is intended for skipping non-CSV preamble lines that
     /// appear before the actual CSV data starts and must therefore be called before any
     /// records are read; once iteration has begun this method throws
     /// [IllegalStateException].
@@ -135,7 +137,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     /// The method returns the number of lines actually skipped.
     ///
     /// **Note:** "lines" here means *physical* lines terminated by `CR`, `LF`, or `CRLF` —
-    /// not CSV records. The predicate sees each physical line as a plain string, with no
+    /// not CSV records. A non-empty final segment that is not terminated by a line break
+    /// (for example, the last line of a file without a trailing newline) is also counted as
+    /// one line. The predicate sees each physical line as a plain string, with no
     /// awareness of quoting or escaping. This method is intended for skipping non-CSV
     /// preamble lines that appear before the actual CSV data starts and must therefore be
     /// called before any records are read; once iteration has begun this method throws

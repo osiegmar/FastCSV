@@ -327,20 +327,23 @@ final class RelaxedCsvParser implements CsvParser {
             if (numCharsToSkip == 0) {
                 throw new EOFException();
             }
+            // An unterminated last line was skipped: count it like any other skipped line.
+            startingLineNumber++;
             return;
         }
 
         do {
             if (c == CR) {
                 reader.consumeLF();
-                startingLineNumber++;
                 break;
             }
             if (c == LF) {
-                startingLineNumber++;
                 break;
             }
         } while ((c = reader.read()) != EOF);
+
+        // Count the skipped line, whether it ended with a line break or with the end of data.
+        startingLineNumber++;
     }
 
     @Override
