@@ -2,7 +2,6 @@ package de.siegmar.fastcsv.reader;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -59,7 +58,7 @@ public final class IndexedCsvReader<T> implements Closeable {
     private final boolean allowExtraCharsAfterClosingQuote;
     private final boolean allowUnclosedQuote;
     private final int pageSize;
-    private final RandomAccessFile raf;
+    private final SeekableInputStreamReader reader;
     private final Lock fileLock = new ReentrantLock();
     private final CsvCallbackHandler<T> csvRecordHandler;
     private final CsvParser csvParser;
@@ -114,10 +113,9 @@ public final class IndexedCsvReader<T> implements Closeable {
             this.csvIndex = buildIndex(bomHeaderLength, statusListener);
         }
 
-        raf = new RandomAccessFile(file.toFile(), "r");
+        reader = new SeekableInputStreamReader(new RandomAccessFile(file.toFile(), "r"), charset);
         csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
-            allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize,
-            new InputStreamReader(new RandomAccessFileInputStream(raf), charset));
+            allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize, reader);
     }
 
     private static void assertFields(final char fieldSeparator, final char quoteCharacter,
@@ -248,7 +246,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         final List<T> ret = new ArrayList<>(pageSize);
         fileLock.lock();
         try {
-            raf.seek(page.offset());
+            reader.seek(page.offset());
             csvParser.reset(page.startingLineNumber() - 1);
 
             for (int i = 0; i < pageSize && csvParser.parse(); i++) {
