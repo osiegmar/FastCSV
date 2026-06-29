@@ -19,6 +19,11 @@ class RelaxedCsvReaderTest extends AbstractCsvReaderTest {
         System.clearProperty("de.siegmar.fastcsv.relaxed");
     }
 
+    @Override
+    protected int bufferOverflowPadding() {
+        return 1;
+    }
+
     @Test
     void allowExtraCharsAfterClosingQuote() {
         crb.allowExtraCharsAfterClosingQuote(true);
