@@ -92,7 +92,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @param name case-sensitive name of the field to be retrieved
     /// @return An [Optional] containing the value of the field if found,
-    ///     or an [Optional#EMPTY] if the field is not present. Never returns `null`.
+    ///     or an empty [Optional] if the field is not present. Never returns `null`.
     /// @throws NullPointerException if name is `null`
     /// @see #findFields(String)
     public Optional<String> findField(final String name) {
