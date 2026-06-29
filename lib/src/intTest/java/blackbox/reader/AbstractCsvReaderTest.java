@@ -518,6 +518,18 @@ abstract class AbstractCsvReaderTest {
     }
 
     @Test
+    void hasNextIsIdempotent() {
+        // A second consecutive hasNext() must not re-fetch: the already-fetched record is reused.
+        final CloseableIterator<CsvRecord> it = crb.ofCsvRecord("foo\nbar").iterator();
+        assertThat(it).hasNext();
+        assertThat(it).hasNext();
+        CsvRecordAssert.assertThat(it.next()).fields().containsExactly("foo");
+        CsvRecordAssert.assertThat(it.next()).fields().containsExactly("bar");
+        assertThat(it).isExhausted();
+        assertThat(it).isExhausted();
+    }
+
+    @Test
     void parallelDistinct() {
         assertThat(crb.ofCsvRecord("foo\nfoo").stream().parallel().distinct().count())
             .isEqualTo(2);

@@ -102,8 +102,9 @@ class CsvWriterTest {
 
     @Test
     void delimitText() {
-        assertThat(write("a", "b,c", "d\ne", "f\"g", "", null))
-            .isEqualTo("a,\"b,c\",\"d\ne\",\"f\"\"g\",,\n");
+        // Each field carries exactly one quote-triggering control char: separator, LF, quote, and CR.
+        assertThat(write("a", "b,c", "d\ne", "f\"g", "h\ri", "", null))
+            .isEqualTo("a,\"b,c\",\"d\ne\",\"f\"\"g\",\"h\ri\",,\n");
     }
 
     @Test

@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -303,6 +305,63 @@ abstract class AbstractSkipLinesTest {
         final int linesSkipped = csv.skipLines(line::equals, 5);
 
         assertThat(linesSkipped).isZero();
+    }
+
+    // Count-based skipping drives skipLine(0). Feeding the data through a Reader that yields one
+    // char per read() forces the parser to refill its buffer mid-line — exercising the skip loop's
+    // refill branches and the CRLF lookahead regardless of the internal buffer size.
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\r\n", "\r"})
+    void skipFirstLineWithChunkedRefill(final String terminator) {
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(oneCharPerRead("foo" + terminator + "last"));
+
+        csv.skipLines(1);
+
+        assertThat(csv.stream())
+            .singleElement()
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec)
+                .isStartingLineNumber(2).fields().containsExactly("last"));
+    }
+
+    @Test
+    void skipLineEndingWithLoneCarriageReturnAtEndOfInput() {
+        // A skipped line terminated by a bare CR at EOF: the CRLF lookahead must not read past EOF.
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(oneCharPerRead("abc\r"));
+
+        csv.skipLines(1);
+
+        assertThat(csv.stream()).isEmpty();
+    }
+
+    @Test
+    void skipMultipleLinesWithChunkedRefill() {
+        // With one char per read, each skipped line leaves the buffer exhausted, so the next
+        // skipLine must refill on entry before it can read anything.
+        final CsvReader<CsvRecord> csv = crb.ofCsvRecord(oneCharPerRead("a\nb\nlast"));
+
+        csv.skipLines(2);
+
+        assertThat(csv.stream())
+            .singleElement()
+            .satisfies(rec -> CsvRecordAssert.assertThat(rec)
+                .isStartingLineNumber(3).fields().containsExactly("last"));
+    }
+
+    private static Reader oneCharPerRead(final String data) {
+        return new Reader() {
+            private final StringReader delegate = new StringReader(data);
+
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                return delegate.read(cbuf, off, Math.min(len, 1));
+            }
+
+            @Override
+            public void close() throws IOException {
+                delegate.close();
+            }
+        };
     }
 
     @Test

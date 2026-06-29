@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
+import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
@@ -139,20 +140,31 @@ class CsvReaderBuilderTest {
         assertThat(reader).isNotNull();
     }
 
+    // The deprecated boolean setters map onto a FieldMismatchStrategy; verify both ends of the
+    // mapping by their parsing behavior (true tolerates the mismatch, false rejects it).
+
     @SuppressWarnings("removal")
     @Test
     void deprecatedAllowExtraFields() {
-        assertThat(CsvReader.builder().allowExtraFields(true)
-            .ofCsvRecord("foo\nfoo,bar").stream())
+        assertThat(CsvReader.builder().allowExtraFields(true).ofCsvRecord("foo\nfoo,bar").stream())
             .hasSize(2);
+
+        assertThatThrownBy(() -> CsvReader.builder().allowExtraFields(false)
+            .ofCsvRecord("foo\nfoo,bar").stream().toList())
+            .isInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
     }
 
     @SuppressWarnings("removal")
     @Test
     void deprecatedAllowMissingFields() {
-        assertThat(CsvReader.builder().allowMissingFields(true)
-            .ofCsvRecord("foo,bar\nfoo").stream())
+        assertThat(CsvReader.builder().allowMissingFields(true).ofCsvRecord("foo,bar\nfoo").stream())
             .hasSize(2);
+
+        assertThatThrownBy(() -> CsvReader.builder().allowMissingFields(false)
+            .ofCsvRecord("foo,bar\nfoo").stream().toList())
+            .isInstanceOf(CsvParseException.class)
+            .hasRootCauseMessage("Record 2 has 1 fields, but first record had 2 fields");
     }
 
 }

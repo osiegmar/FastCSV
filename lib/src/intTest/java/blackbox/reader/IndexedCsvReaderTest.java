@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.SoftAssertions;
@@ -38,6 +39,7 @@ import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvRecord;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
+import de.siegmar.fastcsv.reader.StatusListener;
 import testutil.CsvRecordAssert;
 import testutil.NamedCsvRecordAssert;
 
@@ -68,6 +70,21 @@ class IndexedCsvReaderTest {
                 .isInstanceOf(IndexOutOfBoundsException.class)
                 .hasMessage("Index 0 out of bounds for length 0");
         }
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    @Test
+    void readPageAfterCloseThrowsIoException() throws IOException {
+        // Reading a page after the reader has been closed surfaces the underlying seek failure
+        // as an IOException rather than something more obscure.
+        final IndexedCsvReader<CsvRecord> csv = buildSinglePage("foo");
+        csv.close();
+
+        assertThatThrownBy(() -> csv.readPage(0))
+            .isInstanceOf(IOException.class)
+            .hasMessageStartingWith("Exception when reading record that started in line")
+            .rootCause()
+            .isInstanceOf(IOException.class);
     }
 
     @Test
@@ -245,23 +262,38 @@ class IndexedCsvReaderTest {
                 .hasMessage("maxBufferSize must be greater than 0");
         }
 
-        @SuppressWarnings("PMD.CloseResource")
         @Test
         void bufferExceed() throws IOException {
+            // An oversized field on the first page reports the first record.
+            assertBufferExceededOnPage("", 0, "Exception when reading first record");
+        }
+
+        @Test
+        void bufferExceedOnLaterPage() throws IOException {
+            // A buffer overflow on a page that starts beyond line 1 must report that record's
+            // starting line number, not the "first record" wording.
+            assertBufferExceededOnPage("a\n", 1, "Exception when reading record that started in line 2");
+        }
+
+        @SuppressWarnings("PMD.CloseResource")
+        private void assertBufferExceededOnPage(final String prefix, final int page,
+                                                final String expectedContext) throws IOException {
             final int limit = 512;
 
-            // buffer in CsvReader is in char, so prepare enough bytes
-            final byte[] data = new byte[2 * limit];
-            Arrays.fill(data, (byte) 'X');
+            // buffer in CsvReader is in char, so prepare enough bytes to overflow it in a single field
+            final byte[] prefixBytes = prefix.getBytes(StandardCharsets.UTF_8);
+            final byte[] data = new byte[prefixBytes.length + 2 * limit];
+            Arrays.fill(data, prefixBytes.length, data.length, (byte) 'X');
+            System.arraycopy(prefixBytes, 0, data, 0, prefixBytes.length);
             data[data.length - 1] = ',';
 
             final IndexedCsvReader<CsvRecord> csv = singlePageBuilder()
                 .maxBufferSize(limit)
                 .ofCsvRecord(prepareTestFile(data));
 
-            assertThatThrownBy(() -> csv.readPage(0).getFirst())
+            assertThatThrownBy(() -> csv.readPage(page).getFirst())
                 .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("Exception when reading first record")
+                .hasMessageContaining(expectedContext)
                 .rootCause()
                 .isInstanceOf(CsvParseException.class)
                 .hasMessageContaining("is insufficient to read the data of a single field");
@@ -489,6 +521,31 @@ class IndexedCsvReaderTest {
 
     @Nested
     class CsvStatus {
+
+        @Test
+        void indexBuildingFailureIsReportedToListenerAndRethrown() throws IOException {
+            // A failure while building the index must be handed to the listener's onError hook
+            // and then rethrown to the caller.
+            final Path file = prepareTestFile("foo");
+            final IllegalStateException failure = new IllegalStateException("boom");
+            final AtomicReference<Throwable> reported = new AtomicReference<>();
+            final StatusListener listener = new StatusListener() {
+                @Override
+                public void onInit(final long fileSize) {
+                    throw failure;
+                }
+
+                @Override
+                public void onError(final Throwable throwable) {
+                    reported.set(throwable);
+                }
+            };
+
+            assertThatThrownBy(() -> IndexedCsvReader.builder().statusListener(listener).ofCsvRecord(file))
+                .isSameAs(failure);
+
+            assertThat(reported).hasValue(failure);
+        }
 
         @Test
         void finalStatus() throws IOException {
