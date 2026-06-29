@@ -122,7 +122,7 @@ final class RelaxedCsvParser implements CsvParser {
         return fsepRemainder;
     }
 
-    @SuppressWarnings({"checkstyle:ReturnCount", "checkstyle:NPathComplexity"})
+    @SuppressWarnings({"checkstyle:ReturnCount", "checkstyle:NPathComplexity", "PMD.AssignmentInOperand"})
     @Override
     public boolean parse() throws IOException {
         startingLineNumber += lines;
@@ -165,7 +165,8 @@ final class RelaxedCsvParser implements CsvParser {
         "checkstyle:ParameterAssignment",
         "checkstyle:NPathComplexity",
         "checkstyle:BooleanExpressionComplexity",
-        "PMD.AvoidReassigningParameters"
+        "PMD.AvoidReassigningParameters",
+        "PMD.AssignmentInOperand"
     })
     private boolean parseUnquoted(int ch) throws IOException {
         boolean endOfRecord = true;
@@ -317,7 +318,7 @@ final class RelaxedCsvParser implements CsvParser {
         return reader.peekLine();
     }
 
-    @SuppressWarnings("checkstyle:MultipleVariableDeclarations")
+    @SuppressWarnings({"checkstyle:MultipleVariableDeclarations", "PMD.AssignmentInOperand"})
     @Override
     public void skipLine(final int numCharsToSkip) throws IOException {
         reader.skip(numCharsToSkip);

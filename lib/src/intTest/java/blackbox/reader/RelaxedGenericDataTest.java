@@ -38,7 +38,7 @@ class RelaxedGenericDataTest {
         System.clearProperty("de.siegmar.fastcsv.relaxed");
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
     @ParameterizedTest(name = "{index} - {0}")
     @MethodSource("dataProvider")
     void dataTest(final String name, final TestSpec testSpec, final CheckVariant checkVariant) {

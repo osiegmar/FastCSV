@@ -69,11 +69,11 @@ sourceSets {
     }
 }
 
-val commonImplementation by configurations.getting {
+val commonImplementation = configurations.getByName("commonImplementation") {
     extendsFrom(configurations.implementation.get())
 }
 
-val intTest by sourceSets.getting
+val intTest = sourceSets.getByName("intTest")
 configurations[intTest.implementationConfigurationName].extendsFrom(configurations.testImplementation.get())
 configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.testRuntimeOnly.get())
 
@@ -87,7 +87,7 @@ dependencies {
     testImplementation(libs.assertj.core)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    "intTestImplementation"(project)
+    "intTestImplementation"(project(":lib"))
     "intTestImplementation"(libs.jackson.dataformat.yaml)
 
     signature(libs.gummy.bears) {

@@ -331,7 +331,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     @Nullable
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
     private T fetch() {
         try {
             return fetchRecord();

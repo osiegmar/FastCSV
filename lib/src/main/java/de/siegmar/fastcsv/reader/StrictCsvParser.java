@@ -471,7 +471,8 @@ final class StrictCsvParser implements CsvParser {
 
                 if (begin == len) {
                     // all data was consumed -- nothing to relocate
-                    pos = len = 0;
+                    len = 0;
+                    pos = 0;
                 } else {
                     if (buf.length - len + begin < readSize) {
                         // reclaimable space is insufficient - allocate a larger buffer

@@ -15,6 +15,9 @@
 
         <!-- false positive: https://github.com/pmd/pmd/issues/4113 -->
         <exclude name="UnitTestShouldIncludeAssert"/>
+
+        <!-- deliberate labeled break for multi-level control flow in the hot parser path -->
+        <exclude name="LabeledStatement"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
         <exclude name="AtLeastOneConstructor"/>
@@ -35,6 +38,13 @@
     <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
         <properties>
             <property name="skipAnnotations" value="true" />
+        </properties>
+    </rule>
+    <!-- allow the idiomatic buf[pos++] index increments in the hot parser/writer paths;
+         the (c = read()) condition-assignment loops remain flagged and are suppressed inline -->
+    <rule ref="category/java/errorprone.xml/AssignmentInOperand">
+        <properties>
+            <property name="allowIncrementDecrement" value="true" />
         </properties>
     </rule>
     <rule ref="category/java/multithreading.xml" />

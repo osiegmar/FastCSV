@@ -53,8 +53,8 @@ final class CsvScanner {
         }
     }
 
-    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment"})
+    @SuppressWarnings({"PMD.AvoidReassigningParameters", "PMD.AssignmentInOperand",
+        "checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
     private void consumeRecord(int d) throws IOException {
         do {
             // parse fields
@@ -90,8 +90,8 @@ final class CsvScanner {
         return stream.hasData() && consumeUnquotedField(stream.get());
     }
 
-    @SuppressWarnings({"PMD.AvoidReassigningParameters", "checkstyle:FinalParameters",
-        "checkstyle:ParameterAssignment"})
+    @SuppressWarnings({"PMD.AvoidReassigningParameters", "PMD.AssignmentInOperand",
+        "checkstyle:FinalParameters", "checkstyle:ParameterAssignment"})
     private boolean consumeUnquotedField(int d) throws IOException {
         do {
             if (d == fieldSeparator) {

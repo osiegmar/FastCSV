@@ -184,7 +184,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         return csvIndex;
     }
 
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
     private CsvIndex buildIndex(final int bomHeaderLength, final StatusListener statusListener) throws IOException {
         final var listener = new ScannerListener(statusListener);
 
@@ -241,7 +241,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         return readPage(csvIndex.pages().get(page));
     }
 
-    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingThrowable"})
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
     private List<T> readPage(final CsvIndex.CsvPage page) throws IOException {
         final List<T> ret = new ArrayList<>(pageSize);
         fileLock.lock();
