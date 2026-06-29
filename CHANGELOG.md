@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1](https://github.com/osiegmar/FastCSV/compare/v4.3.0...v4.3.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* detect BOM correctly on short streams in BomInputStream ([efc1633](https://github.com/osiegmar/FastCSV/commit/efc163346b09ed5fafc7b958d19d220f403b485a))
+* prevent ArrayIndexOutOfBoundsException in NamedCsvRecord.findFields ([0a05a0b](https://github.com/osiegmar/FastCSV/commit/0a05a0bcaf6b58c0d5c5486f3abdb3043a6f192a))
+* prevent data corruption after seek in IndexedCsvReader with multibyte charsets ([c7d45ff](https://github.com/osiegmar/FastCSV/commit/c7d45ffb2ed21b74bfe408bd612a36079a2d6d40))
+* prevent skipLine from resurrecting an unterminated last line at EOF ([be02dab](https://github.com/osiegmar/FastCSV/commit/be02dabe7bade7d83257be93370d5cb4d285a53d))
+* reject non-ASCII-compatible charsets in IndexedCsvReader ([8cc6ea8](https://github.com/osiegmar/FastCSV/commit/8cc6ea841da7d23560f3e6dc72c8ff613afc4789))
+
 ## [4.3.0](https://github.com/osiegmar/FastCSV/compare/v4.2.0...v4.3.0) (2026-05-09)
 
 
