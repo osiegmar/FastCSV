@@ -21,7 +21,7 @@ jobs:
     name: Check build reproducibility
     runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
       - name: Set up Java
