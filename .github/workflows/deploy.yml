@@ -20,7 +20,7 @@ jobs:
         uses: withastro/action@v6
         with:
           path: docs
-          node-version: 22
+          node-version: 24
 
   deploy:
     needs: build

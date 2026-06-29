@@ -1,4 +1,6 @@
+import fs from 'node:fs';
 import {defineConfig} from 'astro/config';
+import {unified} from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import rehypeFaqSchema from './plugins/rehype-faq-schema.mjs';
@@ -7,7 +9,9 @@ import rehypeFaqSchema from './plugins/rehype-faq-schema.mjs';
 export default defineConfig({
     site: 'https://fastcsv.org',
     markdown: {
-        rehypePlugins: [rehypeFaqSchema],
+        processor: unified({
+            rehypePlugins: [rehypeFaqSchema],
+        }),
     },
     integrations: [
         starlight({
@@ -33,11 +37,11 @@ export default defineConfig({
                 },
                 {
                     label: 'Guides',
-                    autogenerate: {directory: 'guides', collapsed: true},
+                    items: [{autogenerate: {directory: 'guides', collapsed: true}}],
                 },
                 {
                     label: 'Architecture & Design',
-                    autogenerate: {directory: 'architecture'},
+                    items: [{autogenerate: {directory: 'architecture'}}],
                 },
                 {
                     label: 'FAQ',
