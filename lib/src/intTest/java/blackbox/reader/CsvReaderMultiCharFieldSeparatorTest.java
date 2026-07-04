@@ -146,6 +146,7 @@ class CsvReaderMultiCharFieldSeparatorTest {
         );
     }
 
+    @SuppressWarnings("removal")
     @Test
     void allowExtraCharsAfterClosingQuoteOnlyInStrictMode() {
         assertThatThrownBy(() -> CsvReader.builder()

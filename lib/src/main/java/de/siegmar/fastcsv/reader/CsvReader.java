@@ -605,6 +605,12 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @see #trimWhitespacesAroundQuotes(boolean)
+        /// @deprecated This option permits non-conforming input (RFC 4180 does not allow any character between
+        ///     a closing quote and the field separator or end of line) and yields unspecified results if the
+        ///     extra characters contain quote characters.
+        ///     Use [#trimWhitespacesAroundQuotes(boolean)] instead.
+        @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
             this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
             return this;

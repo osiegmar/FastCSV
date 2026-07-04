@@ -120,6 +120,7 @@ class GenericDataTest {
     /// @param input    the CSV input (virtual file content including line breaks)
     /// @param settings the test spec settings
     /// @return the parsed CSV records
+    @SuppressWarnings("removal")
     private List<List<String>> parseCsvRecords(final TestSpecSettings settings, final String input) {
         final CommentStrategy commentStrategy = switch (settings.commentMode()) {
             case NONE -> CommentStrategy.NONE;

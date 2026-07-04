@@ -191,9 +191,9 @@ In this case, we observe:
 2. A quoted field with a trailing whitespace `"value 2"_` (the underscore represents the whitespace)
 
    By default, FastCSV throws a `CsvParseException` when reading this field.
-   This behavior can be changed by setting `CsvReaderBuilder.allowExtraCharsAfterClosingQuote(boolean)` to `true`.
-   In this case, FastCSV concatenates any trailing characters (including whitespaces) to the field.
-   The Java value for this field would be `"value 2 "` (**without** the quotes).
+   By setting `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` to `true`, FastCSV tolerates and trims
+   the whitespace. The Java value for this field would then be `"value 2"` (**without** the quotes and the
+   trailing whitespace).
 
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
 
@@ -207,6 +207,10 @@ In this case, we observe:
       between double quotes and commas") are broken per RFC. A choice must be made.
     - For performance reasons, FastCSV switches to unquoted-field-parsing when the first character is not a quote
       character. It's not reasonable to slow down the parser in order to guess which broken format is used.
+
+   Setting `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` to `true` changes this behavior as well:
+   the leading whitespace is trimmed and the field is treated as quoted, resulting in the Java value `"value 3"`
+   (**without** the quotes).
 
 ### Unclosed quoted fields
 

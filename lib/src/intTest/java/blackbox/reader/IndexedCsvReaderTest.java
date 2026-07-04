@@ -197,6 +197,7 @@ class IndexedCsvReaderTest {
 
     // allow extra characters after closing quotes
 
+    @SuppressWarnings("removal")
     @Test
     void allowExtraCharsAfterClosingQuote() throws IOException {
         final var bldr = singlePageBuilder().allowExtraCharsAfterClosingQuote(true);

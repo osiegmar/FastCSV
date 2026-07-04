@@ -390,6 +390,12 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///
         /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
         /// @return This updated object, allowing additional method calls to be chained together.
+        /// @see CsvReader.CsvReaderBuilder#trimWhitespacesAroundQuotes(boolean)
+        /// @deprecated This option permits non-conforming input (RFC 4180 does not allow any character between
+        ///     a closing quote and the field separator or end of line) and yields unspecified results if the
+        ///     extra characters contain quote characters. For sequential reading,
+        ///     [CsvReader.CsvReaderBuilder#trimWhitespacesAroundQuotes(boolean)] provides a saner alternative.
+        @Deprecated(forRemoval = true)
         public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(
             final boolean allowExtraCharsAfterClosingQuote) {
             this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;

@@ -87,6 +87,8 @@ The following examples will now lead to a `CsvParseException`:
 
 To restore the old behavior, you can use the `allowExtraCharsAfterClosingQuote(boolean)` method in `CsvReaderBuilder` or `IndexedCsvReaderBuilder`.
 This method was named `acceptCharsAfterQuotes(boolean)` in earlier versions of FastCSV.
+Note that `allowExtraCharsAfterClosingQuote` is deprecated and will be removed in a future major release.
+To tolerate whitespace around quoted fields, use `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` instead.
 
 :::caution
 As the default has changed, you may need to check your code and your desired behavior.

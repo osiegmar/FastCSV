@@ -133,7 +133,6 @@ class CsvReaderBuilderTest {
             .skipEmptyLines(true)
             .extraFieldStrategy(FieldMismatchStrategy.STRICT)
             .missingFieldStrategy(FieldMismatchStrategy.STRICT)
-            .allowExtraCharsAfterClosingQuote(false)
             .allowUnclosedQuote(true)
             .ofCsvRecord("foo");
 

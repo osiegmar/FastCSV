@@ -8,6 +8,7 @@ import testutil.CsvRecordAssert;
 
 class StrictCsvReaderTest extends AbstractCsvReaderTest {
 
+    @SuppressWarnings("removal")
     @Test
     void allowExtraCharsAfterClosingQuote() {
         crb.allowExtraCharsAfterClosingQuote(true);

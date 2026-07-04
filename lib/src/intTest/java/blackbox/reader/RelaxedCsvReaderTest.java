@@ -24,6 +24,7 @@ class RelaxedCsvReaderTest extends AbstractCsvReaderTest {
         return 1;
     }
 
+    @SuppressWarnings("removal")
     @Test
     void allowExtraCharsAfterClosingQuote() {
         crb.allowExtraCharsAfterClosingQuote(true);

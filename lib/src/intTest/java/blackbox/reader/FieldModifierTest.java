@@ -32,6 +32,7 @@ class FieldModifierTest {
             );
     }
 
+    @SuppressWarnings("removal")
     @Test
     void trim() {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
@@ -42,6 +43,7 @@ class FieldModifierTest {
             .containsExactly("foo", "bar\u2000", "baz");
     }
 
+    @SuppressWarnings("removal")
     @Test
     void strip() {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.STRIP));
