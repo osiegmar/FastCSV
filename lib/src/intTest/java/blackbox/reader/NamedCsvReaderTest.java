@@ -272,7 +272,7 @@ class NamedCsvReaderTest {
             .satisfiesExactly(
                 rec -> NamedCsvRecordAssert.assertThat(rec)
                     .isStartingLineNumber(2)
-                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("h1", "h2"))
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty())
                     .satisfies(r -> assertThat(r.getFields()).containsExactly("")),
                 rec -> NamedCsvRecordAssert.assertThat(rec)
                     .isStartingLineNumber(3)

@@ -28,6 +28,9 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     @Nullable
     private String[] header;
 
+    /// The line number the header was captured from; `Long.MAX_VALUE` until captured.
+    private long headerStartingLineNumber = Long.MAX_VALUE;
+
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                                   final FieldModifier fieldModifier,
                                   final boolean allowDuplicateHeaderFields,
@@ -105,24 +108,27 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     @Nullable
     @Override
-    @SuppressWarnings("checkstyle:ReturnCount")
     protected NamedCsvRecord buildRecord() {
         final String[] compactFields = compactFields();
 
-        if (recordType == RecordType.COMMENT) {
-            return new NamedCsvRecord(startingLineNumber, compactFields, true, EMPTY_HEADER);
+        return switch (recordType) {
+            case COMMENT -> new NamedCsvRecord(startingLineNumber, compactFields, true, EMPTY_HEADER);
+            case EMPTY -> new NamedCsvRecord(startingLineNumber, compactFields, false, EMPTY_HEADER);
+            case DATA -> dataRecord(compactFields);
+        };
+    }
+
+    @Nullable
+    @SuppressWarnings("PMD.UseVarargs")
+    private NamedCsvRecord dataRecord(final String[] compactFields) {
+        if (header == null) {
+            header = validateHeader(compactFields);
+            headerStartingLineNumber = startingLineNumber;
         }
 
-        if (header == null) {
-            // an empty record must not be captured as the header (the reader may skip it entirely)
-            if (recordType == RecordType.EMPTY) {
-                return new NamedCsvRecord(startingLineNumber, compactFields, false, EMPTY_HEADER);
-            }
-
-            header = validateHeader(compactFields);
-            if (!returnHeader) {
-                return null;
-            }
+        // the header record itself - captured just now or re-read by IndexedCsvReader
+        if (startingLineNumber == headerStartingLineNumber && !returnHeader) {
+            return null;
         }
 
         return new NamedCsvRecord(startingLineNumber, compactFields, false, header);

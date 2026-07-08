@@ -195,6 +195,210 @@ class IndexedCsvReaderTest {
         }
     }
 
+    @Test
+    void namedCsvOutOfOrder() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("h1\nv1\nv2"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v2"));
+
+            assertThat(csv.readPage(0))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+        }
+    }
+
+    @Test
+    void namedCsvPageReRead() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("h1\nv1\nv2"))) {
+            for (int i = 0; i < 2; i++) {
+                assertThat(csv.readPage(0))
+                    .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                    .fields().containsExactly(entry("h1", "v1"));
+            }
+        }
+    }
+
+    @Test
+    void namedCsvLeadingEmptyLine() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("\nh1\nv1"))) {
+            assertThat(csv.readPage(0))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).isStartingLineNumber(1))
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty());
+
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+        }
+    }
+
+    @Test
+    void namedCsvLeadingEmptyLineOutOfOrder() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("\nh1\nv1"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+
+            assertThat(csv.readPage(0))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).isStartingLineNumber(1))
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty());
+        }
+    }
+
+    @Test
+    void namedCsvCommentOnlyFile() throws IOException {
+        final var icrb = IndexedCsvReader.builder()
+            .pageSize(1)
+            .commentStrategy(CommentStrategy.READ);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("#c1\n#c2\n#c3"))) {
+            assertThat(csv.readPage(2))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .isComment()
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty())
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).field(0).isEqualTo("c3"));
+
+            assertThat(csv.readPage(0))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .isComment()
+                .satisfies(r -> NamedCsvRecordAssert.assertThat(r).field(0).isEqualTo("c1"));
+        }
+    }
+
+    @Test
+    void namedCsvMalformedHeaderFailsFast() throws IOException {
+        final var icrb = IndexedCsvReader.builder()
+            .pageSize(1)
+            .commentStrategy(CommentStrategy.READ);
+        final Path file = prepareTestFile("#c1\n\"h1\"x\nv1");
+
+        assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
+            .isInstanceOf(CsvParseException.class);
+    }
+
+    @Test
+    void namedCsvDuplicateHeaderFailsFast() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(1);
+        final Path file = prepareTestFile("h,h\nv1,v2");
+
+        assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageStartingWith("Header contains duplicate fields");
+    }
+
+    @Test
+    void namedCsvMultilineHeader() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(1);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("\"h1a\nh1b\",h2\nv1,v2"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1a\nh1b", "v1"), entry("h2", "v2"));
+
+            assertThat(csv.readPage(0)).isEmpty();
+        }
+    }
+
+    @Test
+    void namedCsvHeaderBehindCommentPage() throws IOException {
+        final var icrb = IndexedCsvReader.builder()
+            .pageSize(2)
+            .commentStrategy(CommentStrategy.READ);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("#c1\n#c2\nh1\nv1"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+
+            assertThat(csv.readPage(0))
+                .satisfiesExactly(
+                    rec -> NamedCsvRecordAssert.assertThat(rec).isComment()
+                        .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty()),
+                    rec -> NamedCsvRecordAssert.assertThat(rec).isComment()
+                        .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty()));
+        }
+    }
+
+    @Test
+    void namedCsvPostHeaderComment() throws IOException {
+        final var icrb = IndexedCsvReader.builder()
+            .pageSize(3)
+            .commentStrategy(CommentStrategy.READ);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("h1\n#c\nv1"))) {
+            assertThat(csv.readPage(0))
+                .satisfiesExactly(
+                    rec -> NamedCsvRecordAssert.assertThat(rec).isComment()
+                        .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty()),
+                    rec -> NamedCsvRecordAssert.assertThat(rec)
+                        .fields().containsExactly(entry("h1", "v1")));
+        }
+    }
+
+    @Test
+    void namedCsvHeaderOnlyFile() throws IOException {
+        final var icrb = IndexedCsvReader.builder().pageSize(2);
+
+        try (var csv = icrb.build(NamedCsvRecordHandler.of(), prepareTestFile("h1"))) {
+            for (int i = 0; i < 2; i++) {
+                assertThat(csv.readPage(0)).isEmpty();
+            }
+        }
+    }
+
+    @Test
+    void namedCsvReturnHeader() throws IOException {
+        final var cbh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
+
+        try (var csv = IndexedCsvReader.builder().pageSize(1).build(cbh, prepareTestFile("h1\nv1"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v1"));
+
+            for (int i = 0; i < 2; i++) {
+                assertThat(csv.readPage(0))
+                    .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                    .fields().containsExactly(entry("h1", "h1"));
+            }
+        }
+    }
+
+    @Test
+    void namedCsvPredefinedHeader() throws IOException {
+        final var cbh = NamedCsvRecordHandler.of(c -> c.header("H"));
+
+        try (var csv = IndexedCsvReader.builder().pageSize(1).build(cbh, prepareTestFile("a\nb"))) {
+            assertThat(csv.readPage(1))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("H", "b"));
+
+            assertThat(csv.readPage(0))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("H", "a"));
+        }
+    }
+
+    @Test
+    void namedCsvEmptyFile() throws IOException {
+        try (var csv = IndexedCsvReader.builder().pageSize(1)
+            .build(NamedCsvRecordHandler.of(), prepareTestFile(""))) {
+            assertThat(csv.getIndex().pages()).isEmpty();
+
+            assertThatThrownBy(() -> csv.readPage(0))
+                .isInstanceOf(IndexOutOfBoundsException.class);
+        }
+    }
+
     // allow extra characters after closing quotes
 
     @SuppressWarnings("removal")

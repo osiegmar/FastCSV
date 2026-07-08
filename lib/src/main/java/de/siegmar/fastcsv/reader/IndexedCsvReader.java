@@ -116,6 +116,10 @@ public final class IndexedCsvReader<T> implements Closeable {
         reader = new SeekableInputStreamReader(new RandomAccessFile(file.toFile(), "r"), charset);
         csvParser = new StrictCsvParser(fieldSeparator, quoteCharacter, commentStrategy, commentCharacter,
             allowExtraCharsAfterClosingQuote, allowUnclosedQuote, csvRecordHandler, maxBufferSize, reader);
+
+        if (csvRecordHandler instanceof NamedCsvRecordHandler && !this.csvIndex.pages().isEmpty()) {
+            captureHeader();
+        }
     }
 
     private static void assertFields(final char fieldSeparator, final char quoteCharacter,
@@ -265,6 +269,27 @@ public final class IndexedCsvReader<T> implements Closeable {
             fileLock.unlock();
         }
         return ret;
+    }
+
+    /// Feeds the first data record to the callback handler, which captures its header from it
+    /// (unless predefined), so that page reads are independent of the order in which pages are requested.
+    @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
+    private void captureHeader() throws IOException {
+        try {
+            final CsvIndex.CsvPage firstPage = csvIndex.pages().get(0);
+            reader.seek(firstPage.offset());
+            csvParser.reset(firstPage.startingLineNumber() - 1);
+
+            while (csvParser.parse()) {
+                if (csvRecordHandler.getRecordType() == RecordType.DATA) {
+                    csvRecordHandler.buildRecord();
+                    break;
+                }
+            }
+        } catch (final Throwable t) {
+            reader.close();
+            throw t;
+        }
     }
 
     private String buildExceptionMessage() {
