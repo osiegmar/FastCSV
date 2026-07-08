@@ -256,8 +256,9 @@ final class RelaxedCsvParser implements CsvParser {
                         break OUTER;
                     }
                     if (!trimWhitespacesAroundQuotes || ch > SPACE) {
-                        throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
-                            .formatted(ch, ch));
+                        throw new CsvParseException(
+                            "Unexpected character after closing quote: '%c' (0x%x) (record starting at line %d)"
+                                .formatted(ch, ch, startingLineNumber));
                     }
                 }
 
@@ -303,7 +304,7 @@ final class RelaxedCsvParser implements CsvParser {
                     insufficient to read the data of a single field. \
                     This issue typically arises when a quotation begins but does not conclude within the \
                     confines of this buffer's maximum limit. \
-                    """.formatted(maxBufferSize));
+                    (record starting at line %d)""".formatted(maxBufferSize, startingLineNumber));
             }
             final char[] newField = new char[Math.min(maxBufferSize, currentField.length * 2)];
             System.arraycopy(currentField, 0, newField, 0, currentField.length);
@@ -364,7 +365,7 @@ final class RelaxedCsvParser implements CsvParser {
         reader.close();
     }
 
-    private static final class LookaheadReader implements Closeable {
+    private final class LookaheadReader implements Closeable {
 
         private final Reader reader;
         private final int maxBufferSize;
@@ -432,8 +433,9 @@ final class RelaxedCsvParser implements CsvParser {
             if (required > buffer.length) {
                 // grow (relocates `start` to 0 along the way)
                 if (required > maxBufferSize) {
-                    throw new CsvParseException("The maximum buffer size of %d is insufficient to read a single line."
-                        .formatted(maxBufferSize));
+                    throw new CsvParseException(
+                        "The maximum buffer size of %d is insufficient to read a single line (line %d)."
+                            .formatted(maxBufferSize, startingLineNumber + 1));
                 }
                 final char[] newBuf = new char[Math.min(maxBufferSize, Math.max(buffer.length * 2, required))];
                 System.arraycopy(buffer, start, newBuf, 0, available);

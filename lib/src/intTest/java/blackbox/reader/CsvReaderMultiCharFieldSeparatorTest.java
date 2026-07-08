@@ -71,8 +71,8 @@ class CsvReaderMultiCharFieldSeparatorTest {
 
         assertThatThrownBy(() -> csv.stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("Exception when reading first record")
-            .hasRootCauseMessage("Unexpected character after closing quote: 'x' (0x78)");
+            .hasMessage("Unexpected character after closing quote: 'x' (0x78) (record starting at line 1)")
+            .hasNoCause();
     }
 
     @Test
@@ -84,8 +84,8 @@ class CsvReaderMultiCharFieldSeparatorTest {
 
         assertThatThrownBy(() -> csv.stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("Exception when reading first record")
-            .hasRootCauseMessage("Unexpected character after closing quote: ';' (0x3b)");
+            .hasMessage("Unexpected character after closing quote: ';' (0x3b) (record starting at line 1)")
+            .hasNoCause();
     }
 
     @Test

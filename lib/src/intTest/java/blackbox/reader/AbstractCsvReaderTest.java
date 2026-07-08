@@ -129,9 +129,8 @@ abstract class AbstractCsvReaderTest {
         crb.extraFieldStrategy(FieldMismatchStrategy.STRICT);
         assertThatThrownBy(() -> readAll("foo\nfoo,bar"))
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading record that started in line 2")
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
+            .hasMessage("Record 2 has 2 fields, but first record had 1 fields")
+            .hasNoCause();
     }
 
     @Test
@@ -165,9 +164,8 @@ abstract class AbstractCsvReaderTest {
         crb.missingFieldStrategy(FieldMismatchStrategy.STRICT);
         assertThatThrownBy(() -> readAll("foo,bar\nfoo"))
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading record that started in line 2")
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record 2 has 1 fields, but first record had 2 fields");
+            .hasMessage("Record 2 has 1 fields, but first record had 2 fields")
+            .hasNoCause();
     }
 
     @Test
@@ -217,9 +215,8 @@ abstract class AbstractCsvReaderTest {
     void allowExtraCharsAfterClosingQuoteNot() {
         assertThatThrownBy(() -> readAll("foo,\"bar\"baz").stream())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Unexpected character after closing quote: 'b' (0x62)");
+            .hasMessage("Unexpected character after closing quote: 'b' (0x62) (record starting at line 1)")
+            .hasNoCause();
     }
 
     // allow unclosed quote at end of input
@@ -238,8 +235,8 @@ abstract class AbstractCsvReaderTest {
         crb.allowUnclosedQuote(false);
         assertThatThrownBy(() -> readAll("a,b\n\"c"))
             .isInstanceOf(CsvParseException.class)
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Unclosed quoted field at end of input (record starting at line 2)");
+            .hasMessage("Unclosed quoted field at end of input (record starting at line 2)")
+            .hasNoCause();
     }
 
     @Test
@@ -390,9 +387,8 @@ abstract class AbstractCsvReaderTest {
 
         assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record starting at line 1 has surpassed the maximum limit of %d fields", buf.length);
+            .hasMessage("Record starting at line 1 has surpassed the maximum limit of %d fields", buf.length)
+            .hasNoCause();
     }
 
     // buffer exceed
@@ -418,10 +414,9 @@ abstract class AbstractCsvReaderTest {
 
         assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).iterator().next())
             .isInstanceOf(CsvParseException.class)
-            .hasMessageContaining("Exception when reading first record")
-            .rootCause()
-                .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("is insufficient to read the data of a single field");
+            .hasMessageContaining("is insufficient to read the data of a single field")
+            .hasMessageContaining("(record starting at line 1)")
+            .hasNoCause();
     }
 
     @Test
@@ -436,10 +431,9 @@ abstract class AbstractCsvReaderTest {
 
         assertThatThrownBy(iterator::next)
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading record that started in line 2")
-            .rootCause()
-                .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("The maximum buffer size of 16777216 is insufficient");
+            .hasMessageContaining("The maximum buffer size of 16777216 is insufficient")
+            .hasMessageContaining("(record starting at line 2)")
+            .hasNoCause();
     }
 
     // record size exceed
@@ -456,10 +450,9 @@ abstract class AbstractCsvReaderTest {
 
         assertThatThrownBy(() -> crb.ofCsvRecord(new CharArrayReader(buf)).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Field at index 8 in record starting at line 1 exceeds the max record size of "
-                + "67108864 characters");
+            .hasMessage("Field at index 8 in record starting at line 1 exceeds the max record size of "
+                + "67108864 characters")
+            .hasNoCause();
     }
 
     // API

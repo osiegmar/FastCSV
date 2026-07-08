@@ -257,6 +257,8 @@ public final class IndexedCsvReader<T> implements Closeable {
             }
         } catch (final IOException e) {
             throw new IOException(buildExceptionMessage(), e);
+        } catch (final CsvParseException e) {
+            throw e;
         } catch (final Throwable t) {
             throw new CsvParseException(buildExceptionMessage(), t);
         } finally {

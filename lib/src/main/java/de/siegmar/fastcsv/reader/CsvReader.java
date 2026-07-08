@@ -337,6 +337,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             return fetchRecord();
         } catch (final IOException e) {
             throw new UncheckedIOException(buildExceptionMessage(), e);
+        } catch (final CsvParseException e) {
+            throw e;
         } catch (final Throwable t) {
             throw new CsvParseException(buildExceptionMessage(), t);
         }

@@ -268,8 +268,9 @@ final class StrictCsvParser implements CsvParser {
                                     }
                                 }
                             } else if (!allowExtraCharsAfterClosingQuote) {
-                                throw new CsvParseException("Unexpected character after closing quote: '%c' (0x%x)"
-                                    .formatted(c, (int) c));
+                                throw new CsvParseException(
+                                    "Unexpected character after closing quote: '%c' (0x%x) (record starting at line %d)"
+                                        .formatted(c, (int) c, startingLineNumber));
                             }
                         }
                     }
@@ -421,7 +422,7 @@ final class StrictCsvParser implements CsvParser {
     }
 
     @SuppressWarnings("checkstyle:visibilitymodifier")
-    private static class CsvBuffer implements Closeable {
+    private final class CsvBuffer implements Closeable {
 
         private static final int DEFAULT_READ_SIZE = 8192;
 
@@ -506,7 +507,7 @@ final class StrictCsvParser implements CsvParser {
                     insufficient to read the data of a single field. \
                     This issue typically arises when a quotation begins but does not conclude within the \
                     confines of this buffer's maximum limit. \
-                    """.formatted(maxBufferSize));
+                    (record starting at line %d)""".formatted(maxBufferSize, startingLineNumber));
             }
             return new char[Math.min(maxBufferSize, buf.length * 2)];
         }

@@ -16,8 +16,8 @@ class CsvCallbackHandlerTest {
         final String csv = ",".repeat(max - 1) + "\n" + ",".repeat(max);
         Assertions.assertThatCode(() -> CsvReader.builder().ofCsvRecord(csv).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading record that started in line 2")
-            .hasRootCauseMessage("Record starting at line 2 has surpassed the maximum limit of 16384 fields");
+            .hasMessage("Record starting at line 2 has surpassed the maximum limit of 16384 fields")
+            .hasNoCause();
     }
 
     @Test
@@ -29,8 +29,8 @@ class CsvCallbackHandlerTest {
         );
         Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading record that started in line 2")
-            .hasRootCauseMessage("Record starting at line 2 has surpassed the maximum limit of 10 fields");
+            .hasMessage("Record starting at line 2 has surpassed the maximum limit of 10 fields")
+            .hasNoCause();
     }
 
     @Test
@@ -70,9 +70,8 @@ class CsvCallbackHandlerTest {
         );
         Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseMessage("Field at index 2 in record starting at line 1 exceeds the max record size of "
-                + "5 characters");
+            .hasMessage("Field at index 2 in record starting at line 1 exceeds the max record size of 5 characters")
+            .hasNoCause();
     }
 
     @Test
@@ -83,9 +82,8 @@ class CsvCallbackHandlerTest {
         );
         Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseMessage("Field at index 0 in record starting at line 1 exceeds the max field size of "
-                + "5 characters");
+            .hasMessage("Field at index 0 in record starting at line 1 exceeds the max field size of 5 characters")
+            .hasNoCause();
     }
 
     @Test
@@ -97,9 +95,8 @@ class CsvCallbackHandlerTest {
         final var builder = CsvReader.builder().commentStrategy(CommentStrategy.READ);
         Assertions.assertThatCode(() -> builder.build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .hasRootCauseMessage("Field at index 0 in record starting at line 1 exceeds the max field size of "
-                + "5 characters");
+            .hasMessage("Field at index 0 in record starting at line 1 exceeds the max field size of 5 characters")
+            .hasNoCause();
     }
 
 }

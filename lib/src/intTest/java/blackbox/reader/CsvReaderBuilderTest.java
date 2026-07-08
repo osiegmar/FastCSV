@@ -151,7 +151,8 @@ class CsvReaderBuilderTest {
         assertThatThrownBy(() -> CsvReader.builder().allowExtraFields(false)
             .ofCsvRecord("foo\nfoo,bar").stream().toList())
             .isInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record 2 has 2 fields, but first record had 1 fields");
+            .hasMessage("Record 2 has 2 fields, but first record had 1 fields")
+            .hasNoCause();
     }
 
     @SuppressWarnings("removal")
@@ -163,7 +164,8 @@ class CsvReaderBuilderTest {
         assertThatThrownBy(() -> CsvReader.builder().allowMissingFields(false)
             .ofCsvRecord("foo,bar\nfoo").stream().toList())
             .isInstanceOf(CsvParseException.class)
-            .hasRootCauseMessage("Record 2 has 1 fields, but first record had 2 fields");
+            .hasMessage("Record 2 has 1 fields, but first record had 2 fields")
+            .hasNoCause();
     }
 
 }

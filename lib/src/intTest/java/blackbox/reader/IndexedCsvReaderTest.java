@@ -230,8 +230,8 @@ class IndexedCsvReaderTest {
         try (var csv = bldr.ofCsvRecord(prepareTestFile("\"abc"), StandardCharsets.UTF_8)) {
             assertThatThrownBy(() -> csv.readPage(0))
                 .isInstanceOf(CsvParseException.class)
-                .hasRootCauseInstanceOf(CsvParseException.class)
-                .hasRootCauseMessage("Unclosed quoted field at end of input (record starting at line 1)");
+                .hasMessage("Unclosed quoted field at end of input (record starting at line 1)")
+                .hasNoCause();
         }
     }
 
@@ -266,14 +266,14 @@ class IndexedCsvReaderTest {
         @Test
         void bufferExceed() throws IOException {
             // An oversized field on the first page reports the first record.
-            assertBufferExceededOnPage("", 0, "Exception when reading first record");
+            assertBufferExceededOnPage("", 0, "(record starting at line 1)");
         }
 
         @Test
         void bufferExceedOnLaterPage() throws IOException {
             // A buffer overflow on a page that starts beyond line 1 must report that record's
-            // starting line number, not the "first record" wording.
-            assertBufferExceededOnPage("a\n", 1, "Exception when reading record that started in line 2");
+            // starting line number.
+            assertBufferExceededOnPage("a\n", 1, "(record starting at line 2)");
         }
 
         @SuppressWarnings("PMD.CloseResource")
@@ -294,10 +294,9 @@ class IndexedCsvReaderTest {
 
             assertThatThrownBy(() -> csv.readPage(page).getFirst())
                 .isInstanceOf(CsvParseException.class)
+                .hasMessageContaining("is insufficient to read the data of a single field")
                 .hasMessageContaining(expectedContext)
-                .rootCause()
-                .isInstanceOf(CsvParseException.class)
-                .hasMessageContaining("is insufficient to read the data of a single field");
+                .hasNoCause();
         }
 
     }

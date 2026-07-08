@@ -28,7 +28,7 @@ class RelaxedCsvParserTest {
 
         assertThatThrownBy(p::peekLine)
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("The maximum buffer size of %d is insufficient to read a single line."
+            .hasMessage("The maximum buffer size of %d is insufficient to read a single line (line 1)."
                 .formatted(maxBufferSize));
     }
 
