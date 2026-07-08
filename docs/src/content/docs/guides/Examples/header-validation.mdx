@@ -1,0 +1,28 @@
+---
+title: Header validation
+description: "Validate the header of a CSV file when reading it with FastCSV's HeaderValidator API."
+---
+
+import SourceExample from '../../../../components/SourceExample.astro';
+
+When reading CSV files with a header (using `NamedCsvRecordHandler`), you may want to assert that the file
+actually comes with the header you expect – and fail fast (before processing any records) if it doesn't.
+
+FastCSV allows you to do this by configuring a `HeaderValidator`. The validator is called once the header is
+determined – either from the first record or from a predefined header. If the validation fails,
+a `CsvParseException` is thrown. Input without any header (e.g., an empty file) yields no records
+and is not validated.
+
+Two standard validators are provided:
+
+- `HeaderValidator.containsExactly(...)`: the header must consist of exactly the given fields, in the given order.
+- `HeaderValidator.containsAtLeast(...)`: the header must contain at least the given fields, in any order.
+
+For anything beyond that (e.g., case-insensitive comparison or pattern matching), you can implement custom
+validation logic using a lambda expression.
+
+## Example
+
+In the following example, the header is validated while reading a CSV file.
+
+<SourceExample filename="ExampleNamedCsvReaderWithHeaderValidation.java"/>

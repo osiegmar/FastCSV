@@ -298,10 +298,8 @@ class IndexedCsvReaderTest {
 
         assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
             .isInstanceOf(CsvParseException.class)
-            .hasMessage("Exception when reading first record")
-            .rootCause()
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageStartingWith("Header contains duplicate fields");
+            .hasMessageStartingWith("Header contains duplicate fields")
+            .hasNoCause();
 
         // the file handle must have been released on failure
         Files.delete(file);

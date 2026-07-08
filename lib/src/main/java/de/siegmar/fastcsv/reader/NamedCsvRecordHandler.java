@@ -1,5 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,8 +23,10 @@ import de.siegmar.fastcsv.util.Nullable;
 public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHandler<NamedCsvRecord> {
 
     private static final String[] EMPTY_HEADER = new String[0];
-    private final boolean allowDuplicateHeaderFields;
+    private static final HeaderValidator NO_DUPLICATE_FIELDS = NamedCsvRecordHandler::checkForDuplicates;
+
     private final boolean returnHeader;
+    private final List<HeaderValidator> headerValidators;
 
     @Nullable
     private String[] header;
@@ -33,12 +36,12 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     private NamedCsvRecordHandler(final int maxFields, final int maxFieldSize, final int maxRecordSize,
                                   final FieldModifier fieldModifier,
-                                  final boolean allowDuplicateHeaderFields,
                                   final boolean returnHeader,
+                                  final List<HeaderValidator> headerValidators,
                                   @Nullable final List<String> header) {
         super(maxFields, maxFieldSize, maxRecordSize, fieldModifier);
-        this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
         this.returnHeader = returnHeader;
+        this.headerValidators = List.copyOf(headerValidators);
         if (header != null) {
             this.header = validateHeader(header.toArray(new String[0]));
         }
@@ -83,15 +86,15 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             Objects.requireNonNull(h, "header element must not be null");
         }
 
-        if (!allowDuplicateHeaderFields) {
-            checkForDuplicates(fields);
+        final List<String> headerList = List.of(fields);
+        for (final HeaderValidator headerValidator : headerValidators) {
+            headerValidator.validate(headerList);
         }
 
         return fields;
     }
 
-    @SuppressWarnings("PMD.UseVarargs")
-    private static void checkForDuplicates(final String[] header) {
+    private static void checkForDuplicates(final List<String> header) {
         final var duplicateHeaders = new LinkedHashSet<String>();
         final var seen = new HashSet<String>();
         for (final String h : header) {
@@ -101,7 +104,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
 
         if (!duplicateHeaders.isEmpty()) {
-            throw new IllegalArgumentException("Header contains duplicate fields: "
+            throw new CsvParseException("Header contains duplicate fields: "
                 + duplicateHeaders);
         }
     }
@@ -143,6 +146,9 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         private boolean returnHeader;
 
         @Nullable
+        private HeaderValidator headerValidator;
+
+        @Nullable
         private List<String> header;
 
         private NamedCsvRecordHandlerBuilder() {
@@ -150,7 +156,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets whether duplicate header fields are allowed.
         ///
-        /// When set to `false`, an [IllegalArgumentException] is thrown if the header contains duplicate fields.
+        /// When set to `false`, a [CsvParseException] is thrown if the header contains duplicate fields.
         /// When set to `true`, duplicate fields are allowed. See [NamedCsvRecord] for details on how duplicate
         /// headers are handled.
         ///
@@ -191,6 +197,28 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             return this;
         }
 
+        /// Sets a validator that is called once the header is determined – either from the first record
+        /// (that is not a comment or an empty line) or from a predefined header (see [#header(String...)]).
+        /// Input without any header (e.g., an empty file) yields no records and is not validated.
+        ///
+        /// The validator must throw an exception (any [RuntimeException]) if the header is not acceptable.
+        /// While reading, a [CsvParseException] (as thrown by the standard validators) propagates as-is;
+        /// any other exception gets wrapped in one. For a predefined header, the validator is already
+        /// called by [#build()] and any exception propagates as-is.
+        ///
+        /// The validator is called after the built-in checks (`null` elements, duplicates) have passed.
+        ///
+        /// @param headerValidator the validator, must not be `null`
+        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @throws NullPointerException if `null` is passed
+        /// @see HeaderValidator#containsExactly(String...)
+        /// @see HeaderValidator#containsAtLeast(String...)
+        public NamedCsvRecordHandlerBuilder headerValidator(final HeaderValidator headerValidator) {
+            Objects.requireNonNull(headerValidator, "headerValidator must not be null");
+            this.headerValidator = headerValidator;
+            return this;
+        }
+
         /// Sets whether the header itself should be returned as the first record.
         ///
         /// When enabled, the first record returned will be a [NamedCsvRecord] with the header fields as its fields
@@ -213,12 +241,24 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         /// @return the new instance
         /// @throws IllegalArgumentException if argument constraints are violated
         ///     (see [AbstractInternalCsvCallbackHandler])
+        /// @throws CsvParseException if a predefined header (see [#header(String...)]) contains duplicate
+        ///     fields (see [#allowDuplicateHeaderFields(boolean)]) or is rejected by a configured validator
+        ///     (see [#headerValidator(HeaderValidator)])
         public NamedCsvRecordHandler build() {
             if (returnHeader && header != null) {
                 throw new IllegalArgumentException("Predefined headers cannot be used with returnHeader=true");
             }
+
+            final List<HeaderValidator> headerValidators = new ArrayList<>();
+            if (!allowDuplicateHeaderFields) {
+                headerValidators.add(NO_DUPLICATE_FIELDS);
+            }
+            if (headerValidator != null) {
+                headerValidators.add(headerValidator);
+            }
+
             return new NamedCsvRecordHandler(maxFields, maxFieldSize, maxRecordSize, fieldModifier,
-                allowDuplicateHeaderFields, returnHeader, header);
+                returnHeader, headerValidators, header);
         }
 
     }
