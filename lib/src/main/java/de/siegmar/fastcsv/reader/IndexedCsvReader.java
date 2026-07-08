@@ -286,10 +286,22 @@ public final class IndexedCsvReader<T> implements Closeable {
                     break;
                 }
             }
+        } catch (final IOException e) {
+            throw closeAfterFailure(new IOException(buildExceptionMessage(), e));
+        } catch (final CsvParseException e) {
+            throw closeAfterFailure(e);
         } catch (final Throwable t) {
-            reader.close();
-            throw t;
+            throw closeAfterFailure(new CsvParseException(buildExceptionMessage(), t));
         }
+    }
+
+    private <E extends Throwable> E closeAfterFailure(final E exception) {
+        try {
+            reader.close();
+        } catch (final IOException e) {
+            exception.addSuppressed(e);
+        }
+        return exception;
     }
 
     private String buildExceptionMessage() {

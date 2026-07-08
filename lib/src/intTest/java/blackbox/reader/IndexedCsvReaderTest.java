@@ -283,7 +283,12 @@ class IndexedCsvReaderTest {
         final Path file = prepareTestFile("#c1\n\"h1\"x\nv1");
 
         assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
-            .isInstanceOf(CsvParseException.class);
+            .isInstanceOf(CsvParseException.class)
+            .hasMessageStartingWith("Unexpected character after closing quote")
+            .hasNoCause();
+
+        // the file handle must have been released on failure
+        Files.delete(file);
     }
 
     @Test
@@ -292,8 +297,14 @@ class IndexedCsvReaderTest {
         final Path file = prepareTestFile("h,h\nv1,v2");
 
         assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading first record")
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageStartingWith("Header contains duplicate fields");
+
+        // the file handle must have been released on failure
+        Files.delete(file);
     }
 
     @Test
