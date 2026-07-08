@@ -105,6 +105,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
     @Nullable
     @Override
+    @SuppressWarnings("checkstyle:ReturnCount")
     protected NamedCsvRecord buildRecord() {
         final String[] compactFields = compactFields();
 
@@ -113,6 +114,11 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
 
         if (header == null) {
+            // an empty record must not be captured as the header (the reader may skip it entirely)
+            if (recordType == RecordType.EMPTY) {
+                return new NamedCsvRecord(startingLineNumber, compactFields, false, EMPTY_HEADER);
+            }
+
             header = validateHeader(compactFields);
             if (!returnHeader) {
                 return null;
@@ -151,7 +157,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets a predefined header.
         ///
-        /// When not set, the header is taken from the first record (that is not a comment).
+        /// When not set, the header is taken from the first record (that is not a comment or an empty line).
         ///
         /// @param header the header, must not be `null`
         /// @return This updated object, allowing additional method calls to be chained together.
@@ -166,7 +172,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets the header.
         ///
-        /// When not set, the header is taken from the first record (that is not a comment).
+        /// When not set, the header is taken from the first record (that is not a comment or an empty line).
         ///
         /// @param header the header, must not be `null`
         /// @return This updated object, allowing additional method calls to be chained together.

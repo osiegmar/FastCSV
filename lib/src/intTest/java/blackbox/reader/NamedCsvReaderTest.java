@@ -232,6 +232,55 @@ class NamedCsvReaderTest {
             );
     }
 
+    // empty lines
+
+    @Test
+    void leadingEmptyLineSkipped() {
+        assertThat(parse("\nh1,h2\nv1,v2").stream())
+            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+            .isStartingLineNumber(3)
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("h1", "h2"))
+            .satisfies(r -> NamedCsvRecordAssert.assertThat(r).fields()
+                .containsExactly(entry("h1", "v1"), entry("h2", "v2")));
+    }
+
+    @Test
+    void leadingEmptyLineNotSkipped() {
+        final var csvReader = CsvReader.builder()
+            .skipEmptyLines(false)
+            .ofNamedCsvRecord("\nh1,h2\nv1,v2");
+        assertThat(csvReader.stream())
+            .satisfiesExactly(
+                rec -> NamedCsvRecordAssert.assertThat(rec)
+                    .isStartingLineNumber(1)
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().isEmpty())
+                    .satisfies(r -> assertThat(r.getFields()).containsExactly("")),
+                rec -> NamedCsvRecordAssert.assertThat(rec)
+                    .isStartingLineNumber(3)
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("h1", "h2"))
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).fields()
+                        .containsExactly(entry("h1", "v1"), entry("h2", "v2")))
+            );
+    }
+
+    @Test
+    void interimEmptyLineNotSkipped() {
+        final var csvReader = CsvReader.builder()
+            .skipEmptyLines(false)
+            .ofNamedCsvRecord("h1,h2\n\nv1,v2");
+        assertThat(csvReader.stream())
+            .satisfiesExactly(
+                rec -> NamedCsvRecordAssert.assertThat(rec)
+                    .isStartingLineNumber(2)
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).header().containsExactly("h1", "h2"))
+                    .satisfies(r -> assertThat(r.getFields()).containsExactly("")),
+                rec -> NamedCsvRecordAssert.assertThat(rec)
+                    .isStartingLineNumber(3)
+                    .satisfies(r -> NamedCsvRecordAssert.assertThat(r).fields()
+                        .containsExactly(entry("h1", "v1"), entry("h2", "v2")))
+            );
+    }
+
     // Builder methods
 
     @Test
