@@ -84,6 +84,31 @@ class FieldModifierTest {
             .isInstanceOf(NullPointerException.class);
     }
 
+    @Test
+    void exceptionOnSubsequentRecord() {
+        final FieldModifier failOnSecondRecord = new FieldModifier() {
+            private static final long FIRST_RECORD_LINE = 1;
+
+            @Override
+            public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,
+                                 final String field) {
+                if (startingLineNumber > FIRST_RECORD_LINE) {
+                    throw new IllegalStateException("boom");
+                }
+                return field;
+            }
+        };
+
+        final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c.fieldModifier(failOnSecondRecord));
+
+        assertThatThrownBy(() -> crb.build(cbh, "foo\nbar").stream().toList())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading record that started in line 2")
+            .rootCause()
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("boom");
+    }
+
     private static final class NullFieldModifier implements FieldModifier {
         @Override
         public String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted,

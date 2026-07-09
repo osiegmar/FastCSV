@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,6 +38,8 @@ import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvIndex;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvRecord;
+import de.siegmar.fastcsv.reader.CsvRecordHandler;
+import de.siegmar.fastcsv.reader.FieldModifier;
 import de.siegmar.fastcsv.reader.IndexedCsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecordHandler;
 import de.siegmar.fastcsv.reader.StatusListener;
@@ -303,6 +306,77 @@ class IndexedCsvReaderTest {
 
         // the file handle must have been released on failure
         Files.delete(file);
+    }
+
+    @Test
+    void namedCsvHeaderValidator() throws IOException {
+        final var validatedHeaders = new ArrayList<List<String>>();
+        final var handler = NamedCsvRecordHandler.of(c -> c.headerValidator(validatedHeaders::add));
+
+        try (var csv = singlePageBuilder().build(handler, prepareTestFile("h1,h2\nv1,v2\nv3,v4"))) {
+            assertThat(csv.readPage(2))
+                .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
+                .fields().containsExactly(entry("h1", "v3"), entry("h2", "v4"));
+
+            assertThat(csv.readPage(0)).isEmpty();
+        }
+
+        // validated exactly once, independent of the order in which pages are read
+        assertThat(validatedHeaders).containsExactly(List.of("h1", "h2"));
+    }
+
+    @Test
+    void namedCsvHeaderValidatorFailsFast() throws IOException {
+        final var icrb = singlePageBuilder();
+        final Path file = prepareTestFile("h1,h2\nv1,v2");
+        final var handler = NamedCsvRecordHandler.of(c -> c.headerValidator(header -> {
+            throw new IllegalStateException("boom");
+        }));
+
+        assertThatThrownBy(() -> icrb.build(handler, file))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Exception when reading first record")
+            .rootCause()
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("boom");
+
+        // the file handle must have been released on failure
+        Files.delete(file);
+    }
+
+    @Test
+    void namedCsvHeaderCaptureIoException() throws IOException {
+        final Path file = prepareTestFile("h1,h2\nv1,v2");
+
+        // a prebuilt index with a broken page offset causes an IOException on seek
+        final var index = new CsvIndex(0, Files.size(file), (byte) ',', (byte) '"',
+            CommentStrategy.NONE, (byte) '#', 2L, List.of(new CsvIndex.CsvPage(-1, 1)));
+        final var icrb = singlePageBuilder().index(index);
+
+        assertThatThrownBy(() -> icrb.build(NamedCsvRecordHandler.of(), file))
+            .isInstanceOf(IOException.class)
+            .hasMessageStartingWith("Exception when reading")
+            .rootCause()
+            .isInstanceOf(IOException.class);
+
+        // the file handle must have been released on failure
+        Files.delete(file);
+    }
+
+    @Test
+    void readPageWrapsUnexpectedException() throws IOException {
+        final var handler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifier.modify(field -> {
+            throw new IllegalStateException("boom");
+        })));
+
+        try (var csv = singlePageBuilder().build(handler, prepareTestFile("v1\nv2"))) {
+            assertThatThrownBy(() -> csv.readPage(1))
+                .isInstanceOf(CsvParseException.class)
+                .hasMessage("Exception when reading record that started in line 2")
+                .rootCause()
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+        }
     }
 
     @Test
