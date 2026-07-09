@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0](https://github.com/osiegmar/FastCSV/compare/v4.3.1...v4.4.0) (2026-07-09)
+
+
+### Features
+
+* add header validation support to NamedCsvRecordHandler ([#151](https://github.com/osiegmar/FastCSV/issues/151)) ([e50ad43](https://github.com/osiegmar/FastCSV/commit/e50ad4341e74c0dd9fe5edf90916dd545425b54a))
+* deprecate allowExtraCharsAfterClosingQuote ([4523745](https://github.com/osiegmar/FastCSV/commit/45237452b1eb44d71927399379ffbe33da3bdd47)), closes [#170](https://github.com/osiegmar/FastCSV/issues/170)
+* propagate CsvParseException from readers unwrapped ([1f4fa3e](https://github.com/osiegmar/FastCSV/commit/1f4fa3eb36e8dd6f8593bc930429d2ee2e2f3715))
+
+
+### Bug Fixes
+
+* align IndexedCsvReader header capture exception wrapping with page reads ([1923e7e](https://github.com/osiegmar/FastCSV/commit/1923e7e7db3be1094b88494931f9cbd2f7e59a21))
+* make IndexedCsvReader page reads with named records order-independent ([00193db](https://github.com/osiegmar/FastCSV/commit/00193db704a04804115735f020918f5387541646))
+* prevent leading empty line from being captured as header ([9d4b178](https://github.com/osiegmar/FastCSV/commit/9d4b1780726a627b7ba8f9be4aab17c78ed5f34c))
+* restore missing space before link in SourceExample component ([36e45ee](https://github.com/osiegmar/FastCSV/commit/36e45ee0493c3bc54ed8075ae39ed5543e3361bf))
+
 ## [4.3.1](https://github.com/osiegmar/FastCSV/compare/v4.3.0...v4.3.1) (2026-06-29)
 
 
