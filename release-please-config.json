@@ -20,6 +20,11 @@
           "type": "generic",
           "path": "docs/src/content/docs/guides/quickstart.mdx",
           "glob": false
+        },
+        {
+          "type": "generic",
+          "path": "docs/public/llms.txt",
+          "glob": false
         }
       ]
     }
