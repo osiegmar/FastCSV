@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0](https://github.com/osiegmar/FastCSV/compare/v4.3.1...v4.4.0) (2026-07-28)
+
+
+### Features
+
+* add header validation support to NamedCsvRecordHandler ([#151](https://github.com/osiegmar/FastCSV/issues/151)) ([e50ad43](https://github.com/osiegmar/FastCSV/commit/e50ad4341e74c0dd9fe5edf90916dd545425b54a))
+* deprecate allowExtraCharsAfterClosingQuote ([4523745](https://github.com/osiegmar/FastCSV/commit/45237452b1eb44d71927399379ffbe33da3bdd47)), closes [#170](https://github.com/osiegmar/FastCSV/issues/170)
+* propagate CsvParseException from readers unwrapped ([1f4fa3e](https://github.com/osiegmar/FastCSV/commit/1f4fa3eb36e8dd6f8593bc930429d2ee2e2f3715))
+
+
+### Bug Fixes
+
+* align IndexedCsvReader header capture exception wrapping with page reads ([1923e7e](https://github.com/osiegmar/FastCSV/commit/1923e7e7db3be1094b88494931f9cbd2f7e59a21))
+* clear stale CR flag on data chars in StrictCsvParser ([d598c2c](https://github.com/osiegmar/FastCSV/commit/d598c2c74d1fcfc13121e08abb49c994d69f8e33))
+* close file stream when building a reader from a Path fails ([53b2311](https://github.com/osiegmar/FastCSV/commit/53b2311f8085e6bea6db3784aa8682e615fd4be5))
+* make IndexedCsvReader page reads with named records order-independent ([00193db](https://github.com/osiegmar/FastCSV/commit/00193db704a04804115735f020918f5387541646))
+* make writer construction from a Path safe ([849373e](https://github.com/osiegmar/FastCSV/commit/849373e64719c520f8d55363d3f32061b30463fd))
+* prevent leading empty line from being captured as header ([9d4b178](https://github.com/osiegmar/FastCSV/commit/9d4b1780726a627b7ba8f9be4aab17c78ed5f34c))
+* reject prebuilt CsvIndex with mismatched pageSize ([9878618](https://github.com/osiegmar/FastCSV/commit/9878618436b3292f4d80f36acadf0267c5e00124))
+* restore missing space before link in SourceExample component ([36e45ee](https://github.com/osiegmar/FastCSV/commit/36e45ee0493c3bc54ed8075ae39ed5543e3361bf))
+* restrict IndexedCsvReader to UTF-8 and single-byte charsets ([695e090](https://github.com/osiegmar/FastCSV/commit/695e090d72c1b775a0a9de88fa9dfb5afa26ad14))
+
+
+### Performance Improvements
+
+* avoid String allocation for empty fields ([6ada9d4](https://github.com/osiegmar/FastCSV/commit/6ada9d4f8daaeb99e2878214f30c9ee2ccceaaea))
+* bulk-copy scan loops in RelaxedCsvParser ([e623a6e](https://github.com/osiegmar/FastCSV/commit/e623a6e27e63938977f417fb438076b02b94c7d4))
+* defer validation message formatting in parsers ([2f23a35](https://github.com/osiegmar/FastCSV/commit/2f23a353a1c853058869a88ed262cf20512c27dd))
+* skip unescape pass for quoted fields without escaped quotes ([09a256b](https://github.com/osiegmar/FastCSV/commit/09a256b49cfa2f5b73cffa5c5f8dbb42a46519c5))
+
 ## [4.3.1](https://github.com/osiegmar/FastCSV/compare/v4.3.0...v4.3.1) (2026-06-29)
 
 
