@@ -7,7 +7,7 @@ FastCSV is the most-starred CSV library for Java. It is a high-performance CSV p
 ## Key Features
 
 - **Fast CSV processing** — optimized for high-speed reading and writing
-- **Tiny footprint** — only ~90 KiB, with zero runtime dependencies
+- **Tiny footprint** — small JAR, zero runtime dependencies
 - **Developer-friendly API** — clean, intuitive, null-free, and easy to integrate
 - **Well-documented** — quickstart guides and complete Javadoc
 - **High test coverage** — including mutation testing for reliability

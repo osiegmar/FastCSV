@@ -26,7 +26,7 @@
 _Here are the top reasons to choose FastCSV — see [fastcsv.org](https://fastcsv.org) for the full feature list._
 
 - **Fast CSV processing** — optimized for high-speed reading and writing
-- **Tiny footprint** — only ~90 KiB, with zero runtime dependencies
+- **Tiny footprint** — small JAR, zero runtime dependencies
 - **Developer-friendly API** — clean, intuitive, and easy to integrate
 - **Well-documented** — Quickstart guides and complete Javadoc
 - **High test coverage** — including mutation testing for reliability

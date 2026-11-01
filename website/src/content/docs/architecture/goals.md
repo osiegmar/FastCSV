@@ -17,7 +17,7 @@ security.
 ## Lightweight
 
 FastCSV has no runtime dependencies and keeps its memory footprint small.
-The JAR file of version 4.1.0 has a size of only 90 KiB.
+The JAR file is about 100 KiB.
 
 ## Compliant
 
