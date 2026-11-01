@@ -137,6 +137,11 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         return new NamedCsvRecord(startingLineNumber, compactFields, false, header);
     }
 
+    @Override
+    boolean isConsumedHeader() {
+        return startingLineNumber == headerStartingLineNumber;
+    }
+
     /// A builder for [NamedCsvRecordHandler].
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class NamedCsvRecordHandlerBuilder

@@ -1,8 +1,11 @@
 package blackbox.reader;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 import org.junit.jupiter.api.Test;
 
+import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
@@ -11,10 +14,23 @@ import de.siegmar.fastcsv.reader.CsvRecordHandler;
 class CsvCallbackHandlerTest {
 
     @Test
+    void consumedRecordIsNotFieldCountChecked() {
+        final var cbh = new AbstractBaseCsvCallbackHandler<Integer>() {
+            @Override
+            protected Integer buildRecord() {
+                // consume the first line (e.g., metadata) - it must not become the first record
+                return getStartingLineNumber() == 1 ? null : getFieldCount();
+            }
+        };
+        assertThat(CsvReader.builder().build(cbh, "metadata\na,b\nc,d").stream())
+            .containsExactly(2, 2);
+    }
+
+    @Test
     void defaultMaxFieldCapacity() {
         final int max = 16_384;
         final String csv = ",".repeat(max - 1) + "\n" + ",".repeat(max);
-        Assertions.assertThatCode(() -> CsvReader.builder().ofCsvRecord(csv).stream().count())
+        assertThatCode(() -> CsvReader.builder().ofCsvRecord(csv).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Record starting at line 2 has surpassed the maximum limit of 16384 fields")
             .hasNoCause();
@@ -27,7 +43,7 @@ class CsvCallbackHandlerTest {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c
             .maxFields(max)
         );
-        Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
+        assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Record starting at line 2 has surpassed the maximum limit of 10 fields")
             .hasNoCause();
@@ -35,28 +51,28 @@ class CsvCallbackHandlerTest {
 
     @Test
     void invalidMaxFields() {
-        Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFields(0)))
+        assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFields(0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxFields must be > 0");
     }
 
     @Test
     void invalidMaxFieldSize() {
-        Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFieldSize(0)))
+        assertThatCode(() -> CsvRecordHandler.of(c -> c.maxFieldSize(0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxFieldSize must be > 0");
     }
 
     @Test
     void invalidMaxRecordSize() {
-        Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(0)))
+        assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxRecordSize must be > 0");
     }
 
     @Test
     void invalidMaxRecordSize2() {
-        Assertions.assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(1).maxFieldSize(2)))
+        assertThatCode(() -> CsvRecordHandler.of(c -> c.maxRecordSize(1).maxFieldSize(2)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("maxRecordSize must be >= maxFieldSize");
     }
@@ -68,7 +84,7 @@ class CsvCallbackHandlerTest {
             .maxFieldSize(2)
             .maxRecordSize(5)
         );
-        Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
+        assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Field at index 2 in record starting at line 1 exceeds the max record size of 5 characters")
             .hasNoCause();
@@ -80,7 +96,7 @@ class CsvCallbackHandlerTest {
         final CsvRecordHandler cbh = CsvRecordHandler.of(c -> c
             .maxFieldSize(5)
         );
-        Assertions.assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
+        assertThatCode(() -> CsvReader.builder().build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Field at index 0 in record starting at line 1 exceeds the max field size of 5 characters")
             .hasNoCause();
@@ -93,7 +109,7 @@ class CsvCallbackHandlerTest {
             .maxFieldSize(5)
         );
         final var builder = CsvReader.builder().commentStrategy(CommentStrategy.READ);
-        Assertions.assertThatCode(() -> builder.build(cbh, csv).stream().count())
+        assertThatCode(() -> builder.build(cbh, csv).stream().count())
             .isInstanceOf(CsvParseException.class)
             .hasMessage("Field at index 0 in record starting at line 1 exceeds the max field size of 5 characters")
             .hasNoCause();
