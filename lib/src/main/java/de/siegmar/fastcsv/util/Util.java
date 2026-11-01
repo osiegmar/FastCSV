@@ -29,7 +29,7 @@ public final class Util {
         return false;
     }
 
-    /// Checks if the given character is a newline character.
+    /// Checks if the given character is a line break character.
     ///
     /// @param character character to test.
     /// @return `true` if the argument is [#CR] or [#LF]
@@ -37,9 +37,9 @@ public final class Util {
         return character == CR || character == LF;
     }
 
-    /// Checks if the given string contains any newline characters.
+    /// Checks if the given string contains any line break characters.
     ///
-    /// @param str the string to check for newlines
+    /// @param str the string to check for line break characters
     /// @return `true` if the string contains either [#CR] or [#LF], `false` otherwise
     public static boolean containsNewline(final String str) {
         return str.indexOf(CR) >= 0 || str.indexOf(LF) >= 0;

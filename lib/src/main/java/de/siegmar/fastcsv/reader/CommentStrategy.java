@@ -1,16 +1,17 @@
 package de.siegmar.fastcsv.reader;
 
-/// This is an enumeration that defines the strategies for handling comments in CSV data that does not conform to RFC.
+/// Strategies for handling comments.
+///
+/// Comments are not part of RFC 4180.
 public enum CommentStrategy {
 
-    /// This strategy does not detect comments. It treats everything as regular fields.
+    /// Comments are not recognized; a line that begins with the comment character is read as a record.
     NONE,
 
-    /// This strategy detects comments but does not return the commented lines.
+    /// Comments are recognized and skipped.
     SKIP,
 
-    /// This strategy detects and returns the commented lines. The entire line is treated as one field.
-    /// The comment character itself is removed.
+    /// Comments are recognized and returned; the comment text (without the comment character) is the only field.
     READ
 
 }

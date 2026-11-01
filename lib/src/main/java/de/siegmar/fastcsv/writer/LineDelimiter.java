@@ -1,6 +1,6 @@
 package de.siegmar.fastcsv.writer;
 
-/// Enumeration for different line delimiters (LF, CR, CRLF, platform default).
+/// The line breaks the writer can write after each record and comment (LF, CR, CRLF, platform default).
 public enum LineDelimiter {
 
     /// Line Feed - (UNIX).
@@ -21,14 +21,14 @@ public enum LineDelimiter {
         this.str = str;
     }
 
-    /// Maps a line delimiter string to the corresponding enum constant.
+    /// Maps a line break string to the corresponding enum constant.
     ///
     /// Accepted values are `"\r\n"` ([#CRLF]), `"\n"` ([#LF]) and `"\r"` ([#CR]).
     /// The [#PLATFORM] constant is never returned by this method.
     ///
-    /// @param str the line delimiter string to look up.
+    /// @param str the line break string to look up.
     /// @return the matching enum constant.
-    /// @throws IllegalArgumentException if the string is not a known line delimiter.
+    /// @throws IllegalArgumentException if the string is not a known line break.
     public static LineDelimiter of(final String str) {
         return switch (str) {
             case "\r\n" -> CRLF;

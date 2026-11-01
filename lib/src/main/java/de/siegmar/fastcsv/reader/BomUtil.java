@@ -9,14 +9,14 @@ import java.util.Optional;
 @SuppressWarnings("checkstyle:MagicNumber")
 final class BomUtil {
 
-    /// The maximum number of bytes a BOM header can have.
+    /// The maximum number of bytes a BOM can have.
     static final int POTENTIAL_BOM_SIZE = 4;
 
     private BomUtil() {
     }
 
-    /// Detects the character encoding of a byte array based on the presence of a Byte Order Mark (BOM) header.
-    /// The method supports the following BOM headers:
+    /// Detects the character encoding of a byte array based on the presence of a byte order mark (BOM).
+    /// The method supports the following BOMs:
     ///
     /// | Encoding  | BOM         |
     /// |-----------|-------------|
@@ -31,8 +31,8 @@ final class BomUtil {
     /// @param buf the byte array to detect the character encoding from
     /// @param n   the number of valid bytes in `buf`; only indices `[0, n)` are inspected
     ///     and any remaining bytes are ignored (`0 <= n <= buf.length`)
-    /// @return an Optional containing the detected BomHeader if a BOM header is found,
-    ///     or an empty Optional if no BOM header is found
+    /// @return an Optional containing the detected BomHeader if a BOM is found,
+    ///     or an empty Optional if no BOM is found
     @SuppressWarnings({
         "checkstyle:CyclomaticComplexity",
         "checkstyle:BooleanExpressionComplexity",
@@ -42,7 +42,7 @@ final class BomUtil {
     })
     static Optional<BomHeader> detectCharset(final byte[] buf, final int n) {
         if (n < 2) {
-            // Not enough bytes to be a BOM header
+            // Not enough bytes to be a BOM
             return Optional.empty();
         }
 
@@ -74,11 +74,11 @@ final class BomUtil {
         return Optional.empty();
     }
 
-    /// Detects the character encoding of a file based on the presence of a Byte Order Mark (BOM) header.
+    /// Detects the character encoding of a file based on the presence of a byte order mark (BOM).
     ///
     /// @param file the file to detect the character encoding from
-    /// @return an [Optional] containing the detected [BomHeader] if a BOM header is found,
-    ///     or an empty [Optional] if no BOM header is found
+    /// @return an [Optional] containing the detected [BomHeader] if a BOM is found,
+    ///     or an empty [Optional] if no BOM is found
     /// @throws IOException if an I/O error occurs reading the file
     static Optional<BomHeader> detectCharset(final Path file)
         throws IOException {

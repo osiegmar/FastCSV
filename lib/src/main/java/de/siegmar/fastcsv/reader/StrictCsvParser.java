@@ -198,7 +198,7 @@ final class StrictCsvParser implements CsvParser {
                         }
                     }
                 } else if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
-                    // commented line
+                    // comment
                     while (lPos < lLen) {
                         final char lookAhead = lBuf[lPos++];
 
@@ -316,7 +316,7 @@ final class StrictCsvParser implements CsvParser {
         }
 
         if ((lStatus & STATUS_COMMENTED_RECORD) != 0) {
-            // commented line
+            // comment
             callbackHandler.setComment(lBuf, lBegin, lPos - lBegin);
             return;
         }

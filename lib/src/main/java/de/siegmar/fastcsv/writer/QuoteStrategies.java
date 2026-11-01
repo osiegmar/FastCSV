@@ -3,10 +3,10 @@ package de.siegmar.fastcsv.writer;
 /// Provides some common [QuoteStrategy] implementations.
 public enum QuoteStrategies implements QuoteStrategy {
 
-    /// Enclose fields only if quoting is required.
+    /// Quote fields only if quoting is required.
     REQUIRED,
 
-    /// Enclose any field with quotes regardless of its content (even empty and `null` fields).
+    /// Quote all fields regardless of their content (even empty and `null` fields).
     ALWAYS {
         @Override
         public boolean quoteNull(final int lineNo, final int fieldIdx) {
@@ -24,7 +24,7 @@ public enum QuoteStrategies implements QuoteStrategy {
         }
     },
 
-    /// Enclose any field with quotes if it has content (is not empty or `null`).
+    /// Quote all fields with non-empty field content.
     NON_EMPTY {
         @Override
         public boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
@@ -32,7 +32,7 @@ public enum QuoteStrategies implements QuoteStrategy {
         }
     },
 
-    /// Enclose empty but not `null` fields to differentiate them.
+    /// Quote empty but not `null` fields to differentiate them.
     /// This is required for PostgreSQL CSV imports, for example.
     EMPTY {
         @Override

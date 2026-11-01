@@ -13,7 +13,8 @@ import de.siegmar.fastcsv.util.Nullable;
 import de.siegmar.fastcsv.util.Preconditions;
 import de.siegmar.fastcsv.util.Util;
 
-/// Less strict but also less performant CSV parser.
+/// CSV parser supporting multi-character field separators and tolerances such as whitespace around quote
+/// characters; less performant than [StrictCsvParser].
 @SuppressWarnings({
     "checkstyle:CyclomaticComplexity",
     "checkstyle:ExecutableStatementCount",

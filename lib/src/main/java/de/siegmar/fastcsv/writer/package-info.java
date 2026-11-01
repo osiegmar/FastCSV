@@ -2,7 +2,7 @@
 ///
 /// The main entry point is [de.siegmar.fastcsv.writer.CsvWriter], configured via its builder.
 /// It supports writing complete records, field-by-field record construction
-/// (via [de.siegmar.fastcsv.writer.CsvWriter.CsvWriterRecord]), and comment lines.
+/// (via [de.siegmar.fastcsv.writer.CsvWriter.CsvWriterRecord]), and comments.
 ///
 /// Quoting behavior can be customized using [de.siegmar.fastcsv.writer.QuoteStrategy]
 /// (see [de.siegmar.fastcsv.writer.QuoteStrategies] for built-in strategies).

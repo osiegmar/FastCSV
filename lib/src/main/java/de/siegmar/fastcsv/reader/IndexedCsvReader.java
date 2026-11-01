@@ -35,7 +35,7 @@ import de.siegmar.fastcsv.util.Util;
 ///
 /// As indexing is performed on a byte level, only **UTF-8 and single-byte charsets** (such as ISO-8859-1 or
 /// US-ASCII) are supported; anything else is rejected with an [IllegalArgumentException]. This also applies to
-/// a charset detected via a BOM header.
+/// a charset detected via a BOM.
 ///
 /// Other multibyte charsets cannot be indexed byte-wise, for either of two reasons. UTF-16, UTF-32 and the
 /// variable-width legacy charsets (Shift_JIS, Big5, GBK, GB18030, ISO-2022-*, …) put ASCII byte values
@@ -378,13 +378,13 @@ public final class IndexedCsvReader<T> implements Closeable {
     ///
     /// - Field separator: `,` (comma)
     /// - Quote character: `"` (double quotes)
-    /// - Comment strategy: [CommentStrategy#NONE] (as RFC doesn't handle comments)
+    /// - Comment strategy: [CommentStrategy#NONE] (as comments are not part of RFC 4180)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Allow extra characters after closing quotes: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
-    /// The line delimiter (line-feed, carriage-return or the combination of both) is detected
-    /// automatically and thus not configurable.
+    /// CR, LF and CRLF are all recognized as line breaks, even mixed within the same CSV data;
+    /// this is not configurable.
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class IndexedCsvReaderBuilder {
 
@@ -425,8 +425,7 @@ public final class IndexedCsvReader<T> implements Closeable {
 
         /// Sets the `quoteCharacter` used when reading CSV data.
         ///
-        /// @param quoteCharacter the character used to enclose fields
-        ///                                             (default: `"` - double quotes).
+        /// @param quoteCharacter the quote character (default: `"` - double quotes).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             checkControlCharacter(quoteCharacter);
@@ -434,8 +433,8 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
-        /// Sets the strategy that defines how (and if) commented lines should be handled
-        /// (default: [CommentStrategy#NONE] as comments are not defined in RFC 4180).
+        /// Sets the strategy for handling comments
+        /// (default: [CommentStrategy#NONE] as comments are not part of RFC 4180).
         ///
         /// @param commentStrategy the strategy for handling comments.
         /// @return This updated object, allowing additional method calls to be chained together.
@@ -448,9 +447,9 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
-        /// Sets the `commentCharacter` used to comment lines.
+        /// Sets the `commentCharacter` used when reading CSV data.
         ///
-        /// @param commentCharacter the character used to comment lines (default: `#` - hash)
+        /// @param commentCharacter the character that begins a comment (default: `#` - hash)
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see #commentStrategy(CommentStrategy)
         public IndexedCsvReaderBuilder commentCharacter(final char commentCharacter) {
@@ -459,12 +458,12 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
-        /// Specifies whether the presence of characters between a closing quote and a field separator or
-        /// the end of a line should be treated as an error or not.
+        /// Specifies whether the presence of characters between a closing quote character and the next field
+        /// separator, line break or the end of the CSV data should be treated as an error or not.
         ///
         /// Example: `"a"b,"c"`
         ///
-        /// If this is set to `true`, the value `ab` will be returned for the first field.
+        /// If this is set to `true`, the first field is returned as `ab`.
         ///
         /// If this is set to `false`, a [CsvParseException] will be thrown.
         ///
@@ -472,8 +471,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @see CsvReader.CsvReaderBuilder#trimWhitespacesAroundQuotes(boolean)
         /// @deprecated This option permits non-conforming input (RFC 4180 does not allow any character between
-        ///     a closing quote and the field separator or end of line) and yields unspecified results if the
-        ///     extra characters contain quote characters. For sequential reading,
+        ///     a closing quote character and the next field separator or line break) and yields unspecified
+        ///     results if the extra characters contain quote characters. For sequential reading,
         ///     [CsvReader.CsvReaderBuilder#trimWhitespacesAroundQuotes(boolean)] provides a saner alternative.
         @Deprecated(forRemoval = true)
         public IndexedCsvReaderBuilder allowExtraCharsAfterClosingQuote(
@@ -482,11 +481,11 @@ public final class IndexedCsvReader<T> implements Closeable {
             return this;
         }
 
-        /// Defines whether input that ends inside a quoted field (EOF before a closing quote) is tolerated.
+        /// Defines whether the CSV data may end inside a quoted field.
         ///
         /// Example: `"foo,bar`
         ///
-        /// If this is set to `true`, the value `foo,bar` will be returned as a single field; otherwise,
+        /// If this is set to `true`, the field content `foo,bar` is returned as a single field; otherwise,
         /// a [CsvParseException] will be thrown.
         ///
         /// Independent of this flag, a [CsvParseException] is thrown if the unclosed region exceeds
@@ -494,7 +493,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///
         /// **The default will change to `false` in version 5.0.**
         ///
-        /// @param allowUnclosedQuote allow input ending inside a quoted field (default: `true`).
+        /// @param allowUnclosedQuote tolerate an unclosed quoted field (default: `true`).
         /// @return This updated object, allowing additional method calls to be chained together.
         public IndexedCsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
             this.allowUnclosedQuote = allowUnclosedQuote;
@@ -624,7 +623,7 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// Constructs a new [IndexedCsvReader] for the specified arguments.
         ///
         /// Only UTF-8 and single-byte charsets are supported – whether passed explicitly or detected via a
-        /// BOM header. Every configured control character must additionally map to its own single byte in
+        /// BOM. Every configured control character must additionally map to its own single byte in
         /// both directions under that charset.
         ///
         /// @param <T>             the type of the CSV record.

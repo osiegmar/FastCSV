@@ -72,9 +72,9 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
     /// See [#addField(char\[\],int,int,boolean)] for more details on the parameters.
     ///
     /// @param fieldIdx the index of the field in the record (starting with 0)
-    /// @param buf      the internal buffer that contains the field value (among other data)
-    /// @param offset   the offset of the field value in the buffer
-    /// @param len      the length of the field value
+    /// @param buf      the internal buffer that contains the field content (among other data)
+    /// @param offset   the offset of the field content in the buffer
+    /// @param len      the length of the field content
     /// @param quoted   `true` if the field was quoted
     protected void handleField(final int fieldIdx, final char[] buf, final int offset, final int len,
                                final boolean quoted) {
@@ -93,13 +93,13 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// Handles a comment.
     ///
-    /// This method is called for each comment line.
+    /// This method is called for each comment.
     ///
     /// See [#setComment(char\[\],int,int)] for more details on the parameters.
     ///
-    /// @param buf    the internal buffer that contains the field value (among other data)
-    /// @param offset the offset of the field value in the buffer
-    /// @param len    the length of the field value
+    /// @param buf    the internal buffer that contains the comment text (among other data)
+    /// @param offset the offset of the comment text in the buffer
+    /// @param len    the length of the comment text
     protected void handleComment(final char[] buf, final int offset, final int len) {
     }
 

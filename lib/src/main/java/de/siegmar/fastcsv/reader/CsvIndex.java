@@ -20,7 +20,7 @@ import java.util.StringJoiner;
 /// Even if the constructor is public (mandatory for record classes),
 /// this class is **not intended to be instantiated directly!**
 ///
-/// @param bomHeaderLength  The length of an optional BOM header.
+/// @param bomHeaderLength  The length of an optional BOM, in bytes.
 /// @param fileSize         The CSV file size this index was built for.
 /// @param fieldSeparator   The field separator used when building this index.
 /// @param quoteCharacter   The quote character used when building this index.

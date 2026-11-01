@@ -9,13 +9,13 @@ import java.util.function.Function;
 /// @see FieldModifiers
 public interface FieldModifier {
 
-    /// Builds a modifier that modifies the field value using the provided function.
+    /// Builds a modifier that modifies the field content using the provided function.
     /// Comments are not modified.
     ///
-    /// @param function the function to modify the field value. The contract of
+    /// @param function the function to modify the field content. The contract of
     ///                 [FieldModifier#modify(long, int, boolean, String)] applies:
     ///                 the value passed to the function is never `null` and the return value must not be `null`.
-    /// @return a new field modifier that applies the function to the field value
+    /// @return a new field modifier that applies the function to the field content
     /// @throws NullPointerException if the function is `null`
     static FieldModifier modify(final Function<? super String, String> function) {
         Objects.requireNonNull(function, "function must not be null");
@@ -33,9 +33,9 @@ public interface FieldModifier {
     ///
     /// @param startingLineNumber the starting line number (starting with 1)
     /// @param fieldIdx           the field index (starting with 0)
-    /// @param quoted             `true` if the field was enclosed by the defined quote characters
-    /// @param field              the field value, never `null`
-    /// @return the modified field value (must not be `null`)
+    /// @param quoted             `true` if the field was a quoted field
+    /// @param field              the field content, never `null`
+    /// @return the modified field content (must not be `null`)
     default String modify(final long startingLineNumber, final int fieldIdx, final boolean quoted, final String field) {
         return field;
     }
@@ -44,8 +44,8 @@ public interface FieldModifier {
     /// The Default implementation returns the field as is.
     ///
     /// @param startingLineNumber the starting line number (starting with 1)
-    /// @param field              the field value (comment), never `null`
-    /// @return the modified field value (must not be `null`)
+    /// @param field              the comment text, never `null`
+    /// @return the modified comment text (must not be `null`)
     default String modifyComment(final long startingLineNumber, final String field) {
         return field;
     }

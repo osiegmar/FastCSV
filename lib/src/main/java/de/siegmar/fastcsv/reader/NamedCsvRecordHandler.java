@@ -154,13 +154,13 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         private NamedCsvRecordHandlerBuilder() {
         }
 
-        /// Sets whether duplicate header fields are allowed.
+        /// Sets whether duplicate field names are allowed in the header.
         ///
-        /// When set to `false`, a [CsvParseException] is thrown if the header contains duplicate fields.
-        /// When set to `true`, duplicate fields are allowed. See [NamedCsvRecord] for details on how duplicate
-        /// headers are handled.
+        /// When set to `false`, a [CsvParseException] is thrown if the header contains duplicate field names.
+        /// When set to `true`, duplicate field names are allowed. See [NamedCsvRecord] for details on how duplicate
+        /// field names are handled.
         ///
-        /// @param allowDuplicateHeaderFields whether duplicate header fields are allowed (default: `false`)
+        /// @param allowDuplicateHeaderFields whether duplicate field names are allowed (default: `false`)
         /// @return This updated object, allowing additional method calls to be chained together.
         public NamedCsvRecordHandlerBuilder allowDuplicateHeaderFields(final boolean allowDuplicateHeaderFields) {
             this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
@@ -169,7 +169,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets a predefined header.
         ///
-        /// When not set, the header is taken from the first record (that is not a comment or an empty line).
+        /// When not set, the header is taken from the first record (empty lines and comments never count as the
+        /// first record).
         ///
         /// @param header the header, must not be `null`
         /// @return This updated object, allowing additional method calls to be chained together.
@@ -184,7 +185,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets the header.
         ///
-        /// When not set, the header is taken from the first record (that is not a comment or an empty line).
+        /// When not set, the header is taken from the first record (empty lines and comments never count as the
+        /// first record).
         ///
         /// @param header the header, must not be `null`
         /// @return This updated object, allowing additional method calls to be chained together.
@@ -198,7 +200,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
 
         /// Sets a validator that is called once the header is determined – either from the first record
-        /// (that is not a comment or an empty line) or from a predefined header (see [#header(String...)]).
+        /// (empty lines and comments never count as the first record) or from a predefined header
+        /// (see [#header(String...)]).
         /// Input without any header (e.g., an empty file) yields no records and is not validated.
         ///
         /// The validator must throw an exception (any [RuntimeException]) if the header is not acceptable.
@@ -221,7 +224,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets whether the header itself should be returned as the first record.
         ///
-        /// When enabled, the first record returned will be a [NamedCsvRecord] with the header fields as its fields
+        /// When enabled, the first record returned will be a [NamedCsvRecord] with the field names as its fields
         /// and as the header.
         ///
         /// @param returnHeader whether the header should be returned as the first record (default: `false`)

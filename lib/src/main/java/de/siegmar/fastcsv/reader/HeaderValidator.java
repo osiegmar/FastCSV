@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /// Implementations of this class are used within [NamedCsvRecordHandler] to validate the header
-/// of a CSV file once it is determined.
+/// of CSV data once it is determined.
 ///
 /// Example:
 /// ```
@@ -17,9 +17,9 @@ import java.util.Objects;
 public interface HeaderValidator {
 
     /// Builds a validator that throws a [CsvParseException] if the header does not consist of
-    /// exactly the given fields, in the given order.
+    /// exactly the given field names, in the given order.
     ///
-    /// @param expectedHeader the expected header fields, must not be `null`
+    /// @param expectedHeader the expected field names, must not be `null`
     /// @return the validator
     /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
     /// @see #containsExactly(List)
@@ -29,9 +29,9 @@ public interface HeaderValidator {
     }
 
     /// Builds a validator that throws a [CsvParseException] if the header does not consist of
-    /// exactly the given fields, in the given order.
+    /// exactly the given field names, in the given order.
     ///
-    /// @param expectedHeader the expected header fields, must not be `null`
+    /// @param expectedHeader the expected field names, must not be `null`
     /// @return the validator
     /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
     /// @see #containsExactly(String...)
@@ -47,9 +47,9 @@ public interface HeaderValidator {
     }
 
     /// Builds a validator that throws a [CsvParseException] if the header does not contain all
-    /// of the given fields, in any order. Additional fields are allowed.
+    /// of the given field names, in any order. Additional field names are allowed.
     ///
-    /// @param requiredFields the required header fields, must not be `null`
+    /// @param requiredFields the required field names, must not be `null`
     /// @return the validator
     /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
     /// @see #containsAtLeast(List)
@@ -59,9 +59,9 @@ public interface HeaderValidator {
     }
 
     /// Builds a validator that throws a [CsvParseException] if the header does not contain all
-    /// of the given fields, in any order. Additional fields are allowed.
+    /// of the given field names, in any order. Additional field names are allowed.
     ///
-    /// @param requiredFields the required header fields, must not be `null`
+    /// @param requiredFields the required field names, must not be `null`
     /// @return the validator
     /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
     /// @see #containsAtLeast(String...)
@@ -78,10 +78,10 @@ public interface HeaderValidator {
         };
     }
 
-    /// Gets called once the header is determined – either from the first record (that is not a
-    /// comment or an empty line) or from a predefined header.
+    /// Gets called once the header is determined – either from the first record (empty lines and
+    /// comments never count as the first record) or from a predefined header.
     ///
-    /// @param header the header fields, never `null`
+    /// @param header the field names of the header, never `null`
     /// @throws RuntimeException if the header is not acceptable
     void validate(List<String> header);
 

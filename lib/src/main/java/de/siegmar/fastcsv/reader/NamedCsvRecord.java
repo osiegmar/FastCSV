@@ -13,7 +13,7 @@ import java.util.StringJoiner;
 
 /// Represents an immutable CSV record with named (and indexed) fields.
 ///
-/// The field values are never `null`. Empty fields are represented as empty strings.
+/// The field contents are never `null`. Empty fields are represented as empty strings.
 ///
 /// Instances of this class are immutable and safe for use by multiple threads.
 ///
@@ -30,30 +30,30 @@ public final class NamedCsvRecord extends CsvRecord {
         this.header = header;
     }
 
-    /// Retrieves the header names of this record.
+    /// Retrieves the field names of the header.
     ///
-    /// The header names are returned in the order they appear in the CSV file.
+    /// The field names are returned in the order they appear in the CSV data.
     ///
-    /// Note that the header names are not necessarily unique.
-    /// If you need to collect all fields with the same name (duplicate header), use [#getFieldsAsMapList()].
+    /// Note that the field names are not necessarily unique.
+    /// If you need to collect all fields with the same field name, use [#getFieldsAsMapList()].
     ///
-    /// Note that records for commented lines ([#isComment()]) and records for empty lines have an empty header.
-    /// To retrieve the comment value, use [#getField(int)] with index 0.
+    /// Note that comments ([#isComment()]) and empty lines have an empty header.
+    /// To retrieve the comment text, use [#getField(int)] with index 0.
     ///
-    /// @return the header names, never `null`
+    /// @return the field names, never `null`
     public List<String> getHeader() {
         // Not using List.of() here for performance reasons, as it copies the array.
         return Collections.unmodifiableList(Arrays.asList(header));
     }
 
-    /// Retrieves the value of a field by its case-sensitive name, considering the first occurrence in case of
-    /// duplicates.
+    /// Retrieves the field content of a field by its case-sensitive field name, considering the first occurrence
+    /// in case of duplicates.
     ///
     /// This method is equivalent to `findField(name).orElseThrow(NoSuchElementException::new)` although a
     /// more explanatory exception message is provided.
     ///
     /// @param name case-sensitive name of the field to be retrieved
-    /// @return field value, never `null`
+    /// @return the field content, never `null`
     /// @throws NoSuchElementException if this record has no such field
     /// @throws NullPointerException   if name is `null`
     /// @see #findField(String)
@@ -71,11 +71,11 @@ public final class NamedCsvRecord extends CsvRecord {
                 .formatted(name, fieldIdx, fields.length));
         }
 
-        // Return the value of the field
+        // Return the field content
         return fields[fieldIdx];
     }
 
-    // Finds the index for the first occurrence of the given header name (case-sensitive); returns -1 if not found
+    // Finds the index for the first occurrence of the given field name (case-sensitive); returns -1 if not found
     private int findHeaderIndex(final String name) {
         for (int i = 0; i < header.length; i++) {
             if (name.equals(header[i])) {
@@ -85,13 +85,13 @@ public final class NamedCsvRecord extends CsvRecord {
         return -1;
     }
 
-    /// Retrieves the value of a field by its case-sensitive name, considering the first occurrence in case of
-    /// duplicates.
+    /// Retrieves the field content of a field by its case-sensitive field name, considering the first occurrence
+    /// in case of duplicates.
     ///
     /// This method is equivalent to `findFields(name).stream().findFirst()` but more performant.
     ///
     /// @param name case-sensitive name of the field to be retrieved
-    /// @return An [Optional] containing the value of the field if found,
+    /// @return An [Optional] containing the field content if found,
     ///     or an empty [Optional] if the field is not present. Never returns `null`.
     /// @throws NullPointerException if name is `null`
     /// @see #findFields(String)
@@ -103,14 +103,15 @@ public final class NamedCsvRecord extends CsvRecord {
             return Optional.empty();
         }
 
-        // Return the value of the field wrapped in an Optional
+        // Return the field content wrapped in an Optional
         return Optional.of(fields[fieldIdx]);
     }
 
-    /// Collects all field values with the given name (case-sensitive) in the order they appear in the header.
+    /// Collects the field contents of all fields with the given field name (case-sensitive) in the order they
+    /// appear in the header.
     ///
-    /// @param name case-sensitive name of the field to collect values for
-    /// @return the field values (empty list if record doesn't contain that field), never `null`
+    /// @param name case-sensitive name of the fields to collect
+    /// @return the field contents (empty list if record doesn't contain that field), never `null`
     /// @throws NullPointerException if name is `null`
     public List<String> findFields(final String name) {
         final int bound = commonSize();
@@ -123,15 +124,15 @@ public final class NamedCsvRecord extends CsvRecord {
         return ret;
     }
 
-    /// Constructs an ordered map, associating header names with corresponding field values of this record,
+    /// Constructs an ordered map, associating field names with the corresponding field contents of this record,
     /// considering the first occurrence in case of duplicates.
     ///
-    /// The constructed map will only contain entries for fields that have a key and a value. No map entry will have a
+    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry will have a
     /// `null` key or value.
     ///
-    /// If you need to collect all fields with the same name (duplicate header), use [#getFieldsAsMapList()].
+    /// If you need to collect all fields with the same field name, use [#getFieldsAsMapList()].
     ///
-    /// @return an ordered map of header names and field values of this record, never `null`
+    /// @return an ordered map of field names and field contents of this record, never `null`
     /// @see #getFieldsAsMapList()
     @SuppressWarnings("PMD.UseConcurrentHashMap")
     public Map<String, String> getFieldsAsMap() {
@@ -143,15 +144,15 @@ public final class NamedCsvRecord extends CsvRecord {
         return map;
     }
 
-    /// Constructs an unordered map, associating header names with an ordered list of corresponding field values in
+    /// Constructs an unordered map, associating field names with an ordered list of corresponding field contents in
     /// this record.
     ///
-    /// The constructed map will only contain entries for fields that have a key and a value. No map entry will have a
+    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry will have a
     /// `null` key or value.
     ///
-    /// If you don't have to handle duplicate headers, you may simply use [#getFieldsAsMap()].
+    /// If you don't have to handle duplicate field names, you may simply use [#getFieldsAsMap()].
     ///
-    /// @return an unordered map of header names and field values of this record, never `null`
+    /// @return an unordered map of field names and field contents of this record, never `null`
     /// @see #getFieldsAsMap()
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.UseConcurrentHashMap"})
     public Map<String, List<String>> getFieldsAsMapList() {

@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 
 /// Represents an immutable CSV record with unnamed (indexed) fields.
 ///
-/// The field values are never `null`. Empty fields are represented as empty strings.
+/// The field contents are never `null`. Empty fields are represented as empty strings.
 ///
 /// Instances of this class are immutable and safe for use by multiple threads.
 ///
@@ -31,7 +31,7 @@ public class CsvRecord {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     final String[] fields;
 
-    /// If the record is a commented record.
+    /// Whether this holds a comment.
     ///
     /// @see #isComment()
     @SuppressWarnings("checkstyle:VisibilityModifier")
@@ -46,8 +46,8 @@ public class CsvRecord {
 
     /// Provides the line number at which this record originated, starting from 1.
     ///
-    /// This information is particularly valuable in scenarios involving CSV files containing empty lines as well as
-    /// multi-line or commented records, where the record number may deviate from the line number.
+    /// This information is particularly valuable for CSV data containing empty lines, comments or records that
+    /// span multiple lines, where the record number may deviate from the line number.
     ///
     /// Example:
     /// ```text
@@ -55,13 +55,13 @@ public class CsvRecord {
     /// 2 foo,"multi
     /// 3 line bar"
     /// 4                    (empty, potentially skipped)
-    /// 5 #commented record  (potentially skipped)
+    /// 5 #comment           (potentially skipped)
     /// 6 "latest
     /// 7 record"
     /// ```
     ///
     /// The last record (containing the multi-line field "latest\nrecord") would have a starting line number of 6,
-    /// no matter if empty lines or commented records are skipped or not.
+    /// no matter whether empty lines or comments are skipped or not.
     ///
     /// A starting offset of 1 is used to be consistent with the line numbers shown of most text editors.
     ///
@@ -74,15 +74,14 @@ public class CsvRecord {
         return startingLineNumber;
     }
 
-    /// Retrieves the value of a field based on its index, with indexing starting from 0.
+    /// Retrieves the field content of the field at the given index, with indexing starting from 0.
     ///
-    /// There is always at least one field, even if the line was empty.
+    /// There is always at least one field; an empty line has one empty field.
     ///
-    /// If this records holds a comment, the comment is returned by calling this method with index 0. The comment
-    /// character is not included in the returned value.
+    /// For a comment, index 0 returns the comment text (without the comment character).
     ///
     /// @param index index of the field to return
-    /// @return field value, never `null`
+    /// @return the field content, never `null`
     /// @throws IndexOutOfBoundsException if the index is out of range
     public String getField(final int index) {
         return fields[index];
@@ -90,8 +89,7 @@ public class CsvRecord {
 
     /// Retrieves all fields of this record as an unmodifiable list.
     ///
-    /// The returned list has a minimum size of 1, even if the line was empty.
-    /// For empty lines, the first field is an empty string.
+    /// The returned list has a minimum size of 1; for an empty line, it contains one empty string.
     ///
     /// @return all fields of this record, never `null`
     public List<String> getFields() {
@@ -101,7 +99,7 @@ public class CsvRecord {
 
     /// Gets the count of fields in this record.
     ///
-    /// The minimum number of fields is 1, even if the line was empty.
+    /// The minimum number of fields is 1; an empty line has one empty field.
     ///
     /// @return the number of fields in this record
     /// @see CsvReader.CsvReaderBuilder#extraFieldStrategy(FieldMismatchStrategy)
@@ -110,11 +108,11 @@ public class CsvRecord {
         return fields.length;
     }
 
-    /// Indicates whether the record is a commented record.
+    /// Indicates whether this holds a comment.
     ///
-    /// Retrieve the comment by calling [#getField(int)] with index 0.
+    /// Retrieve the comment text by calling [#getField(int)] with index 0.
     ///
-    /// @return `true` if the record is a commented record
+    /// @return `true` if this holds a comment
     /// @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
     public boolean isComment() {
         return comment;

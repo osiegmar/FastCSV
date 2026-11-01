@@ -85,7 +85,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     }
 
     /// {@inheritDoc}
-    /// Materializes the field value, apply field modifier, checks constraints and adds the field to the record.
+    /// Materializes the field content, applies the field modifier, checks constraints and adds the field to the record.
     ///
     /// @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
     @Override
@@ -108,11 +108,11 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         recordSize += modifiedFieldLength;
     }
 
-    /// Modifies field value.
+    /// Modifies field content.
     ///
-    /// @param value  the field value
+    /// @param value  the field content
     /// @param quoted `true` if the field was quoted
-    /// @return the modified field value
+    /// @return the modified field content
     protected String modifyField(final String value, final boolean quoted) {
         return fieldModifier.modify(startingLineNumber, fieldIdx, quoted, value);
     }
@@ -128,7 +128,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     }
 
     /// {@inheritDoc}
-    /// Materializes the comment value, apply field modifier, checks constraints and adds the field to the record.
+    /// Materializes the comment text, applies the field modifier, checks constraints and adds the field to the record.
     ///
     /// @throws CsvParseException if the addition exceeds the limit of record size.
     @Override
@@ -149,10 +149,10 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         fieldIdx = 1;
     }
 
-    /// Modifies comment value.
+    /// Modifies comment text.
     ///
-    /// @param field the comment value
-    /// @return the modified comment value
+    /// @param field the comment text
+    /// @return the modified comment text
     protected String modifyComment(final String field) {
         return fieldModifier.modifyComment(startingLineNumber, field);
     }

@@ -84,9 +84,9 @@ public final class CsvWriter implements Closeable, Flushable {
         return new CsvWriterBuilder();
     }
 
-    /// Writes a complete line - one or more fields and new line character(s) at the end.
+    /// Writes a record: its fields, followed by a line break.
     ///
-    /// @param values the fields to write (`null` values are handled as empty strings, if
+    /// @param values the field contents to write (`null` values are handled as empty strings, if
     ///               not configured otherwise ([QuoteStrategies#EMPTY])).
     /// @return This CsvWriter.
     /// @throws UncheckedIOException if a write-error occurs
@@ -105,9 +105,9 @@ public final class CsvWriter implements Closeable, Flushable {
         }
     }
 
-    /// Writes a complete line - one or more fields and new line character(s) at the end.
+    /// Writes a record: its fields, followed by a line break.
     ///
-    /// @param values the fields to write (`null` values are handled as empty strings, if
+    /// @param values the field contents to write (`null` values are handled as empty strings, if
     ///               not configured otherwise ([QuoteStrategies#EMPTY]))
     /// @return This CsvWriter.
     /// @throws UncheckedIOException if a write-error occurs
@@ -222,7 +222,7 @@ public final class CsvWriter implements Closeable, Flushable {
         int nextDelimPos = value.indexOf(quoteChar, startPos);
 
         while (nextDelimPos != -1) {
-            // Write up to and including the delimiter
+            // Write up to and including the quote character
             w.write(value, startPos, nextDelimPos - startPos + 1);
             w.write(quoteChar);
             startPos = nextDelimPos + 1;
@@ -233,15 +233,15 @@ public final class CsvWriter implements Closeable, Flushable {
         w.write(value, startPos, value.length() - startPos);
     }
 
-    /// Writes a comment line and new line character(s) at the end.
+    /// Writes a comment, followed by a line break.
     ///
-    /// Note that comments are not part of the CSV standard and may not be supported by all readers.
+    /// Note that comments are not part of RFC 4180 and may not be supported by all readers.
     ///
-    /// @param comment the comment to write. The comment character
+    /// @param comment the comment text to write. The comment character
     ///                (configured by [CsvWriterBuilder#commentCharacter(char)]) is automatically prepended.
-    ///                Empty or `null` values results in a line only consisting of the comment character.
-    ///                If the argument `comment` contains line break characters (`CR`, `LF`), multiple comment lines
-    ///                will be written, terminated with the line break character configured by
+    ///                `null` or an empty string writes a comment consisting of the comment character only.
+    ///                If the comment text contains line breaks (`CR`, `LF`, `CRLF`), a separate comment is
+    ///                written for each line, each followed by the line break configured by
     ///                [CsvWriterBuilder#lineDelimiter(LineDelimiter)].
     /// @return This CsvWriter.
     /// @throws UncheckedIOException if a write-error occurs
@@ -334,7 +334,7 @@ public final class CsvWriter implements Closeable, Flushable {
     /// - quote character: `"` (double quote)
     /// - comment character: `#` (hash/number)
     /// - quote strategy: [QuoteStrategies#REQUIRED]
-    /// - line delimiter: [LineDelimiter#CRLF]
+    /// - line break: [LineDelimiter#CRLF]
     /// - buffer size: 8,192 bytes
     /// - auto flush: `false`
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
@@ -362,21 +362,21 @@ public final class CsvWriter implements Closeable, Flushable {
             return this;
         }
 
-        /// Sets the character used to quote values – default: `"` (double quote).
+        /// Sets the quote character – default: `"` (double quote).
         ///
         /// Be aware that using characters other than the default double quote character goes against the RFC 4180
         /// standard.
         ///
-        /// @param quoteCharacter the character for enclosing fields.
+        /// @param quoteCharacter the quote character.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
             this.quoteCharacter = quoteCharacter;
             return this;
         }
 
-        /// Sets the character used to prepend commented lines – default: `#` (hash/number).
+        /// Sets the comment character – default: `#` (hash/number).
         ///
-        /// @param commentCharacter the character for prepending commented lines.
+        /// @param commentCharacter the character that begins each comment.
         /// @return This updated object, allowing additional method calls to be chained together.
         public CsvWriterBuilder commentCharacter(final char commentCharacter) {
             this.commentCharacter = commentCharacter;
@@ -386,8 +386,8 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Sets the strategy that defines when optional quoting has to be performed
         /// (default: [QuoteStrategies#REQUIRED]).
         ///
-        /// @param quoteStrategy the strategy when fields should be enclosed using the `quoteCharacter`,
-        ///                      even if not strictly required; must not be `null`.
+        /// @param quoteStrategy the strategy that decides whether to quote a field when quoting is not required;
+        ///                      must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws NullPointerException if quoteStrategy is `null`
         /// @see QuoteStrategies
@@ -396,9 +396,9 @@ public final class CsvWriter implements Closeable, Flushable {
             return this;
         }
 
-        /// Sets the delimiter used to separate lines (default: [LineDelimiter#CRLF]).
+        /// Sets the line break written after each record and comment (default: [LineDelimiter#CRLF]).
         ///
-        /// @param lineDelimiter the line delimiter to be used; must not be `null`.
+        /// @param lineDelimiter the line break to be written; must not be `null`.
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws NullPointerException if lineDelimiter is `null`
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
@@ -633,7 +633,7 @@ public final class CsvWriter implements Closeable, Flushable {
         }
 
         /// Writes a field to the current record.
-        /// @param value the field value
+        /// @param value the field content
         /// @return this CsvWriterRecord instance
         /// @throws UncheckedIOException if a write-error occurs
         public CsvWriterRecord writeField(final String value) {

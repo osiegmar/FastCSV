@@ -19,7 +19,7 @@ public enum FieldModifiers implements FieldModifier {
     /// Modifier that does not modify anything.
     NOP,
 
-    /// Modifier that modifies the field value with [String#trim()].
+    /// Modifier that modifies the field content with [String#trim()].
     /// Comments are not modified.
     TRIM {
         @Override
@@ -29,7 +29,7 @@ public enum FieldModifiers implements FieldModifier {
         }
     },
 
-    /// Modifier that modifies the field value with [String#strip()].
+    /// Modifier that modifies the field content with [String#strip()].
     /// Comments are not modified.
     STRIP {
         @Override

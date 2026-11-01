@@ -22,10 +22,10 @@ public abstract class CsvCallbackHandler<T> {
     ///
     /// The [CsvReader] will skip
     ///
-    /// - records of type [RecordType#COMMENT] if
+    /// - comments ([RecordType#COMMENT]) if
     ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
     ///   is set to [CommentStrategy#SKIP]
-    /// - records of type [RecordType#EMPTY] if
+    /// - empty lines ([RecordType#EMPTY]) if
     ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#skipEmptyLines(boolean)]
     ///   is set to `true`.
     protected abstract RecordType getRecordType();
@@ -48,43 +48,43 @@ public abstract class CsvCallbackHandler<T> {
 
     /// Called for each field in the record.
     ///
-    /// A record can either be a comment or a regular record. If this method is called, the record is a regular record
-    /// and cannot be a comment.
+    /// The callbacks are invoked either for a record or for a comment, never both. If this method is called,
+    /// it is a record, not a comment.
     ///
     /// The `quoted` parameter indicates whether the field was quoted. It is for informational purposes only.
-    /// Any potential escape characters are already removed and the `offset` points to the first character
-    /// after the opening quote and the `len` does not include the closing quote. Hence, a quoted field
-    /// can be processed in the same way as an unquoted field.
+    /// Each escape pair is already replaced by one quote character, the `offset` points to the first character
+    /// after the opening quote character and the `len` does not include the closing quote character.
+    /// Hence, a quoted field can be processed in the same way as an unquoted field.
     /// Some implementations need the information whether a field was quoted, e.g., for differentiating between
-    /// `null` and empty fields (`foo,,bar` vs. `foo,"",bar`).
+    /// an unquoted and a quoted empty field (`foo,,bar` vs. `foo,"",bar`) to read the former as `null`.
     ///
-    /// The `buf` parameter is the internal buffer that contains the field value (among other data). Do not
+    /// The `buf` parameter is the internal buffer that contains the field content (among other data). Do not
     /// attempt to modify the buffer or store a reference to it. The buffer is reused for performance reasons.
     ///
-    /// @param buf    the internal buffer that contains the field value (among other data)
-    /// @param offset the offset of the field value in the buffer
-    /// @param len    the length of the field value
+    /// @param buf    the internal buffer that contains the field content (among other data)
+    /// @param offset the offset of the field content in the buffer
+    /// @param len    the length of the field content
     /// @param quoted `true` if the field was quoted
     protected abstract void addField(char[] buf, int offset, int len, boolean quoted);
 
-    /// Called for each comment line.
+    /// Called for each comment.
     ///
-    /// Note that the comment character is not included in the value.
+    /// Note that the comment character is not part of the comment text.
     ///
     /// This method is not called if
     /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
     /// is set to [CommentStrategy#NONE].
     ///
-    /// There can only be one invocation of this method per record.
-    /// A record can either be a comment or a regular record. If this method is called, the record is a comment
-    /// and cannot be a regular record.
+    /// This method is called at most once between [#beginRecord(long)] and [#buildRecord()].
+    /// The callbacks are invoked either for a record or for a comment, never both. If this method is called,
+    /// it is a comment, not a record.
     ///
-    /// The `buf` parameter is the internal buffer that contains the field value (among other data). Do not
+    /// The `buf` parameter is the internal buffer that contains the comment text (among other data). Do not
     /// attempt to modify the buffer or store a reference to it. The buffer is reused for performance reasons.
     ///
-    /// @param buf    the internal buffer that contains the field value (among other data)
-    /// @param offset the offset of the field value in the buffer
-    /// @param len    the length of the field value
+    /// @param buf    the internal buffer that contains the comment text (among other data)
+    /// @param offset the offset of the comment text in the buffer
+    /// @param len    the length of the comment text
     protected abstract void setComment(char[] buf, int offset, int len);
 
     /// Called for each empty line.
@@ -92,7 +92,7 @@ public abstract class CsvCallbackHandler<T> {
 
     /// Called at the end of each CSV record to build the actual record representation.
     ///
-    /// @return the record or `null` if the record should be ignored/skipped as it is consumed by the callback handler.
+    /// @return the record, or `null` if the callback handler consumes it (e.g., the header) so that it is not returned.
     @Nullable
     protected abstract T buildRecord();
 
