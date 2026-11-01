@@ -12,13 +12,16 @@ import java.util.stream.Stream;
 
 import specreader.spec.TestSpec;
 import specreader.spec.TestSpecCheck;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class TestSpecRepository {
 
-    private static final ObjectReader OR = new YAMLMapper()
+    private static final ObjectReader OR = YAMLMapper.builder()
+        .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .build()
         .readerFor(TestSpec.class);
 
     private TestSpecRepository() {
