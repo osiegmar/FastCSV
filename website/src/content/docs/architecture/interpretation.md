@@ -8,7 +8,8 @@ sidebar:
 At first, the CSV format may seem very simple. In practice, however, numerous edge cases need to be considered.
 The [JavaCsvComparison](https://github.com/osiegmar/JavaCsvComparison) project illustrates that there are many different
 ways to interpret CSV files, especially when not strictly following the RFC specification. Some of these differences
-might be considered as bugs, while others represent alternative approaches to handling edge cases (mostly garbled data).
+might be considered as bugs, while others represent alternative approaches to handling edge cases (mostly malformed CSV
+data).
 
 This document describes how FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
 For the terms used here, see the [CSV glossary](/glossary/).
@@ -40,22 +41,22 @@ FastCSV supports any encoding when reading or writing CSV files while defaulting
 The only exception is `IndexedCsvReader`: because it builds its index on byte level, it is limited to UTF-8 and
 single-byte encodings. See [Indexed reading](/guides/examples/indexed-read/) for details.
 
-### Empty fields / null values
+### Empty fields and null
 
-The CSV format itself does not provide a way to distinguish between empty fields and null values. This can be a problem
+The CSV format itself does not provide a way to distinguish between an empty field and `null`. This can be a problem
 when such a distinction is required.
 
-FastCSV provides the following options to handle null values:
+FastCSV provides the following options to handle `null`:
 
-**on Writing**: depending on the configured `QuoteStrategy`, null values are either written as empty fields (default) or
-as quoted empty fields (`QuoteStrategies.EMPTY`). This helps to produce PostgreSQL-compatible CSV files for example. If
-you instead want to write a specific string for null values, you have to pass the string to
+**on Writing**: depending on the configured `QuoteStrategy`, `null` is either written as an empty field (default) or
+as a quoted empty field (`QuoteStrategies.EMPTY`). This helps to produce PostgreSQL-compatible CSV files for example. If
+you instead want to write a specific string for `null`, you have to pass the string to
 the `CsvWriter.writeRecord()` method.
 
 **on Reading**: the `CsvCallbackHandler.addField()` method gets passed a parameter `quoted` that indicates whether the
 field was quoted or not. The standard record implementation (`CsvRecord`) does currently not provide a way to
-distinguish between empty fields and null values by itself but a custom implementation could use the `quoted` parameter
-to do so.
+distinguish between an unquoted and a quoted empty field by itself but a custom implementation could use the `quoted`
+parameter to do so.
 
 Example for **empty** and **quoted empty** fields:
 
@@ -64,7 +65,7 @@ Example for **empty** and **quoted empty** fields:
 2,"",barCRLF
 ```
 
-### Newline after last record
+### Line break after the last record
 
 RFC 4180 says:
 > The last record in the file may or may not have an ending line break.
@@ -96,8 +97,8 @@ value_a_1CRLF
 value_a_2,value_b_2,value_c_2CRLF
 ```
 
-In this example, `value_a_1` likely belongs to `header_a`, and `header_b` does not have a value for the first data
-record. However, this is just an assumption. Field `value_c_2` does not even have a corresponding header.
+In this example, `value_a_1` likely belongs to `header_a`, and the first record after the header has no field for
+`header_b`. However, this is just an assumption. Field `value_c_2` does not even have a corresponding field name.
 
 To ensure no misinterpretation, FastCSV does not allow extra or missing fields in a record by default.
 This means that the above example would result in a `CsvParseException` when reading it with FastCSV.
@@ -108,7 +109,7 @@ and `CsvReaderBuilder.missingFieldStrategy(FieldMismatchStrategy)` to `IGNORE` o
 ### Empty lines
 
 As a consequence of not dictating equal field counts, a line could be completely empty. This is particularly relevant
-for a CSV file with only one column, raising the question of whether the field is empty or if the line is empty and
+for a CSV file with only one field per record, raising the question of whether the field is empty or if the line is empty and
 should be skipped.
 
 ```
@@ -132,17 +133,17 @@ FastCSV interprets them as containing no records and returns an empty stream.
 
 ### Fields spanning multiple lines
 
-Fields enclosed in double quotes can span multiple lines.
+Quoted fields can span multiple lines.
 
 ```
 "a multi-lineCRLF
 field"CRLF
 ```
 
-FastCSV supports this for reading and writing. The Java value for this field would be `"a multi-line\r\nfield"`.
-Any end-of-line characters within the field are preserved.
+FastCSV supports this for reading and writing. The field content would be `"a multi-line\r\nfield"`.
+Line breaks within a quoted field are preserved.
 
-### Unique header names
+### Unique field names
 
 The 4180-bis draft notes:
 > Implementers should be aware that some applications may treat header values as unique
@@ -155,12 +156,12 @@ value_1,value_2CRLF
 
 The `NamedCsvRecord` class in FastCSV offers several options to handle this scenario:
 
-- By default, FastCSV does **not** allow duplicate headers to prevent misinterpretation of data.
+- By default, FastCSV does **not** allow duplicate field names to prevent misinterpretation of data.
   This behavior can be changed by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
-- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** value (`"value_1"`).
-- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** values (`"value_1"` and `"value_2"`).
+- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** field content (`"value_1"`).
+- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** field contents (`"value_1"` and `"value_2"`).
 
-Regardless of the option chosen, FastCSV always treats headers as case-sensitive.
+Regardless of the option chosen, FastCSV always treats field names as case-sensitive.
 
 ### Spaces within fields
 
@@ -168,10 +169,10 @@ RFC 4180 says:
 > Spaces are considered part of a field and should not be ignored.
 
 FastCSV adheres to this recommendation by reading and writing fields as they are, including any (leading or trailing)
-whitespaces.
+whitespace.
 
-When reading CSV files, you have the option to configure a `FieldModifier` to trim the field value before it is returned
-to the user. The following example demonstrates trimming, printing `"foo"` and `"bar"` without any whitespaces:
+When reading CSV files, you have the option to configure a `FieldModifier` to trim the field content before it is returned
+to the user. The following example demonstrates trimming, printing `"foo"` and `"bar"` without any whitespace:
 
 ```java
 var handler = CsvRecordHandler.of(c -> c.fieldModifier(FieldModifiers.TRIM));
@@ -184,9 +185,9 @@ CsvReader.builder().build(handler, " foo , bar ")
 The 4180-bis draft notes:
 > When quoted fields are used, this document does not allow whitespace between double quotes and commas.
 
-RFC 4180's grammar doesn't allow it either, and FastCSV never writes whitespaces between double quotes and commas.
+RFC 4180's grammar doesn't allow it either, and FastCSV never writes whitespace between double quotes and commas.
 
-Let's explore how FastCSV manages whitespaces when reading CSV files:
+Let's explore how FastCSV handles whitespace when reading CSV files:
 
 ```
 "value 1","value 2" , "value 3"CRLF
@@ -199,50 +200,50 @@ In this case, we observe:
 
    By default, FastCSV throws a `CsvParseException` when reading this field.
    By setting `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` to `true`, FastCSV tolerates and trims
-   the whitespace. The Java value for this field would then be `"value 2"` (**without** the quotes and the
+   the whitespace. The field content would then be `value 2` (**without** the quotes and the
    trailing whitespace).
 
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
 
-   FastCSV would handle this field as an unquoted field. Consequently, the Java value for this field would
-   be `" value 3"` (**including** the quotes). This decision was made for a couple of reasons:
+   FastCSV would handle this field as an unquoted field. Consequently, the field content would
+   be `" value 3"` (**including** the quote characters). This decision was made for a couple of reasons:
 
     - As "Spaces are considered part of a field and should not be ignored" (see "Spaces within fields" above), the
-      quotes actually don't enclose the field. The quotes are now part of the field.
-    - Some CSV implementations don't use quotes (as a field enclosure) at all. It's not "safe" to assume that a late
-      quote character is really a field enclosure. Both formats ("not using quotes when there's a need" and "whitespaces
-      between double quotes and commas") are broken per RFC. A choice must be made.
+      quote characters don't enclose the field. They are part of the field content.
+    - Some CSV implementations don't use quote characters at all. It's not "safe" to assume that a late
+      quote character really begins a quoted field. Both formats ("not quoting when quoting is required" and "whitespace
+      between double quotes and commas") are malformed per RFC. A choice must be made.
     - For performance reasons, FastCSV switches to unquoted-field-parsing when the first character is not a quote
       character. It's not reasonable to slow down the parser in order to guess which broken format is used.
 
    Setting `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` to `true` changes this behavior as well:
-   the leading whitespace is trimmed and the field is treated as quoted, resulting in the Java value `"value 3"`
-   (**without** the quotes).
+   the leading whitespace is trimmed and the field is treated as quoted, resulting in the field content `value 3`
+   (**without** the quote characters).
 
 ### Unclosed quoted fields
 
-A quoted field may be unintentionally truncated, leaving an opening quote without a matching close before end-of-file:
+A quoted field may be unintentionally truncated, leaving an opening quote character without a closing quote character before the CSV data ends:
 
 ```
 "value 1,value 2CRLF
 value 3CRLF
 ```
 
-By default, FastCSV consumes the remaining bytes (including any newlines) as the content of the final field.
+By default, FastCSV consumes the remaining characters (including any line breaks) as the field content of the final field.
 This tolerance is kept for compatibility with earlier versions.
 
-This behavior can be made strict by setting `CsvReaderBuilder.allowUnclosedQuote(false)` (also available
+This tolerance can be turned into a rejection by setting `CsvReaderBuilder.allowUnclosedQuote(false)` (also available
 on `IndexedCsvReaderBuilder`). FastCSV then throws a `CsvParseException` that references the starting line of the
 offending record.
 
-The default of this flag will change to `false` in version 5.0. To preserve the current lenient behavior across the
+The default of this flag will change to `false` in version 5.0. To preserve the current tolerance across the
 upgrade, set it explicitly to `true`.
 
-### Other field enclosures
+### Other quote characters
 
-The RFC does not mention any field enclosures other than double quotes.
+The RFC does not mention any quote character other than the double quote.
 
-FastCSV supports any character as field enclosures when reading or writing CSV files.
+FastCSV supports any character as quote character when reading or writing CSV files.
 
 ### Other field separators
 
@@ -252,24 +253,25 @@ The 4180-bis draft notes:
 
 FastCSV supports any character as field separator when reading or writing CSV files.
 
-### Escaping double quotes
+### Escape pairs
 
 The 4180-bis draft notes:
 > This document prescribes that a double quote appearing inside a field must be escaped by preceding it with another
 > double quote. Implementers should be aware that some applications may choose to use a different escaping mechanism.
 
-FastCSV does not support any other escaping mechanism than escaping double quotes with another double quote.
+FastCSV does not support any other escaping mechanism than escape pairs: a quote character inside a quoted field is
+written as two quote characters.
 
-### BOM header
+### Byte order mark (BOM)
 
 The 4180-bis draft notes:
 > Some applications might be able to read and properly interpret such a header, others could break.
 
-Reading CSV files with a BOM header is supported when enabling BOM header detection
+Reading CSV files with a BOM is supported when enabling BOM detection
 via `CsvReaderBuilder.detectBomHeader(true)`.
 
-FastCSV does not offer an option to write a BOM header. This is mostly because of the now dominant UTF-8 encoding. UTF-8
-does not require a BOM header. Let me know if you have a good reason to add this feature.
+FastCSV does not offer an option to write a BOM. This is mostly because of the now dominant UTF-8 encoding. UTF-8
+does not require a BOM. Let me know if you have a good reason to add this feature.
 
 ### Bidirectional text
 
@@ -282,8 +284,8 @@ The 4180-bis draft notes:
 
 FastCSV implements this feature as follows:
 
-When **writing** CSV files: The `CsvWriter.writeComment(String)` method can be used to write a comment line. If
-the `String` parameter contains line breaks, FastCSV will automatically prepend a comment character to each line. A call
+When **writing** CSV files: The `CsvWriter.writeComment(String)` method can be used to write a comment. If
+the `String` parameter contains line breaks, FastCSV writes a separate comment for each line. A call
 to `writeComment("foo\nbar")` would result in the following output:
 
 ```
@@ -291,7 +293,7 @@ to `writeComment("foo\nbar")` would result in the following output:
 #barCRLF
 ```
 
-When writing a regular CSV record, FastCSV will automatically enclose the first field in double quotes if it starts
+When writing a regular CSV record, FastCSV automatically quotes the first field if it begins
 with the configured comment character. A call to `writeRecord("#foo", "#bar")` would result in the following output:
 
 ```
@@ -303,15 +305,15 @@ handling by default. The `CsvReaderBuilder.commentStrategy()` method is used to 
 following options are available:
 
 - `CommentStrategies.NONE`: Disable comment handling, read the line as a regular CSV record (default)
-- `CommentStrategies.READ`: Parse comment lines as records. The `CsvRecord.isComment()` method can be used to check if
-  the record is a comment. The `CsvRecord.getField(0)` method can be used to get the comment text.
-- `CommentStrategies.SKIP`: Parse comment lines but skip them; no `CsvRecord` is created/returned for comment lines.
+- `CommentStrategies.READ`: Return comments as `CsvRecord`. The `CsvRecord.isComment()` method can be used to check if
+  it holds a comment. The `CsvRecord.getField(0)` method can be used to get the comment text.
+- `CommentStrategies.SKIP`: Recognize comments but skip them; no `CsvRecord` is returned for them.
 
-Both the `CsvReaderBuilder` and `CsvWriterBuilder`, allows to configure the character to be used as the comment
-character (via `commentCharacter(char)`). The default value is `#`.
+Both `CsvReaderBuilder` and `CsvWriterBuilder` allow configuring the comment character
+(via `commentCharacter(char)`). The default is `#`.
 
-When comment handling is enabled, FastCSV handles any line that starts with the configured comment character and that is
-not a continuation of a multi-line field as a comment line. The following example illustrates this:
+When comment handling is enabled, FastCSV reads a comment where a record would begin with the comment character.
+A line inside a multi-line quoted field is therefore never a comment. The following example illustrates this:
 
 ```
 # this is a commentCRLF
@@ -321,22 +323,22 @@ this is also # not a commentCRLF
 # and therfore not a comment"CRLF
 ```
 
-### Different end of line characters
+### CR and LF line breaks
 
-RFC 4180 mentions only the CRLF sequence as the end-of-line character. In practice, CSV data with CR or LF line breaks
+RFC 4180 mentions only CRLF as line break. In practice, CSV data with CR or LF line breaks
 is common – for example, when created by Unix tools (the 4180-bis draft also proposed accepting CR and LF, while
 keeping CRLF as the default).
 
-In line with the RFC, FastCSV defaults to using the CRLF sequence as the end-of-line character. However, it also
-provides support for the CR and LF characters (via `CsvWriterBuilder.lineDelimiter(LineDelimiter)`) when writing CSV
-files. The CsvReader, on the other hand, automatically detects the end-of-line character when reading CSV files.
+In line with the RFC, FastCSV writes CRLF by default. However, it also supports writing CR or LF
+(via `CsvWriterBuilder.lineDelimiter(LineDelimiter)`). When reading, `CsvReader` recognizes CR, LF and CRLF, even
+mixed within the same CSV data.
 
 ## ABNF Grammar
 
 When comment handling is disabled (default), the following ABNF grammar, taken from the 4180-bis draft, describes
 the CSV data FastCSV reads. Compared to RFC 4180, it allows any character in fields (including control characters
 and non-ASCII text) and CR or LF line breaks.
-FastCSV's reader is more lenient than this grammar in three cases (this also applies to the grammar with comments below):
+FastCSV's reader has tolerances beyond this grammar in three cases (this also applies to the grammar with comments below):
 
 - The last record may end without a line break, as RFC 4180 permits.
 - A quote character inside an unquoted field (`ab"cd`) is read as part of the field.
@@ -374,7 +376,7 @@ UTF8-data = UTF8-2 / UTF8-3 / UTF8-4 ; as per section 4 of [RFC3629]
 ```
 
 When comment handling is enabled, the following ABNF grammar describes the CSV data FastCSV reads. The same three
-leniencies as above apply; in particular, the last record or comment may end without a line break.
+tolerances as above apply; in particular, the last record or comment may end without a line break.
 
 ```ABNF
 file = *((comment / record) linebreak)

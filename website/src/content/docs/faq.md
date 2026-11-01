@@ -44,14 +44,14 @@ Well, not so fast! 😉
 
 Think about how to handle:
 
-- enclosed and non-enclosed fields
-- fields containing commas, line breaks or (escaped) quotes
-- different line endings
+- quoted and unquoted fields
+- fields containing commas, line breaks or quote characters
+- different line breaks
 - empty lines or empty fields
 - optional headers
-- BOM (Byte Order Mark) headers
+- a byte order mark (BOM)
 - large files/fields without running out of memory
-- garbled data (e.g. data outside of quotes)
+- malformed CSV data (e.g. characters after a closing quote character)
 - comments
 
 FastCSV handles all these cases and more, so you don't have to worry about them. With only a few kilobytes in size

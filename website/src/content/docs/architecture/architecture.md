@@ -6,20 +6,7 @@ description: This document describes the architecture of FastCSV.
 This document describes the architecture of FastCSV.
 It is intended for developers who want to understand the inner workings of the library.
 
-## Glossary of CSV Terms
-
-This section provides definitions for key terms related to the CSV format, as per the CSV specification
-[RFC 4180](https://datatracker.ietf.org/doc/html/rfc4180).
-
-- **Line**: Refers to a single string of text that concludes with one or more end-of-line characters. By default, a line
-  is terminated by `\r\n`.
-- **Record**: Denotes a collection of fields that are divided by a field separator.
-- **Field**: Represents an individual value within a CSV record. A field may span multiple lines, if it is encapsulated
-  by the quote character.
-- **Field Separator**: This is the character used to distinguish between different fields within a record. The default
-  separator is a comma (`,`).
-- **Quote Character**: This character is used to encapsulate fields within a record. The default quote character is a
-  double quote (`"`).
+The CSV terms used here (record, field, line break, …) are defined in the [CSV glossary](/glossary/).
 
 ## Reading CSV
 
@@ -44,7 +31,7 @@ and parsing behavior. Its primary purpose is to instantiate the `CsvParser` and 
 
 The `CsvParser` encapsulates the low-level logic for parsing CSV data, acting under the control of the `CsvReader`. This
 component is not intended for direct use. For each field, the `CsvParser` invokes the `CsvCallbackHandler` to process
-and materialize it. Additionally, the `CsvParser` is responsible for handling end-of-line characters.
+and materialize it. Additionally, the `CsvParser` is responsible for handling line breaks.
 
 #### CsvCallbackHandler
 

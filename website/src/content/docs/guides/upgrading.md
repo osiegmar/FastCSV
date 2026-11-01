@@ -13,9 +13,9 @@ For a full list of changes, including new features, see the [changelog](https://
 - The minimum Java version has been raised from 11 to 17
 - This also raised the required Android API level from version 33 (Android 13) to 34 (Android 14)
 
-## Duplicate header handling
+## Duplicate field names
 
-FastCSV 4.x rejects duplicate headers by default, ensuring that each header field is unique and preventing misinterpretation.
+FastCSV 4.x rejects duplicate field names in the header by default, ensuring that each field name is unique and preventing misinterpretation.
 
 You can change this behavior by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
 

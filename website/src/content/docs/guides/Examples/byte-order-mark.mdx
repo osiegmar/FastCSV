@@ -8,44 +8,44 @@ sidebar:
 import SourceExample from '../../../../components/SourceExample.astro';
 
 FastCSV is capable of reading CSV files with a [Byte order mark](https://en.wikipedia.org/wiki/Byte_order_mark)
-(BOM) header.
+(BOM).
 
 :::note
 A byte order mark (BOM) is a sequence of 2 to 4 bytes at the start of a text file
-that serves as a header to indicate the file's Unicode encoding, such as UTF-8, UTF-16, or UTF-32.
-For UTF-16 and UTF-32, the BOM header also indicates the byte order (big-endian or little-endian).
+that indicates the file's Unicode encoding, such as UTF-8, UTF-16, or UTF-32.
+For UTF-16 and UTF-32, the BOM also indicates the byte order (big-endian or little-endian).
 
 While UTF-8 is the standard encoding for most text files today,
-some applications (like Microsoft Excel) still use the BOM header to explicitly specify the file's encoding.
+some applications (like Microsoft Excel) still use the BOM to explicitly specify the file's encoding.
 :::
 
-Enabling automatic BOM header detection can impact performance.
-Due to the decreased usage of BOM headers in modern applications, BOM header detection is disabled by default.
-To enable BOM header detection, use the `detectBomHeader` method of the `CsvReaderBuilder` class.
+Enabling automatic BOM detection can impact performance.
+Due to the decreased usage of BOMs in modern applications, BOM detection is disabled by default.
+To enable BOM detection, use the `detectBomHeader` method of the `CsvReaderBuilder` class.
 
 You may also want to check out the corresponding
 [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv/latest/de.siegmar.fastcsv/de/siegmar/fastcsv/reader/CsvReader.CsvReaderBuilder.html#detectBomHeader(boolean))
 for more information.
 
-The following table shows the BOM headers for different Unicode encodings that FastCSV can detect:
+The following table shows the BOMs for different Unicode encodings that FastCSV can detect:
 
-| Encoding    | BOM header (hex) |
-|-------------|------------------|
-| UTF-8       | `EF BB BF`       |
-| UTF-16 (BE) | `FE FF`          |
-| UTF-16 (LE) | `FF FE`          |
-| UTF-32 (BE) | `00 00 FE FF`    |
-| UTF-32 (LE) | `FF FE 00 00`    |
+| Encoding    | BOM (hex)     |
+|-------------|---------------|
+| UTF-8       | `EF BB BF`    |
+| UTF-16 (BE) | `FE FF`       |
+| UTF-16 (LE) | `FF FE`       |
+| UTF-32 (BE) | `00 00 FE FF` |
+| UTF-32 (LE) | `FF FE 00 00` |
 
-The UTF-8 BOM header is the most common one that is also used by Microsoft Excel.
+The UTF-8 BOM is the most common one that is also used by Microsoft Excel.
 
 ## Example
 
-In the following example, a CSV file with a BOM header is created and read using FastCSV.
+In the following example, a CSV file with a BOM is created and read using FastCSV.
 
 <SourceExample filename="ExampleCsvReaderWithBomHeader.java" highlights={['.detectBomHeader(true)']}/>
 
 :::tip
-To **create** CSV files with a BOM header using FastCSV, you have to write the BOM header manually,
-as shown in the example. FastCSV does not support creating CSV files with a BOM header by itself.
+To **create** CSV files with a BOM using FastCSV, you have to write the BOM manually,
+as shown in the example. FastCSV does not support creating CSV files with a BOM by itself.
 :::

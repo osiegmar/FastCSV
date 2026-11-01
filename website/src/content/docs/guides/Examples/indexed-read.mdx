@@ -6,11 +6,11 @@ description: "Use FastCSV's IndexedCsvReader for random access and paginated rea
 import SourceExample from '../../../../components/SourceExample.astro';
 
 CSV files are most commonly read sequentially from start to end. In some situations, like in graphical user interfaces,
-you might need to read specific rows directly without having to read the entire file. FastCSV supports indexed reading
+you might need to read specific records directly without having to read the entire file. FastCSV supports indexed reading
 of CSV files, which allows you to navigate back and forth in the file in a random-access manner.
 
 As CSV files do not include an index, FastCSV creates an index while reading the file. This index is stored in memory
-and allows you to access rows directly. The index can optionally be stored in a file to avoid creating it every time
+and allows you to access records directly. The index can optionally be stored in a file to avoid creating it every time
 you read the CSV file.
 
 :::note
@@ -37,7 +37,7 @@ when indexing files of unknown shape.
 :::caution[Character set support]
 Unlike `CsvReader`, `IndexedCsvReader` supports only **UTF-8 and single-byte character sets** (such as ISO-8859-1
 or US-ASCII). Anything else is rejected with an `IllegalArgumentException` – this also applies to a character set
-detected via a BOM header.
+detected via a BOM.
 
 The index is built on byte level while the pages themselves are decoded and parsed on character level. That only
 holds together if every ASCII byte is exactly its own character, and multi-byte character sets break this in one

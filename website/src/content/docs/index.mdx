@@ -57,26 +57,26 @@ The main features of FastCSV include:
 ### CSV specific
 
 - Compliant with [RFC 4180](https://tools.ietf.org/html/rfc4180) – including:
-  - Newline and field separator characters in fields
-  - Quote escaping
+  - Line breaks and field separators in fields
+  - Escape pairs (`""`) in quoted fields
 - Configurable field separator
-- Supports line endings `CRLF` (Windows), `LF` (Unix) and `CR` (old macOS)
+- Supports line breaks `CRLF` (Windows), `LF` (Unix) and `CR` (old macOS)
 - Supports unicode characters
 
 ### Reader specific
 
-- Supports reading of some non-compliant (real-world) data
+- Tolerates some malformed (real-world) CSV data
 - Preserves line break character(s) within fields
 - Preserves the starting line number (even with skipped and multi-line records) – helpful for error messages
-- Auto-detection of line delimiters (`CRLF`, `LF`, or `CR` – can also be mixed)
+- Recognizes all line breaks (`CRLF`, `LF`, or `CR` – can also be mixed)
 - Configurable data validation
 - Supports single and multi-character field separators
-- Supports trimming of whitespaces around quoted fields
-- Supports optional header records (access fields by name)
-- Supports for duplicate header names
+- Supports trimming whitespace around quoted fields
+- Supports an optional header (access fields by field name)
+- Supports duplicate field names
 - Supports skipping empty lines
-- Supports skipping non-CSV header (either by a fixed number of lines or by peeking data)
-- Supports commented lines (skipping & reading) with configurable comment character
+- Supports skipping lines before the CSV data (either by a fixed number of lines or by peeking data)
+- Supports comments (skipping & reading) with configurable comment character
 - Configurable field modifiers (e.g., to trim fields)
 - Flexible callback handlers (e.g., to directly map to domain objects)
 - BOM (Byte Order Mark) support (UTF-8, UTF-16 LE/BE, UTF-32 LE/BE)

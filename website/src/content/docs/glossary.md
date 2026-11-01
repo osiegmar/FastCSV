@@ -61,7 +61,7 @@ The first record, when it contains field names instead of data.
 Read it with `CsvReader.builder().ofNamedCsvRecord(…)`.
 See also [Header validation](/guides/examples/header-validation/).
 
-**RFC 4180:** As specified; the header is optional. Stricter: duplicate field names are rejected by default to avoid ambiguous access by name. [Details](/architecture/interpretation/#unique-header-names)
+**RFC 4180:** As specified; the header is optional. Stricter: duplicate field names are rejected by default to avoid ambiguous access by name. [Details](/architecture/interpretation/#unique-field-names)
 
 *Known elsewhere as:* header row, column names
 
@@ -133,7 +133,7 @@ Outside a quoted field, a line break ends a record; inside a quoted field, it is
 When reading, FastCSV recognizes all three, even mixed within the same CSV data.
 When writing, it uses CRLF as required by RFC 4180, unless configured otherwise (`lineDelimiter`).
 
-**RFC 4180:** Writing uses CRLF as specified. Deviates when reading: RFC 4180 defines only CRLF, but CR and LF are common in practice, e.g. in files created by Unix tools. [Details](/architecture/interpretation/#different-end-of-line-characters)
+**RFC 4180:** Writing uses CRLF as specified. Tolerated when reading: RFC 4180 defines only CRLF, but CR and LF are common in practice, e.g. in files created by Unix tools. [Details](/architecture/interpretation/#cr-and-lf-line-breaks)
 
 *Known elsewhere as:* newline, line ending, end-of-line (EOL), line terminator, line delimiter
 
@@ -255,6 +255,6 @@ When reading UTF-8 without detection, it ends up at the start of the first field
 Enable detection with `detectBomHeader(true)`; it applies when reading from a `Path` or `InputStream`, not from a
 `Reader` or `String`. See [Byte Order Mark (BOM) in CSV Files](/guides/examples/byte-order-mark/).
 
-**RFC 4180:** Not part of RFC 4180; detection is opt-in. [Details](/architecture/interpretation/#bom-header)
+**RFC 4180:** Not part of RFC 4180; detection is opt-in. [Details](/architecture/interpretation/#byte-order-mark-bom)
 
 *Known elsewhere as:* BOM header, BOM character

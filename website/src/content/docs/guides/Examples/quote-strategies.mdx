@@ -5,9 +5,9 @@ description: "Control CSV field quoting behavior with FastCSV's QuoteStrategy AP
 
 import SourceExample from '../../../../components/SourceExample.astro';
 
-Fields in CSV files can be enclosed in quotes.
-Although the CSV specification requires quotes only when a field contains a separator, delimiter,
-or enclosure character, some applications may always enclose fields in quotes for consistency or simplicity.
+Fields in CSV files can be quoted.
+Although the CSV specification requires quoting only when a field contains a field separator, a line break
+or a quote character, some applications always quote fields for consistency or simplicity.
 
 From a specification standpoint, these two examples are data identical:
 
@@ -21,7 +21,7 @@ From a specification standpoint, these two examples are data identical:
 field 1,field 2,field 3
 ```
 
-However, certain use cases may require enclosing fields to convey a different meaning.
+However, certain use cases may require quoting fields to convey a different meaning.
 For example, this can help distinguish between fields containing an empty string and those with no value at all
 (*null* fields).
 
@@ -38,7 +38,7 @@ In the following example, CSV output is created using different quote strategies
 
 ## Reading quoted fields
 
-To determine if a field is enclosed in quotes when reading a CSV file,
+To determine if a field is a quoted field when reading a CSV file,
 additional work and an extra object per field are required.
 FastCSV does not support this feature out of the box, but it can be implemented using a custom callback handler.
 
