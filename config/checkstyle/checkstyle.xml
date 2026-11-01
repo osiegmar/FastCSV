@@ -209,9 +209,6 @@
         <module name="JavadocContentLocation"/>
         <module name="JavadocMethod"/>
         <!--<module name="JavadocParagraph"/>-->
-        <!--
-        <module name="JavadocStyle"/>
-        -->
         <module name="JavadocTagContinuationIndentation"/>
         <module name="JavadocType"/>
         <!--

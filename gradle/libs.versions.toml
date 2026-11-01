@@ -5,6 +5,8 @@ fastdoubleparser = { module = "ch.randelshofer:fastdoubleparser", version = "2.0
 gummy-bears = { module = "com.toasttab.android:gummy-bears-api-34", version = "0.16.0" }
 spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.5.13" }
 jackson-dataformat-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version = "3.2.4" }
+# Error Prone 2.42.0 pulls Guava 33.4.0, which calls sun.misc.Unsafe (warning on JDK 24+)
+guava = { module = "com.google.guava:guava", version = "33.7.2-jre" }
 # Do not update – Error Prone 2.43.0+ requires Java 21, but OSS-Fuzz uses Java 17
 errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
 nullaway = { module = "com.uber.nullaway:nullaway", version = "0.14.3" }

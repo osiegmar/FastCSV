@@ -69,8 +69,8 @@ static class RollingOutputStream extends OutputStream {
     /// @param fileSupplier  a supplier for the next file to write to
     /// @param rollingPolicy the rolling policy
     /// @param fileConsumer  a consumer for rolled files (e.g., for further processing)
-    public RollingOutputStream(final Supplier<Path> fileSupplier, final RollingPolicy rollingPolicy,
-                               final Consumer<ProcessedFile> fileConsumer) {
+    RollingOutputStream(final Supplier<Path> fileSupplier, final RollingPolicy rollingPolicy,
+                        final Consumer<ProcessedFile> fileConsumer) {
         this.fileSupplier = Objects.requireNonNull(fileSupplier);
         this.rollingPolicy = Objects.requireNonNull(rollingPolicy);
         this.fileConsumer = Objects.requireNonNull(fileConsumer);
@@ -143,7 +143,7 @@ static class FileSupplier implements Supplier<Path> {
     private final String filePattern;
     private int fileCounter;
 
-    public FileSupplier(final Path baseDir, final String filePattern) {
+    FileSupplier(final Path baseDir, final String filePattern) {
         this.baseDir = Objects.requireNonNull(baseDir);
         this.filePattern = Objects.requireNonNull(filePattern);
     }

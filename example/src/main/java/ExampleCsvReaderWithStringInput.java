@@ -26,7 +26,7 @@ void main() {
         .forEach(IO::println);
 
     IO.println("Reading data via iterator:");
-    for (final var it = CsvReader.builder().ofCsvRecord(data).iterator(); it.hasNext(); ) {
+    for (final var it = CsvReader.builder().ofCsvRecord(data).iterator(); it.hasNext();) {
         final CsvRecord csvRecord = it.next();
         IO.println(csvRecord.getFields());
     }

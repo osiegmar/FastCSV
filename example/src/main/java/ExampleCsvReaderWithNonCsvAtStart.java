@@ -11,7 +11,7 @@ void main() throws IOException {
     final String data = """
         Your CSV file contains some non-CSV data before the actual CSV header?
         And you don't want to (mis)interpret them as CSV header? No problem!
-        
+
         header1,header2
         foo,bar
         """;

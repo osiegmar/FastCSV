@@ -48,13 +48,6 @@ tasks.javadoc {
     options.jFlags = listOf("-Duser.language=en", "-Duser.country=US")
 }
 
-// Workaround for Gradle 9 support of Bnd https://github.com/bndtools/bnd/issues/6346
-tasks.jar {
-    bundle {
-        properties.put("project.group", provider { project.group })
-    }
-}
-
 sourceSets {
     create("common", Action<SourceSet> {
         compileClasspath += sourceSets.main.get().output
@@ -80,6 +73,7 @@ configurations[intTest.runtimeOnlyConfigurationName].extendsFrom(configurations.
 dependencies {
     errorprone(libs.errorprone)
     errorprone(libs.nullaway)
+    errorprone(libs.guava)
 
     commonImplementation(libs.assertj.core)
 
