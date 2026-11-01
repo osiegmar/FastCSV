@@ -4,11 +4,11 @@ on:
   push:
     paths-ignore:
       - '**/*.md'
-      - 'docs/**'
+      - 'website/**'
   pull_request:
     paths-ignore:
       - '**/*.md'
-      - 'docs/**'
+      - 'website/**'
 
 jobs:
   build:

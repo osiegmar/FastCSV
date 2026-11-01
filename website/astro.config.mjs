@@ -25,7 +25,7 @@ export default defineConfig({
                 replacesTitle: true,
             },
             editLink: {
-                baseUrl: 'https://github.com/osiegmar/FastCSV/edit/main/docs/'
+                baseUrl: 'https://github.com/osiegmar/FastCSV/edit/main/website/'
             },
             social: [
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/osiegmar/FastCSV' },

@@ -18,12 +18,12 @@
         },
         {
           "type": "generic",
-          "path": "docs/src/content/docs/guides/quickstart.mdx",
+          "path": "website/src/content/docs/guides/quickstart.mdx",
           "glob": false
         },
         {
           "type": "generic",
-          "path": "docs/public/llms.txt",
+          "path": "website/public/llms.txt",
           "glob": false
         }
       ]

@@ -19,7 +19,7 @@ jobs:
       - name: Install, build, and upload your site
         uses: withastro/action@v6
         with:
-          path: docs
+          path: website
           node-version: 26
 
   deploy:

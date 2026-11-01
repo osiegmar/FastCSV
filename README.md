@@ -38,7 +38,7 @@ _Here are the top reasons to choose FastCSV — see [fastcsv.org](https://fastcs
 
 ## Performance
 
-![Benchmark](docs/src/assets/benchmark.png "Benchmark")
+![Benchmark](website/src/assets/benchmark.png "Benchmark")
 Based on the [Java CSV library benchmark suite](https://github.com/osiegmar/JavaCsvBenchmarkSuite).
 
 ## Quick Start
