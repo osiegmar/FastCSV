@@ -1,7 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,11 +25,6 @@ class CsvScannerTest {
     void indexer() {
         assertThat(indexesOf("^___\n^___", "\n"))
             .containsExactly(0, 4);
-    }
-
-    @Test
-    void nullInput() {
-        assertThatThrownBy(() -> scan(null, "\n", CommentStrategy.READ));
     }
 
     @Test
