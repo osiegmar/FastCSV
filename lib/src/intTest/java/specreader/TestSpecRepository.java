@@ -10,17 +10,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import specreader.spec.TestSpec;
 import specreader.spec.TestSpecCheck;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class TestSpecRepository {
 
-    private static final ObjectReader OR = new ObjectMapper(new YAMLFactory())
+    private static final ObjectReader OR = new YAMLMapper()
         .readerFor(TestSpec.class);
 
     private TestSpecRepository() {
@@ -121,11 +119,7 @@ public final class TestSpecRepository {
     }
 
     private static TestSpecFile loadTestSpec(final Path file) {
-        try {
-            return new TestSpecFile(file, OR.readValue(file.toFile()));
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new TestSpecFile(file, OR.readValue(file.toFile()));
     }
 
 }

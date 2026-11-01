@@ -6,7 +6,7 @@ open module blackbox {
     requires org.junit.jupiter.params;
     requires org.assertj.core;
     requires net.bytebuddy;
-    requires com.fasterxml.jackson.dataformat.yaml;
-    requires com.fasterxml.jackson.databind;
+    requires tools.jackson.dataformat.yaml;
+    requires tools.jackson.databind;
 
 }
