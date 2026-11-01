@@ -1,6 +1,8 @@
 ---
-title: Other libraries
-description: Other libraries for reading and writing CSV files in Java.
+title: Other Java CSV Libraries
+description: "Alternatives to FastCSV for reading and writing CSV in Java: Apache Commons CSV, Jackson CSV, Opencsv and SimpleFlatMapper compared."
+sidebar:
+  label: Other libraries
 ---
 
 While FastCSV offers a great mix of features, performance, and usability, it might not be the right choice for every use
