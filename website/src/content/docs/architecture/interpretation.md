@@ -11,6 +11,7 @@ ways to interpret CSV files, especially when not strictly following the RFC spec
 might be considered as bugs, while others represent alternative approaches to handling edge cases (mostly garbled data).
 
 This document describes how FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
+For the terms used here, see the [CSV glossary](/glossary/).
 
 ## Status of the RFC
 

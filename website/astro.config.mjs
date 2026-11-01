@@ -51,6 +51,10 @@ export default defineConfig({
                     link: '/faq/'
                 },
                 {
+                    label: 'Glossary',
+                    link: '/glossary/'
+                },
+                {
                     label: 'Other libraries',
                     link: '/other-libraries/'
                 },
