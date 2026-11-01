@@ -37,9 +37,9 @@ and materialize it. Additionally, the `CsvParser` is responsible for handling li
 
 Serving as the interface between the `CsvReader` and the `CsvParser`, the `CsvCallbackHandler` is responsible for
 processing and materializing fields. It initiates the materialization of records as soon as all fields of a record are
-parsed. Leveraging the `FieldModifier`, the `CsvCallbackHandler` can optionally modify fields, such as trimming or
+parsed. Using the `FieldModifier`, the `CsvCallbackHandler` can optionally modify fields, such as trimming or
 altering case, before their materialization.
-One implementation of the `CsvCallbackHandler` is the `CsvRecordCallbackHandler` which materializes records as
+One implementation of the `CsvCallbackHandler` is the `CsvRecordHandler` which materializes records as
 `CsvRecord` objects.
 
 #### FieldModifier
@@ -49,7 +49,7 @@ The `FieldModifier` is employed to modify fields, providing capabilities such as
 #### CsvRecord
 
 The `CsvRecord` represents a single CSV record, providing access to its fields.
-It is built by the `CsvRecordCallbackHandler`.
+It is built by the `CsvRecordHandler`.
 
 ### Logic
 
@@ -79,7 +79,7 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(file)) {
 This very basic example hides all the complexity that is going on behind the scenes.
 
 - The `CsvReaderBuilder` is instantiated with default settings by the `CsvReader.builder()` factory method.
-- The `ofCsvRecord()` method initializes a `CsvRecordCallbackHandler` with default settings, opens the given CSV file,
+- The `ofCsvRecord()` method initializes a `CsvRecordHandler` with default settings, opens the given CSV file,
   initializes the `CsvParser` and `CsvReader`, and returns the `CsvReader` to the user.
 - The user iterates over the `Iterable` by calling `forEach()` on it.
 - As the `CsvReader` also implements `AutoCloseable`, the user can rely on the wrapping try-with-resources statement to

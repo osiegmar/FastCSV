@@ -48,10 +48,10 @@ when such a distinction is required.
 
 FastCSV provides the following options to handle `null`:
 
-**on Writing**: depending on the configured `QuoteStrategy`, `null` is either written as an empty field (default) or
-as a quoted empty field (`QuoteStrategies.EMPTY`). This helps to produce PostgreSQL-compatible CSV files for example. If
-you instead want to write a specific string for `null`, you have to pass the string to
-the `CsvWriter.writeRecord()` method.
+**on Writing**: by default, both `null` and an empty string are written as an unquoted empty field. With
+`QuoteStrategies.EMPTY`, an empty string is written as a quoted empty field (`""`) while `null` stays unquoted, so the two
+can be told apart. This helps to produce PostgreSQL-compatible CSV files for example. If you instead want to write a
+specific string for `null`, you have to pass the string to the `CsvWriter.writeRecord()` method.
 
 **on Reading**: the `CsvCallbackHandler.addField()` method gets passed a parameter `quoted` that indicates whether the
 field was quoted or not. The standard record implementation (`CsvRecord`) does currently not provide a way to
@@ -206,7 +206,7 @@ In this case, we observe:
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
 
    FastCSV would handle this field as an unquoted field. Consequently, the field content would
-   be `" value 3"` (**including** the quote characters). This decision was made for a couple of reasons:
+   be ` "value 3"` (**including** the space and the quote characters). This decision was made for a couple of reasons:
 
     - As "Spaces are considered part of a field and should not be ignored" (see "Spaces within fields" above), the
       quote characters don't enclose the field. They are part of the field content.
@@ -304,10 +304,10 @@ When **reading** CSV files: As comments are not part of RFC 4180, FastCSV does n
 handling by default. The `CsvReaderBuilder.commentStrategy()` method is used to configure the wanted behavior. The
 following options are available:
 
-- `CommentStrategies.NONE`: Disable comment handling, read the line as a regular CSV record (default)
-- `CommentStrategies.READ`: Return comments as `CsvRecord`. The `CsvRecord.isComment()` method can be used to check if
+- `CommentStrategy.NONE`: Disable comment handling, read the line as a regular CSV record (default)
+- `CommentStrategy.READ`: Return comments as `CsvRecord`. The `CsvRecord.isComment()` method can be used to check if
   it holds a comment. The `CsvRecord.getField(0)` method can be used to get the comment text.
-- `CommentStrategies.SKIP`: Recognize comments but skip them; no `CsvRecord` is returned for them.
+- `CommentStrategy.SKIP`: Recognize comments but skip them; no `CsvRecord` is returned for them.
 
 Both `CsvReaderBuilder` and `CsvWriterBuilder` allow configuring the comment character
 (via `commentCharacter(char)`). The default is `#`.
@@ -320,7 +320,7 @@ A line inside a multi-line quoted field is therefore never a comment. The follow
 "# this is not a comment"CRLF
 this is also # not a commentCRLF
 "this is a multi-lineCRLF
-# and therfore not a comment"CRLF
+# and therefore not a comment"CRLF
 ```
 
 ### CR and LF line breaks
