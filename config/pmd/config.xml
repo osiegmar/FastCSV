@@ -25,6 +25,8 @@
         <exclude name="CommentDefaultAccessModifier"/>
         <exclude name="ConfusingTernary"/>
         <exclude name="EmptyMethodInAbstractClassShouldBeAbstract"/>
+        <!-- declaring locals at first use (often final) is the idiomatic style here -->
+        <exclude name="LocalVariableDeclarationShouldBeAtStartOfBlock"/>
         <exclude name="LongVariable"/>
         <exclude name="OnlyOneReturn"/>
         <exclude name="ShortClassName"/>

@@ -15,7 +15,12 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
     reports.maybeCreate("html").required = true
 }
 
+checkstyle {
+    toolVersion = "14.4.0"
+}
+
 pmd {
+    toolVersion = "7.29.0"
     isConsoleOutput = true
     ruleSets = emptyList()
     ruleSetFiles = files("${project.rootDir}/config/pmd/config.xml")

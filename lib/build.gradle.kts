@@ -117,10 +117,14 @@ tasks.check {
 
 pitest {
     // Ensure Java 25 compatibility
-    pitestVersion = "1.20.3"
+    pitestVersion = "1.30.1"
     junit5PluginVersion = "1.2.3"
     targetClasses = setOf("blackbox.*", "de.siegmar.*")
     timestampedReports = false
+}
+
+jacoco {
+    toolVersion = "0.8.16"
 }
 
 tasks.jacocoTestReport {

@@ -12,4 +12,5 @@
 /// All readers implement [java.io.Closeable] and should be used in a try-with-resources block.
 ///
 /// Obtain a reader via [de.siegmar.fastcsv.reader.CsvReader#builder()].
+
 package de.siegmar.fastcsv.reader;

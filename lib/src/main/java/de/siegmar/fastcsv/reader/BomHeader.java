@@ -9,7 +9,10 @@ enum BomHeader {
     UTF_8(StandardCharsets.UTF_8, 3),
     UTF_16_BE(StandardCharsets.UTF_16BE, 2),
     UTF_16_LE(StandardCharsets.UTF_16LE, 2),
+    // StandardCharsets has no UTF-32 constants
+    @SuppressWarnings("PMD.UseStandardCharsets")
     UTF_32_BE(Charset.forName("UTF-32BE"), 4),
+    @SuppressWarnings("PMD.UseStandardCharsets")
     UTF_32_LE(Charset.forName("UTF-32LE"), 4);
 
     private final Charset charset;

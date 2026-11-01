@@ -3,7 +3,6 @@ package blackbox.reader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 class RelaxedCsvReaderSkipLinesTest extends AbstractSkipLinesTest {
 
     @BeforeAll
