@@ -5,8 +5,14 @@ plugins {
     id("com.github.spotbugs")
 }
 
+val libs = the<VersionCatalogsExtension>().named("libs")
+
 repositories {
     mavenCentral()
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
 }
 
 tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
@@ -16,11 +22,11 @@ tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
 }
 
 checkstyle {
-    toolVersion = "14.4.0"
+    toolVersion = libs.findVersion("checkstyle").get().requiredVersion
 }
 
 pmd {
-    toolVersion = "7.29.0"
+    toolVersion = libs.findVersion("pmd").get().requiredVersion
     isConsoleOutput = true
     ruleSets = emptyList()
     ruleSetFiles = files("${project.rootDir}/config/pmd/config.xml")
