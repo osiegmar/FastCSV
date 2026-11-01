@@ -1,7 +1,7 @@
 open module common {
 
-    requires de.siegmar.fastcsv;
-    requires org.assertj.core;
+    requires transitive de.siegmar.fastcsv;
+    requires transitive org.assertj.core;
 
     exports testutil;
 

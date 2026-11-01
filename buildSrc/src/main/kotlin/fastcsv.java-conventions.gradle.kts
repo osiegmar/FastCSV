@@ -25,3 +25,10 @@ pmd {
     ruleSets = emptyList()
     ruleSetFiles = files("${project.rootDir}/config/pmd/config.xml")
 }
+
+// PMD's type resolution otherwise falls back to the JDK running Gradle (25) and judges the code
+// against APIs Java 17 doesn't have; PMD 7.27+ warns about that fallback ("Adding current platform").
+dependencies {
+    pmdAux(javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+        .map { it.metadata.installationPath.files("lib/jrt-fs.jar") })
+}
