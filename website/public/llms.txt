@@ -53,7 +53,7 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(Path.of("input.c
 - [Basic Tutorial](https://fastcsv.org/guides/basic/): Learn reading and writing CSV files with CsvReader, IndexedCsvReader, and CsvWriter.
 - [Design Goals](https://fastcsv.org/architecture/goals/): Core design goals — performance, lightweight, compliance, simplicity, robustness, security.
 - [Architecture](https://fastcsv.org/architecture/architecture/): Technical architecture covering reader and writer components.
-- [CSV Interpretation](https://fastcsv.org/architecture/interpretation/): How FastCSV interprets CSV data per RFC 4180-bis.
+- [CSV Interpretation](https://fastcsv.org/architecture/interpretation/): How FastCSV interprets RFC 4180, including edge cases and tolerances for real-world CSV data.
 - [FAQ](https://fastcsv.org/faq/): Frequently asked questions about FastCSV.
 - [Upgrading](https://fastcsv.org/guides/upgrading/): Guide for migrating from FastCSV 3.x to 4.x.
 - [Other Libraries](https://fastcsv.org/other-libraries/): Comparison with alternative Java CSV libraries.

@@ -1,6 +1,8 @@
 ---
-title: CSV Interpretation
-description: How FastCSV interprets CSV data and how this interpretation aligns with the RFC specification.
+title: How FastCSV Interprets RFC 4180
+description: "How FastCSV reads RFC 4180 CSV: quoted fields, line breaks in fields, escaped double quotes, empty fields, field count, and how malformed CSV is handled."
+sidebar:
+  label: CSV Interpretation
 ---
 
 At first, the CSV format may seem very simple. In practice, however, numerous edge cases need to be considered.
@@ -19,17 +21,18 @@ UTF-8 has become the standard for CSV files.
 Yakov Shafranovich, the original author of RFC 4180, and I (Oliver Siegmar, the author of FastCSV) conducted a thorough
 review and revision of the RFC. Our focus was on addressing numerous edge cases that arise in practical scenarios.
 
-The draft for RFC 4180-bis is available
-on [datatracker.ietf.org](https://datatracker.ietf.org/doc/html/draft-shafranovich-rfc4180-bis), and you can explore the
-GitHub repository at [osiegmar/rfc4180-bis](https://github.com/osiegmar/rfc4180-bis).
-
-Currently, the draft is under review by the IETF.
+The result, the 4180-bis draft, was submitted to the IETF but has expired without being published as an RFC.
+**RFC 4180 – an informational RFC – therefore remains the reference FastCSV is built on.** The last version of the draft,
+[draft-shafranovich-rfc4180-bis-07](https://datatracker.ietf.org/doc/html/draft-shafranovich-rfc4180-bis-07), is still available,
+as is its GitHub repository [osiegmar/rfc4180-bis](https://github.com/osiegmar/rfc4180-bis). It documents the reasoning
+behind several of the decisions described below. Quotations from the draft are taken from this version and marked as such.
 
 ## Implementation details
 
 ### Encoding
 
-While RFC 4180 refers to US-ASCII, RFC 4180-bis uses Unicode (UTF-8).
+RFC 4180 names US-ASCII as common usage but allows other character sets via the `charset` parameter of the
+`text/csv` MIME type. Today, CSV data commonly contains non-ASCII text, and UTF-8 has become the de facto standard.
 
 FastCSV supports any encoding when reading or writing CSV files while defaulting to UTF-8.
 
@@ -65,25 +68,22 @@ Example for **empty** and **quoted empty** fields:
 RFC 4180 says:
 > The last record in the file may or may not have an ending line break.
 
-RFC 4180-bis says:
-> The last record in the file MUST have an ending line break indicating the end of a record.
-
-This change was implemented to eliminate ambiguity, especially when the CSV file consists of only one field per record.
-In such cases, it becomes impossible to determine whether the example has a third record (containing an empty field) or
-not:
+This optional line break creates ambiguity, especially when the CSV file consists of only one field per record.
+In such cases, it becomes impossible to determine whether the following example has a third record (containing an
+empty field) or not:
 
 ```
 fooCRLF
 barCRLF
 ```
 
-FastCSV conforms to the RFC 4180-bis requirement and includes end-of-line characters after every record, including the
-last one.
+To avoid this ambiguity, FastCSV writes a line break after every record, including the last one – which RFC 4180
+permits and the 4180-bis draft proposed to make mandatory.
 
 ### Different field count
 
-The RFC says:
-> Each record SHOULD contain the same number of fields throughout the file.
+RFC 4180 says:
+> Each line should contain the same number of fields throughout the file.
 
 In practice, however, this is not always the case. This prompts the question of what the correct behavior should be.
 
@@ -118,13 +118,16 @@ value_2CRLF
 
 By default, FastCSV skips empty lines (see `CsvReaderBuilder.skipEmptyLines(boolean)`). Reading such a file would result
 in two records (containing `"value_1"` and `"value_2"`).
+Strictly, this deviates from RFC 4180, under which an empty line is a record with one empty field. The default is kept
+for compatibility.
 
 To regularly read empty lines, you can disable this behavior, resulting in three records (containing `"value_1"`, `""`,
 and `"value_2"`).
 
 ### Empty files
 
-Empty files (zero bytes) are valid per RFC. FastCSV will return an empty stream when reading such a file.
+Empty files (zero bytes) can be derived from the RFC 4180 grammar (as a single record with one empty field).
+FastCSV interprets them as containing no records and returns an empty stream.
 
 ### Fields spanning multiple lines
 
@@ -140,7 +143,7 @@ Any end-of-line characters within the field are preserved.
 
 ### Unique header names
 
-The RFC says:
+The 4180-bis draft notes:
 > Implementers should be aware that some applications may treat header values as unique
 > (either case-sensitive or case-insensitive).
 
@@ -160,8 +163,8 @@ Regardless of the option chosen, FastCSV always treats headers as case-sensitive
 
 ### Spaces within fields
 
-The RFC says:
-> Spaces are considered part of a field and SHOULD NOT be ignored
+RFC 4180 says:
+> Spaces are considered part of a field and should not be ignored.
 
 FastCSV adheres to this recommendation by reading and writing fields as they are, including any (leading or trailing)
 whitespaces.
@@ -177,10 +180,10 @@ CsvReader.builder().build(handler, " foo , bar ")
 
 ### Whitespace outside quoted fields
 
-The RFC says:
+The 4180-bis draft notes:
 > When quoted fields are used, this document does not allow whitespace between double quotes and commas.
 
-FastCSV strictly adheres to this requirement: it never writes whitespaces between double quotes and commas!
+RFC 4180's grammar doesn't allow it either, and FastCSV never writes whitespaces between double quotes and commas.
 
 Let's explore how FastCSV manages whitespaces when reading CSV files:
 
@@ -203,7 +206,7 @@ In this case, we observe:
    FastCSV would handle this field as an unquoted field. Consequently, the Java value for this field would
    be `" value 3"` (**including** the quotes). This decision was made for a couple of reasons:
 
-    - As "Spaces are considered part of a field and SHOULD NOT be ignored" (see "Spaces within fields" above), the
+    - As "Spaces are considered part of a field and should not be ignored" (see "Spaces within fields" above), the
       quotes actually don't enclose the field. The quotes are now part of the field.
     - Some CSV implementations don't use quotes (as a field enclosure) at all. It's not "safe" to assume that a late
       quote character is really a field enclosure. Both formats ("not using quotes when there's a need" and "whitespaces
@@ -224,7 +227,8 @@ A quoted field may be unintentionally truncated, leaving an opening quote withou
 value 3CRLF
 ```
 
-By default, FastCSV consumes the remaining bytes (including any newlines) as the content of the final field, in line with its tolerance of real-world malformed input.
+By default, FastCSV consumes the remaining bytes (including any newlines) as the content of the final field.
+This tolerance is kept for compatibility with earlier versions.
 
 This behavior can be made strict by setting `CsvReaderBuilder.allowUnclosedQuote(false)` (also available
 on `IndexedCsvReaderBuilder`). FastCSV then throws a `CsvParseException` that references the starting line of the
@@ -241,7 +245,7 @@ FastCSV supports any character as field enclosures when reading or writing CSV f
 
 ### Other field separators
 
-The RFC says:
+The 4180-bis draft notes:
 > This document defines a comma as a field separator but implementers should be aware that some applications may use
 > different values
 
@@ -249,7 +253,7 @@ FastCSV supports any character as field separator when reading or writing CSV fi
 
 ### Escaping double quotes
 
-The RFC says:
+The 4180-bis draft notes:
 > This document prescribes that a double quote appearing inside a field must be escaped by preceding it with another
 > double quote. Implementers should be aware that some applications may choose to use a different escaping mechanism.
 
@@ -257,7 +261,7 @@ FastCSV does not support any other escaping mechanism than escaping double quote
 
 ### BOM header
 
-The RFC says:
+The 4180-bis draft notes:
 > Some applications might be able to read and properly interpret such a header, others could break.
 
 Reading CSV files with a BOM header is supported when enabling BOM header detection
@@ -272,7 +276,7 @@ FastCSV does not contain any special handling for bidirectional text.
 
 ### Comments
 
-The RFC says:
+The 4180-bis draft notes:
 > Some implementations may use the hash sign ("#") to mark lines that are meant to be commented line.
 
 FastCSV implements this feature as follows:
@@ -293,7 +297,7 @@ with the configured comment character. A call to `writeRecord("#foo", "#bar")` w
 "#foo",#barCRLF
 ```
 
-When **reading** CSV files: As the RFC does not clearly specify how to handle comments, FastCSV does enable comment
+When **reading** CSV files: As comments are not part of RFC 4180, FastCSV does not enable comment
 handling by default. The `CsvReaderBuilder.commentStrategy()` method is used to configure the wanted behavior. The
 following options are available:
 
@@ -318,8 +322,9 @@ this is also # not a commentCRLF
 
 ### Different end of line characters
 
-While RFC 4180 mentions only the CRLF sequence as the end-of-line character, 4180-bis explicitly includes the CR and LF
-characters, while maintaining the CRLF sequence as the default.
+RFC 4180 mentions only the CRLF sequence as the end-of-line character. In practice, CSV data with CR or LF line breaks
+is common – for example, when created by Unix tools (the 4180-bis draft also proposed accepting CR and LF, while
+keeping CRLF as the default).
 
 In line with the RFC, FastCSV defaults to using the CRLF sequence as the end-of-line character. However, it also
 provides support for the CR and LF characters (via `CsvWriterBuilder.lineDelimiter(LineDelimiter)`) when writing CSV
@@ -327,7 +332,14 @@ files. The CsvReader, on the other hand, automatically detects the end-of-line c
 
 ## ABNF Grammar
 
-When comment handling is disabled (default), FastCSV adheres to the ABNF grammar of RFC 4180-bis.
+When comment handling is disabled (default), the following ABNF grammar, taken from the 4180-bis draft, describes
+the CSV data FastCSV reads. Compared to RFC 4180, it allows any character in fields (including control characters
+and non-ASCII text) and CR or LF line breaks.
+FastCSV's reader is more lenient than this grammar in three cases (this also applies to the grammar with comments below):
+
+- The last record may end without a line break, as RFC 4180 permits.
+- A quote character inside an unquoted field (`ab"cd`) is read as part of the field.
+- An unclosed quoted field is tolerated by default (see [Unclosed quoted fields](#unclosed-quoted-fields)).
 
 ```ABNF
 file = [header] *(record)
@@ -360,7 +372,8 @@ LF = %x0A ; as per section B.1 of [RFC5234]
 UTF8-data = UTF8-2 / UTF8-3 / UTF8-4 ; as per section 4 of [RFC3629]
 ```
 
-When comment handling is enabled, FastCSV adheres to the following ABNF grammar:
+When comment handling is enabled, the following ABNF grammar describes the CSV data FastCSV reads. The same three
+leniencies as above apply; in particular, the last record or comment may end without a line break.
 
 ```ABNF
 file = *((comment / record) linebreak)
