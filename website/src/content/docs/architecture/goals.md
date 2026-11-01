@@ -5,70 +5,62 @@ sidebar:
   order: 1
 ---
 
-The development of FastCSV is guided by a set of design goals.
+These goals guide the development of FastCSV.
 
 ## Performance
 
-FastCSV is engineered for exceptional speed, optimized for rapid CSV file reading and writing.
-It achieves high performance without compromising on CSV specification compliance, robustness, or security.
+FastCSV reads and writes CSV data fast, without trading away compliance with the CSV specification, robustness or
+security.
 
 ![Benchmark](../../../assets/benchmark.png "Benchmark")
 
 ## Lightweight
 
-FastCSV is designed to be lightweight. It has no external dependencies and ensures a small memory footprint.
-
-The Jar-File of version 4.1.0 has a size of only 90 KiB.
+FastCSV has no runtime dependencies and keeps its memory footprint small.
+The JAR file of version 4.1.0 has a size of only 90 KiB.
 
 ## Compliant
 
-FastCSV is designed to comply with the CSV specification [RFC 4180](https://datatracker.ietf.org/doc/html/rfc4180).
-
-Its very high [test coverage](https://app.codecov.io/gh/osiegmar/FastCSV) ensures that it adheres to the specification.
-See also the [Java Csv Comparison Project](https://github.com/osiegmar/JavaCsvComparison) on how FastCSV handles edge cases and how it compares to other
-libraries.
+FastCSV is built on [RFC 4180](https://datatracker.ietf.org/doc/html/rfc4180), and
+[specification tests](https://github.com/osiegmar/FastCSV/tree/main/lib/src/intTest/resources/spec) check its
+behavior against it.
+The [CSV interpretation](/architecture/interpretation/) page explains how FastCSV handles real-world CSV data beyond
+the RFC, such as LF line breaks or comments, and the cases the RFC leaves open, such as records with differing field
+counts.
+The [Java CSV Comparison Project](https://github.com/osiegmar/JavaCsvComparison) shows how FastCSV handles edge cases
+compared to other libraries.
 
 ## Simplicity
 
-FastCSV is designed to be simple and intuitive. It provides a simple API that is easy to use and understand.
-See the [Quickstart](/guides/quickstart/) for a first impression.
+The API is small and does what its names say. The [Quickstart](/guides/quickstart/) gives a first impression.
 
 ## Robustness
 
-FastCSV is designed to be robust and reliable. [Thoroughly tested](https://app.codecov.io/gh/osiegmar/FastCSV),
-it ensures a high level of stability.
-[PIT mutation testing](https://pitest.org) is used to ensure the quality of the tests.
+Besides the [test coverage](https://app.codecov.io/gh/osiegmar/FastCSV),
+[PIT mutation testing](https://pitest.org) checks that the tests actually catch faults.
 
-While FastCSV accepts null inputs for certain and documented methods, it does not return null values in any of its public APIs.
+Some documented methods accept `null` arguments; no public API returns `null`.
 
 ## Security
 
-FastCSV is designed to be secure.
-
-We follow the Open Source Security Foundation (OpenSSF) Best Practices.
-See our [Best Practices](https://www.bestpractices.dev/projects/9141) report for more information.
-
-FastCSV is also part of the [OSS-Fuzz](https://google.github.io/oss-fuzz/) project to ensure its security.
+FastCSV follows the Open Source Security Foundation (OpenSSF) Best Practices;
+see the [Best Practices](https://www.bestpractices.dev/projects/9141) report.
+It is also part of [OSS-Fuzz](https://google.github.io/oss-fuzz/).
 
 ## Documentation
 
-FastCSV is designed to be well documented. It offers comprehensive documentation for all features.
-
-This website along with the [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv)
-provides detailed information on how to use the library.
+Every feature is documented, on this website and in the [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv).
 
 ## Maintainability and Support
 
-FastCSV is designed to be maintainable to ensure its longevity, continued development and support.
-Checkout our [FAQ](/faq/) for more information on how to get help and how to contribute.
-
-[Spotbugs](https://spotbugs.github.io),
+[SpotBugs](https://spotbugs.github.io),
 [PMD](https://pmd.github.io),
 [Error Prone](https://errorprone.info),
 [NullAway](https://github.com/uber/NullAway) and
-[Checkstyle](https://checkstyle.sourceforge.io) are used to ensure the quality of the code.
+[Checkstyle](https://checkstyle.sourceforge.io) keep the code maintainable.
+The [FAQ](/faq/) explains how to get help and how to contribute.
 
 ## Non-Goals
 
-While flexibility and extensibility are important, they are not considered as design goals. They are only considered if
-they do not conflict with the design goals listed above.
+Flexibility and extensibility are not design goals. They are considered only where they don't conflict with the goals
+above.
