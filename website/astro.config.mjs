@@ -15,6 +15,9 @@ export default defineConfig({
     },
     integrations: [
         starlight({
+            // src/content/docs/404.md is rendered by the regular [...slug] route; Starlight's own 404 route
+            // would render the same entry and causes a route conflict warning
+            disable404Route: true,
             plugins: [starlightLinksValidator()],
             title: 'FastCSV',
             defaultLocale: 'en',
