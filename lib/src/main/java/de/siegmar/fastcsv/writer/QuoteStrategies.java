@@ -6,7 +6,7 @@ public enum QuoteStrategies implements QuoteStrategy {
     /// Quote fields only if quoting is required.
     REQUIRED,
 
-    /// Quote all fields regardless of their content (even empty and `null` fields).
+    /// Quote all fields, including those passed as an empty string or `null`.
     ALWAYS {
         @Override
         public boolean quoteNull(final int lineNo, final int fieldIdx) {
@@ -32,7 +32,7 @@ public enum QuoteStrategies implements QuoteStrategy {
         }
     },
 
-    /// Quote empty but not `null` fields to differentiate them.
+    /// Quote fields passed as an empty string, but not those passed as `null`, to tell them apart.
     /// This is required for PostgreSQL CSV imports, for example.
     EMPTY {
         @Override

@@ -7,6 +7,9 @@ import java.util.StringJoiner;
 
 /// Represents an immutable CSV record with unnamed (indexed) fields.
 ///
+/// If comments are read ([CommentStrategy#READ]), a comment is returned as a `CsvRecord` too:
+/// [#isComment()] returns `true` and the comment text is field 0.
+///
 /// The field contents are never `null`. Empty fields are represented as empty strings.
 ///
 /// Instances of this class are immutable and safe for use by multiple threads.

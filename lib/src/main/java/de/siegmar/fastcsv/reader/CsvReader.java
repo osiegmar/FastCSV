@@ -496,10 +496,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Sets the strategy for handling comments
         /// (default: [CommentStrategy#NONE] as comments are not part of RFC 4180).
         ///
-        /// With any other strategy, special parsing rules are applied for comments. FastCSV defines a comment
-        /// as a line that starts with the comment character. No (whitespace) character is allowed before the
-        /// comment character. Everything after the comment character until the end of the line is the
-        /// comment text.
+        /// With any other strategy, where a record would begin with the comment character, a comment is read
+        /// instead. Everything after the comment character up to the next line break is the comment text.
         ///
         /// @param commentStrategy the strategy for handling comments.
         /// @return This updated object, allowing additional method calls to be chained together.
@@ -637,8 +635,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Defines whether whitespace before an opening quote character and after a closing quote character
         /// is allowed and removed.
         ///
-        /// RFC 4180 does not allow whitespace between a quote character and the adjacent field separator or
-        /// line break.
+        /// This is a tolerance of malformed CSV data: RFC 4180 does not allow any character between a quote
+        /// character and the adjacent field separator or line break.
         /// CSV data that contains such whitespace causes two major problems for the parser:
         ///
         /// - Whitespace before an opening quote character causes the parser to treat the field as unquoted,
@@ -659,8 +657,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// | `"_x_"`       | `_x_`         |
         /// | `_x_`         | `_x_`         |
         ///
-        /// Whitespace in this context is defined as any character whose code point is less than or equal to
-        /// `U+0020` (the space character) –
+        /// Whitespace in this context is any character from `U+0000` to `U+0020` (the space character) –
         /// the same logic as in Java's [String#trim()] method.
         ///
         /// **When enabling this, the less performant [RelaxedCsvParser] is used!**
@@ -673,6 +670,10 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /// Defines whether a byte order mark (BOM) at the beginning of the data should be detected.
+        ///
+        /// A detected BOM determines the character set and is removed. Without detection, a BOM is decoded with
+        /// the configured character set; with UTF-8, it remains as `U+FEFF` at the start of the first field's
+        /// content.
         ///
         /// **BOM detection only applies for [InputStream] and
         /// [Path] based data sources.

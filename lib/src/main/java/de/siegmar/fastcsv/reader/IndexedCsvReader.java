@@ -436,6 +436,9 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// Sets the strategy for handling comments
         /// (default: [CommentStrategy#NONE] as comments are not part of RFC 4180).
         ///
+        /// With any other strategy, where a record would begin with the comment character, a comment is read
+        /// instead. Everything after the comment character up to the next line break is the comment text.
+        ///
         /// @param commentStrategy the strategy for handling comments.
         /// @return This updated object, allowing additional method calls to be chained together.
         /// @throws IllegalArgumentException if [CommentStrategy#SKIP] is passed, as this is not supported

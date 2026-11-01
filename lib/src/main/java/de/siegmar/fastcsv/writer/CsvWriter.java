@@ -86,8 +86,8 @@ public final class CsvWriter implements Closeable, Flushable {
 
     /// Writes a record: its fields, followed by a line break.
     ///
-    /// @param values the field contents to write (`null` values are handled as empty strings, if
-    ///               not configured otherwise ([QuoteStrategies#EMPTY])).
+    /// @param values the field contents to write; a `null` element is written as an empty field
+    ///               (unquoted, unless the [QuoteStrategy] decides otherwise).
     /// @return This CsvWriter.
     /// @throws UncheckedIOException if a write-error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
@@ -107,8 +107,8 @@ public final class CsvWriter implements Closeable, Flushable {
 
     /// Writes a record: its fields, followed by a line break.
     ///
-    /// @param values the field contents to write (`null` values are handled as empty strings, if
-    ///               not configured otherwise ([QuoteStrategies#EMPTY]))
+    /// @param values the field contents to write; a `null` element is written as an empty field
+    ///               (unquoted, unless the [QuoteStrategy] decides otherwise)
     /// @return This CsvWriter.
     /// @throws UncheckedIOException if a write-error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
@@ -633,7 +633,8 @@ public final class CsvWriter implements Closeable, Flushable {
         }
 
         /// Writes a field to the current record.
-        /// @param value the field content
+        /// @param value the field content; `null` is written as an empty field
+        ///              (unquoted, unless the [QuoteStrategy] decides otherwise)
         /// @return this CsvWriterRecord instance
         /// @throws UncheckedIOException if a write-error occurs
         public CsvWriterRecord writeField(final String value) {
