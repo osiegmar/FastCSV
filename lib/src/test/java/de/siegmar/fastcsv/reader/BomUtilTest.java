@@ -22,7 +22,7 @@ class BomUtilTest {
                 .satisfies(
                     bh -> assertThat(bh.getCharset()).hasToString(charset),
                     bh -> assertThat(bh.getLength()).isEqualTo(len),
-                    bh -> assertThat(bh.toString()).isEqualTo("BomHeader[charset=%s, length=%s]", charset, len)
+                    bh -> assertThat(bh.toString()).isEqualTo("Bom[charset=%s, length=%s]", charset, len)
                 );
         }
     }

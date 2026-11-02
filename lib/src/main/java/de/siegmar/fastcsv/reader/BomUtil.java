@@ -31,7 +31,7 @@ final class BomUtil {
     /// @param buf the byte array to detect the character encoding from
     /// @param n   the number of valid bytes in `buf`; only indices `[0, n)` are inspected
     ///     and any remaining bytes are ignored (`0 <= n <= buf.length`)
-    /// @return an Optional containing the detected BomHeader if a BOM is found,
+    /// @return an [Optional] containing the detected [Bom] if a BOM is found,
     ///     or an empty Optional if no BOM is found
     @SuppressWarnings({
         "checkstyle:CyclomaticComplexity",
@@ -40,7 +40,7 @@ final class BomUtil {
         "checkstyle:ReturnCount",
         "PMD.AvoidLiteralsInIfCondition"
     })
-    static Optional<BomHeader> detectCharset(final byte[] buf, final int n) {
+    static Optional<Bom> detectCharset(final byte[] buf, final int n) {
         if (n < 2) {
             // Not enough bytes to be a BOM
             return Optional.empty();
@@ -48,18 +48,18 @@ final class BomUtil {
 
         if (buf[0] == (byte) 0xEF) {
             if (n > 2 && buf[1] == (byte) 0xBB && buf[2] == (byte) 0xBF) {
-                return Optional.of(BomHeader.UTF_8);
+                return Optional.of(Bom.UTF_8);
             }
         } else if (buf[0] == (byte) 0xFE) {
             if (buf[1] == (byte) 0xFF) {
-                return Optional.of(BomHeader.UTF_16_BE);
+                return Optional.of(Bom.UTF_16_BE);
             }
         } else if (buf[0] == (byte) 0xFF) {
             if (buf[1] == (byte) 0xFE) {
                 if (n > 3 && buf[2] == (byte) 0x00 && buf[3] == (byte) 0x00) {
-                    return Optional.of(BomHeader.UTF_32_LE);
+                    return Optional.of(Bom.UTF_32_LE);
                 } else {
-                    return Optional.of(BomHeader.UTF_16_LE);
+                    return Optional.of(Bom.UTF_16_LE);
                 }
             }
         } else if (buf[0] == (byte) 0x00) {
@@ -67,7 +67,7 @@ final class BomUtil {
                 && buf[1] == (byte) 0x00
                 && buf[2] == (byte) 0xFE
                 && buf[3] == (byte) 0xFF) {
-                return Optional.of(BomHeader.UTF_32_BE);
+                return Optional.of(Bom.UTF_32_BE);
             }
         }
 
@@ -77,10 +77,10 @@ final class BomUtil {
     /// Detects the character encoding of a file based on the presence of a byte order mark (BOM).
     ///
     /// @param file the file to detect the character encoding from
-    /// @return an [Optional] containing the detected [BomHeader] if a BOM is found,
+    /// @return an [Optional] containing the detected [Bom] if a BOM is found,
     ///     or an empty [Optional] if no BOM is found
     /// @throws IOException if an I/O error occurs reading the file
-    static Optional<BomHeader> detectCharset(final Path file)
+    static Optional<Bom> detectCharset(final Path file)
         throws IOException {
         try (var in = Files.newInputStream(file, StandardOpenOption.READ)) {
             final byte[] buf = in.readNBytes(POTENTIAL_BOM_SIZE);

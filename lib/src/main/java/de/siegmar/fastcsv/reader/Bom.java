@@ -4,7 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-enum BomHeader {
+enum Bom {
 
     UTF_8(StandardCharsets.UTF_8, 3),
     UTF_16_BE(StandardCharsets.UTF_16BE, 2),
@@ -18,7 +18,7 @@ enum BomHeader {
     private final Charset charset;
     private final int length;
 
-    BomHeader(final Charset charset, final int length) {
+    Bom(final Charset charset, final int length) {
         this.charset = charset;
         this.length = length;
     }
@@ -33,7 +33,7 @@ enum BomHeader {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", BomHeader.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", Bom.class.getSimpleName() + "[", "]")
             .add("charset=" + charset)
             .add("length=" + length)
             .toString();

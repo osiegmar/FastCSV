@@ -17,16 +17,16 @@ final class BomInputStream extends InputStream {
         delegate = inputStream;
 
         final int bufCnt = delegate.readNBytes(buffer, 0, BomUtil.POTENTIAL_BOM_SIZE);
-        final Optional<BomHeader> optHeader = BomUtil.detectCharset(buffer, bufCnt);
+        final Optional<Bom> optBom = BomUtil.detectCharset(buffer, bufCnt);
 
         bufferLen = bufCnt;
-        if (optHeader.isEmpty()) {
+        if (optBom.isEmpty()) {
             bufferPos = 0;
             charset = defaultCharset;
         } else {
-            final BomHeader bomHeader = optHeader.get();
-            bufferPos = bomHeader.getLength();
-            charset = bomHeader.getCharset();
+            final Bom bom = optBom.get();
+            bufferPos = bom.getLength();
+            charset = bom.getCharset();
         }
     }
 
