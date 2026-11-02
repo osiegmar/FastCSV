@@ -24,11 +24,10 @@ public enum LineDelimiter {
     /// Maps a line break string to the corresponding enum constant.
     ///
     /// Accepted values are `"\r\n"` ([#CRLF]), `"\n"` ([#LF]) and `"\r"` ([#CR]).
-    /// The [#PLATFORM] constant is never returned by this method.
     ///
     /// @param str the line break string to look up.
     /// @return the matching enum constant.
-    /// @throws IllegalArgumentException if the string is not a known line break.
+    /// @throws IllegalArgumentException if `str` is not one of the accepted values.
     public static LineDelimiter of(final String str) {
         return switch (str) {
             case "\r\n" -> CRLF;

@@ -249,7 +249,7 @@ FastCSV supports any character as quote character when reading or writing CSV fi
 
 The 4180-bis draft notes:
 > This document defines a comma as a field separator but implementers should be aware that some applications may use
-> different values
+> different values, especially with non-English languages.
 
 FastCSV supports any character as field separator when reading or writing CSV files.
 
@@ -280,7 +280,7 @@ FastCSV does not contain any special handling for bidirectional text.
 ### Comments
 
 The 4180-bis draft notes:
-> Some implementations may use the hash sign ("#") to mark lines that are meant to be commented line.
+> Some implementations may use the hash sign ("#") to mark lines that are meant to be commented lines.
 
 FastCSV implements this feature as follows:
 
