@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1](https://github.com/osiegmar/FastCSV/compare/v4.4.0...v4.4.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* check field count of the header record ([7299758](https://github.com/osiegmar/FastCSV/commit/729975840b5f678f0839f96f514b47b323bf047d))
+
 ## [4.4.0](https://github.com/osiegmar/FastCSV/compare/v4.3.1...v4.4.0) (2026-07-28)
 
 
