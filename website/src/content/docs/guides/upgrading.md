@@ -61,7 +61,7 @@ In FastCSV 4.x, the `CsvWriter` for `OutputStream` and `Writer` behaves the same
 it writes the internal buffer to the `OutputStream` or `Writer` only when the internal buffer is full, or when `flush()` or `close()` is called.
 The buffer can also be completely disabled by calling `CsvWriterBuilder.bufferSize(0)`.
 
-As a consequence, you no longer need or should wrap the `Writer` in a `BufferedWriter` to ensure proper performance, unless you haven't disabled FastCSV's internal buffer (`CsvWriterBuilder.bufferSize(0)`).
+As a consequence, you don't need to wrap the `Writer` in a `BufferedWriter` for good performance, unless you have disabled FastCSV's internal buffer (`CsvWriterBuilder.bufferSize(0)`).
 
 This change was made to align with the behavior of `CsvWriter` for `OutputStream`. When writing to an `OutputStream`, a `java.io.OutputStreamWriter` is used, which also buffers internally. Automatically flushing FastCSV's internal buffer after each record would have no effect, as the `OutputStreamWriter` would still buffer the data until it is full or flushed manually.
 
@@ -69,14 +69,16 @@ This change was made to align with the behavior of `CsvWriter` for `OutputStream
 - Close the `CsvWriter` at the end of your writing process to ensure all data is written.
 - Call `flush()` on the `CsvWriter` before writing to the underlying `Writer` or `OutputStream` directly to ensure all data is written.
 - Calling `CsvWriterBuilder.bufferSize(0)` disables FastCSV's internal buffer, but the buffer of `java.io.OutputStreamWriter` cannot be disabled.
+- To get the data to the `Writer` or `OutputStream` after each record, as in 3.x, call `CsvWriterBuilder.autoFlush(true)`.
+  It writes the internal buffer and calls `flush()` on the `Writer` or `OutputStream` after each record.
 
 :::caution
 As the default has changed, you may need to check your code and your desired behavior.
 :::
 
-## Handling of characters after closing quote
+## Handling of characters after the closing quote character
 
-FastCSV 4.x no longer tolerates characters after the closing quote of a quoted field, by default.
+FastCSV 4.x no longer tolerates characters after the closing quote character of a quoted field, by default.
 This is a change in behavior compared to earlier versions of FastCSV. It ensures no erroneous data is read and interpreted without noticing it.
 
 The following examples will now lead to a `CsvParseException`:
@@ -89,6 +91,8 @@ To restore the old behavior, you can use the `allowExtraCharsAfterClosingQuote(b
 This method was named `acceptCharsAfterQuotes(boolean)` in earlier versions of FastCSV.
 Note that `allowExtraCharsAfterClosingQuote` is deprecated and will be removed in a future major release.
 To tolerate whitespace around quoted fields, use `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` instead.
+Unlike the old behavior, it removes the whitespace: `"foo" ,"bar"` is read as `foo` and `bar` instead of `foo ` and `bar`.
+This option is not available for `IndexedCsvReader`.
 
 :::caution
 As the default has changed, you may need to check your code and your desired behavior.
@@ -99,53 +103,28 @@ As the default has changed, you may need to check your code and your desired beh
 Quote strategies received two breaking changes in FastCSV 4:
 
 - The method `quoteNonEmpty` of `de.siegmar.fastcsv.writer.QuoteStrategy` has been renamed to `quoteValue` to better reflect its purpose.
+  As it is a default method, an implementation that overrides `quoteNonEmpty` without `@Override` still compiles, but the method is no longer called.
+  Rename it to `quoteValue`.
 - To explicitly define that quoting only happens if required, the `quoteStrategy` method in `CsvWriterBuilder` no longer accepts a `null` value.
   Instead, you can use the `QuoteStrategies.REQUIRED` constant to indicate that quoting should only happen if required.
 
-## Changed implementation of `CsvIndex` and `CsvPage` to Java records
+## Changed implementation of `CsvIndex` to a Java record
 
-The `CsvIndex` and `CsvPage` classes have been changed to Java records. With this change, a few method calls have changed as well.
+`CsvIndex` and its nested `CsvPage` have been changed to Java records.
+Of their methods, only `getPageCount()` and `getRecordCount()` were public in 3.x; they have changed as follows:
 
 ```diff lang="java"
   CsvIndex csvIndex = yourCodeToBuildTheIndex();
 
-  // Simple get-prefix removal
-- csvIndex.getBomHeaderLength();
-+ csvIndex.bomHeaderLength();
-
-- csvIndex.getFileSize();
-+ csvIndex.fileSize();
-
-- csvIndex.getFieldSeparator();
-+ csvIndex.fieldSeparator();
-
-- csvIndex.getQuoteCharacter();
-+ csvIndex.quoteCharacter();
-
-- csvIndex.getCommentStrategy();
-+ csvIndex.commentStrategy();
-
-- csvIndex.getCommentCharacter();
-+ csvIndex.commentCharacter();
-
-- csvIndex.getRecordCount();
-+ csvIndex.recordCount();
-
-  // Replaced getPageCount() with pages().size()
 - csvIndex.getPageCount();
 + csvIndex.pages().size();
 
-  // Replaced getPage(int) with direct access to the pages list
-- var firstPage = csvIndex.getPage(0);
-+ var firstPage = csvIndex.pages().getFirst();
-
-  // Again, simple get-prefix removal
-- firstPage.getOffset();
-+ firstPage.offset()
-
-- firstPage.getStartingLineNumber();
-+ firstPage.startingLineNumber();
+- csvIndex.getRecordCount();
++ csvIndex.recordCount();
 ```
+
+If you serialized a `CsvIndex` with FastCSV 3.x, build it again with 4.x.
+A deserialized 3.x index has a record count of 0 and is rejected by `IndexedCsvReaderBuilder.index(CsvIndex)` with an `IllegalArgumentException`.
 
 ## Callback handler refactoring
 
@@ -180,39 +159,14 @@ If you extended `AbstractBaseCsvCallbackHandler`, your `buildRecord` method must
   }
 ```
 
-### Migrating direct `CsvCallbackHandler` subclasses
+### Other callback handler classes
 
-If you extended the lower-level `CsvCallbackHandler` directly, you must implement three new abstract methods: `getRecordType()`, `getFieldCount()`, and `setEmpty()`.
+In 3.x, a direct subclass of `CsvCallbackHandler` outside FastCSV could not create a `RecordWrapper`, as its constructor was not public.
+In 4.x, you can extend `CsvCallbackHandler` directly; it requires the methods `getRecordType()`, `getFieldCount()`, and `setEmpty()`.
+See [custom callback handler](/guides/examples/custom-callback-handler/) for an example.
 
-```diff lang="java"
-  public class MyHandler extends CsvCallbackHandler<MyRecord> {
-
-+     private RecordType recordType = RecordType.DATA;
-+     private int fieldCount;
-
-+     @Override
-+     protected RecordType getRecordType() {
-+         return recordType;
-+     }
-
-+     @Override
-+     protected int getFieldCount() {
-+         return fieldCount;
-+     }
-
-+     @Override
-+     protected void setEmpty() {
-+         recordType = RecordType.EMPTY;
-+     }
-
-      @Override
--     protected RecordWrapper<MyRecord> buildRecord() {
--         return new RecordWrapper<>(isComment, isEmpty, fieldCount, record);
-+     protected MyRecord buildRecord() {
-+         return record;
-      }
-  }
-```
+`AbstractInternalCsvCallbackHandler` was documented as internal in 3.x; in 4.x it is sealed and can no longer be extended.
+Extend `AbstractBaseCsvCallbackHandler` instead.
 
 ## Null-free refactoring in CollectingStatusListener
 
@@ -255,22 +209,24 @@ This change was necessary because callback handlers now have more configuration 
 
 In FastCSV 3.2.0, the default limits for the maximum number of fields per record and the maximum field size were made configurable
 via system properties `fastcsv.max.field.count` and `fastcsv.max.field.size`.
-In version 3.6.0 these properties were deprecated in favor of a more flexible configuration via the builder methods of `CsvReader` and `CallbackHandler`.
+In version 3.6.0 these properties were deprecated in favor of the builder methods of `CsvReaderBuilder` and of the callback handlers (`CsvRecordHandler`, `NamedCsvRecordHandler`, `StringArrayHandler`).
 In version 4.0.0 those deprecated properties were removed.
 
-```diff lang="java"
-  // Set the maximum number of fields per record
-- System.setProperty("fastcsv.max.field.count", "16384");
-+ CsvRecordHandler handler = CsvRecordHandler.builder()
-+     .maxFields(16_384)
-+     .maxFieldSize(16_777_216)
-+     .build();
+In 3.x, `fastcsv.max.field.size` set the maximum field size, set the maximum record size to four times that value, and limited the maximum buffer size to that value.
+The following example sets the same limits as the system properties in 3.x:
 
-  // Set the maximum buffer size and maximum field size
-- System.setProperty("fastcsv.max.field.size", "16777216");
-+ CsvReader csvReader = CsvReader.builder()
-+    .maxBufferSize(16_777_216)
-+    .build(handler, file);
+```diff lang="java"
+- System.setProperty("fastcsv.max.field.count", "1024");
+- System.setProperty("fastcsv.max.field.size", "1048576");
++ CsvRecordHandler handler = CsvRecordHandler.builder()
++     .maxFields(1_024)
++     .maxFieldSize(1_048_576)
++     .maxRecordSize(4_194_304)
++     .build();
++
++ CsvReader<CsvRecord> csvReader = CsvReader.builder()
++     .maxBufferSize(1_048_576)
++     .build(handler, file);
 ```
 
 ### FieldModifiers.modify moved to FieldModifier.modify
@@ -305,3 +261,25 @@ Use `FieldModifier.modify` instead, which has moved from `FieldModifiers` to the
 -     FieldModifiers.upper(Locale.ENGLISH);
 +     FieldModifier.modify(field -> field.toUpperCase(Locale.ENGLISH));
 ```
+
+## Changes in later 4.x releases
+
+If you upgrade from 3.x directly to the latest 4.x version, these changes from 4.x minor and patch releases also apply.
+
+### Charsets supported by `IndexedCsvReader` (4.3.1, 4.4.0)
+
+`IndexedCsvReader` builds its index on byte level.
+Since 4.4.0, it accepts only UTF-8 and single-byte charsets that encode ASCII characters as the same single bytes (such as ISO-8859-1 or windows-1252).
+Other charsets, such as UTF-16 or Shift_JIS, lead to an `IllegalArgumentException`.
+For CSV data in such a charset, use `CsvReader` or transcode the data to UTF-8.
+
+### `skipLines` only before reading records (4.3.0)
+
+`CsvReader.skipLines(int)` and `CsvReader.skipLines(Predicate, int)` are meant to skip lines before the CSV data starts.
+Since 4.3.0, calling them after the first record has been read leads to an `IllegalStateException`.
+
+### Unwrapped `CsvParseException` (4.4.0)
+
+In 3.x, a `CsvParseException` thrown while parsing was wrapped in another `CsvParseException` that added the starting line number.
+Since 4.4.0, it is thrown as is, and its message contains the starting line number.
+If your code reads the cause of a `CsvParseException`, check it.
