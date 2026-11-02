@@ -123,14 +123,14 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void nonExistingFieldName() {
+    void fieldMissingInHeader() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("Header does not contain a field 'bar'. Valid names are: [foo]");
     }
 
     @Test
-    void nonExistingFieldName2() {
+    void fieldMissingInRecord() {
         final var reader = CsvReader.builder()
             .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
             .ofNamedCsvRecord("foo,bar\nfaz");
@@ -140,13 +140,13 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void findNonExistingFieldByName() {
+    void findFieldMissingInHeader() {
         assertThat(parse("foo\nfaz").iterator().next().findField("bar"))
             .isEmpty();
     }
 
     @Test
-    void findNonExistingFieldByName2() {
+    void findFieldMissingInRecord() {
         final var reader = CsvReader.builder()
             .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
             .ofNamedCsvRecord("foo,bar\nfaz");
