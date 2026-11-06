@@ -68,3 +68,10 @@ checks:
     records:
       - [ 'A' ]
       - [ '' ]
+  - id: open-quotation-9
+    input: '"A""'
+    description: >-
+      A quoted field that is never closed and ends with an escaped quotation mark.
+      The escaped quotation mark is field content.
+    records:
+      - [ 'A"' ]

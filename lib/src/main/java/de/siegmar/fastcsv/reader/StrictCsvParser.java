@@ -304,10 +304,10 @@ final class StrictCsvParser implements CsvParser {
         if ((lStatus & STATUS_QUOTED_FIELD) != 0) {
             // field with quotes
             final int beginAfterQuote = lBegin + 1;
-            // Only strip a trailing quote if there is one to strip: for a field that consists of nothing
-            // but the opening quote, lBuf[lPos - 1] is that very quote and stripping it would put
-            // endAfterField before beginAfterQuote.
-            final int endAfterField = lPos - (lPos - 1 > lBegin && lBuf[lPos - 1] == quoteCharacter ? 1 : 0);
+            // Only strip a trailing quote if it closes the field: in a field still open at the end of the data,
+            // a last quote is the opening quote (") or the second half of an escape pair ("a"").
+            final int endAfterField = lPos
+                - (lBuf[lPos - 1] == quoteCharacter && (lStatus & STATUS_QUOTED_MODE) == 0 ? 1 : 0);
             final int len = (lStatus & STATUS_ESCAPED_QUOTE) != 0
                 ? cleanDelimiters(lBuf, beginAfterQuote, endAfterField, quoteCharacter)
                 : endAfterField - beginAfterQuote;
