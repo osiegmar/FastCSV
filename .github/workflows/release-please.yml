@@ -5,18 +5,19 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   release-please:
     runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v5
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           config-file: release-please-config.json
@@ -25,6 +26,8 @@ jobs:
   publish:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
+    permissions:
+      contents: write
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.release-please.outputs.tag_name }}

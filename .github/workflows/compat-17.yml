@@ -10,18 +10,21 @@ on:
       - '**/*.md'
       - 'website/**'
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
     runs-on: ubuntu-24.04-arm
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Java
-      uses: actions/setup-java@v6
+      uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
       with:
         distribution: 'temurin'
         java-version: '17'
-    - uses: gradle/actions/setup-gradle@v6
+    - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
     - name: Build with Gradle
       run: ./gradlew lib:jar
