@@ -129,7 +129,6 @@ export default defineConfig({
                         'codeRepository': 'https://github.com/osiegmar/FastCSV',
                         'programmingLanguage': 'Java',
                         'license': 'https://opensource.org/licenses/MIT',
-                        'applicationCategory': 'Library',
                         'runtimePlatform': 'Java 17+',
                     }),
                 },
