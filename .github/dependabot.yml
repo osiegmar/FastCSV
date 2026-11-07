@@ -1,0 +1,44 @@
+version: 2
+
+# Version updates: one pull request per ecosystem and month, on the first Friday. New releases are only considered
+# after a week.
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "cron"
+      cronjob: "0 6 * * fri#1"
+      timezone: "Europe/Berlin"
+    cooldown:
+      default-days: 7
+    groups:
+      gradle:
+        patterns: ["*"]
+    ignore:
+      # Error Prone 2.43.0+ requires Java 21, but OSS-Fuzz uses Java 17
+      - dependency-name: "com.google.errorprone:error_prone_core"
+        versions: [">=2.43.0"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "cron"
+      cronjob: "0 6 * * fri#1"
+      timezone: "Europe/Berlin"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/website"
+    schedule:
+      interval: "cron"
+      cronjob: "0 6 * * fri#1"
+      timezone: "Europe/Berlin"
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        patterns: ["*"]
