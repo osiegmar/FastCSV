@@ -34,6 +34,8 @@ jreleaser {
             mavenCentral {
                 create("sonatype") {
                     active.set(org.jreleaser.model.Active.ALWAYS)
+                    // sign, checksum and verify; JReleaser documents another default than it applies
+                    applyMavenCentralRules.set(true)
                     url.set("https://central.sonatype.com/api/v1/publisher")
                     stagingRepositories.add("lib/build/staging-deploy")
                 }
