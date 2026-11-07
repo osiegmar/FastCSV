@@ -100,13 +100,4 @@ public abstract class CsvCallbackHandler<T> {
     protected void terminate() {
     }
 
-    /// Returns whether the record just consumed by [#buildRecord()] is the header.
-    ///
-    /// A consumed header is subject to the field count check, other consumed records are not.
-    ///
-    /// @return `true` if the consumed record is the header
-    boolean isConsumedHeader() {
-        return false;
-    }
-
 }

@@ -267,8 +267,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     private T processRecord() {
         final T csvRecord = callbackHandler.buildRecord();
 
-        // handle consumed records (e.g., header for named records); a consumed header still counts as first record
-        if (csvRecord == null && !callbackHandler.isConsumedHeader()) {
+        // handle consumed records (e.g., header for named records)
+        if (csvRecord == null) {
             return null;
         }
 

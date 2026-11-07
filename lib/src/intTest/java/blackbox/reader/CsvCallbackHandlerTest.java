@@ -1,30 +1,15 @@
 package blackbox.reader;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import org.junit.jupiter.api.Test;
 
-import de.siegmar.fastcsv.reader.AbstractBaseCsvCallbackHandler;
 import de.siegmar.fastcsv.reader.CommentStrategy;
 import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRecordHandler;
 
 class CsvCallbackHandlerTest {
-
-    @Test
-    void consumedRecordIsNotFieldCountChecked() {
-        final var cbh = new AbstractBaseCsvCallbackHandler<Integer>() {
-            @Override
-            protected Integer buildRecord() {
-                // consume the first line (e.g., metadata) - it must not become the first record
-                return getStartingLineNumber() == 1 ? null : getFieldCount();
-            }
-        };
-        assertThat(CsvReader.builder().build(cbh, "metadata\na,b\nc,d").stream())
-            .containsExactly(2, 2);
-    }
 
     @Test
     void defaultMaxFieldCapacity() {

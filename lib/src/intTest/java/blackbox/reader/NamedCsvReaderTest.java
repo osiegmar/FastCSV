@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import de.siegmar.fastcsv.reader.CommentStrategy;
-import de.siegmar.fastcsv.reader.CsvParseException;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.FieldModifiers;
@@ -73,56 +72,6 @@ class NamedCsvReaderTest {
     }
 
     @Test
-    void missingFieldComparedToHeader() {
-        assertThatThrownBy(() -> parse("a,b\nx").stream().toList())
-            .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record 2 has 1 fields, but first record had 2 fields");
-    }
-
-    @Test
-    void extraFieldComparedToHeader() {
-        assertThatThrownBy(() -> parse("a,b\nx,y,z").stream().toList())
-            .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record 2 has 3 fields, but first record had 2 fields");
-    }
-
-    @Test
-    void returnedHeaderComparedToHeader() {
-        final var cbh = NamedCsvRecordHandler.of(c -> c.returnHeader(true));
-        assertThatThrownBy(() -> CsvReader.builder().build(cbh, "a,b\nx").stream().toList())
-            .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record 2 has 1 fields, but first record had 2 fields");
-    }
-
-    @Test
-    void headerAfterCommentAndEmptyLineComparedToHeader() {
-        final var reader = CsvReader.builder()
-            .commentStrategy(CommentStrategy.SKIP)
-            .ofNamedCsvRecord("#comment\n\na,b\nx");
-        assertThatThrownBy(() -> reader.stream().toList())
-            .isInstanceOf(CsvParseException.class)
-            .hasMessage("Record 4 has 1 fields, but first record had 2 fields");
-    }
-
-    @Test
-    void predefinedHeaderIsNoFirstRecord() {
-        final var cbh = NamedCsvRecordHandler.of(c -> c.header("a", "b"));
-        assertThat(CsvReader.builder().build(cbh, "x\ny").stream())
-            .hasSize(2);
-    }
-
-    @Test
-    void skipMismatchComparedToHeader() {
-        final var reader = CsvReader.builder()
-            .missingFieldStrategy(FieldMismatchStrategy.SKIP)
-            .extraFieldStrategy(FieldMismatchStrategy.SKIP)
-            .ofNamedCsvRecord("a,b\nx\nx,y,z\nx,y");
-        assertThat(reader.stream())
-            .singleElement(NamedCsvRecordAssert.NAMED_CSV_RECORD)
-            .fields().containsExactly(entry("a", "x"), entry("b", "y"));
-    }
-
-    @Test
     void fieldMissingInHeader() {
         assertThatThrownBy(() -> parse("foo\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
@@ -131,10 +80,7 @@ class NamedCsvReaderTest {
 
     @Test
     void fieldMissingInRecord() {
-        final var reader = CsvReader.builder()
-            .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
-            .ofNamedCsvRecord("foo,bar\nfaz");
-        assertThatThrownBy(() -> reader.iterator().next().getField("bar"))
+        assertThatThrownBy(() -> parse("foo,bar\nfaz").iterator().next().getField("bar"))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("Field 'bar' is on index 1, but current record only contains 1 fields");
     }
@@ -147,10 +93,7 @@ class NamedCsvReaderTest {
 
     @Test
     void findFieldMissingInRecord() {
-        final var reader = CsvReader.builder()
-            .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
-            .ofNamedCsvRecord("foo,bar\nfaz");
-        assertThat(reader.iterator().next().findField("bar"))
+        assertThat(parse("foo,bar\nfaz").iterator().next().findField("bar"))
             .isEmpty();
     }
 
