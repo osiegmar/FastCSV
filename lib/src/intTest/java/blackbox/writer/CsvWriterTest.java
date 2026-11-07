@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.LineDelimiter;
 import de.siegmar.fastcsv.writer.QuoteStrategies;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CloseResource"})
 class CsvWriterTest {
@@ -30,6 +31,44 @@ class CsvWriterTest {
     private final CsvWriter.CsvWriterBuilder crw = CsvWriter.builder()
         .lineDelimiter(LineDelimiter.LF)
         .bufferSize(0);
+
+    @Test
+    void quoteStrategyCountsRecordsAndComments() throws IOException {
+        final List<Integer> lineNumbers = collectLineNumbers();
+
+        try (var csv = crw.build(new StringWriter())) {
+            csv.writeComment("comment with\nline break")
+                .writeRecord("a")
+                .writeRecord("b")
+                .writeComment("comment")
+                .writeRecord("c");
+        }
+
+        assertThat(lineNumbers).containsExactly(2, 3, 5);
+    }
+
+    @Test
+    void quoteStrategyCountsRecordWithLineBreakOnce() throws IOException {
+        final List<Integer> lineNumbers = collectLineNumbers();
+
+        try (var csv = crw.build(new StringWriter())) {
+            csv.writeRecord("a", "b\nc").writeRecord("d");
+        }
+
+        assertThat(lineNumbers).containsExactly(1, 2);
+    }
+
+    private List<Integer> collectLineNumbers() {
+        final List<Integer> lineNumbers = new ArrayList<>();
+        crw.quoteStrategy(new QuoteStrategy() {
+            @Override
+            public boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
+                lineNumbers.add(lineNo);
+                return false;
+            }
+        });
+        return lineNumbers;
+    }
 
     @ParameterizedTest
     @ValueSource(chars = {'\r', '\n'})
