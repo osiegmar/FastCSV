@@ -77,10 +77,13 @@ void simple(final Path file) throws IOException {
 void reuseIndex(final Path file) throws IOException {
     IO.println("# Reuse Index");
 
-    final CsvIndex csvIndex = IndexedCsvReader.builder()
+    final CsvIndex csvIndex;
+    try (IndexedCsvReader<CsvRecord> csv = IndexedCsvReader.builder()
         .pageSize(5)
-        .ofCsvRecord(file)
-        .getIndex();
+        .ofCsvRecord(file)) {
+
+        csvIndex = csv.getIndex();
+    }
 
     System.out.printf("Indexed %,d records%n", csvIndex.recordCount());
 

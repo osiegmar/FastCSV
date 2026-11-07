@@ -7,7 +7,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 /// for brevity, leveraging newer language features.
 void main() {
     final String data = """
-        #line1
+        #line1,x
         foo,bar
         """;
 

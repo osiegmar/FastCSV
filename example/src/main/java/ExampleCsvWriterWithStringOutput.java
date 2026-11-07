@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.StringWriter;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -6,11 +7,12 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 ///
 /// FastCSV supports Java 17 and later, but this code uses Java 25
 /// for brevity, leveraging newer language features.
-void main() {
+void main() throws IOException {
     final StringWriter sw = new StringWriter();
-    CsvWriter.builder().build(sw)
-        .writeRecord("header1", "header2")
-        .writeRecord("value1", "value2");
+    try (CsvWriter csv = CsvWriter.builder().build(sw)) {
+        csv.writeRecord("header1", "header2")
+            .writeRecord("value1", "value2");
+    }
 
     final String csv = sw.toString();
     IO.println(csv);

@@ -11,7 +11,7 @@ import de.siegmar.fastcsv.writer.CsvWriter;
 void main() throws IOException {
     final String data = """
         firstname,initial,lastname,age
-        john,h.,smith
+        john,h.,smith,42
         """;
 
     try (CsvReader<NamedCsvRecord> reader = CsvReader.builder().ofNamedCsvRecord(data);
