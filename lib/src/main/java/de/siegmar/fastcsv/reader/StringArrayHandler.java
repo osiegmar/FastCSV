@@ -5,6 +5,9 @@ import java.util.function.Consumer;
 
 /// A [CsvCallbackHandler] implementation that returns the fields of each record as an array of Strings.
 ///
+/// A comment ([CommentStrategy#READ]) is returned as an array with the comment text as its only element,
+/// an empty line as an array with one empty string. The array does not tell them apart from a record.
+///
 /// Example:
 /// ```
 /// StringArrayHandler handler = StringArrayHandler.builder()
@@ -42,7 +45,7 @@ public final class StringArrayHandler extends AbstractInternalCsvCallbackHandler
     ///
     /// @param configurer the configuration, must not be `null`
     /// @return the new instance
-    /// @throws NullPointerException if `null` is passed
+    /// @throws NullPointerException if `configurer` is `null`
     /// @throws IllegalArgumentException if argument constraints are violated
     /// @see #builder()
     public static StringArrayHandler of(final Consumer<StringArrayHandlerBuilder> configurer) {

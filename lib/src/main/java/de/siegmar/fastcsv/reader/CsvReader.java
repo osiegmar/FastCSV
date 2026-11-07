@@ -26,8 +26,8 @@ import de.siegmar.fastcsv.util.Preconditions;
 /// This is the main class for reading CSV data.
 ///
 /// The CSV records are read iteratively, regardless of whether the Iterable, the Iterator, or the Stream is used.
-/// Once all records are read, the data is consumed. If you need to repeatedly read records, you should collect the
-/// records in a List or another collection.
+/// Once all records are read, the data is consumed. To read the records more than once, collect them in a List or
+/// another collection.
 ///
 /// This class is not thread-safe and must not be shared between threads.
 ///
@@ -35,7 +35,7 @@ import de.siegmar.fastcsv.util.Preconditions;
 /// - [IOException] is thrown by file/path-based build methods if the file cannot be opened.
 /// - [java.io.UncheckedIOException] wraps I/O errors that occur during iteration or streaming.
 /// - [CsvParseException] signals structural CSV errors (e.g., malformed quoting, field count mismatch,
-///   or exceeded size limits).
+///   or exceeded size limits) and wraps any other exception thrown while reading, for example by a [FieldModifier].
 ///
 /// Example use:
 /// ```
@@ -55,7 +55,7 @@ import de.siegmar.fastcsv.util.Preconditions;
 /// }
 /// ```
 ///
-/// @param <T> the type of the CSV record.
+/// @param <T> the type of the CSV record
 public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     private final CsvParser csvParser;
@@ -89,28 +89,30 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
     /// Constructs a [CsvReaderBuilder] to configure and build instances of this class.
     ///
-    /// @return a new [CsvReaderBuilder] instance.
+    /// @return a new [CsvReaderBuilder] instance
     public static CsvReaderBuilder builder() {
         return new CsvReaderBuilder();
     }
 
     /// Skips the specified number of lines.
     ///
-    /// **Note:** "lines" here means lines terminated by `CR`, `LF`, or `CRLF` —
-    /// not CSV records. A non-empty final segment that is not terminated by a line break
-    /// (for example, the last line of a file without a trailing line break) is also counted as
-    /// one line. This method is intended for skipping non-CSV preamble lines that
-    /// appear before the actual CSV data starts and must therefore be called before any
-    /// records are read; once iteration has begun this method throws
-    /// [IllegalStateException].
+    /// **Note:** "lines" here means lines ended by `CR`, `LF`, or `CRLF` – not CSV records. Quoting is not taken
+    /// into account, so a line break in a quoted field also ends a line. A non-empty last line without a line
+    /// break also counts as one line. This method is intended for skipping non-CSV lines that appear before the
+    /// actual CSV data starts and must therefore be called before any records are read; once iteration has begun,
+    /// this method throws an [IllegalStateException].
     ///
     /// The setting [CsvReaderBuilder#skipEmptyLines(boolean)] has no effect on this method.
     ///
-    /// @param lineCount the number of lines to skip.
-    /// @throws IllegalArgumentException if lineCount is negative.
-    /// @throws IllegalStateException    if any CSV records have already been read.
-    /// @throws UncheckedIOException     if an I/O error occurs.
-    /// @throws CsvParseException        unless enough lines are available to skip.
+    /// @param lineCount the number of lines to skip
+    /// @throws IllegalArgumentException if `lineCount` is negative
+    /// @throws IllegalStateException    if any CSV records have already been read
+    /// @throws UncheckedIOException     if an I/O error occurs
+    /// @throws CsvParseException        if fewer than `lineCount` lines are available or a line does not fit in
+    ///                                  the buffer (see [CsvReaderBuilder#maxBufferSize(int)]); with a field
+    ///                                  separator of multiple characters or with
+    ///                                  [CsvReaderBuilder#trimWhitespacesAroundQuotes(boolean)], a line is
+    ///                                  discarded without being buffered and its length is not limited
     public void skipLines(final int lineCount) {
         if (lineCount < 0) {
             throw new IllegalArgumentException("lineCount must be non-negative");
@@ -131,30 +133,29 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
     }
 
-    /// Skip lines until the specified predicate matches.
+    /// Skips lines until the specified predicate matches.
     /// The line that matches the predicate is not skipped.
     ///
     /// The method returns the number of lines actually skipped.
     ///
-    /// **Note:** "lines" here means lines terminated by `CR`, `LF`, or `CRLF` —
-    /// not CSV records. A non-empty final segment that is not terminated by a line break
-    /// (for example, the last line of a file without a trailing line break) is also counted as
-    /// one line. The predicate sees each line as a plain string, with no
-    /// awareness of quoting or escaping. This method is intended for skipping non-CSV
-    /// preamble lines that appear before the actual CSV data starts and must therefore be
-    /// called before any records are read; once iteration has begun this method throws
-    /// [IllegalStateException].
+    /// **Note:** "lines" here means lines ended by `CR`, `LF`, or `CRLF` – not CSV records. A non-empty last line
+    /// without a line break also counts as one line. The predicate sees each line as a plain string without its
+    /// line break; quoting is not taken into account. This method is intended for skipping non-CSV lines that
+    /// appear before the actual CSV data starts and must therefore be called before any records are read; once
+    /// iteration has begun, this method throws an [IllegalStateException].
     ///
     /// The setting [CsvReaderBuilder#skipEmptyLines(boolean)] has no effect on this method.
     ///
-    /// @param predicate the predicate to match the lines.
-    /// @param maxLines  the maximum number of lines to skip.
-    /// @return the number of lines actually skipped.
-    /// @throws NullPointerException if predicate is `null`.
-    /// @throws IllegalArgumentException if maxLines is negative.
-    /// @throws IllegalStateException if any CSV records have already been read.
-    /// @throws UncheckedIOException if an I/O error occurs.
-    /// @throws CsvParseException if no matching line is found within the maximum limit of maxLines.
+    /// @param predicate the predicate to match the lines
+    /// @param maxLines  the maximum number of lines to test with the predicate, so at most `maxLines - 1` lines are
+    ///                  skipped before a match; with `0`, nothing is read and the method returns `0`
+    /// @return the number of lines actually skipped
+    /// @throws NullPointerException if `predicate` is `null`
+    /// @throws IllegalArgumentException if `maxLines` is negative
+    /// @throws IllegalStateException if any CSV records have already been read
+    /// @throws UncheckedIOException if an I/O error occurs
+    /// @throws CsvParseException if none of the first `maxLines` lines matches, the CSV data ends before a match or
+    ///     a line does not fit in the buffer (see [CsvReaderBuilder#maxBufferSize(int)])
     public int skipLines(final Predicate<String> predicate, final int maxLines) {
         Objects.requireNonNull(predicate, "predicate must not be null");
         if (maxLines < 0) {
@@ -188,7 +189,7 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
             "No matching line found within the maximum limit of %d lines.".formatted(maxLines));
     }
 
-    /// {@return an iterator over elements of type [CsvRecord].}
+    /// {@return an iterator over the records}
     ///
     /// The returned iterator is not thread-safe.
     /// Remember to close the returned iterator when you're done.
@@ -196,25 +197,27 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     ///
     /// This method is idempotent and can be called multiple times.
     ///
-    /// @throws UncheckedIOException if an I/O error occurs.
-    /// @throws CsvParseException    if any other problem occurs when parsing the CSV data.
+    /// It reads nothing itself; the iterator throws an [UncheckedIOException] if an I/O error occurs and a
+    /// [CsvParseException] if parsing fails.
+    ///
     /// @see #stream()
     @Override
     public CloseableIterator<T> iterator() {
         return csvRecordIterator;
     }
 
-    /// Constructs a [Spliterator] for splitting and traversing the elements of this reader.
+    /// Constructs a [Spliterator] for traversing the records of this reader; [Spliterator#trySplit()] returns `null`.
     ///
     /// The returned spliterator is not thread-safe.
     /// Remember to invoke [#close()] when you're done.
     /// Alternatively, use [#stream()].
     ///
-    /// This method is idempotent and can be called multiple times.
+    /// This method can be called multiple times; all spliterators share the position of this reader.
     ///
-    /// @return a spliterator over the CSV records.
-    /// @throws UncheckedIOException if an I/O error occurs.
-    /// @throws CsvParseException    if any other problem occurs when parsing the CSV data.
+    /// It reads nothing itself; the spliterator throws an [UncheckedIOException] if an I/O error occurs and a
+    /// [CsvParseException] if parsing fails.
+    ///
+    /// @return a spliterator over the CSV records
     /// @see #stream()
     @Override
     public Spliterator<T> spliterator() {
@@ -225,15 +228,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     ///
     /// The returned stream is not thread-safe.
     /// Remember to close the returned stream when you're done.
-    /// Closing the stream will also close this reader.
+    /// Closing the stream also closes this reader.
     ///
     /// This method can be called multiple times, although it creates a new stream each time.
     ///
     /// The stream is not reusable after it has been closed.
+    /// This method reads nothing itself; the stream throws an [UncheckedIOException] if an I/O error occurs and a
+    /// [CsvParseException] if parsing fails.
     ///
-    /// @return a sequential `Stream` over the CSV records.
-    /// @throws UncheckedIOException if an I/O error occurs.
-    /// @throws CsvParseException    if any other problem occurs when parsing the CSV data.
+    /// @return a sequential `Stream` over the CSV records
     /// @see #iterator()
     public Stream<T> stream() {
         return StreamSupport.stream(spliterator(), false)
@@ -314,6 +317,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         };
     }
 
+    /// Closes this reader and its data source, including an [InputStream] or [Reader] passed to the builder.
+    ///
+    /// @throws IOException if an I/O error occurs
     @Override
     public void close() throws IOException {
         csvParser.close();
@@ -417,22 +423,30 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     /// This builder is used to create configured instances of [CsvReader]. The default
-    /// configuration of this class adheres to RFC 4180:
+    /// configuration of this class adheres to RFC 4180, except that it tolerates an unclosed quoted field:
     ///
     /// - Field separator: `,` (comma)
-    /// - Quote character: `"` (double quotes)
+    /// - Quote character: `"` (double quote)
     /// - Comment strategy: [CommentStrategy#NONE] (as comments are not part of RFC 4180)
     /// - Comment character: `#` (hash) (in case comment strategy is enabled)
     /// - Skip empty lines: `true`
     /// - Extra field strategy: [FieldMismatchStrategy#STRICT]
     /// - Missing field strategy: [FieldMismatchStrategy#STRICT]
-    /// - Allow extra characters after closing quotes: `false`
+    /// - Allow extra characters after closing quote characters: `false`
+    /// - Allow unclosed quoted field: `true`
     /// - Allow whitespace around quote characters: `false`
     /// - Detect BOM: `false`
     /// - Max buffer size: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE} characters
     ///
     /// CR, LF and CRLF are all recognized as line breaks, even mixed within the same CSV data;
     /// this is not configurable.
+    ///
+    /// The methods that construct a reader check the configuration. They throw an [IllegalArgumentException] if the
+    /// field separator, the quote character or the comment character contains a line break character, or if the
+    /// quote character and the first character of the field separator are the same. If the comment strategy is not
+    /// [CommentStrategy#NONE], the comment character must differ from these two as well. They throw an
+    /// [IllegalStateException] if [#allowExtraCharsAfterClosingQuote(boolean)] is enabled together with a field
+    /// separator of multiple characters or with [#trimWhitespacesAroundQuotes(boolean)].
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvReaderBuilder {
 
@@ -456,8 +470,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Sets the `fieldSeparator` used when reading CSV data.
         ///
-        /// @param fieldSeparator the field separator character (default: `,` - comma).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param fieldSeparator the field separator character (default: `,`)
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @see #fieldSeparator(String)
         public CsvReaderBuilder fieldSeparator(final char fieldSeparator) {
             this.fieldSeparator = String.valueOf(fieldSeparator);
@@ -470,11 +484,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// separate fields. The entire string is the field separator: fields are only separated where the
         /// **full string** occurs. Its individual characters are **not** field separators on their own.
         ///
-        /// **If multiple characters are used, the less performant [RelaxedCsvParser] is used!**
+        /// **If multiple characters are used, a less performant parser is used.**
         ///
-        /// @param fieldSeparator the field separator string (default: `,` - comma).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws IllegalArgumentException if fieldSeparator is `null` or empty
+        /// @param fieldSeparator the field separator string (default: `,`)
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws IllegalArgumentException if `fieldSeparator` is `null` or empty
         /// @see #fieldSeparator(char)
         public CsvReaderBuilder fieldSeparator(final String fieldSeparator) {
             if (fieldSeparator == null || fieldSeparator.isEmpty()) {
@@ -486,8 +500,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Sets the `quoteCharacter` used when reading CSV data.
         ///
-        /// @param quoteCharacter the quote character (default: `"` - double quotes).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param quoteCharacter the quote character (default: `"`)
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvReaderBuilder quoteCharacter(final char quoteCharacter) {
             this.quoteCharacter = quoteCharacter;
             return this;
@@ -499,8 +513,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// With any other strategy, where a record would begin with the comment character, a comment is read
         /// instead. Everything after the comment character up to the next line break is the comment text.
         ///
-        /// @param commentStrategy the strategy for handling comments.
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param commentStrategy the strategy for handling comments
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @see #commentCharacter(char)
         public CsvReaderBuilder commentStrategy(final CommentStrategy commentStrategy) {
             this.commentStrategy = commentStrategy;
@@ -509,8 +523,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Sets the `commentCharacter` used when reading CSV data.
         ///
-        /// @param commentCharacter the character that begins a comment (default: `#` - hash)
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param commentCharacter the character that begins a comment (default: `#`)
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @see #commentStrategy(CommentStrategy)
         public CsvReaderBuilder commentCharacter(final char commentCharacter) {
             this.commentCharacter = commentCharacter;
@@ -519,24 +533,26 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Defines whether empty lines should be skipped when reading data.
         ///
-        /// The default implementation interprets empty lines as lines that do not contain any data
-        /// (no whitespace, no quotes, nothing).
+        /// An empty line has no characters before its line break (no whitespace, no quote characters, nothing).
+        /// Unless skipped, it is read as a record with one empty field.
         ///
         /// Comments are not affected by this setting; see [#commentStrategy(CommentStrategy)].
         ///
-        /// @param skipEmptyLines Whether empty lines should be skipped (default: `true`).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param skipEmptyLines whether empty lines should be skipped (default: `true`)
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvReaderBuilder skipEmptyLines(final boolean skipEmptyLines) {
             this.skipEmptyLines = skipEmptyLines;
             return this;
         }
 
         /// Defines the strategy for handling records that contain more fields than the first record.
-        /// Empty lines and comments never count as the first record.
+        /// The comparison uses the first record that the reader returns. Empty lines and comments never count as the
+        /// first record, and neither does a header that is not returned (see
+        /// [NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#returnHeader(boolean)]).
         ///
-        /// @param extraFieldStrategy the strategy for extra fields (default: [FieldMismatchStrategy#STRICT]).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if extraFieldStrategy is `null`
+        /// @param extraFieldStrategy the strategy for extra fields (default: [FieldMismatchStrategy#STRICT])
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `extraFieldStrategy` is `null`
         /// @see #missingFieldStrategy(FieldMismatchStrategy)
         public CsvReaderBuilder extraFieldStrategy(final FieldMismatchStrategy extraFieldStrategy) {
             this.extraFieldStrategy =
@@ -545,14 +561,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         }
 
         /// Defines the strategy for handling records that contain fewer fields than the first record.
-        /// Empty lines and comments never count as the first record.
+        /// The comparison uses the first record that the reader returns. Empty lines and comments never count as the
+        /// first record, and neither does a header that is not returned (see
+        /// [NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#returnHeader(boolean)]).
         ///
         /// Empty lines are allowed even if this is set to [FieldMismatchStrategy#STRICT].
         ///
         /// @param missingFieldStrategy the strategy for missing fields
-        ///                             (default: [FieldMismatchStrategy#STRICT]).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if missingFieldStrategy is `null`
+        ///                             (default: [FieldMismatchStrategy#STRICT])
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `missingFieldStrategy` is `null`
         /// @see #extraFieldStrategy(FieldMismatchStrategy)
         /// @see #skipEmptyLines(boolean)
         public CsvReaderBuilder missingFieldStrategy(final FieldMismatchStrategy missingFieldStrategy) {
@@ -563,11 +581,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Defines whether a [CsvParseException] should be thrown if records contain
         /// more fields than the first record.
-        /// Empty lines and comments never count as the first record.
+        /// The comparison uses the first record that the reader returns. Empty lines and comments never count as the
+        /// first record, and neither does a header that is not returned (see
+        /// [NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#returnHeader(boolean)]).
         ///
-        /// @param allowExtraFields Whether extra fields should be allowed (default: `false`).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @deprecated Use [#extraFieldStrategy(FieldMismatchStrategy)] instead.
+        /// @param allowExtraFields whether extra fields should be allowed (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @deprecated Use [#extraFieldStrategy(FieldMismatchStrategy)] instead
         @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowExtraFields(final boolean allowExtraFields) {
             this.extraFieldStrategy = allowExtraFields
@@ -577,13 +597,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Defines whether a [CsvParseException] should be thrown if records contain
         /// fewer fields than the first record.
-        /// Empty lines and comments never count as the first record.
+        /// The comparison uses the first record that the reader returns. Empty lines and comments never count as the
+        /// first record, and neither does a header that is not returned (see
+        /// [NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#returnHeader(boolean)]).
         ///
         /// Empty lines are allowed even if this is set to `false`.
         ///
-        /// @param allowMissingFields Whether missing fields should be allowed (default: `false`).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @deprecated Use [#missingFieldStrategy(FieldMismatchStrategy)] instead.
+        /// @param allowMissingFields whether missing fields should be allowed (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @deprecated Use [#missingFieldStrategy(FieldMismatchStrategy)] instead
         @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowMissingFields(final boolean allowMissingFields) {
             this.missingFieldStrategy = allowMissingFields
@@ -598,15 +620,19 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// If this is set to `true`, the first field is returned as `ab`.
         ///
-        /// If this is set to `false`, a [CsvParseException] will be thrown.
+        /// If this is set to `false`, a [CsvParseException] is thrown.
         ///
-        /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quotes (default: `false`).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// This option cannot be combined with a field separator of multiple characters or with
+        /// [#trimWhitespacesAroundQuotes(boolean)]; constructing the reader then throws an [IllegalStateException].
+        ///
+        /// @param allowExtraCharsAfterClosingQuote allow extra characters after closing quote characters
+        ///     (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @see #trimWhitespacesAroundQuotes(boolean)
         /// @deprecated This option permits non-conforming input (RFC 4180 does not allow any character between
         ///     a closing quote character and the next field separator or line break) and yields unspecified
         ///     results if the extra characters contain quote characters.
-        ///     Use [#trimWhitespacesAroundQuotes(boolean)] instead.
+        ///     Use [#trimWhitespacesAroundQuotes(boolean)] instead
         @Deprecated(forRemoval = true)
         public CsvReaderBuilder allowExtraCharsAfterClosingQuote(final boolean allowExtraCharsAfterClosingQuote) {
             this.allowExtraCharsAfterClosingQuote = allowExtraCharsAfterClosingQuote;
@@ -618,15 +644,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Example: `"foo,bar`
         ///
         /// If this is set to `true`, the field content `foo,bar` is returned as a single field; otherwise,
-        /// a [CsvParseException] will be thrown.
+        /// a [CsvParseException] is thrown.
         ///
-        /// Independent of this flag, a [CsvParseException] is thrown if the unclosed region exceeds
-        /// [#maxBufferSize(int)].
+        /// Independent of this flag, the limit of [#maxBufferSize(int)] applies to an unclosed quoted field.
         ///
         /// **The default will change to `false` in version 5.0.**
         ///
-        /// @param allowUnclosedQuote tolerate an unclosed quoted field (default: `true`).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param allowUnclosedQuote tolerate an unclosed quoted field (default: `true`)
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvReaderBuilder allowUnclosedQuote(final boolean allowUnclosedQuote) {
             this.allowUnclosedQuote = allowUnclosedQuote;
             return this;
@@ -637,15 +662,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// This is a tolerance of malformed CSV data: RFC 4180 does not allow any character between a quote
         /// character and the adjacent field separator or line break.
-        /// CSV data that contains such whitespace causes two major problems for the parser:
+        /// Without this option, such whitespace has these effects:
         ///
-        /// - Whitespace before an opening quote character causes the parser to treat the field as unquoted,
-        ///   leading it to misinterpret characters that are meant to be regular data as control characters,
-        ///   such as field separators, even though they are not intended as control characters.
-        /// - Whitespace after a closing quote character is appended to the field content (without the quote
-        ///   character). It is then unclear whether the whitespace is part of the field content or not, leading
-        ///   to potential misinterpretations of the data. A [CsvParseException] is thrown in this case unless
-        ///   [#allowExtraCharsAfterClosingQuote(boolean)] is enabled.
+        /// - Whitespace before an opening quote character makes the field an unquoted field. The input ` "foo,bar"`
+        ///   is then read as two fields with the field contents ` "foo` and `bar"`.
+        /// - Whitespace after a closing quote character causes a [CsvParseException], unless
+        ///   [#allowExtraCharsAfterClosingQuote(boolean)] is enabled. In that case, the whitespace becomes part of
+        ///   the field content.
         ///
         /// Enabling this option tolerates such whitespace
         /// (*whitespace is shown as underscores (`_`) for clarity*):
@@ -660,10 +683,10 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Whitespace in this context is any character from `U+0000` to `U+0020` (the space character) –
         /// the same logic as in Java's [String#trim()] method.
         ///
-        /// **When enabling this, the less performant [RelaxedCsvParser] is used!**
+        /// **When enabling this, a less performant parser is used.**
         ///
-        /// @param trimWhitespacesAroundQuotes if whitespace should be allowed and removed (default: `false`).
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param trimWhitespacesAroundQuotes if whitespace should be allowed and removed (default: `false`)
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvReaderBuilder trimWhitespacesAroundQuotes(final boolean trimWhitespacesAroundQuotes) {
             this.trimWhitespacesAroundQuotes = trimWhitespacesAroundQuotes;
             return this;
@@ -675,15 +698,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// the configured character set; with UTF-8, it remains as `U+FEFF` at the start of the first field's
         /// content.
         ///
-        /// **BOM detection only applies for [InputStream] and
-        /// [Path] based data sources.
-        /// It does not apply for [Reader] or [String] based data sources
-        /// as they are already decoded.**
+        /// **BOM detection only applies to [InputStream] and [Path] based data sources.
+        /// It does not apply to [Reader] or [String] based data sources, as they are already decoded.**
         ///
         /// Supported BOMs are: UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE.
         ///
         /// @param detectBomHeader if detection should be enabled (default: `false`)
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvReaderBuilder detectBomHeader(final boolean detectBomHeader) {
             this.detectBomHeader = detectBomHeader;
             return this;
@@ -692,23 +713,33 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Defines the maximum buffer size used when parsing data.
         ///
         /// The size of the internal buffer is automatically adjusted to the needs of the parser.
-        /// To protect against out-of-memory errors, its maximum size is limited.
+        /// To protect against out-of-memory errors, its maximum size is limited; if the buffer would have to grow
+        /// beyond it, a [CsvParseException] is thrown.
         ///
         /// The buffer is used for several purposes:
         ///   - Reading data from the underlying stream of data in chunks
         ///   - Storing the data of a single field before it is passed to the callback handler
-        ///   - Buffering a full line when peeking ahead for
-        ///     [CsvReader#skipLines(Predicate, int)]
+        ///   - Buffering a full line when skipping lines with [CsvReader#skipLines(Predicate, int)] and, unless the
+        ///     field separator has multiple characters or [#trimWhitespacesAroundQuotes(boolean)] is enabled, with
+        ///     [CsvReader#skipLines(int)]
+        ///
+        /// The parser needs free space for reading up to 8,192 characters at once. Depending on how many characters
+        /// the data source returns per read, a field can therefore exceed the limit although it is up to
+        /// 8,192 characters smaller than this value.
+        ///
+        /// When reading from a [String], the data is already in memory and this limit does not apply. The exception
+        /// is a field separator of multiple characters or [#trimWhitespacesAroundQuotes(boolean)]: with these, the
+        /// limit applies to each field.
         ///
         /// Set a larger value only if you expect to read fields or lines larger than the default limit.
         /// In that case you probably **also need to adjust** the maximum field size of the callback handler.
         ///
-        /// Set a smaller value if your runtime environment has not enough memory available for the default value.
-        /// Setting values smaller than 16,384 characters will most likely lead to performance degradation.
+        /// Set a smaller value if your runtime environment does not have enough memory for the default value.
+        /// Setting values smaller than 16,384 characters most likely degrades performance.
         ///
         /// @param maxBufferSize the maximum buffer size in characters (default: {@value %,2d #DEFAULT_MAX_BUFFER_SIZE})
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws IllegalArgumentException if maxBufferSize is not positive
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws IllegalArgumentException if `maxBufferSize` is not positive
         public CsvReaderBuilder maxBufferSize(final int maxBufferSize) {
             Preconditions.checkArgument(maxBufferSize > 0, "maxBufferSize must be greater than 0");
             this.maxBufferSize = maxBufferSize;
@@ -717,12 +748,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Convenience method to read a single CSV record from the specified string.
         ///
-        /// If the string contains multiple records, only the first one is returned.
+        /// If the string contains multiple records, only the first one is read and returned.
         ///
         /// @param data the CSV data to read; must not be `null`
-        /// @return a single [CsvRecord] instance containing the parsed data
-        /// @throws NullPointerException if data is `null`
-        /// @throws CsvParseException    if the data cannot be parsed
+        /// @return a single [CsvRecord] instance containing the parsed data, never `null`
+        /// @throws NullPointerException     if `data` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
+        /// @throws CsvParseException        if the data contains no record or cannot be parsed
         /// @see #ofSingleCsvRecord(CsvCallbackHandler, String)
         public CsvRecord ofSingleCsvRecord(final String data) {
             return ofSingleCsvRecord(CsvRecordHandler.of(), data);
@@ -730,14 +763,17 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Convenience method to read a single CSV record using a custom callback handler.
         ///
-        /// If the string contains multiple records, only the first one is returned.
+        /// If the string contains multiple records, only the first one is read and returned.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
         /// @param data            the CSV data to read; must not be `null`
-        /// @return a single record as processed by the callback handler
-        /// @throws NullPointerException if callbackHandler or data is `null`
-        /// @throws CsvParseException    if the data cannot be parsed
+        /// @return a single record as processed by the callback handler, never `null`
+        /// @throws NullPointerException     if `callbackHandler` or `data` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
+        /// @throws CsvParseException        if the data contains no record that the callback handler returns (a header
+        ///     read by [NamedCsvRecordHandler] is not returned) or cannot be parsed
         /// @see #ofSingleCsvRecord(String)
         public <T> T ofSingleCsvRecord(final CsvCallbackHandler<T> callbackHandler, final String data) {
             final T fetchedRecord = build(callbackHandler, data).fetch();
@@ -753,11 +789,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// [CsvRecordHandler] as the callback handler.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
-        /// @param inputStream the input stream to read data from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if inputStream is `null`
+        /// @param inputStream the input stream to read data from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `inputStream` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofCsvRecord(InputStream, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream) {
             return build(CsvRecordHandler.of(), inputStream);
@@ -768,12 +806,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream,Charset)] with
         /// [CsvRecordHandler] as the callback handler.
         ///
-        /// @param inputStream the input stream to read data from.
+        /// @param inputStream the input stream to read data from
         /// @param charset     the character set to use. If BOM detection is enabled
         ///                    (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                    when no BOM is found.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if inputStream or charset is `null`
+        ///                    when no BOM is found
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `inputStream` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofCsvRecord(InputStream)
         public CsvReader<CsvRecord> ofCsvRecord(final InputStream inputStream, final Charset charset) {
             return build(CsvRecordHandler.of(), inputStream, charset);
@@ -786,9 +826,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param reader the data source to read from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if reader is `null`
+        /// @param reader the data source to read from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `reader` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public CsvReader<CsvRecord> ofCsvRecord(final Reader reader) {
             return build(CsvRecordHandler.of(), reader);
         }
@@ -800,9 +842,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param data the data to read.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if data is `null`
+        /// @param data the data to read
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `data` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public CsvReader<CsvRecord> ofCsvRecord(final String data) {
             return build(CsvRecordHandler.of(), data);
         }
@@ -813,12 +857,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// [CsvRecordHandler] as the callback handler.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
-        /// @param file the file to read data from.
-        /// @return a new CsvReader - never `null`. Don't forget to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if file is `null`
+        /// @param file the file to read data from
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `file` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofCsvRecord(Path, Charset)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file) throws IOException {
             return build(CsvRecordHandler.of(), file);
@@ -829,13 +875,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,Path,Charset)] with
         /// [CsvRecordHandler] as the callback handler.
         ///
-        /// @param file    the file to read data from.
+        /// @param file    the file to read data from
         /// @param charset the character set to use. If BOM detection is enabled
         ///                (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                when no BOM is found.
-        /// @return a new CsvReader - never `null`. Don't forget to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if file or charset is `null`
+        ///                when no BOM is found
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `file` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofCsvRecord(Path)
         public CsvReader<CsvRecord> ofCsvRecord(final Path file, final Charset charset) throws IOException {
             return build(CsvRecordHandler.of(), file, charset);
@@ -847,11 +895,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// [NamedCsvRecordHandler] as the callback handler.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
-        /// @param inputStream the input stream to read data from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if reader is `null`
+        /// @param inputStream the input stream to read data from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `inputStream` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofNamedCsvRecord(InputStream, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream) {
             return build(NamedCsvRecordHandler.of(), inputStream);
@@ -862,12 +912,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream,Charset)] with
         /// [NamedCsvRecordHandler] as the callback handler.
         ///
-        /// @param inputStream the input stream to read data from.
+        /// @param inputStream the input stream to read data from
         /// @param charset     the character set to use. If BOM detection is enabled
         ///                    (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                    when no BOM is found.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if file or charset is `null`
+        ///                    when no BOM is found
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `inputStream` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofNamedCsvRecord(InputStream)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final InputStream inputStream, final Charset charset) {
             return build(NamedCsvRecordHandler.of(), inputStream, charset);
@@ -880,9 +932,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param reader the data source to read from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if reader is `null`
+        /// @param reader the data source to read from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `reader` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Reader reader) {
             return build(NamedCsvRecordHandler.of(), reader);
         }
@@ -894,9 +948,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param data the data to read.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if data is `null`
+        /// @param data the data to read
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `data` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final String data) {
             return build(NamedCsvRecordHandler.of(), data);
         }
@@ -907,12 +963,14 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// [NamedCsvRecordHandler] as the callback handler.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
-        /// @param file the file to read data from.
-        /// @return a new CsvReader - never `null`. Don't forget to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if file is `null`
+        /// @param file the file to read data from
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `file` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofNamedCsvRecord(Path, Charset)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file) throws IOException {
             return build(NamedCsvRecordHandler.of(), file);
@@ -923,13 +981,15 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,Path,Charset)] with
         /// [NamedCsvRecordHandler] as the callback handler.
         ///
-        /// @param file    the file to read data from.
+        /// @param file    the file to read data from
         /// @param charset the character set to use. If BOM detection is enabled
         ///                (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                when no BOM is found.
-        /// @return a new CsvReader - never `null`. Don't forget to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if file or charset is `null`
+        ///                when no BOM is found
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `file` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #ofNamedCsvRecord(Path)
         public CsvReader<NamedCsvRecord> ofNamedCsvRecord(final Path file, final Charset charset)
             throws IOException {
@@ -941,19 +1001,20 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// This is a convenience method for calling [#build(CsvCallbackHandler,InputStream,Charset)].
         ///
         /// This library uses built-in buffering, so you do not need to pass in a buffered InputStream
-        /// implementation such as [java.io.BufferedInputStream]. Performance may be even likely
-        /// better if you do not.
+        /// implementation such as [java.io.BufferedInputStream]. Performance may even be better if you do not.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
         /// Use [#build(CsvCallbackHandler,Path)] for optimal performance when reading files.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param inputStream     the input stream to read data from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if callbackHandler or inputStream is `null`
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param inputStream     the input stream to read data from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `callbackHandler` or `inputStream` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #build(CsvCallbackHandler, InputStream, Charset)
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final InputStream inputStream) {
             return build(callbackHandler, inputStream, StandardCharsets.UTF_8);
@@ -962,22 +1023,23 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Constructs a new callback-based [CsvReader] for the specified input stream and character set.
         ///
         /// This library uses built-in buffering, so you do not need to pass in a buffered InputStream
-        /// implementation such as [java.io.BufferedInputStream]. Performance may be even likely
-        /// better if you do not.
+        /// implementation such as [java.io.BufferedInputStream]. Performance may even be better if you do not.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the BOM is read to determine the character
         /// set when reading starts – this method itself does not consume the input stream.
         ///
         /// Use [#build(CsvCallbackHandler,Path,Charset)] for optimal performance when reading files.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param inputStream     the input stream to read data from.
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param inputStream     the input stream to read data from
         /// @param charset         the character set to use. If BOM detection is enabled
         ///                        (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                        when no BOM is found.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if callbackHandler, inputStream or charset is `null`
+        ///                        when no BOM is found
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `callbackHandler`, `inputStream` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         /// @see #build(CsvCallbackHandler, InputStream)
         @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
@@ -997,20 +1059,20 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Constructs a new callback-based [CsvReader] for the specified reader.
         ///
         /// This library uses built-in buffering, so you do not need to pass in a buffered Reader
-        /// implementation such as [java.io.BufferedReader]. Performance may be even likely
-        /// better if you do not.
+        /// implementation such as [java.io.BufferedReader]. Performance may even be better if you do not.
         ///
         /// Use [#build(CsvCallbackHandler,Path)] for optimal performance when
         /// reading files and [#build(CsvCallbackHandler,String)] when reading Strings.
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param reader          the data source to read from.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if callbackHandler or reader is `null`
-        /// @throws IllegalArgumentException if argument validation fails.
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param reader          the data source to read from
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `callbackHandler` or `reader` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Reader reader) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(reader, "reader must not be null");
@@ -1034,12 +1096,13 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///
         /// [#detectBomHeader(boolean)] has no effect on this method.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param data            the data to read.
-        /// @return a new CsvReader - never `null`.
-        /// @throws NullPointerException if callbackHandler or data is `null`
-        /// @throws IllegalArgumentException if argument validation fails.
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param data            the data to read
+        /// @return a new CsvReader, never `null`
+        /// @throws NullPointerException if `callbackHandler` or `data` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException if the configured options conflict (see [CsvReaderBuilder])
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final String data) {
             Objects.requireNonNull(callbackHandler, "callbackHandler must not be null");
             Objects.requireNonNull(data, "data must not be null");
@@ -1062,14 +1125,16 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Constructs a new callback-based [CsvReader] for the specified file.
         ///
         /// If [#detectBomHeader(boolean)] is enabled, the character set is determined by the BOM.
-        /// Per default the character set is [StandardCharsets#UTF_8].
+        /// By default, the character set is [StandardCharsets#UTF_8].
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param file            the file to read data from.
-        /// @return a new CsvReader - never `null`. Remember to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if callbackHandler or file is `null`
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param file            the file to read data from
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `callbackHandler` or `file` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #build(CsvCallbackHandler, Path, Charset)
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler, final Path file)
             throws IOException {
@@ -1078,15 +1143,17 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
 
         /// Constructs a new callback-based [CsvReader] for the specified file and character set.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use. Do not reuse a handler after it has been used!
-        /// @param file            the file to read data from.
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use; do not reuse a handler after it has been used
+        /// @param file            the file to read data from
         /// @param charset         the character set to use. If BOM detection is enabled
         ///                        (via [#detectBomHeader(boolean)]), this acts as a default
-        ///                        when no BOM is found.
-        /// @return a new CsvReader - never `null`. Remember to close it!
-        /// @throws IOException          if an I/O error occurs.
-        /// @throws NullPointerException if callbackHandler, file or charset is `null`
+        ///                        when no BOM is found
+        /// @return a new CsvReader, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs
+        /// @throws NullPointerException     if `callbackHandler`, `file` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvReaderBuilder])
+        /// @throws IllegalStateException    if the configured options conflict (see [CsvReaderBuilder])
         /// @see #build(CsvCallbackHandler, Path)
         public <T> CsvReader<T> build(final CsvCallbackHandler<T> callbackHandler,
                                       final Path file, final Charset charset) throws IOException {
@@ -1106,11 +1173,11 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Only for streams this library opened itself – streams passed in by the caller stay owned by
         /// the caller and must not be closed here.
         ///
-        /// @param <T>             the type of the CSV record.
-        /// @param callbackHandler the record handler to use.
-        /// @param inputStream     the library-opened stream to read data from.
-        /// @param charset         the character set to use.
-        /// @return a new CsvReader - never `null`.
+        /// @param <T>             the type of the CSV record
+        /// @param callbackHandler the callback handler to use
+        /// @param inputStream     the library-opened stream to read data from
+        /// @param charset         the character set to use
+        /// @return a new CsvReader, never `null`
         @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
         <T> CsvReader<T> buildOwning(final CsvCallbackHandler<T> callbackHandler,
                                      final InputStream inputStream, final Charset charset) {

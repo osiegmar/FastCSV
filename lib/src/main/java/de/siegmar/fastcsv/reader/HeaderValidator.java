@@ -12,7 +12,7 @@ import de.siegmar.fastcsv.util.Util;
 /// Example:
 /// ```
 /// NamedCsvRecordHandler handler = NamedCsvRecordHandler.builder()
-///     .headerValidator(HeaderValidator.containsExactly("col1", "col2"))
+///     .headerValidator(HeaderValidator.containsExactly("id", "name"))
 ///     .build();
 /// ```
 @FunctionalInterface
@@ -23,7 +23,7 @@ public interface HeaderValidator {
     ///
     /// @param expectedHeader the expected field names, must not be `null`
     /// @return the validator
-    /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
+    /// @throws NullPointerException if `expectedHeader` is `null` or contains a `null` element
     /// @see #containsExactly(List)
     static HeaderValidator containsExactly(final String... expectedHeader) {
         Objects.requireNonNull(expectedHeader, "expectedHeader must not be null");
@@ -35,7 +35,7 @@ public interface HeaderValidator {
     ///
     /// @param expectedHeader the expected field names, must not be `null`
     /// @return the validator
-    /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
+    /// @throws NullPointerException if `expectedHeader` is `null` or contains a `null` element
     /// @see #containsExactly(String...)
     static HeaderValidator containsExactly(final List<String> expectedHeader) {
         Objects.requireNonNull(expectedHeader, "expectedHeader must not be null");
@@ -53,7 +53,7 @@ public interface HeaderValidator {
     ///
     /// @param requiredFields the required field names, must not be `null`
     /// @return the validator
-    /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
+    /// @throws NullPointerException if `requiredFields` is `null` or contains a `null` element
     /// @see #containsAtLeast(List)
     static HeaderValidator containsAtLeast(final String... requiredFields) {
         Objects.requireNonNull(requiredFields, "requiredFields must not be null");
@@ -65,7 +65,7 @@ public interface HeaderValidator {
     ///
     /// @param requiredFields the required field names, must not be `null`
     /// @return the validator
-    /// @throws NullPointerException if `null` is passed or the fields contain `null` elements
+    /// @throws NullPointerException if `requiredFields` is `null` or contains a `null` element
     /// @see #containsAtLeast(String...)
     static HeaderValidator containsAtLeast(final List<String> requiredFields) {
         Objects.requireNonNull(requiredFields, "requiredFields must not be null");
@@ -81,7 +81,7 @@ public interface HeaderValidator {
     }
 
     /// Gets called once the header is determined – either from the first record (empty lines and
-    /// comments never count as the first record) or from a predefined header.
+    /// comments never count as the first record) or from an external header.
     ///
     /// @param header the field names of the header, never `null`
     /// @throws RuntimeException if the header is not acceptable

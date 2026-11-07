@@ -1,4 +1,4 @@
-/// FastCSV – a lightning-fast, dependency-free CSV library for Java.
+/// FastCSV – an RFC 4180 compliant CSV library for Java.
 module de.siegmar.fastcsv {
 
     /// Classes for reading CSV data (see [de.siegmar.fastcsv.reader.CsvReader]).

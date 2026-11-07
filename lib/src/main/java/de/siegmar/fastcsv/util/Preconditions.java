@@ -14,7 +14,7 @@ public final class Preconditions {
     ///
     /// @param expression   the expression that has to be `true`
     /// @param errorMessage the exception message to be thrown
-    /// @throws IllegalArgumentException if the `expression` is `false`.
+    /// @throws IllegalArgumentException if the `expression` is `false`
     public static void checkArgument(final boolean expression, final String errorMessage) {
         if (!expression) {
             throw new IllegalArgumentException(errorMessage);
@@ -25,7 +25,7 @@ public final class Preconditions {
     ///
     /// @param expression           the expression that has to be `true`
     /// @param errorMessageSupplier a supplier for the exception message to be thrown
-    /// @throws IllegalArgumentException if the `expression` is `false`.
+    /// @throws IllegalArgumentException if the `expression` is `false`
     @SuppressWarnings("AnnotateFormatMethod")
     public static void checkArgument(final boolean expression, final Supplier<String> errorMessageSupplier) {
         if (!expression) {

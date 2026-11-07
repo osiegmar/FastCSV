@@ -4,8 +4,7 @@ import de.siegmar.fastcsv.util.Nullable;
 
 /// This class defines the methods that are called during the CSV reading process.
 ///
-/// Implementations highly affect the behavior of the [CsvReader]. With great power comes great responsibility.
-/// Don't mess up the CSV reading process!
+/// Implementations strongly affect the behavior of the [CsvReader].
 ///
 /// Even if you need custom handling, you typically don't need to extend this class directly.
 /// Check out [AbstractBaseCsvCallbackHandler] first.
@@ -20,7 +19,7 @@ public abstract class CsvCallbackHandler<T> {
 
     /// {@return the type of the record that is built from the CSV data}
     ///
-    /// The [CsvReader] will skip
+    /// The [CsvReader] skips
     ///
     /// - comments ([RecordType#COMMENT]) if
     ///   [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)]
@@ -32,11 +31,11 @@ public abstract class CsvCallbackHandler<T> {
 
     /// {@return the number of fields in the record}
     ///
-    /// The [CsvReader] will verify that the number of fields in each record matches the number of fields in the
-    /// first record unless
-    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#extraFieldStrategy(FieldMismatchStrategy)] or
+    /// The [CsvReader] compares the number of fields in each record with the number of fields in the
+    /// first record unless both
+    /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#extraFieldStrategy(FieldMismatchStrategy)] and
     /// [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#missingFieldStrategy(FieldMismatchStrategy)]
-    /// are set to [FieldMismatchStrategy#IGNORE] or [FieldMismatchStrategy#SKIP].
+    /// are set to [FieldMismatchStrategy#IGNORE].
     protected abstract int getFieldCount();
 
     /// Called at the beginning of each record.
@@ -90,13 +89,16 @@ public abstract class CsvCallbackHandler<T> {
     /// Called for each empty line.
     protected abstract void setEmpty();
 
-    /// Called at the end of each CSV record to build the actual record representation.
+    /// Called at the end of each record, comment and empty line to build the actual record representation.
     ///
-    /// @return the record, or `null` if the callback handler consumes it (e.g., the header) so that it is not returned.
+    /// @return the record, or `null` if the callback handler consumes it (e.g., the header) so that it is not returned
     @Nullable
     protected abstract T buildRecord();
 
-    /// Called at the end of the CSV reading process.
+    /// Called by the [CsvReader] when it reaches the end of the CSV data. It can be called again if the reader is asked
+    /// for more records after that.
+    ///
+    /// This method is not called if reading ends early, and [IndexedCsvReader] never calls it.
     protected void terminate() {
     }
 

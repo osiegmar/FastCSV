@@ -3,7 +3,7 @@ package de.siegmar.fastcsv.reader;
 import java.util.Objects;
 import java.util.function.Function;
 
-/// Implementations of this class are used within [CsvCallbackHandler] implementations to modify the fields of
+/// Implementations of this interface are used within [CsvCallbackHandler] implementations to modify the fields of
 /// a CSV record before storing them in the resulting object.
 ///
 /// @see FieldModifiers
@@ -14,9 +14,10 @@ public interface FieldModifier {
     ///
     /// @param function the function to modify the field content. The contract of
     ///                 [FieldModifier#modify(long, int, boolean, String)] applies:
-    ///                 the value passed to the function is never `null` and the return value must not be `null`.
+    ///                 the field content passed to the function is never `null` and the return value must not be
+    ///                 `null`
     /// @return a new field modifier that applies the function to the field content
-    /// @throws NullPointerException if the function is `null`
+    /// @throws NullPointerException if `function` is `null`
     static FieldModifier modify(final Function<? super String, String> function) {
         Objects.requireNonNull(function, "function must not be null");
         return new FieldModifier() {
@@ -28,8 +29,9 @@ public interface FieldModifier {
         };
     }
 
-    /// Gets called for every single field (that is not a comment).
-    /// The Default implementation returns the field as is.
+    /// Called for every field, including the fields of a header read from the first record.
+    /// Not called for comments, empty lines or an external header.
+    /// The default implementation returns the field content as is.
     ///
     /// @param startingLineNumber the starting line number (starting with 1)
     /// @param fieldIdx           the field index (starting with 0)
@@ -40,8 +42,8 @@ public interface FieldModifier {
         return field;
     }
 
-    /// Gets called for every comment.
-    /// The Default implementation returns the field as is.
+    /// Called for every comment.
+    /// The default implementation returns the comment text as is.
     ///
     /// @param startingLineNumber the starting line number (starting with 1)
     /// @param field              the comment text, never `null`
@@ -52,7 +54,7 @@ public interface FieldModifier {
 
     /// Chains multiple modifiers.
     ///
-    /// @param after the next modifier to use.
+    /// @param after the next modifier to use
     /// @return a composed field modifier that first applies this modifier and then applies the after modifier
     default FieldModifier andThen(final FieldModifier after) {
         return new FieldModifier() {

@@ -3,16 +3,16 @@ package de.siegmar.fastcsv.writer;
 /// The line breaks the writer can write after each record and comment (LF, CR, CRLF, platform default).
 public enum LineDelimiter {
 
-    /// Line Feed - (UNIX).
+    /// Line feed (Unix).
     LF("\n"),
 
-    /// Carriage Return - (Mac classic).
+    /// Carriage return (classic Mac OS).
     CR("\r"),
 
-    /// Carriage Return and Line Feed (Windows).
+    /// Carriage return and line feed (Windows).
     CRLF("\r\n"),
 
-    /// Use current platform default ([System#lineSeparator()].
+    /// The default of the current platform ([System#lineSeparator()]).
     PLATFORM(System.lineSeparator());
 
     private final String str;
@@ -25,9 +25,10 @@ public enum LineDelimiter {
     ///
     /// Accepted values are `"\r\n"` ([#CRLF]), `"\n"` ([#LF]) and `"\r"` ([#CR]).
     ///
-    /// @param str the line break string to look up.
-    /// @return the matching enum constant.
-    /// @throws IllegalArgumentException if `str` is not one of the accepted values.
+    /// @param str the line break string to look up
+    /// @return the matching enum constant
+    /// @throws NullPointerException if `str` is `null`
+    /// @throws IllegalArgumentException if `str` is not one of the accepted values
     public static LineDelimiter of(final String str) {
         return switch (str) {
             case "\r\n" -> CRLF;

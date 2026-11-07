@@ -2,15 +2,15 @@ package de.siegmar.fastcsv.reader;
 
 /// Custom status listeners have to implement this interface.
 ///
-/// FastCSV will call these methods synchronously –
-/// make sure **not to perform time-consuming / blocking** tasks!
+/// FastCSV calls these methods synchronously –
+/// make sure **not to perform time-consuming or blocking** tasks.
 ///
 /// @see IndexedCsvReader.IndexedCsvReaderBuilder#statusListener(StatusListener)
 public interface StatusListener {
 
     /// Called on initialization.
     ///
-    /// @param fileSize the total file size.
+    /// @param fileSize the total file size in bytes
     default void onInit(final long fileSize) {
     }
 
@@ -20,7 +20,7 @@ public interface StatusListener {
 
     /// Called when a new read operation has been performed.
     ///
-    /// @param bytes number of bytes read.
+    /// @param bytes number of bytes read
     default void onReadBytes(final int bytes) {
     }
 
@@ -28,9 +28,9 @@ public interface StatusListener {
     default void onComplete() {
     }
 
-    /// Called when there was an error while indexing.
+    /// Called when there was an error while detecting a BOM or indexing.
     ///
-    /// @param throwable the exception thrown.
+    /// @param throwable the exception thrown
     default void onError(final Throwable throwable) {
     }
 

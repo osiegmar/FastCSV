@@ -325,15 +325,15 @@ final class StrictCsvParser implements CsvParser {
         callbackHandler.addField(lBuf, lBegin, lPos - lBegin, false);
     }
 
-    /// Remove escapes from the field data.
+    /// Replaces each escape pair in the field with one quote character.
     ///
     /// The input buffer could look like this: `foo ""is"" bar`
     ///
-    /// @param buf            the buffer containing the field data
-    /// @param begin          the start position of the field data (after the opening quote)
-    /// @param end            the end position of the field data (on the closing quote / end of buffer)
+    /// @param buf            the buffer containing the field
+    /// @param begin          the start position of the field (after the opening quote character)
+    /// @param end            the end position of the field (on the closing quote character / end of buffer)
     /// @param quoteCharacter the quote character
-    /// @return the length of the field data after removing escapes
+    /// @return the length of the field content
     private static int cleanDelimiters(final char[] buf, final int begin, final int end,
                                        final char quoteCharacter) {
 

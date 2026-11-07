@@ -48,7 +48,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// @param maxRecordSize the maximum record size; must be > 0 and >= `maxFieldSize`
     /// @param fieldModifier the field modifier; must not be `null`
     /// @throws IllegalArgumentException if the arguments are invalid
-    /// @throws NullPointerException     if `null` is passed
+    /// @throws NullPointerException     if `fieldModifier` is `null`
     protected AbstractInternalCsvCallbackHandler(final int maxFields,
                                                  final int maxFieldSize,
                                                  final int maxRecordSize,
@@ -87,7 +87,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// {@inheritDoc}
     /// Materializes the field content, applies the field modifier, checks constraints and adds the field to the record.
     ///
-    /// @throws CsvParseException if the addition exceeds the limit of record size or maximum fields count.
+    /// @throws CsvParseException if the field exceeds the maximum field size or the maximum record size, or the record
+    ///     exceeds the maximum number of fields
     @Override
     protected void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
         final String modifiedField = modifyField(len == 0 ? "" : new String(buf, offset, len), quoted);
@@ -130,7 +131,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
     /// {@inheritDoc}
     /// Materializes the comment text, applies the field modifier, checks constraints and adds the field to the record.
     ///
-    /// @throws CsvParseException if the addition exceeds the limit of record size.
+    /// @throws CsvParseException if the comment text exceeds the maximum field size
     @Override
     protected void setComment(final char[] buf, final int offset, final int len) {
         recordType = RecordType.COMMENT;
@@ -176,7 +177,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
     /// Builds a compact fields array (a copy of the internal fields array with the length of the current record).
     ///
-    /// In contrast to the class property [#fields], the returned array does only contain the fields of the
+    /// In contrast to the class property [#fields], the returned array only contains the fields of the
     /// current record.
     ///
     /// @return the compact fields array
@@ -207,20 +208,18 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         private static final int DEFAULT_MAX_FIELD_SIZE = 16 * 1024 * 1024;
         private static final int DEFAULT_MAX_RECORD_SIZE = 4 * DEFAULT_MAX_FIELD_SIZE;
 
-        /// The maximum number of fields a single record may have.
-        /// The default value is {@value %,2d #DEFAULT_MAX_FIELDS}.
+        /// The maximum number of fields a single record may have (default: {@value %,2d #DEFAULT_MAX_FIELDS}).
         protected int maxFields = DEFAULT_MAX_FIELDS;
 
-        /// The maximum number of characters a single field may have.
-        /// The default value is {@value %,2d #DEFAULT_MAX_FIELD_SIZE}.
+        /// The maximum number of characters a single field may have
+        /// (default: {@value %,2d #DEFAULT_MAX_FIELD_SIZE}).
         protected int maxFieldSize = DEFAULT_MAX_FIELD_SIZE;
 
-        /// The maximum number of characters a single record may have.
-        /// The default value is {@value %,2d #DEFAULT_MAX_RECORD_SIZE}.
+        /// The maximum number of characters a single record may have
+        /// (default: {@value %,2d #DEFAULT_MAX_RECORD_SIZE}).
         protected int maxRecordSize = DEFAULT_MAX_RECORD_SIZE;
 
-        /// The field modifier.
-        /// The default value is [FieldModifiers#NOP].
+        /// The field modifier (default: [FieldModifiers#NOP]).
         protected FieldModifier fieldModifier = FieldModifiers.NOP;
 
         /// Constructs a new default instance.
@@ -229,16 +228,17 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
         /// Method to be implemented by subclasses to return the correct type.
         ///
-        /// @return This object of subclass type.
+        /// @return This object of subclass type
         protected abstract T self();
 
         /// Defines the maximum number of fields a single record may have.
         ///
-        /// This constraint is enforced for all fields, including the header.
+        /// This constraint is enforced for all records, including a header read from the first record, but not for
+        /// an [external header][NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#header(String...)].
         ///
         /// @param maxFields the maximum fields a record may have; must be > 0
         ///                  (default: {@value %,2d #DEFAULT_MAX_FIELDS})
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @throws IllegalArgumentException if the argument is less than 1
         @SuppressWarnings("checkstyle:HiddenField")
         public T maxFields(final int maxFields) {
@@ -249,8 +249,12 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
         /// Defines the maximum number of characters a single field may have.
         ///
-        /// This constraint is enforced for all fields, including the header and comments.
+        /// This constraint is enforced for all fields, including a header read from the first record and comments,
+        /// but not for an [external header][NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#header(String...)].
         /// The size of the field is determined **after** field modifiers are applied.
+        ///
+        /// Building the handler throws an [IllegalArgumentException] if this value is larger than
+        /// [#maxRecordSize(int)], so raise that as well if you go beyond its default.
         ///
         /// In contrast to [de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#maxBufferSize(int)] which enforces
         /// the maximum field size **before** the field modifier is applied, this constraint allows more precise control
@@ -258,7 +262,7 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         ///
         /// @param maxFieldSize the maximum field size; must be > 0
         ///                     (default: {@value %,2d #DEFAULT_MAX_FIELD_SIZE})
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @throws IllegalArgumentException if the argument is less than 1
         /// @see de.siegmar.fastcsv.reader.CsvReader.CsvReaderBuilder#maxBufferSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
@@ -270,15 +274,17 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
 
         /// Defines the maximum number of characters a single record may have.
         ///
-        /// This constraint is enforced for all fields, including the header and comments.
+        /// This constraint is enforced for all records, including a header read from the first record and comments,
+        /// but not for an [external header][NamedCsvRecordHandler.NamedCsvRecordHandlerBuilder#header(String...)].
         /// The size of the record is the sum of the sizes of all fields.
         /// The size of each field is determined **after** field modifiers are applied.
         ///
-        /// Make sure that [#maxRecordSize] is >= [#maxFieldSize].
+        /// Building the handler throws an [IllegalArgumentException] if this value is smaller than
+        /// [#maxFieldSize(int)].
         ///
         /// @param maxRecordSize the maximum record size; must be > 0
         ///                      (default: {@value %,2d #DEFAULT_MAX_RECORD_SIZE})
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         /// @throws IllegalArgumentException if the argument is less than 1
         /// @see #maxFieldSize(int)
         @SuppressWarnings("checkstyle:HiddenField")
@@ -291,8 +297,8 @@ public abstract sealed class AbstractInternalCsvCallbackHandler<T> extends CsvCa
         /// Sets the field modifier.
         ///
         /// @param fieldModifier the field modifier; must not be `null` (default: [FieldModifiers#NOP])
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if `null` is passed
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `fieldModifier` is `null`
         @SuppressWarnings("checkstyle:HiddenField")
         public T fieldModifier(final FieldModifier fieldModifier) {
             Objects.requireNonNull(fieldModifier, "fieldModifier must not be null");

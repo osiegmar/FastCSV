@@ -33,7 +33,7 @@ FastCSV comes with two features to handle such files:
 
 - `skipLines(int lineCount)`: Skip a specific number of lines (`lineCount`) regardless of their content.
 - `skipLines(Predicate<String> predicate, int maxLines)`: Skip lines until a specific line (e.g., the header) is found.
-  Stop skipping after a specific number of lines (`maxLines`).
+  Throws a `CsvParseException` if none of the first `maxLines` lines matches.
 
 :::note
 Do not mix this with comments in CSV files. Comments are lines that start with a specific character

@@ -70,8 +70,10 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     ///
     /// @param configurer the configuration, must not be `null`
     /// @return the new instance
-    /// @throws NullPointerException     if `null` is passed
+    /// @throws NullPointerException     if `configurer` is `null`
     /// @throws IllegalArgumentException if argument constraints are violated
+    /// @throws CsvParseException        if an external header contains duplicate fields or is rejected by a standard
+    ///                                  validator (see [NamedCsvRecordHandlerBuilder#build()])
     /// @see #builder()
     public static NamedCsvRecordHandler of(final Consumer<NamedCsvRecordHandlerBuilder> configurer) {
         Objects.requireNonNull(configurer, "configurer must not be null");
@@ -162,20 +164,21 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         /// field names are handled.
         ///
         /// @param allowDuplicateHeaderFields whether duplicate field names are allowed (default: `false`)
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         public NamedCsvRecordHandlerBuilder allowDuplicateHeaderFields(final boolean allowDuplicateHeaderFields) {
             this.allowDuplicateHeaderFields = allowDuplicateHeaderFields;
             return this;
         }
 
-        /// Sets a predefined header.
+        /// Sets an external header: field names for CSV data without a header. The first record is then returned
+        /// like any other record.
         ///
         /// When not set, the header is taken from the first record (empty lines and comments never count as the
         /// first record).
         ///
-        /// @param header the header, must not be `null`
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if `null` is passed
+        /// @param header the field names, must not be `null`
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `header` is `null` or contains a `null` element
         /// @see #header(List)
         @SuppressWarnings("checkstyle:HiddenField")
         public NamedCsvRecordHandlerBuilder header(final String... header) {
@@ -184,14 +187,15 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
             return this;
         }
 
-        /// Sets the header.
+        /// Sets an external header: field names for CSV data without a header. The first record is then returned
+        /// like any other record.
         ///
         /// When not set, the header is taken from the first record (empty lines and comments never count as the
         /// first record).
         ///
-        /// @param header the header, must not be `null`
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if `null` is passed
+        /// @param header the field names, must not be `null`
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `header` is `null` or contains a `null` element
         /// @see #header(String...)
         @SuppressWarnings("checkstyle:HiddenField")
         public NamedCsvRecordHandlerBuilder header(final List<String> header) {
@@ -201,20 +205,20 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
 
         /// Sets a validator that is called once the header is determined – either from the first record
-        /// (empty lines and comments never count as the first record) or from a predefined header
+        /// (empty lines and comments never count as the first record) or from an external header
         /// (see [#header(String...)]).
         /// Input without any header (e.g., an empty file) yields no records and is not validated.
         ///
         /// The validator must throw an exception (any [RuntimeException]) if the header is not acceptable.
         /// While reading, a [CsvParseException] (as thrown by the standard validators) propagates as-is;
-        /// any other exception gets wrapped in one. For a predefined header, the validator is already
+        /// any other exception gets wrapped in one. For an external header, the validator is already
         /// called by [#build()] and any exception propagates as-is.
         ///
         /// The validator is called after the built-in checks (`null` elements, duplicates) have passed.
         ///
         /// @param headerValidator the validator, must not be `null`
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if `null` is passed
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `headerValidator` is `null`
         /// @see HeaderValidator#containsExactly(String...)
         /// @see HeaderValidator#containsAtLeast(String...)
         public NamedCsvRecordHandlerBuilder headerValidator(final HeaderValidator headerValidator) {
@@ -225,11 +229,12 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
 
         /// Sets whether the header itself should be returned as the first record.
         ///
-        /// When enabled, the first record returned will be a [NamedCsvRecord] with the field names as its fields
-        /// and as the header.
+        /// When enabled, the first record returned is a [NamedCsvRecord] with the field names as its fields
+        /// and as the header. This cannot be combined with an external header: [#build()] then throws an
+        /// [IllegalArgumentException].
         ///
         /// @param returnHeader whether the header should be returned as the first record (default: `false`)
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @return This updated object, allowing additional method calls to be chained together
         public NamedCsvRecordHandlerBuilder returnHeader(final boolean returnHeader) {
             this.returnHeader = returnHeader;
             return this;
@@ -244,10 +249,11 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         ///
         /// @return the new instance
         /// @throws IllegalArgumentException if argument constraints are violated
-        ///     (see [AbstractInternalCsvCallbackHandler])
-        /// @throws CsvParseException if a predefined header (see [#header(String...)]) contains duplicate
-        ///     fields (see [#allowDuplicateHeaderFields(boolean)]) or is rejected by a configured validator
-        ///     (see [#headerValidator(HeaderValidator)])
+        ///     (see [AbstractInternalCsvCallbackHandler]) or if an external header is combined with
+        ///     [#returnHeader(boolean)]
+        /// @throws CsvParseException if an external header (see [#header(String...)]) contains duplicate
+        ///     fields (see [#allowDuplicateHeaderFields(boolean)]) or is rejected by a standard validator;
+        ///     any other exception of a validator propagates as-is (see [#headerValidator(HeaderValidator)])
         public NamedCsvRecordHandler build() {
             if (returnHeader && header != null) {
                 throw new IllegalArgumentException("Predefined headers cannot be used with returnHeader=true");

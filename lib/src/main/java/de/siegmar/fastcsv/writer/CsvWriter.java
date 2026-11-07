@@ -79,17 +79,21 @@ public final class CsvWriter implements Closeable, Flushable {
     /// Creates a [CsvWriterBuilder] instance used to configure and create instances of
     /// this class.
     ///
-    /// @return CsvWriterBuilder instance with default settings.
+    /// @return CsvWriterBuilder instance with default settings
     public static CsvWriterBuilder builder() {
         return new CsvWriterBuilder();
     }
 
     /// Writes a record: its fields, followed by a line break.
     ///
+    /// If `values` is empty or holds a single field that the [QuoteStrategy] does not quote and whose field content is
+    /// `null` or empty, only the line break is written. This is an empty line, which `CsvReader` skips by default.
+    ///
     /// @param values the field contents to write; a `null` element is written as an empty field
-    ///               (unquoted, unless the [QuoteStrategy] decides otherwise).
-    /// @return This CsvWriter.
-    /// @throws UncheckedIOException if a write-error occurs
+    ///               (unquoted, unless the [QuoteStrategy] decides otherwise)
+    /// @return This CsvWriter
+    /// @throws NullPointerException if `values` is `null`
+    /// @throws UncheckedIOException if a write error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     /// @see #writeRecord(String...)
     public CsvWriter writeRecord(final Iterable<String> values) {
@@ -107,10 +111,14 @@ public final class CsvWriter implements Closeable, Flushable {
 
     /// Writes a record: its fields, followed by a line break.
     ///
+    /// If `values` is empty or holds a single field that the [QuoteStrategy] does not quote and whose field content is
+    /// `null` or empty, only the line break is written. This is an empty line, which `CsvReader` skips by default.
+    ///
     /// @param values the field contents to write; a `null` element is written as an empty field
     ///               (unquoted, unless the [QuoteStrategy] decides otherwise)
-    /// @return This CsvWriter.
-    /// @throws UncheckedIOException if a write-error occurs
+    /// @return This CsvWriter
+    /// @throws NullPointerException if `values` is `null`
+    /// @throws UncheckedIOException if a write error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     /// @see #writeRecord(Iterable)
     public CsvWriter writeRecord(final String... values) {
@@ -128,9 +136,9 @@ public final class CsvWriter implements Closeable, Flushable {
     /// Starts a new record.
     ///
     /// This method is used to write a record field by field. The record is ended by calling
-    /// [#endRecord()].
+    /// [CsvWriterRecord#endRecord()].
     ///
-    /// @return CsvWriterRecord instance to write fields to.
+    /// @return CsvWriterRecord instance to write fields to
     /// @throws IllegalStateException if a record is already started
     /// @see #writeRecord(String...)
     /// @see #writeRecord(Iterable)
@@ -242,9 +250,9 @@ public final class CsvWriter implements Closeable, Flushable {
     ///                `null` or an empty string writes a comment consisting of the comment character only.
     ///                If the comment text contains line breaks (`CR`, `LF`, `CRLF`), a separate comment is
     ///                written for each line, each followed by the line break configured by
-    ///                [CsvWriterBuilder#lineDelimiter(LineDelimiter)].
-    /// @return This CsvWriter.
-    /// @throws UncheckedIOException if a write-error occurs
+    ///                [CsvWriterBuilder#lineDelimiter(LineDelimiter)]
+    /// @return This CsvWriter
+    /// @throws UncheckedIOException if a write error occurs
     /// @throws IllegalStateException if a record is already started (by calling [#writeRecord()]) and not ended
     public CsvWriter writeComment(final String comment) {
         validateNoOpenRecord();
@@ -328,15 +336,20 @@ public final class CsvWriter implements Closeable, Flushable {
     }
 
     /// This builder is used to create configured instances of [CsvWriter]. The default
-    /// configuration of this class adheres with RFC 4180.
+    /// configuration of this class adheres to RFC 4180.
     ///
     /// - field separator: `,` (comma)
     /// - quote character: `"` (double quote)
-    /// - comment character: `#` (hash/number)
+    /// - comment character: `#` (hash)
     /// - quote strategy: [QuoteStrategies#REQUIRED]
     /// - line break: [LineDelimiter#CRLF]
-    /// - buffer size: 8,192 bytes
+    /// - buffer size: {@value %,2d #DEFAULT_BUFFER_SIZE} characters
     /// - auto flush: `false`
+    ///
+    /// The methods that construct a writer throw an [IllegalArgumentException] if the field separator, the quote
+    /// character or the comment character is a line break character, or if these three are not all different. This
+    /// also applies to the comment character if you never write a comment: for example, `fieldSeparator('#')`
+    /// requires another comment character. A file is not opened in this case.
     @SuppressWarnings({"checkstyle:HiddenField", "PMD.AvoidFieldNameMatchingMethodName"})
     public static final class CsvWriterBuilder {
 
@@ -353,31 +366,30 @@ public final class CsvWriter implements Closeable, Flushable {
         CsvWriterBuilder() {
         }
 
-        /// Sets the character that is used to separate fields – default: `,` (comma).
+        /// Sets the character that is used to separate fields (default: `,`).
         ///
-        /// @param fieldSeparator the field separator character.
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param fieldSeparator the field separator character
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvWriterBuilder fieldSeparator(final char fieldSeparator) {
             this.fieldSeparator = fieldSeparator;
             return this;
         }
 
-        /// Sets the quote character – default: `"` (double quote).
+        /// Sets the quote character (default: `"`).
         ///
-        /// Be aware that using characters other than the default double quote character goes against the RFC 4180
-        /// standard.
+        /// Be aware that using a character other than the double quote does not conform to RFC 4180.
         ///
-        /// @param quoteCharacter the quote character.
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param quoteCharacter the quote character
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvWriterBuilder quoteCharacter(final char quoteCharacter) {
             this.quoteCharacter = quoteCharacter;
             return this;
         }
 
-        /// Sets the comment character – default: `#` (hash/number).
+        /// Sets the comment character (default: `#`).
         ///
-        /// @param commentCharacter the character that begins each comment.
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param commentCharacter the character that begins each comment
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvWriterBuilder commentCharacter(final char commentCharacter) {
             this.commentCharacter = commentCharacter;
             return this;
@@ -387,9 +399,9 @@ public final class CsvWriter implements Closeable, Flushable {
         /// (default: [QuoteStrategies#REQUIRED]).
         ///
         /// @param quoteStrategy the strategy that decides whether to quote a field when quoting is not required;
-        ///                      must not be `null`.
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if quoteStrategy is `null`
+        ///                      must not be `null`
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `quoteStrategy` is `null`
         /// @see QuoteStrategies
         public CsvWriterBuilder quoteStrategy(final QuoteStrategy quoteStrategy) {
             this.quoteStrategy = Objects.requireNonNull(quoteStrategy, "quoteStrategy must not be null");
@@ -398,40 +410,40 @@ public final class CsvWriter implements Closeable, Flushable {
 
         /// Sets the line break written after each record and comment (default: [LineDelimiter#CRLF]).
         ///
-        /// @param lineDelimiter the line break to be written; must not be `null`.
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws NullPointerException if lineDelimiter is `null`
+        /// @param lineDelimiter the line break to be written; must not be `null`
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws NullPointerException if `lineDelimiter` is `null`
         public CsvWriterBuilder lineDelimiter(final LineDelimiter lineDelimiter) {
             this.lineDelimiter = Objects.requireNonNull(lineDelimiter, "lineDelimiter must not be null");
             return this;
         }
 
-        /// Configures the size of the internal buffer.
+        /// Configures the size of the internal buffer in characters (default: {@value %,2d #DEFAULT_BUFFER_SIZE}).
         ///
-        /// The default buffer size of 8,192 bytes usually does not need to be altered. One use-case is if you
+        /// The default usually does not need to be changed. One use case for changing it is if you
         /// need many instances of a CsvWriter and need to optimize for instantiation time and memory footprint.
         ///
         /// A buffer size of 0 disables the buffer.
         ///
         /// This setting is ignored when using [#toConsole()] as console output is unbuffered.
         ///
-        /// @param bufferSize the buffer size to be used (must be &ge; 0).
-        /// @return This updated object, allowing additional method calls to be chained together.
-        /// @throws IllegalArgumentException if bufferSize is negative
+        /// @param bufferSize the buffer size to be used; must not be negative
+        /// @return This updated object, allowing additional method calls to be chained together
+        /// @throws IllegalArgumentException if `bufferSize` is negative
         public CsvWriterBuilder bufferSize(final int bufferSize) {
             Preconditions.checkArgument(bufferSize >= 0, "buffer size must be >= 0");
             this.bufferSize = bufferSize;
             return this;
         }
 
-        /// Configures whether data should be flushed after each record write operation.
+        /// Configures whether data should be flushed after each record and comment (default: `false`).
         ///
-        /// Obviously this comes with drastic performance implications but can be useful for debugging purposes.
+        /// This slows down writing but can be useful for debugging purposes.
         ///
         /// This setting is ignored when using [#toConsole()] as console output is always flushed.
         ///
-        /// @param autoFlush whether the data should be flushed after each record write operation.
-        /// @return This updated object, allowing additional method calls to be chained together.
+        /// @param autoFlush whether the data should be flushed after each record and comment
+        /// @return This updated object, allowing additional method calls to be chained together
         public CsvWriterBuilder autoFlush(final boolean autoFlush) {
             this.autoFlush = autoFlush;
             return this;
@@ -442,9 +454,10 @@ public final class CsvWriter implements Closeable, Flushable {
         /// See [#build(OutputStream, Charset)] for details. This is just a convenience method
         /// for calling it with `charset` set to [StandardCharsets#UTF_8].
         ///
-        /// @param outputStream the OutputStream to write CSV data to.
-        /// @return a new CsvWriter instance - never `null`. Remember to close it!
-        /// @throws NullPointerException if outputStream is `null`
+        /// @param outputStream the OutputStream to write CSV data to
+        /// @return a new CsvWriter instance, never `null`; remember to close it
+        /// @throws NullPointerException if `outputStream` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         /// @see #build(OutputStream, Charset)
         public CsvWriter build(final OutputStream outputStream) {
             return build(outputStream, StandardCharsets.UTF_8);
@@ -459,12 +472,13 @@ public final class CsvWriter implements Closeable, Flushable {
         /// This ensures good performance but also means that you **must call [#flush()] or [#close()]**
         /// to ensure that all data is written to the underlying `outputStream`!
         ///
-        /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files!
+        /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files.
         ///
-        /// @param outputStream the OutputStream to write CSV data to.
-        /// @param charset      the character set to be used for writing data to the output stream.
-        /// @return a new CsvWriter instance - never `null`. Remember to close it!
-        /// @throws NullPointerException if outputStream or charset is `null`
+        /// @param outputStream the OutputStream to write CSV data to
+        /// @param charset      the character set to be used for writing data to the output stream
+        /// @return a new CsvWriter instance, never `null`; remember to close it
+        /// @throws NullPointerException if `outputStream` or `charset` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         /// @see #build(OutputStream)
         public CsvWriter build(final OutputStream outputStream, final Charset charset) {
             Objects.requireNonNull(outputStream, "outputStream must not be null");
@@ -476,15 +490,16 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Constructs a [CsvWriter] for the specified Writer.
         ///
         /// This library uses built-in buffering, unless [#bufferSize(int)] is used to disable it.
-        /// You typically do not need to wrap the given `writer` in an [java.io.BufferedWriter].
+        /// You typically do not need to wrap the given `writer` in a [java.io.BufferedWriter].
         /// This ensures good performance but also means that you **must call [#flush()] or [#close()]**
         /// to ensure that all data is written to the underlying `writer`!
         ///
-        /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files!
+        /// Use [#build(Path,Charset,OpenOption...)] for optimal performance when writing files.
         ///
-        /// @param writer the Writer to use for writing CSV data.
-        /// @return a new CsvWriter instance - never `null`. Remember to close it!
-        /// @throws NullPointerException if writer is `null`
+        /// @param writer the Writer to use for writing CSV data
+        /// @return a new CsvWriter instance, never `null`; remember to close it
+        /// @throws NullPointerException if `writer` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         public CsvWriter build(final Writer writer) {
             Objects.requireNonNull(writer, "writer must not be null");
 
@@ -496,12 +511,13 @@ public final class CsvWriter implements Closeable, Flushable {
         /// See [#build(Path,Charset,OpenOption...)] for details. This is just a convenience method
         /// for calling it with `charset` set to [StandardCharsets#UTF_8].
         ///
-        /// @param file        the file to write data to.
+        /// @param file        the file to write data to
         /// @param openOptions options specifying how the file is opened.
-        ///                    See [Files#newOutputStream(Path,OpenOption...)] for defaults.
-        /// @return a new CsvWriter instance - never `null`. Remember to close it!
-        /// @throws IOException          if a write-error occurs
-        /// @throws NullPointerException if file or charset is `null`
+        ///                    See [Files#newOutputStream(Path,OpenOption...)] for defaults
+        /// @return a new CsvWriter instance, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs, for example when the file cannot be opened
+        /// @throws NullPointerException     if `file` or `openOptions` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         public CsvWriter build(final Path file, final OpenOption... openOptions)
             throws IOException {
             return build(file, StandardCharsets.UTF_8, openOptions);
@@ -509,13 +525,14 @@ public final class CsvWriter implements Closeable, Flushable {
 
         /// Constructs a [CsvWriter] for the specified Path.
         ///
-        /// @param file        the file to write data to.
-        /// @param charset     the character set to be used for writing data to the file.
+        /// @param file        the file to write data to
+        /// @param charset     the character set to be used for writing data to the file
         /// @param openOptions options specifying how the file is opened.
-        ///                    See [Files#newOutputStream(Path,OpenOption...)] for defaults.
-        /// @return a new CsvWriter instance - never `null`. Remember to close it!
-        /// @throws IOException          if a write-error occurs
-        /// @throws NullPointerException if file or charset is `null`
+        ///                    See [Files#newOutputStream(Path,OpenOption...)] for defaults
+        /// @return a new CsvWriter instance, never `null`; remember to close it
+        /// @throws IOException              if an I/O error occurs, for example when the file cannot be opened
+        /// @throws NullPointerException     if `file`, `charset` or `openOptions` is `null`
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         public CsvWriter build(final Path file, final Charset charset,
                                final OpenOption... openOptions)
             throws IOException {
@@ -540,9 +557,9 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Only for streams this library opened itself – streams passed in by the caller stay owned by
         /// the caller and must not be closed here.
         ///
-        /// @param outputStream the library-opened stream to write CSV data to.
-        /// @param charset      the character set to use.
-        /// @return a new CsvWriter - never `null`.
+        /// @param outputStream the library-opened stream to write CSV data to
+        /// @param charset      the character set to use
+        /// @return a new CsvWriter, never `null`
         @SuppressWarnings({"checkstyle:IllegalCatch", "PMD.AvoidCatchingGenericException"})
         CsvWriter buildOwning(final OutputStream outputStream, final Charset charset) {
             try {
@@ -565,7 +582,8 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Convenience method to write to the console (standard output).
         ///
         /// Settings [#bufferSize(int)] and [#autoFlush(boolean)] are ignored.
-        /// Data is directly written to standard output and flushed after each record.
+        /// Data is directly written to standard output with the [Charset#defaultCharset()] and flushed after each
+        /// record and comment.
         ///
         /// Example use:
         /// ```
@@ -573,8 +591,9 @@ public final class CsvWriter implements Closeable, Flushable {
         ///     .writeRecord("Hello", "world");
         /// ```
         ///
-        /// @return a new CsvWriter instance - never `null`.
-        ///     Calls to [CsvWriter#close()] are ignored, standard out remains open.
+        /// @return a new CsvWriter instance, never `null`;
+        ///     calls to [CsvWriter#close()] are ignored, standard out remains open
+        /// @throws IllegalArgumentException if the configured characters are not valid (see [CsvWriterBuilder])
         @SuppressWarnings("checkstyle:RegexpMultiline")
         public CsvWriter toConsole() {
             final Writer writer = new NoCloseWriter(new OutputStreamWriter(System.out, Charset.defaultCharset()));
@@ -636,7 +655,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// @param value the field content; `null` is written as an empty field
         ///              (unquoted, unless the [QuoteStrategy] decides otherwise)
         /// @return this CsvWriterRecord instance
-        /// @throws UncheckedIOException if a write-error occurs
+        /// @throws UncheckedIOException if a write error occurs
         public CsvWriterRecord writeField(final String value) {
             try {
                 writeInternal(value, fieldIdx++);
@@ -648,7 +667,7 @@ public final class CsvWriter implements Closeable, Flushable {
 
         /// Ends the current record.
         /// @return the enclosing CsvWriter instance
-        /// @throws UncheckedIOException if a write-error occurs
+        /// @throws UncheckedIOException if a write error occurs
         public CsvWriter endRecord() {
             openRecordWriter = false;
             try {

@@ -7,12 +7,8 @@ package de.siegmar.fastcsv.reader;
 /// FieldModifier modifier = FieldModifiers.TRIM
 ///     .andThen(FieldModifier.modify(field -> field.toUpperCase(Locale.ENGLISH)));
 /// CsvRecordHandler handler = CsvRecordHandler.of(c -> c.fieldModifier(modifier));
-/// List<CsvRecord> records = CsvReader.builder()
-///     .build(handler, "  foo   ,   bar")
-///     .stream()
-///     .toList();
-///
-/// // fields would be: "FOO" and "BAR"
+/// CsvRecord csvRecord = CsvReader.builder().ofSingleCsvRecord(handler, "  foo   ,   bar");
+/// // field contents: "FOO" and "BAR"
 /// ```
 public enum FieldModifiers implements FieldModifier {
 

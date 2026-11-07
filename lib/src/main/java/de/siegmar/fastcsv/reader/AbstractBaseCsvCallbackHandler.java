@@ -17,7 +17,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// The starting line number of the current record.
     ///
-    /// See [#beginRecord(long)] and [#getStartingLineNumber()].
+    /// See [#beginRecord(long)].
     ///
     /// @return the starting line number of the current record
     protected long getStartingLineNumber() {
@@ -30,7 +30,7 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
         return recordType;
     }
 
-    /// {@return the number of fields in the current record.}
+    /// {@return the number of fields in the current record}
     @Override
     protected int getFieldCount() {
         return fieldCount;
@@ -58,8 +58,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleField(int, char\[\], int, int, boolean)]
-    /// before incrementing the [#fieldCount].
+    /// This implementation increments the field count and then delegates to
+    /// [#handleField(int, char\[\], int, int, boolean)] with the previous count as field index.
     @Override
     protected final void addField(final char[] buf, final int offset, final int len, final boolean quoted) {
         handleField(fieldCount++, buf, offset, len, quoted);
@@ -82,8 +82,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the [#recordType]
-    /// and before incrementing the [#fieldCount].
+    /// This implementation delegates to [#handleComment(char\[\],int,int)] after updating the record type
+    /// and before setting the field count to 1.
     @Override
     protected final void setComment(final char[] buf, final int offset, final int len) {
         recordType = RecordType.COMMENT;
@@ -105,8 +105,8 @@ public abstract class AbstractBaseCsvCallbackHandler<T> extends CsvCallbackHandl
 
     /// {@inheritDoc}
     ///
-    /// This implementation delegates to [#handleEmpty()] after updating the [#recordType]
-    /// and before setting the [#fieldCount] to 1.
+    /// This implementation delegates to [#handleEmpty()] after updating the record type
+    /// and before setting the field count to 1.
     @Override
     protected final void setEmpty() {
         recordType = RecordType.EMPTY;

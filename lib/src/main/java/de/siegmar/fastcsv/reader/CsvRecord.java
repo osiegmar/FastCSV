@@ -47,10 +47,10 @@ public class CsvRecord {
         this.comment = comment;
     }
 
-    /// Provides the line number at which this record originated, starting from 1.
+    /// Provides the starting line number of this record: the line number of its first line, starting from 1.
     ///
-    /// This information is particularly valuable for CSV data containing empty lines, comments or records that
-    /// span multiple lines, where the record number may deviate from the line number.
+    /// This is useful for CSV data containing empty lines, comments or records that span multiple lines, where the
+    /// record number may differ from the line number.
     ///
     /// Example:
     /// ```text
@@ -66,11 +66,11 @@ public class CsvRecord {
     /// The last record (containing the multi-line field "latest\nrecord") would have a starting line number of 6,
     /// no matter whether empty lines or comments are skipped or not.
     ///
-    /// A starting offset of 1 is used to be consistent with the line numbers shown of most text editors.
+    /// Counting starts at 1 to be consistent with the line numbers shown by most text editors.
     ///
     /// Note that this number is only correct if the CSV data was read from the very beginning. If you passed
-    /// a [java.io.Reader] to the [CsvReader] and have already read from it, the line number will be
-    /// incorrect.
+    /// a [java.io.Reader] to the [CsvReader] and have already read from it, the line number is
+    /// incorrect. Lines skipped with [CsvReader#skipLines(int)] are counted.
     ///
     /// @return the starting line number of this record, starting from 1
     public long getStartingLineNumber() {

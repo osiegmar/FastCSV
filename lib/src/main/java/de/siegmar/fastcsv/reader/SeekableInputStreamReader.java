@@ -33,8 +33,8 @@ final class SeekableInputStreamReader extends Reader {
     /// any retained, now-stale leftover bytes from a multibyte sequence straddling the previous read
     /// boundary.
     ///
-    /// @param position the byte offset to seek to.
-    /// @throws IOException if seeking fails.
+    /// @param position the byte offset to seek to
+    /// @throws IOException if seeking fails
     void seek(final long position) throws IOException {
         raf.seek(position);
         delegate = new InputStreamReader(inputStream, charset);

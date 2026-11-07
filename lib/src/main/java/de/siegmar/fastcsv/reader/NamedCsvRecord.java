@@ -57,7 +57,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// @param name case-sensitive name of the field to be retrieved
     /// @return the field content, never `null`
     /// @throws NoSuchElementException if this record has no such field
-    /// @throws NullPointerException   if name is `null`
+    /// @throws NullPointerException   if `name` is `null`
     /// @see #findField(String)
     /// @see #findFields(String)
     public String getField(final String name) {
@@ -91,12 +91,12 @@ public final class NamedCsvRecord extends CsvRecord {
     /// Retrieves the field content of a field by its case-sensitive field name, considering the first occurrence
     /// in case of duplicates.
     ///
-    /// This method is equivalent to `findFields(name).stream().findFirst()` but more performant.
+    /// This method is equivalent to `findFields(name).stream().findFirst()` but does not collect all fields.
     ///
     /// @param name case-sensitive name of the field to be retrieved
-    /// @return An [Optional] containing the field content if found,
-    ///     or an empty [Optional] if the field is not present. Never returns `null`.
-    /// @throws NullPointerException if name is `null`
+    /// @return an [Optional] containing the field content if found,
+    ///     or an empty [Optional] if the field is not present, never `null`
+    /// @throws NullPointerException if `name` is `null`
     /// @see #findFields(String)
     public Optional<String> findField(final String name) {
         final int fieldIdx = findHeaderIndex(name);
@@ -115,7 +115,7 @@ public final class NamedCsvRecord extends CsvRecord {
     ///
     /// @param name case-sensitive name of the fields to collect
     /// @return the field contents (empty list if record doesn't contain that field), never `null`
-    /// @throws NullPointerException if name is `null`
+    /// @throws NullPointerException if `name` is `null`
     public List<String> findFields(final String name) {
         final int bound = commonSize();
         final List<String> ret = new ArrayList<>(bound);
@@ -130,7 +130,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// Constructs an ordered map, associating field names with the corresponding field contents of this record,
     /// considering the first occurrence in case of duplicates.
     ///
-    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry will have a
+    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry has a
     /// `null` key or value.
     ///
     /// If you need to collect all fields with the same field name, use [#getFieldsAsMapList()].
@@ -150,7 +150,7 @@ public final class NamedCsvRecord extends CsvRecord {
     /// Constructs an unordered map, associating field names with an ordered list of corresponding field contents in
     /// this record.
     ///
-    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry will have a
+    /// Only fields with a corresponding field name are mapped (and vice versa). No map entry has a
     /// `null` key or value.
     ///
     /// If you don't have to handle duplicate field names, you may simply use [#getFieldsAsMap()].

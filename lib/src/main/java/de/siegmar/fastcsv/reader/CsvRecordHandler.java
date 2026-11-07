@@ -42,7 +42,7 @@ public final class CsvRecordHandler extends AbstractInternalCsvCallbackHandler<C
     ///
     /// @param configurer the configuration, must not be `null`
     /// @return the new instance
-    /// @throws NullPointerException if `null` is passed
+    /// @throws NullPointerException if `configurer` is `null`
     /// @throws IllegalArgumentException if argument constraints are violated
     /// @see #builder()
     public static CsvRecordHandler of(final Consumer<CsvRecordHandlerBuilder> configurer) {

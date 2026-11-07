@@ -35,8 +35,8 @@ public final class Util {
 
     /// Checks if the given character is a line break character.
     ///
-    /// @param character character to test.
-    /// @return `true` if the argument is [#CR] or [#LF]
+    /// @param character character to test
+    /// @return `true` if the argument is [#CR] or [#LF], `false` otherwise
     public static boolean isNewline(final char character) {
         return character == CR || character == LF;
     }
