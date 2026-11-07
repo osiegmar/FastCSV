@@ -279,9 +279,9 @@ final class StrictCsvParser implements CsvParser {
                                 // cleanDelimiters() has to merge the extra characters with the quoted content
                                 lStatus |= STATUS_ESCAPED_QUOTE;
                             } else {
-                                throw new CsvParseException(
+                                throw new CsvParseException(Util.escapeControlCharacters(
                                     "Unexpected character after closing quote: '%c' (0x%x) (record starting at line %d)"
-                                        .formatted(c, (int) c, startingLineNumber));
+                                        .formatted(c, (int) c, startingLineNumber)));
                             }
                         }
                     }

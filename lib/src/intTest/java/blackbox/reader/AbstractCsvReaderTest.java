@@ -219,6 +219,14 @@ abstract class AbstractCsvReaderTest {
             .hasNoCause();
     }
 
+    @Test
+    void unexpectedCharacterEscapesControlCharacters() {
+        assertThatThrownBy(() -> readAll("foo,\"bar\"\u001b").stream())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Unexpected character after closing quote: '\\u001b' (0x1b) (record starting at line 1)")
+            .hasNoCause();
+    }
+
     // allow unclosed quote at end of input
 
     @Test

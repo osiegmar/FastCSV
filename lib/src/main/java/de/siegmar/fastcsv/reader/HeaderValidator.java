@@ -4,6 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
+import de.siegmar.fastcsv.util.Util;
+
 /// Implementations of this class are used within [NamedCsvRecordHandler] to validate the header
 /// of CSV data once it is determined.
 ///
@@ -40,8 +42,8 @@ public interface HeaderValidator {
         final List<String> expected = List.copyOf(expectedHeader);
         return header -> {
             if (!expected.equals(header)) {
-                throw new CsvParseException("Header mismatch: expected %s but found %s"
-                    .formatted(expected, header));
+                throw new CsvParseException(Util.escapeControlCharacters(
+                    "Header mismatch: expected %s but found %s".formatted(expected, header)));
             }
         };
     }
@@ -72,8 +74,8 @@ public interface HeaderValidator {
             final var missingFields = new LinkedHashSet<>(required);
             header.forEach(missingFields::remove);
             if (!missingFields.isEmpty()) {
-                throw new CsvParseException("Header is missing fields %s: %s"
-                    .formatted(missingFields, header));
+                throw new CsvParseException(Util.escapeControlCharacters(
+                    "Header is missing fields %s: %s".formatted(missingFields, header)));
             }
         };
     }

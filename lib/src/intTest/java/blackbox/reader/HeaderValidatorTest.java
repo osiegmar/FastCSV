@@ -78,6 +78,24 @@ class HeaderValidatorTest {
             .hasMessage("Header is missing fields [col2, col3]: [col1, colA]");
     }
 
+    @SuppressWarnings("checkstyle:IllegalTokenText")
+    @Test
+    void containsExactlyEscapesControlCharacters() {
+        assertThatThrownBy(() -> HeaderValidator.containsExactly("col1")
+            .validate(List.of("a\nb")))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Header mismatch: expected [col1] but found [a\\u000ab]");
+    }
+
+    @SuppressWarnings("checkstyle:IllegalTokenText")
+    @Test
+    void containsAtLeastEscapesControlCharacters() {
+        assertThatThrownBy(() -> HeaderValidator.containsAtLeast("col1")
+            .validate(List.of("a\r\nb")))
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Header is missing fields [col1]: [a\\u000d\\u000ab]");
+    }
+
     @Test
     void containsAtLeastNull() {
         assertThatThrownBy(() -> HeaderValidator.containsAtLeast((String[]) null))

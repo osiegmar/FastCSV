@@ -282,9 +282,9 @@ final class RelaxedCsvParser implements CsvParser {
                         break OUTER;
                     }
                     if (!trimWhitespacesAroundQuotes || ch > SPACE) {
-                        throw new CsvParseException(
+                        throw new CsvParseException(Util.escapeControlCharacters(
                             "Unexpected character after closing quote: '%c' (0x%x) (record starting at line %d)"
-                                .formatted(ch, ch, startingLineNumber));
+                                .formatted(ch, ch, startingLineNumber)));
                     }
                 }
 

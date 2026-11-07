@@ -66,6 +66,14 @@ class NamedCsvRecordHandlerTest {
             .hasMessage("Header contains duplicate fields: [col1]");
     }
 
+    @SuppressWarnings("checkstyle:IllegalTokenText")
+    @Test
+    void duplicateHeaderEscapesControlCharacters() {
+        assertThatThrownBy(() -> CsvReader.builder().ofNamedCsvRecord("\"a\nb\",\"a\nb\"").stream().count())
+            .isInstanceOf(CsvParseException.class)
+            .hasMessage("Header contains duplicate fields: [a\\u000ab]");
+    }
+
     @Test
     void noDuplicateHeaderData() {
         assertThatThrownBy(() -> CsvReader.builder().ofNamedCsvRecord("col1,col2,col1").stream().count())

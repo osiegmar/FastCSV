@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import de.siegmar.fastcsv.util.Nullable;
+import de.siegmar.fastcsv.util.Util;
 
 /// A callback handler that returns a [NamedCsvRecord] for each record.
 ///
@@ -104,8 +105,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         }
 
         if (!duplicateHeaders.isEmpty()) {
-            throw new CsvParseException("Header contains duplicate fields: "
-                + duplicateHeaders);
+            throw new CsvParseException(Util.escapeControlCharacters(
+                "Header contains duplicate fields: " + duplicateHeaders));
         }
     }
 

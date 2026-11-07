@@ -85,6 +85,25 @@ class NamedCsvReaderTest {
             .hasMessage("Field 'bar' is on index 1, but current record only contains 1 fields");
     }
 
+    @SuppressWarnings("checkstyle:IllegalTokenText")
+    @Test
+    void fieldMissingInHeaderEscapesControlCharacters() {
+        assertThatThrownBy(() -> parse("\"a\nb\"\nfaz").iterator().next().getField("c\nd"))
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("Header does not contain a field 'c\\u000ad'. Valid names are: [a\\u000ab]");
+    }
+
+    @SuppressWarnings("checkstyle:IllegalTokenText")
+    @Test
+    void fieldMissingInRecordEscapesControlCharacters() {
+        final var reader = CsvReader.builder()
+            .missingFieldStrategy(FieldMismatchStrategy.IGNORE)
+            .ofNamedCsvRecord("foo,\"a\nb\"\nfaz");
+        assertThatThrownBy(() -> reader.iterator().next().getField("a\nb"))
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("Field 'a\\u000ab' is on index 1, but current record only contains 1 fields");
+    }
+
     @Test
     void findFieldMissingInHeader() {
         assertThat(parse("foo\nfaz").iterator().next().findField("bar"))
