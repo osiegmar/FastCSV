@@ -1,0 +1,3 @@
+Field 'header2' of each record:
+value2
+bar

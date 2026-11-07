@@ -1,0 +1,2 @@
+Person[firstName=John, middleName=null, lastName=Doe]
+Person[firstName=Jane, middleName=, lastName=Smith]

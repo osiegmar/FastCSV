@@ -1,0 +1,10 @@
+Reading data with default settings:
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]
+Exception expected due to different field counts:
+de.siegmar.fastcsv.reader.CsvParseException: Record 2 has 1 fields, but first record had 2 fields
+Reading data while ignoring different field counts:
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]
+CsvRecord[startingLineNumber=2, fields=[foo], comment=false]
+CsvRecord[startingLineNumber=3, fields=[foo, bar, baz], comment=false]
+Reading data while skipping records with different field counts:
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]

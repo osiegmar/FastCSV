@@ -1,0 +1,8 @@
+Quote always
+"value1","","","value,4"
+Quote non-empty
+"value1",,,"value,4"
+Quote empty
+value1,"",,"value,4"
+Quote custom
+"value1",,,"value,4"

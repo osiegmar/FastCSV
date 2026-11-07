@@ -1,0 +1,2 @@
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]
+CsvRecord[startingLineNumber=2, fields=[foo2, bar2], comment=false]

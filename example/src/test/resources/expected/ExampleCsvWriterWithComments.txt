@@ -1,0 +1,5 @@
+#A comment can be placed
+#anywhere
+field 1,field 2,"field 3
+#with a line break"
+#in the CSV file

@@ -1,0 +1,6 @@
+Alternative 1 - ignore specific number of lines
+Skipping the first 3 lines
+NamedCsvRecord[startingLineNumber=5, fields=[foo, bar], comment=false, header=[header1, header2]]
+Alternative 2 - wait for a specific line
+Found header line after skipping 3 lines
+NamedCsvRecord[startingLineNumber=5, fields=[foo, bar], comment=false, header=[header1, header2]]

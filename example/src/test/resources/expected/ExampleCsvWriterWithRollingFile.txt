@@ -1,0 +1,7 @@
+Rolled file: ProcessedFile[path=<tmp>/example-0.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-1.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-2.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-3.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-4.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-5.csv, records=146, size=1022]
+Rolled file: ProcessedFile[path=<tmp>/example-6.csv, records=124, size=868]

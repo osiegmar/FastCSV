@@ -1,0 +1,4 @@
+Writing compressed CSV file: <tmp>.csv.gz
+Reading compressed CSV file: <tmp>.csv.gz
+CsvRecord[startingLineNumber=1, fields=[header1, header2], comment=false]
+CsvRecord[startingLineNumber=2, fields=[value1, value2], comment=false]

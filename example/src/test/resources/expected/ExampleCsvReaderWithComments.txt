@@ -1,0 +1,8 @@
+Reading data with no special treatment for comments:
+CsvRecord[startingLineNumber=1, fields=[#line1, x], comment=false]
+CsvRecord[startingLineNumber=2, fields=[foo, bar], comment=false]
+Reading data while skipping comments:
+CsvRecord[startingLineNumber=2, fields=[foo, bar], comment=false]
+Reading data while reading comments:
+Comment: line1,x
+Record: CsvRecord[startingLineNumber=2, fields=[foo, bar], comment=false]

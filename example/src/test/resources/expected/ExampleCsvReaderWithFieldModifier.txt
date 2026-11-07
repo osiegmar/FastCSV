@@ -1,0 +1,9 @@
+Trim fields:
+CsvRecord[startingLineNumber=1, fields=[foo, BAR], comment=false]
+CsvRecord[startingLineNumber=2, fields=[FOO2, bar2], comment=false]
+Combine modifiers (trim/lowercase):
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]
+CsvRecord[startingLineNumber=2, fields=[foo2, bar2], comment=false]
+Custom modifier (trim/lowercase on first record):
+CsvRecord[startingLineNumber=1, fields=[foo, bar], comment=false]
+CsvRecord[startingLineNumber=2, fields=[ FOO2 ,  bar2 ], comment=false]

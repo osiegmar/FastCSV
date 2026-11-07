@@ -1,0 +1,2 @@
+CsvRecord[startingLineNumber=1, fields=[a, o, u], comment=false]
+CsvRecord[startingLineNumber=2, fields=[ä, ö, ü], comment=false]

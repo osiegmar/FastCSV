@@ -1,0 +1,8 @@
+Require an exact header (order-sensitive):
+bar
+Require certain fields (in any order; additional fields are allowed):
+bar
+Custom validation logic:
+bar
+A failed validation aborts reading with a CsvParseException:
+Header mismatch: expected [headerA, headerB] but found [header1, header2]
