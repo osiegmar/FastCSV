@@ -39,3 +39,8 @@ The full public key, together with verification instructions, is published in th
     gpg --verify fastcsv-<version>.jar.asc fastcsv-<version>.jar
 
 Consumers using [Gradle dependency verification](https://docs.gradle.org/current/userguide/dependency_verification.html) can pin the above fingerprint as a trusted key for `de.siegmar:fastcsv`.
+
+From version 4.4.1 on, each release also has a build provenance attestation. It shows that the artifact was built by the release workflow of this repository on GitHub Actions. To verify a downloaded artifact with the GitHub CLI:
+
+    gh attestation verify fastcsv-<version>.jar --repo osiegmar/FastCSV \
+        --signer-workflow osiegmar/FastCSV/.github/workflows/release.yml
