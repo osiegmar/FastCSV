@@ -92,9 +92,9 @@ final class StrictCsvParser implements CsvParser {
 
     private static void assertFields(final char fieldSeparator, final char quoteCharacter,
                               final char commentCharacter, final CommentStrategy commentStrategy) {
-        Preconditions.checkArgument(!Util.isNewline(fieldSeparator), "fieldSeparator must not contain newline chars");
-        Preconditions.checkArgument(!Util.isNewline(quoteCharacter), "quoteCharacter must not be a newline char");
-        Preconditions.checkArgument(!Util.isNewline(commentCharacter), "commentCharacter must not be a newline char");
+        Preconditions.checkArgument(!Util.isLineBreak(fieldSeparator), "fieldSeparator must not contain newline chars");
+        Preconditions.checkArgument(!Util.isLineBreak(quoteCharacter), "quoteCharacter must not be a newline char");
+        Preconditions.checkArgument(!Util.isLineBreak(commentCharacter), "commentCharacter must not be a newline char");
 
         if (commentStrategy == CommentStrategy.NONE) {
             Preconditions.checkArgument(!Util.containsDupe(fieldSeparator, quoteCharacter), () ->

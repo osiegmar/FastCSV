@@ -37,7 +37,7 @@ public final class Util {
     ///
     /// @param character character to test
     /// @return `true` if the argument is [#CR] or [#LF], `false` otherwise
-    public static boolean isNewline(final char character) {
+    public static boolean isLineBreak(final char character) {
         return character == CR || character == LF;
     }
 
@@ -45,7 +45,7 @@ public final class Util {
     ///
     /// @param str the string to check for line break characters
     /// @return `true` if the string contains either [#CR] or [#LF], `false` otherwise
-    public static boolean containsNewline(final String str) {
+    public static boolean containsLineBreak(final String str) {
         return str.indexOf(CR) >= 0 || str.indexOf(LF) >= 0;
     }
 

@@ -600,7 +600,7 @@ public final class IndexedCsvReader<T> implements Closeable {
          * of IndexedCsvReader.
          */
         private static void checkControlCharacter(final char controlChar) {
-            Preconditions.checkArgument(!Util.isNewline(controlChar),
+            Preconditions.checkArgument(!Util.isLineBreak(controlChar),
                 "A newline character must not be used as control character");
             Preconditions.checkArgument(controlChar <= MAX_BASE_ASCII, () ->
                 "Multibyte control characters are not supported in IndexedCsvReader: '%s' (value: %d)".formatted(
