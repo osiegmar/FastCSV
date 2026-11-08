@@ -1,5 +1,5 @@
 ---
-title: CSV Glossary
+title: CSV glossary
 description: "CSV terms explained for Java developers – record, field, header, separator, quoting, empty field vs. null, comments, BOM – and how FastCSV handles them."
 ---
 
@@ -49,7 +49,7 @@ One item of a record.
 
 A field without content, either written as nothing (`a,,c`) or as an empty quoted field (`a,"",c`).
 CSV has no concept of `null`: FastCSV returns an empty field as an empty string, never as `null`.
-To read empty fields as `null`, see [Reading Empty Fields as null](/guides/examples/reading-null/).
+To read empty fields as `null`, see [Reading empty fields as null](/guides/examples/reading-null/).
 
 **RFC 4180:** As specified – RFC 4180 has no concept of `null` either.
 
@@ -196,7 +196,7 @@ A line inside a multi-line quoted field is therefore never a comment, even if it
 Comments are not part of RFC 4180 but widely used.
 A comment is not a record; with `commentStrategy` you choose whether FastCSV treats such lines as records (the default),
 skips them or returns them as comments.
-See [Comments in CSV Files](/guides/examples/handle-comments/).
+See [Comments in CSV files](/guides/examples/handle-comments/).
 
 **RFC 4180:** Not part of RFC 4180. Comment handling is off by default, so such lines are read as regular records, as RFC 4180 requires.
 
@@ -219,7 +219,7 @@ When CSV data is malformed or ambiguous, FastCSV fails with a `CsvParseException
 guessing.
 Specific cases can be accepted on request (tolerance), e.g. with `trimWhitespacesAroundQuotes`; a few are tolerated
 by default, such as an unclosed quoted field.
-See [How FastCSV Interprets RFC 4180](/architecture/interpretation/) for the details.
+See [How FastCSV interprets RFC 4180](/architecture/interpretation/) for the details.
 
 **RFC 4180:** Not covered by RFC 4180. Rejecting by default is FastCSV's choice, so that malformed CSV data is not misread.
 
@@ -253,7 +253,7 @@ The invisible character U+FEFF at the very beginning of a file, written by some 
 UTF-16 or UTF-32 encoding.
 When reading UTF-8 without detection, it ends up at the start of the first field – with a header, the first field name.
 Enable detection with `detectBomHeader(true)`; it applies when reading from a `Path` or `InputStream`, not from a
-`Reader` or `String`. See [Byte Order Mark (BOM) in CSV Files](/guides/examples/byte-order-mark/).
+`Reader` or `String`. See [Byte order mark (BOM) in CSV files](/guides/examples/byte-order-mark/).
 
 **RFC 4180:** Not part of RFC 4180; detection is opt-in. [Details](/architecture/interpretation/#byte-order-mark-bom)
 

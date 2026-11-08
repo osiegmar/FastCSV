@@ -1,5 +1,5 @@
 ---
-title: How FastCSV Interprets RFC 4180
+title: How FastCSV interprets RFC 4180
 description: "How FastCSV reads RFC 4180 CSV: quoted fields, line breaks in fields, escaped double quotes, empty fields, field count, and how malformed CSV is handled."
 sidebar:
   label: CSV Interpretation
@@ -333,7 +333,7 @@ In line with the RFC, FastCSV writes CRLF by default. However, it also supports 
 (via `CsvWriterBuilder.lineDelimiter(LineDelimiter)`). When reading, `CsvReader` recognizes CR, LF and CRLF, even
 mixed within the same CSV data.
 
-## ABNF Grammar
+## ABNF grammar
 
 When comment handling is disabled (default), the following ABNF grammar, taken from the 4180-bis draft, describes
 the CSV data FastCSV reads. Compared to RFC 4180, it allows any character in fields (including control characters

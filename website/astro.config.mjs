@@ -43,7 +43,7 @@ export default defineConfig({
                     items: [{autogenerate: {directory: 'guides', collapsed: true}}],
                 },
                 {
-                    label: 'Architecture & Design',
+                    label: 'Architecture & design',
                     items: [{autogenerate: {directory: 'architecture'}}],
                 },
                 {
@@ -59,7 +59,7 @@ export default defineConfig({
                     link: '/other-libraries/'
                 },
                 {
-                    label: 'Further Reading',
+                    label: 'Further reading',
                     items: [
                         {
                             label: 'Javadoc',

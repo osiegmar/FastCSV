@@ -121,7 +121,7 @@ See also: https://github.com/osiegmar/FastCSV/issues/103
 
 #### Does FastCSV support automatic bean mapping?
 
-See [Bean Mapping example](/guides/examples/bean-mapping/) for more information.
+See [Bean mapping example](/guides/examples/bean-mapping/) for more information.
 
 #### Does FastCSV support automatic type conversion?
 

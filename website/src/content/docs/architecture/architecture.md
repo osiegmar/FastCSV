@@ -13,7 +13,7 @@ The CSV terms used here (record, field, line break, …) are defined in the [CSV
 Reading CSV is a complex process that requires several components to work together. The following sections provide an
 overview of the components involved and the procedural flow.
 
-### Component Overview
+### Component overview
 
 #### CsvReader
 
@@ -114,7 +114,7 @@ try (CsvReader<CsvRecord> csv = builder.build(callbackHandler, file)) {
 In contrast to reading CSV, writing CSV is a much simpler process and requires fewer components. The following sections
 provide an overview of the components involved and the procedural flow.
 
-### Component Overview
+### Component overview
 
 #### CsvWriter
 

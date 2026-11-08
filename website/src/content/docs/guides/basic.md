@@ -1,5 +1,5 @@
 ---
-title: Basic Tutorial
+title: Basic tutorial
 description: "Learn the basics of reading and writing CSV files in Java with FastCSV's CsvReader, IndexedCsvReader, and CsvWriter."
 sidebar:
   order: 2

@@ -1,5 +1,5 @@
 ---
-title: Design Goals
+title: Design goals
 description: "Learn about FastCSV's core design goals: performance, lightweight footprint, RFC 4180 compliance, simplicity, reliability, and security."
 sidebar:
   order: 1
@@ -51,7 +51,7 @@ It is also part of [OSS-Fuzz](https://google.github.io/oss-fuzz/).
 
 Every feature is documented, on this website and in the [Javadoc](https://javadoc.io/doc/de.siegmar/fastcsv).
 
-## Maintainability and Support
+## Maintainability and support
 
 [SpotBugs](https://spotbugs.github.io),
 [PMD](https://pmd.github.io),
@@ -60,7 +60,7 @@ Every feature is documented, on this website and in the [Javadoc](https://javado
 [Checkstyle](https://checkstyle.sourceforge.io) keep the code maintainable.
 The [FAQ](/faq/) explains how to get help and how to contribute.
 
-## Non-Goals
+## Non-goals
 
 Flexibility and extensibility are not design goals. They are considered only where they don't conflict with the goals
 above.
