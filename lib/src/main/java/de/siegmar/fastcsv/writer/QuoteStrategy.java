@@ -14,7 +14,7 @@ public interface QuoteStrategy {
     /// @param lineNo   the 1-based position of the current record among the records and comments written; not a line
     ///                 number, because a record or comment with line breaks counts once
     /// @param fieldIdx the field index (0-based)
-    /// @return `true`, if a field passed as `null` should be quoted
+    /// @return `true` if a field passed as `null` should be quoted
     default boolean quoteNull(final int lineNo, final int fieldIdx) {
         return false;
     }
@@ -24,7 +24,7 @@ public interface QuoteStrategy {
     /// @param lineNo   the 1-based position of the current record among the records and comments written; not a line
     ///                 number, because a record or comment with line breaks counts once
     /// @param fieldIdx the field index (0-based)
-    /// @return `true`, if a field passed as an empty string should be quoted
+    /// @return `true` if a field passed as an empty string should be quoted
     default boolean quoteEmpty(final int lineNo, final int fieldIdx) {
         return false;
     }
@@ -35,7 +35,7 @@ public interface QuoteStrategy {
     ///                 number, because a record or comment with line breaks counts once
     /// @param fieldIdx the field index (0-based)
     /// @param value    the field content; never `null` or empty
-    /// @return `true`, if the field should be quoted
+    /// @return `true` if the field should be quoted
     default boolean quoteValue(final int lineNo, final int fieldIdx, final String value) {
         return false;
     }

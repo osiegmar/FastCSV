@@ -80,7 +80,7 @@ public interface HeaderValidator {
         };
     }
 
-    /// Gets called once the header is determined – either from the first record (empty lines and
+    /// Called once the header is determined – either from the first record (empty lines and
     /// comments never count as the first record) or from an external header.
     ///
     /// @param header the field names of the header, never `null`

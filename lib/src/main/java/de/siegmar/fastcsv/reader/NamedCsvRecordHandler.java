@@ -72,8 +72,8 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
     /// @return the new instance
     /// @throws NullPointerException     if `configurer` is `null`
     /// @throws IllegalArgumentException if argument constraints are violated
-    /// @throws CsvParseException        if an external header contains duplicate fields or is rejected by a standard
-    ///                                  validator (see [NamedCsvRecordHandlerBuilder#build()])
+    /// @throws CsvParseException        if an external header contains duplicate field names or is rejected by a
+    ///                                  standard validator (see [NamedCsvRecordHandlerBuilder#build()])
     /// @see #builder()
     public static NamedCsvRecordHandler of(final Consumer<NamedCsvRecordHandlerBuilder> configurer) {
         Objects.requireNonNull(configurer, "configurer must not be null");
@@ -252,7 +252,7 @@ public final class NamedCsvRecordHandler extends AbstractInternalCsvCallbackHand
         ///     (see [AbstractInternalCsvCallbackHandler]) or if an external header is combined with
         ///     [#returnHeader(boolean)]
         /// @throws CsvParseException if an external header (see [#header(String...)]) contains duplicate
-        ///     fields (see [#allowDuplicateHeaderFields(boolean)]) or is rejected by a standard validator;
+        ///     field names (see [#allowDuplicateHeaderFields(boolean)]) or is rejected by a standard validator;
         ///     any other exception of a validator propagates as-is (see [#headerValidator(HeaderValidator)])
         public NamedCsvRecordHandler build() {
             if (returnHeader && header != null) {

@@ -512,8 +512,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         /// Sets the strategy for handling comments
         /// (default: [CommentStrategy#NONE] as comments are not part of RFC 4180).
         ///
-        /// With any other strategy, where a record would begin with the comment character, a comment is read
-        /// instead. Everything after the comment character up to the next line break is the comment text.
+        /// With any other strategy, a line that begins with the comment character where a record would begin is
+        /// read as a comment. Everything after the comment character up to the next line break is the comment text.
         ///
         /// @param commentStrategy the strategy for handling comments
         /// @return This updated object, allowing additional method calls to be chained together
@@ -726,8 +726,8 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
         ///     [CsvReader#skipLines(int)]
         ///
         /// The parser needs free space for reading up to 8,192 characters at once. Depending on how many characters
-        /// the data source returns per read, a field can therefore exceed the limit although it is up to
-        /// 8,192 characters smaller than this value.
+        /// the data source returns per read, a field can therefore hit the limit even if it is up to
+        /// 8,192 characters shorter than this value.
         ///
         /// When reading from a [String], the data is already in memory and this limit does not apply. The exception
         /// is a field separator of multiple characters or [#trimWhitespacesAroundQuotes(boolean)]: with these, the

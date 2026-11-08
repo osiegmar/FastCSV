@@ -1,6 +1,6 @@
 package de.siegmar.fastcsv.reader;
 
-/// The kind of a [CsvRecord]: a record, an empty line or a comment.
+/// What a callback handler has received: a record, an empty line or a comment.
 public enum RecordType {
 
     /// A record that is not an empty line.

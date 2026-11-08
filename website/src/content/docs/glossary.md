@@ -8,8 +8,8 @@ a *value*, a *cell* or a *field*; a *delimiter* or a *field separator*; an *encl
 a *text qualifier* or a *quote character*.
 This glossary explains the terms used throughout the FastCSV documentation and Javadoc and shows where FastCSV
 handles them. Under *RFC 4180*, each term notes how FastCSV relates to the RFC: *as specified*, *stricter* (rejects
-CSV data RFC 4180 permits), *tolerated* (accepts CSV data RFC 4180 does not permit), *deviates* (reads CSV data RFC 4180
-permits differently) or an opt-in extension. Under *Known elsewhere as*, it lists names used by other tools and documents. This documentation uses
+CSV data that RFC 4180 permits), *tolerated* (accepts CSV data that RFC 4180 does not permit), *deviates* (reads CSV data that RFC 4180
+permits in a different way) or an opt-in extension. Under *Known elsewhere as*, it lists names used by other tools and documents. This documentation uses
 the term in the heading; some API names predate this glossary (for example `lineDelimiter` for the line break or
 `FieldMismatchStrategy.SKIP` for dropping a record).
 
@@ -81,6 +81,7 @@ RFC 4180 expects every record to have the same field count.
 ### Extra field / missing field
 
 A record with more (extra field) or fewer (missing field) fields than the first record.
+A header that is not returned does not count: with `ofNamedCsvRecord`, the first record after the header sets the field count.
 By default, FastCSV rejects such records with a `CsvParseException`.
 Use `extraFieldStrategy` / `missingFieldStrategy` to accept them as they are or to drop them.
 See [Reading ambiguous data](/guides/examples/reading-ambiguous-data/).
@@ -119,7 +120,7 @@ The 0-based position of a field within its record, as used by `CsvRecord.getFiel
 ### Field separator
 
 The character between two fields of a record – a comma by default.
-FastCSV also supports other characters (e.g. `;` or tab) and, when reading, multi-character separators.
+FastCSV also supports other characters (e.g., `;` or tab) and, when reading, multi-character separators.
 See [Non-standard control characters](/guides/examples/non-standard-control-characters/).
 
 **RFC 4180:** RFC 4180 defines only the comma; other separators are an opt-in extension.
@@ -133,7 +134,7 @@ Outside a quoted field, a line break ends a record; inside a quoted field, it is
 When reading, FastCSV recognizes all three, even mixed within the same CSV data.
 When writing, it uses CRLF as required by RFC 4180, unless configured otherwise (`lineDelimiter`).
 
-**RFC 4180:** Writing uses CRLF as specified. Tolerated when reading: RFC 4180 defines only CRLF, but CR and LF are common in practice, e.g. in files created by Unix tools. [Details](/architecture/interpretation/#cr-and-lf-line-breaks)
+**RFC 4180:** Writing uses CRLF as specified. Tolerated when reading: RFC 4180 defines only CRLF, but CR and LF are common in practice, e.g., in files created by Unix tools. [Details](/architecture/interpretation/#cr-and-lf-line-breaks)
 
 *Known elsewhere as:* newline, line ending, end-of-line (EOL), line terminator, line delimiter
 
@@ -180,7 +181,7 @@ FastCSV handles this automatically, both when reading and writing.
 Writing a field as a quoted field.
 It is required when the field contains the field separator, the quote character or a line break, or when the first
 field of a record begins with the comment character; otherwise it is optional.
-`CsvWriter` quotes only when required by default; a `QuoteStrategy` lets you quote more often.
+By default, `CsvWriter` quotes only when required; a `QuoteStrategy` lets you quote more often.
 See [Quote strategies](/guides/examples/quote-strategies/).
 
 **RFC 4180:** As specified. Quoting a first field that begins with the comment character is permitted, as RFC 4180 makes quoting optional; it keeps such records from being read as comments.
@@ -217,7 +218,7 @@ comments, CR or LF line breaks, a byte order mark).
 
 When CSV data is malformed or ambiguous, FastCSV fails with a `CsvParseException` by default (rejection) instead of
 guessing.
-Specific cases can be accepted on request (tolerance), e.g. with `trimWhitespacesAroundQuotes`; a few are tolerated
+Specific cases can be accepted on request (tolerance), e.g., with `trimWhitespacesAroundQuotes`; a few are tolerated
 by default, such as an unclosed quoted field.
 See [How FastCSV interprets RFC 4180](/architecture/interpretation/) for the details.
 
@@ -229,9 +230,9 @@ See [How FastCSV interprets RFC 4180](/architecture/interpretation/) for the det
 
 A quoted field without a closing quote character before the CSV data ends.
 FastCSV 4.x currently tolerates it by default and returns the rest of the CSV data as the field; use
-`allowUnclosedQuote(false)` to reject it. The default changes to rejection in FastCSV 5.0.
+`allowUnclosedQuote(false)` to reject it. The default will change to rejection in FastCSV 5.0.
 
-**RFC 4180:** Tolerated: RFC 4180 does not allow it. FastCSV 4.x tolerates it by default for compatibility; FastCSV 5.0 rejects it. [Details](/architecture/interpretation/#unclosed-quoted-fields)
+**RFC 4180:** Tolerated: RFC 4180 does not allow it. FastCSV 4.x tolerates it by default for compatibility; FastCSV 5.0 will reject it. [Details](/architecture/interpretation/#unclosed-quoted-fields)
 
 *Known elsewhere as:* unclosed quote, unbalanced quotes, premature EOF, unexpected end of input
 
@@ -249,7 +250,7 @@ Use `FieldModifiers.TRIM` (or `STRIP` for Unicode whitespace) – see [Modifying
 
 ### Byte order mark (BOM)
 
-The invisible character U+FEFF at the very beginning of a file, written by some tools (e.g. Excel) to mark UTF-8,
+The invisible character U+FEFF at the very beginning of a file, written by some tools (e.g., Excel) to mark UTF-8,
 UTF-16 or UTF-32 encoding.
 When reading UTF-8 without detection, it ends up at the start of the first field – with a header, the first field name.
 Enable detection with `detectBomHeader(true)`; it applies when reading from a `Path` or `InputStream`, not from a

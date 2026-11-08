@@ -26,7 +26,7 @@ review and revision of the RFC. Our focus was on addressing numerous edge cases 
 The result, the 4180-bis draft, was submitted to the IETF but has expired without being published as an RFC.
 **RFC 4180 – an informational RFC – therefore remains the reference FastCSV is built on.** The last version of the draft,
 [draft-shafranovich-rfc4180-bis-07](https://datatracker.ietf.org/doc/html/draft-shafranovich-rfc4180-bis-07), is still available,
-as is its GitHub repository [osiegmar/rfc4180-bis](https://github.com/osiegmar/rfc4180-bis). It documents the reasoning
+as is its GitHub repository [osiegmar/rfc4180-bis](https://github.com/osiegmar/rfc4180-bis). The draft documents the reasoning
 behind several of the decisions described below. Quotations from the draft are taken from this version and marked as such.
 
 ## Implementation details
@@ -48,13 +48,13 @@ when such a distinction is required.
 
 FastCSV provides the following options to handle `null`:
 
-**on Writing**: by default, both `null` and an empty string are written as an unquoted empty field. With
+**When writing:** by default, both `null` and an empty string are written as an unquoted empty field. With
 `QuoteStrategies.EMPTY`, an empty string is written as a quoted empty field (`""`) while `null` stays unquoted, so the two
 can be told apart. This helps to produce PostgreSQL-compatible CSV files for example. If you instead want to write a
 specific string for `null`, you have to pass the string to the `CsvWriter.writeRecord()` method.
 
-**on Reading**: the `CsvCallbackHandler.addField()` method gets passed a parameter `quoted` that indicates whether the
-field was quoted or not. The standard record implementation (`CsvRecord`) does currently not provide a way to
+**When reading:** the `CsvCallbackHandler.addField()` method gets passed a parameter `quoted` that indicates whether the
+field was quoted or not. The standard record implementation (`CsvRecord`) does not currently provide a way to
 distinguish between an unquoted and a quoted empty field by itself but a custom implementation could use the `quoted`
 parameter to do so.
 
@@ -128,7 +128,7 @@ and `"value_2"`).
 
 ### Empty files
 
-Empty files (zero bytes) can be derived from the RFC 4180 grammar (as a single record with one empty field).
+The RFC 4180 grammar permits empty files (zero bytes), as a single record with one empty field.
 FastCSV interprets them as containing no records and returns an empty stream.
 
 ### Fields spanning multiple lines
@@ -140,7 +140,7 @@ Quoted fields can span multiple lines.
 field"CRLF
 ```
 
-FastCSV supports this for reading and writing. The field content would be `"a multi-line\r\nfield"`.
+FastCSV supports this for reading and writing. The field content would be `a multi-line\r\nfield`.
 Line breaks within a quoted field are preserved.
 
 ### Unique field names
@@ -156,10 +156,10 @@ value_1,value_2CRLF
 
 The `NamedCsvRecord` class in FastCSV offers several options to handle this scenario:
 
-- By default, FastCSV does **not** allow duplicate field names to prevent misinterpretation of data.
+- By default, FastCSV does **not** allow duplicate field names, to prevent misinterpretation of data.
   This behavior can be changed by calling `allowDuplicateHeaderFields(true)` on the `NamedCsvRecordHandlerBuilder`.
-- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** field content (`"value_1"`).
-- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** field contents (`"value_1"` and `"value_2"`).
+- Methods like `getField("header_a")`, `findField("header_a")`, and `getFieldsAsMap()` return only the **first** field content (`value_1`).
+- Methods like `findFields("header_a")` and `getFieldsAsMapList()` return a list containing **all** field contents (`value_1` and `value_2`).
 
 Regardless of the option chosen, FastCSV always treats field names as case-sensitive.
 
@@ -200,7 +200,7 @@ In this case, we observe:
 
    By default, FastCSV throws a `CsvParseException` when reading this field.
    By setting `CsvReaderBuilder.trimWhitespacesAroundQuotes(boolean)` to `true`, FastCSV tolerates and trims
-   the whitespace. The field content would then be `value 2` (**without** the quotes and the
+   the whitespace. The field content would then be `value 2` (**without** the quote characters and the
    trailing whitespace).
 
 3. A quoted field with a leading whitespace `_"value 3"` (the underscore represents the whitespace)
@@ -243,7 +243,7 @@ upgrade, set it explicitly to `true`.
 
 The RFC does not mention any quote character other than the double quote.
 
-FastCSV supports any character as quote character when reading or writing CSV files.
+FastCSV supports any character except CR and LF as the quote character when reading or writing CSV data; `IndexedCsvReader` supports US-ASCII characters only.
 
 ### Other field separators
 
@@ -312,7 +312,7 @@ following options are available:
 Both `CsvReaderBuilder` and `CsvWriterBuilder` allow configuring the comment character
 (via `commentCharacter(char)`). The default is `#`.
 
-When comment handling is enabled, FastCSV reads a comment where a record would begin with the comment character.
+When comment handling is enabled, a line that begins with the comment character where a record would begin is read as a comment.
 A line inside a multi-line quoted field is therefore never a comment. The following example illustrates this:
 
 ```

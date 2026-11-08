@@ -34,7 +34,7 @@ public class CsvRecord {
     @SuppressWarnings("checkstyle:VisibilityModifier")
     final String[] fields;
 
-    /// Whether this holds a comment.
+    /// Whether this object holds a comment.
     ///
     /// @see #isComment()
     @SuppressWarnings("checkstyle:VisibilityModifier")
@@ -70,7 +70,8 @@ public class CsvRecord {
     ///
     /// Note that this number is only correct if the CSV data was read from the very beginning. If you passed
     /// a [java.io.Reader] to the [CsvReader] and have already read from it, the line number is
-    /// incorrect. Lines skipped with [CsvReader#skipLines(int)] are counted.
+    /// incorrect. Lines skipped with [CsvReader#skipLines(int)] or
+    /// [CsvReader#skipLines(java.util.function.Predicate, int)] are counted.
     ///
     /// @return the starting line number of this record, starting from 1
     public long getStartingLineNumber() {
@@ -111,11 +112,11 @@ public class CsvRecord {
         return fields.length;
     }
 
-    /// Indicates whether this holds a comment.
+    /// Indicates whether this object holds a comment.
     ///
     /// Retrieve the comment text by calling [#getField(int)] with index 0.
     ///
-    /// @return `true` if this holds a comment
+    /// @return `true` if this object holds a comment
     /// @see CsvReader.CsvReaderBuilder#commentStrategy(CommentStrategy)
     public boolean isComment() {
         return comment;

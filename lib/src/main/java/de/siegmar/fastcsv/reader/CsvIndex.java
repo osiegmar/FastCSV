@@ -13,8 +13,8 @@ import java.util.StringJoiner;
 /// count, not with the file size.
 ///
 /// This class implements [Serializable], so an index can be persisted and reloaded
-/// to avoid re-indexing the same file. A previously built index can be passed to
-/// [IndexedCsvReader.IndexedCsvReaderBuilder#index(CsvIndex)] for reuse, which describes what has to match.
+/// to avoid re-indexing the same file. A previously built index can be reused by passing it to
+/// [IndexedCsvReader.IndexedCsvReaderBuilder#index(CsvIndex)], whose documentation describes what has to match.
 ///
 /// Although the constructor is public (mandatory for record classes),
 /// this class is **not intended to be instantiated directly.**

@@ -51,7 +51,7 @@ Think about how to handle:
 - optional headers
 - a byte order mark (BOM)
 - large files/fields without running out of memory
-- malformed CSV data (e.g. characters after a closing quote character)
+- malformed CSV data (e.g., characters after a closing quote character)
 - comments
 
 FastCSV handles all these cases and more, so you don't have to worry about them. With only a few kilobytes in size

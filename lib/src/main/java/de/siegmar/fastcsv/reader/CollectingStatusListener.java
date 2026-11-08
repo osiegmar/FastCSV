@@ -64,7 +64,7 @@ public class CollectingStatusListener implements StatusListener {
 
     /// Get the completion status.
     ///
-    /// @return `true`, when all data has been indexed successfully
+    /// @return `true` when all data has been indexed successfully
     public boolean isCompleted() {
         return completionStatus.get();
     }
@@ -76,7 +76,7 @@ public class CollectingStatusListener implements StatusListener {
 
     /// Get the throwable that occurred while indexing.
     ///
-    /// @return the throwable that occurred while indexing, never `null`
+    /// @return an [Optional] with the throwable that occurred while indexing, never `null`
     public Optional<Throwable> getThrowable() {
         return Optional.ofNullable(failedThrowable.get());
     }

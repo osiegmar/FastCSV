@@ -36,7 +36,7 @@ import de.siegmar.fastcsv.util.Util;
 /// Empty lines and comments (with [CommentStrategy#READ]) count as records of a page and are returned; they cannot
 /// be skipped. The field count of a record is not compared with the first record. A header that the callback handler
 /// does not return counts as a record too, so with a [NamedCsvRecordHandler] the page that contains the header
-/// returns one record less.
+/// returns one record fewer.
 ///
 /// A BOM is always detected: it determines the charset and is not part of the first field.
 ///
@@ -455,8 +455,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// Sets the strategy for handling comments
         /// (default: [CommentStrategy#NONE] as comments are not part of RFC 4180).
         ///
-        /// With any other strategy, where a record would begin with the comment character, a comment is read
-        /// instead. Everything after the comment character up to the next line break is the comment text.
+        /// With any other strategy, a line that begins with the comment character where a record would begin is
+        /// read as a comment. Everything after the comment character up to the next line break is the comment text.
         ///
         /// @param commentStrategy the strategy for handling comments
         /// @return This updated object, allowing additional method calls to be chained together
@@ -577,8 +577,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         ///   - Reading data from the underlying stream of data in chunks
         ///   - Storing the data of a single field before it is passed to the callback handler
         ///
-        /// The parser needs free space for reading up to 8,192 characters at once. A field can therefore exceed the
-        /// limit although it is up to 8,192 characters smaller than this value.
+        /// The parser needs free space for reading up to 8,192 characters at once. A field can therefore hit the
+        /// limit even if it is up to 8,192 characters shorter than this value.
         ///
         /// Set a larger value only if you expect to read fields larger than the default limit.
         /// In that case you probably **also need to adjust** the maximum field size of the callback handler.
@@ -676,8 +676,8 @@ public final class IndexedCsvReader<T> implements Closeable {
         /// @return a new IndexedCsvReader, never `null`; remember to close it
         /// @throws IOException              if an I/O error occurs
         /// @throws NullPointerException     if `callbackHandler`, `file` or `charset` is `null`
-        /// @throws IllegalArgumentException if the field separator, the quote character and the comment character
-        ///                                  are not valid (see [IndexedCsvReaderBuilder]), a prebuilt index does not
+        /// @throws IllegalArgumentException if the field separator, the quote character or the comment character
+        ///                                  is not valid (see [IndexedCsvReaderBuilder]), a prebuilt index does not
         ///                                  match (see [#index(CsvIndex)]) or the (supplied or BOM-detected) charset
         ///                                  is neither UTF-8 nor a single-byte charset as described above
         /// @throws CsvParseException        if the callback handler is a [NamedCsvRecordHandler] and reading the

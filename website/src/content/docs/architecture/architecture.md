@@ -63,7 +63,7 @@ The procedural flow can be outlined as follows:
 - The `CsvParser`, in turn, passes each field to the `CsvCallbackHandler` until the end of the record is reached.
 - For every field received, the `CsvCallbackHandler` invokes the `FieldModifier` to potentially modify the field and
   stores the field in a temporary buffer.
-- The `CsvReader` calls the `CsvCallbackHandler` to materialize its buffer into a record (e.g. a `CsvRecord`) and
+- The `CsvReader` calls the `CsvCallbackHandler` to materialize its buffer into a record (e.g., a `CsvRecord`) and
   returns it to the user.
 
 ### Usage

@@ -582,7 +582,7 @@ public final class CsvWriter implements Closeable, Flushable {
         /// Convenience method to write to the console (standard output).
         ///
         /// Settings [#bufferSize(int)] and [#autoFlush(boolean)] are ignored.
-        /// Data is directly written to standard output with the [Charset#defaultCharset()] and flushed after each
+        /// Data is directly written to standard output using [Charset#defaultCharset()] and flushed after each
         /// record and comment.
         ///
         /// Example use:

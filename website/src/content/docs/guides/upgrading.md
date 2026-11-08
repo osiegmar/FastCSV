@@ -69,7 +69,7 @@ This change was made to align with the behavior of `CsvWriter` for `OutputStream
 - Close the `CsvWriter` at the end of your writing process to ensure all data is written.
 - Call `flush()` on the `CsvWriter` before writing to the underlying `Writer` or `OutputStream` directly to ensure all data is written.
 - Calling `CsvWriterBuilder.bufferSize(0)` disables FastCSV's internal buffer, but the buffer of `java.io.OutputStreamWriter` cannot be disabled.
-- To get the data to the `Writer` or `OutputStream` after each record, as in 3.x, call `CsvWriterBuilder.autoFlush(true)`.
+- To get the data to the `Writer` after each record, as in 3.x, call `CsvWriterBuilder.autoFlush(true)`. This also works for an `OutputStream`.
   It writes the internal buffer and calls `flush()` on the `Writer` or `OutputStream` after each record.
 
 :::caution
@@ -78,7 +78,7 @@ As the default has changed, you may need to check your code and your desired beh
 
 ## Handling of characters after the closing quote character
 
-FastCSV 4.x no longer tolerates characters after the closing quote character of a quoted field, by default.
+By default, FastCSV 4.x no longer tolerates characters after the closing quote character of a quoted field.
 This is a change in behavior compared to earlier versions of FastCSV. It ensures no erroneous data is read and interpreted without noticing it.
 
 The following examples will now lead to a `CsvParseException`:
@@ -124,7 +124,7 @@ Of their methods, only `getPageCount()` and `getRecordCount()` were public in 3.
 ```
 
 If you serialized a `CsvIndex` with FastCSV 3.x, build it again with 4.x.
-A deserialized 3.x index has a record count of 0 and is rejected by `IndexedCsvReaderBuilder.index(CsvIndex)` with an `IllegalArgumentException`.
+A deserialized 3.x index has no page size, so `IndexedCsvReaderBuilder` rejects it with an `IllegalArgumentException` when it builds the reader.
 
 ## Callback handler refactoring
 
@@ -268,7 +268,7 @@ If you upgrade from 3.x directly to the latest 4.x version, these changes from 4
 
 ### Charsets supported by `IndexedCsvReader` (4.3.1, 4.4.0)
 
-`IndexedCsvReader` builds its index on byte level.
+`IndexedCsvReader` builds its index at the byte level.
 Since 4.4.0, it accepts only UTF-8 and single-byte charsets that encode ASCII characters as the same single bytes (such as ISO-8859-1 or windows-1252).
 Other charsets, such as UTF-16 or Shift_JIS, lead to an `IllegalArgumentException`.
 For CSV data in such a charset, use `CsvReader` or transcode the data to UTF-8.
@@ -281,5 +281,5 @@ Since 4.3.0, calling them after the first record has been read leads to an `Ille
 ### Unwrapped `CsvParseException` (4.4.0)
 
 In 3.x, a `CsvParseException` thrown while parsing was wrapped in another `CsvParseException` that added the starting line number.
-Since 4.4.0, it is thrown as is, and its message contains the starting line number.
-If your code reads the cause of a `CsvParseException`, check it.
+Since 4.4.0, it is thrown as is. Messages of parsing errors contain the starting line number; messages of header errors do not.
+If your code reads the cause of a `CsvParseException`, update it.
