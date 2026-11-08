@@ -1,6 +1,6 @@
 ---
 title: Design Goals
-description: "Learn about FastCSV's core design goals: performance, lightweight footprint, RFC 4180 compliance, simplicity, robustness, and security."
+description: "Learn about FastCSV's core design goals: performance, lightweight footprint, RFC 4180 compliance, simplicity, reliability, and security."
 sidebar:
   order: 1
 ---
@@ -9,7 +9,7 @@ These goals guide the development of FastCSV.
 
 ## Performance
 
-FastCSV reads and writes CSV data fast, without trading away compliance with the CSV specification, robustness or
+FastCSV reads and writes CSV data fast, without trading away compliance with the CSV specification, reliability or
 security.
 
 ![Benchmark](../../../assets/benchmark.png "Benchmark")
@@ -34,7 +34,7 @@ compared to other libraries.
 
 The API is small and does what its names say. The [Quickstart](/guides/quickstart/) gives a first impression.
 
-## Robustness
+## Reliability
 
 Besides the [test coverage](https://app.codecov.io/gh/osiegmar/FastCSV),
 [PIT mutation testing](https://pitest.org) checks that the tests actually catch faults.

@@ -12,7 +12,7 @@ FastCSV is the most-starred CSV library for Java. It is a high-performance CSV p
 - **Well-documented** — quickstart guides and complete Javadoc
 - **High test coverage** — including mutation testing for reliability
 - **RFC 4180 compliant** — handles edge cases correctly
-- **Robust & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle; never returns null unexpectedly
+- **Reliable & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle; never returns null unexpectedly
 - **Secure** — fuzz-tested via OSS-Fuzz and following OpenSSF best practices
 - **Production-proven** — trusted by open-source projects like JUnit, Apache NiFi, and Neo4j
 - **Java 17+, Android 34+ compatible** — including GraalVM Native Image and OSGi
@@ -51,7 +51,7 @@ try (CsvReader<CsvRecord> csv = CsvReader.builder().ofCsvRecord(Path.of("input.c
 
 - [Quick Start Guide](https://fastcsv.org/guides/quickstart/): Add the Maven/Gradle dependency and write your first CSV reader and writer in Java.
 - [Basic Tutorial](https://fastcsv.org/guides/basic/): Learn reading and writing CSV files with CsvReader, IndexedCsvReader, and CsvWriter.
-- [Design Goals](https://fastcsv.org/architecture/goals/): Core design goals — performance, lightweight, compliance, simplicity, robustness, security.
+- [Design Goals](https://fastcsv.org/architecture/goals/): Core design goals — performance, lightweight, compliance, simplicity, reliability, security.
 - [Architecture](https://fastcsv.org/architecture/architecture/): Technical architecture covering reader and writer components.
 - [CSV Interpretation](https://fastcsv.org/architecture/interpretation/): How FastCSV interprets RFC 4180, including edge cases and tolerances for real-world CSV data.
 - [CSV Glossary](https://fastcsv.org/glossary/): CSV terms as used by FastCSV, with common alternative names and RFC 4180 status.

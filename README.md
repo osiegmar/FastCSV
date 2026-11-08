@@ -31,7 +31,7 @@ _Here are the top reasons to choose FastCSV — see [fastcsv.org](https://fastcs
 - **Well-documented** — Quickstart guides and complete Javadoc
 - **High test coverage** — including mutation testing for reliability
 - **RFC 4180 compliant** — handles edge cases correctly
-- **Robust & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle to ensure code quality; never returns null unexpectedly
+- **Reliable & maintainable** — uses SpotBugs, PMD, Error Prone, NullAway, and Checkstyle to ensure code quality; never returns null unexpectedly
 - **Secure** — fuzz-tested via OSS-Fuzz and following OpenSSF best practices
 - **Production-proven** — trusted by open-source projects like JUnit
 - **Java 17+, Android 34+** compatible — including GraalVM Native Image and OSGi

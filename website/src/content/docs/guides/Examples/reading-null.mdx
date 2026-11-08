@@ -13,7 +13,7 @@ In some situations, however, it is necessary to interpret certain fields as null
 One common example is database imports and exports, where the differentiation between null and empty fields is often required.
 
 A core principle of FastCSV is to provide a null-free API, meaning that no public function ever returns null.
-This design choice helps prevent `NullPointerException` and makes user code more robust.
+This design choice helps prevent `NullPointerException` and makes user code more reliable.
 
 This feature comes with a trade-off: if you absolutely need null values, you will have to implement a workaround.
 
