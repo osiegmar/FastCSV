@@ -13,7 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * escape control characters in exception messages ([7aba9c7](https://github.com/osiegmar/FastCSV/commit/7aba9c751fc9c6c8801e4ab257154d4caaa6a62c))
 * keep the quote character of an escape pair at the end of an unclosed quoted field ([35fc587](https://github.com/osiegmar/FastCSV/commit/35fc5875cd3dfd716dd45bca079b81cf622cb153))
 
-
 ## [4.4.0](https://github.com/osiegmar/FastCSV/compare/v4.3.1...v4.4.0) (2026-07-28)
 
 
