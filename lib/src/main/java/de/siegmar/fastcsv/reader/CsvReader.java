@@ -423,7 +423,9 @@ public final class CsvReader<T> implements Iterable<T>, Closeable {
     }
 
     /// This builder is used to create configured instances of [CsvReader]. The default
-    /// configuration of this class adheres to RFC 4180, except that it tolerates an unclosed quoted field:
+    /// configuration of this class follows RFC 4180, except that it allows any character in fields, skips empty lines,
+    /// reads empty input as no records and tolerates CR and LF line breaks, a quote character inside an unquoted field
+    /// and an unclosed quoted field:
     ///
     /// - Field separator: `,` (comma)
     /// - Quote character: `"` (double quote)
