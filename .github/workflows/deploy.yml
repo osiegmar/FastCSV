@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+  pull_request:
+    paths:
+      - 'website/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions: {}
@@ -22,6 +26,7 @@ jobs:
           node-version: 26
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04-arm
     permissions:
